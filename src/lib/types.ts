@@ -1,3 +1,5 @@
+export type FulfillmentType = 'referral' | 'affiliate' | 'proxy' | 'direct' | 'vendor';
+
 export interface Listing {
   id: string;
   sellerId: string;
@@ -14,6 +16,22 @@ export interface Listing {
   // Legacy fields for backward compatibility
   priceXmr?: number;
   shippingPriceXmr?: number;
+  // Extended fields for new categories
+  fulfillment?: FulfillmentType;
+  referralUrl?: string;
+  supplierSku?: string;
+  supplier?: string;
+  margin?: number;
+  vendorId?: string;
+  vendorRating?: number;
+  vendorReviews?: number;
+  ageRestricted?: boolean;
+  disclaimer?: string;
+  discreteShipping?: boolean;
+  shipsFrom?: string;
+  shipsTo?: string[];
+  requiresSignature?: boolean;
+  coaAvailable?: boolean;
 }
 
 export interface Order {

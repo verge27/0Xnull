@@ -124,6 +124,30 @@ export const CATEGORIES: Category[] = [
       { id: 1005, name: "Privacy & Security", slug: "privacy-security" },
     ]
   },
+  {
+    id: 11,
+    name: "Adult & Intimacy",
+    slug: "adult-intimacy",
+    children: [
+      { id: 1101, name: "Toys & Devices", slug: "toys-devices" },
+      { id: 1102, name: "Lingerie & Apparel", slug: "lingerie-apparel" },
+      { id: 1103, name: "Wellness & Enhancement", slug: "wellness-enhancement" },
+      { id: 1104, name: "Content & Subscriptions", slug: "content-subscriptions" },
+      { id: 1105, name: "Accessories", slug: "intimacy-accessories" },
+    ]
+  },
+  {
+    id: 12,
+    name: "Health & Wellness",
+    slug: "health-wellness",
+    children: [
+      { id: 1201, name: "Hormone Optimization", slug: "hormone-optimization" },
+      { id: 1202, name: "Peptides & Research", slug: "peptides-research" },
+      { id: 1203, name: "Nootropics & Cognitive", slug: "nootropics-cognitive" },
+      { id: 1204, name: "Sports & Recovery", slug: "sports-recovery" },
+      { id: 1205, name: "Supplements & Vitamins", slug: "supplements-vitamins" },
+    ]
+  },
 ];
 
 export const ALL_CATEGORIES = CATEGORIES;
