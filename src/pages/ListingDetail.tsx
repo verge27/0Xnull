@@ -93,7 +93,10 @@ const ListingDetail = () => {
           <div>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <Badge className="mb-2">{listing.category}</Badge>
+                <div className="flex gap-2 mb-2">
+                  <Badge>{listing.category}</Badge>
+                  <Badge variant="secondary">Demo Listing</Badge>
+                </div>
                 <h1 className="text-4xl font-bold mb-2">{listing.title}</h1>
               </div>
             </div>

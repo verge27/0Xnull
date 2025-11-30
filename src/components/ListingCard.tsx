@@ -22,9 +22,14 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
         <CardContent className="p-4">
           <div className="flex items-start justify-between mb-2">
             <h3 className="font-semibold text-lg line-clamp-1">{listing.title}</h3>
-            <Badge variant="secondary" className="ml-2 shrink-0">
-              {listing.category}
-            </Badge>
+            <div className="flex gap-1 ml-2 shrink-0">
+              <Badge variant="secondary" className="text-xs">
+                {listing.category}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                Demo
+              </Badge>
+            </div>
           </div>
           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
             {listing.description}
