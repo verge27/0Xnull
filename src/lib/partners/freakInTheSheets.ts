@@ -13,9 +13,8 @@ import waterLubeImg from '@/assets/freakinthesheets/water-lube.jpg';
 
 const FREAK_BASE_URL = 'https://freakinthesheets.co.uk';
 
-const getProductUrl = (slug: string, affiliateId?: string) => {
-  const baseUrl = `${FREAK_BASE_URL}/product/${slug}`;
-  return affiliateId ? `${baseUrl}?ref=${affiliateId}` : baseUrl;
+const getProductUrl = (slug: string) => {
+  return `${FREAK_BASE_URL}/product/${slug}/`;
 };
 
 export const freakInTheSheetsListings: Partial<Listing>[] = [
@@ -32,7 +31,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('luxury-rabbit-vibrator'),
+    referralUrl: getProductUrl('rocks-off-flutter-rabbit-pink'),
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',
@@ -53,7 +52,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('wand-massager'),
+    referralUrl: 'https://www.freakinthesheets.co.uk/product-category/sex-toys-for-every-occasion/',
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',
@@ -74,7 +73,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('bondage-starter-kit'),
+    referralUrl: 'https://www.freakinthesheets.co.uk/product-category/bondage-gear-for-bdsm/bondage-restraint-kits/',
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',
@@ -95,7 +94,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('lace-bodysuit-black'),
+    referralUrl: getProductUrl('le-desir-suspender-bodystocking-uk-14-to-20'),
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',
@@ -116,7 +115,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('couples-vibrating-ring'),
+    referralUrl: 'https://www.freakinthesheets.co.uk/product-category/sex-toys-for-every-occasion/',
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',
@@ -137,7 +136,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     stock: 99,
     shippingPriceUsd: 0,
     fulfillment: 'referral',
-    referralUrl: getProductUrl('water-based-lube'),
+    referralUrl: 'https://www.freakinthesheets.co.uk/product-category/relaxation-zone/lubricants-and-oils/',
     ageRestricted: true,
     discreteShipping: true,
     shipsFrom: 'UK',

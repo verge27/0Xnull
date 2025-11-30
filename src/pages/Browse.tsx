@@ -48,6 +48,9 @@ const Browse = () => {
       status: 'active' as const,
       condition: item.condition || 'new' as const,
       createdAt: item.createdAt || new Date().toISOString(),
+      referralUrl: item.referralUrl,
+      fulfillment: item.fulfillment,
+      discreteShipping: item.discreteShipping,
       isPartner: true,
       partnerName: 'Freak In The Sheets'
     })),
