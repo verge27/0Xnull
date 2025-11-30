@@ -20,6 +20,7 @@ import wonderloveRemoteImg from '@/assets/freakinthesheets/wonderlove-remote.jpg
 import lewandSwerveImg from '@/assets/freakinthesheets/lewand-swerve.jpg';
 import balldoPurpleImg from '@/assets/freakinthesheets/balldo-purple.jpg';
 import evolvedStrapOnImg from '@/assets/freakinthesheets/evolved-strapon.jpg';
+import jeJoueNuoImg from '@/assets/freakinthesheets/jejoue-nuo.jpg';
 import buttPlugBlingImg from '@/assets/freakinthesheets/butt-plug-bling.jpg';
 import wandMassagerImg from '@/assets/freakinthesheets/wand-massager.jpg';
 import cockRingsImg from '@/assets/freakinthesheets/cock-rings.jpg';
@@ -210,7 +211,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(89.99)),
     category: 'adult-intimacy',
     subcategory: 'toys-devices',
-    images: [buttPlugBlingImg],
+    images: [jeJoueNuoImg],
     condition: 'new',
     status: 'active',
     stock: 99,
