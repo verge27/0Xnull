@@ -14,6 +14,7 @@ import spreaderBarImg from '@/assets/freakinthesheets/spreader-bar.jpg';
 import teddyRedImg from '@/assets/freakinthesheets/teddy-red.jpg';
 import waterLubeImg from '@/assets/freakinthesheets/water-lube.jpg';
 import fleshlubeIceImg from '@/assets/freakinthesheets/fleshlube-ice.jpg';
+import fleshlightQuickshotImg from '@/assets/freakinthesheets/fleshlight-quickshot.jpg';
 import masturbatorImg from '@/assets/freakinthesheets/masturbator.jpg';
 import doubleDildoImg from '@/assets/freakinthesheets/double-dildo.jpg';
 import dualisticDoubleImg from '@/assets/freakinthesheets/dualistic-double.jpg';
@@ -164,7 +165,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(34.99)),
     category: 'adult-intimacy',
     subcategory: 'toys-devices',
-    images: [masturbatorImg],
+    images: [fleshlightQuickshotImg],
     condition: 'new',
     status: 'active',
     stock: 99,
