@@ -23,8 +23,33 @@ export interface Order {
   sellerId: string;
   quantity: number;
   totalXmr: number;
-  status: 'pending_payment' | 'paid' | 'shipped' | 'completed';
+  status: 'created' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'completed' | 'disputed' | 'refunded';
+  trackingCarrier?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  completedAt?: string;
+  disputeReason?: string;
   createdAt: string;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  participants: string[];
+  listingId?: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
 }
 
 export interface User {

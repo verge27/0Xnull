@@ -15,6 +15,8 @@ import NewListing from "./pages/NewListing";
 import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Wishlist from "./pages/Wishlist";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,9 @@ const App = () => (
             <Route path="/sell" element={<Sell />} />
             <Route path="/sell/new" element={<NewListing />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:conversationId" element={<Messages />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -271,3 +271,84 @@ export const updateOrder = (id: string, updates: Partial<Order>): void => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }
 };
+
+// Wishlist functions
+export const getWishlist = (): string[] => {
+  const wishlistStr = localStorage.getItem('wishlist');
+  return wishlistStr ? JSON.parse(wishlistStr) : [];
+};
+
+export const toggleWishlist = (listingId: string): void => {
+  const wishlist = getWishlist();
+  const index = wishlist.indexOf(listingId);
+  if (index > -1) {
+    wishlist.splice(index, 1);
+  } else {
+    wishlist.push(listingId);
+  }
+  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+};
+
+export const isInWishlist = (listingId: string): boolean => {
+  return getWishlist().includes(listingId);
+};
+
+// Messaging functions
+export const getConversations = (): any[] => {
+  const conversationsStr = localStorage.getItem('conversations');
+  return conversationsStr ? JSON.parse(conversationsStr) : [
+    {
+      id: 'conv1',
+      participants: ['user1', getCurrentUser()?.id || 'guest'],
+      listingId: 'listing1',
+      lastMessage: 'Hi, is this still available?',
+      lastMessageAt: new Date(Date.now() - 3600000).toISOString(),
+      unreadCount: 1
+    }
+  ];
+};
+
+export const getMessages = (conversationId: string): any[] => {
+  const messagesStr = localStorage.getItem(`messages_${conversationId}`);
+  return messagesStr ? JSON.parse(messagesStr) : [
+    {
+      id: 'msg1',
+      conversationId,
+      senderId: 'user1',
+      content: 'Hi, is this still available?',
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      read: false
+    },
+    {
+      id: 'msg2',
+      conversationId,
+      senderId: getCurrentUser()?.id || 'guest',
+      content: 'Yes, it is! Would you like to purchase it?',
+      createdAt: new Date(Date.now() - 1800000).toISOString(),
+      read: true
+    }
+  ];
+};
+
+export const sendMessage = (conversationId: string, senderId: string, content: string): void => {
+  const messages = getMessages(conversationId);
+  const newMessage = {
+    id: `msg-${Date.now()}`,
+    conversationId,
+    senderId,
+    content,
+    createdAt: new Date().toISOString(),
+    read: false
+  };
+  messages.push(newMessage);
+  localStorage.setItem(`messages_${conversationId}`, JSON.stringify(messages));
+  
+  // Update conversation
+  const conversations = getConversations();
+  const convIndex = conversations.findIndex(c => c.id === conversationId);
+  if (convIndex > -1) {
+    conversations[convIndex].lastMessage = content;
+    conversations[convIndex].lastMessageAt = new Date().toISOString();
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+  }
+};

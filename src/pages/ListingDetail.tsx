@@ -4,12 +4,13 @@ import { getListing, addOrder, updateListing, DEMO_USERS } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ArrowLeft, Package, Shield } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Package, Shield, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { useAuth } from '@/hooks/useAuth';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { SellerCard } from '@/components/SellerCard';
+import { ImageGallery } from '@/components/ImageGallery';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -56,7 +57,7 @@ const ListingDetail = () => {
       sellerId: listing.sellerId,
       quantity: 1,
       totalXmr,
-      status: 'pending_payment',
+      status: 'created',
       createdAt: new Date().toISOString()
     });
 
@@ -82,13 +83,9 @@ const ListingDetail = () => {
         </Button>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Image */}
-          <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-            <img
-              src={listing.images[0]}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
+          {/* Image Gallery */}
+          <div>
+            <ImageGallery images={listing.images} title={listing.title} />
           </div>
 
           {/* Details */}
@@ -140,15 +137,24 @@ const ListingDetail = () => {
             </div>
 
             <div className="space-y-4">
-              <Button
-                size="lg"
-                className="w-full gap-2 text-lg"
-                onClick={handleBuyNow}
-                disabled={listing.stock < 1}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Buy Now with XMR
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  size="lg"
+                  className="flex-1 gap-2 text-lg"
+                  onClick={handleBuyNow}
+                  disabled={listing.stock < 1}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Buy Now with XMR
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => toast.info('Messaging feature coming soon!')}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </Button>
+              </div>
 
               <Card className="bg-primary/10 border-primary/20">
                 <CardContent className="p-4 flex items-start gap-3">

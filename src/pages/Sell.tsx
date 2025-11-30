@@ -29,7 +29,7 @@ const Sell = () => {
   const orders = getOrders().filter(o => o.sellerId === user.id);
   
   const totalRevenue = orders
-    .filter(o => o.status !== 'pending_payment')
+    .filter(o => o.status !== 'created')
     .reduce((sum, o) => sum + xmrToUsd(o.totalXmr), 0);
   
   const activeListings = listings.filter(l => l.status === 'active').length;

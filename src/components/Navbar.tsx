@@ -1,15 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { NavLink } from './NavLink';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
+import { getWishlist, getConversations } from '@/lib/data';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    setWishlistCount(getWishlist().length);
+    const conversations = getConversations();
+    setUnreadCount(conversations.reduce((sum, c) => sum + c.unreadCount, 0));
+  }, []);
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -43,24 +53,44 @@ export const Navbar = () => {
             </div>
           </form>
 
-          <div className="flex items-center gap-2 sm:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <Link to="/browse">
-              <Button variant="ghost" className="gap-2">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <ShoppingBag className="w-4 h-4" />
-                Browse
+                <span className="hidden md:inline">Browse</span>
+              </Button>
+            </Link>
+
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="w-4 h-4" />
+                {wishlistCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {wishlistCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
             
             {user && (
               <>
+                <Link to="/messages">
+                  <Button variant="ghost" size="icon" className="relative">
+                    <MessageCircle className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </Link>
                 <Link to="/orders">
-                  <Button variant="ghost" className="gap-2">
+                  <Button variant="ghost" size="icon">
                     <Package className="w-4 h-4" />
-                    Orders
                   </Button>
                 </Link>
                 <Link to="/sell">
-                  <Button variant="secondary" className="gap-2">
+                  <Button variant="secondary" className="hidden sm:inline-flex">
                     Sell
                   </Button>
                 </Link>
@@ -69,7 +99,7 @@ export const Navbar = () => {
                     <User className="w-4 h-4" />
                   </Button>
                 </Link>
-                <Button variant="ghost" size="icon" onClick={() => signOut()}>
+                <Button variant="ghost" size="icon" onClick={() => signOut()} className="hidden sm:inline-flex">
                   <LogOut className="w-4 h-4" />
                 </Button>
               </>

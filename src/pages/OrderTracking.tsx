@@ -4,9 +4,13 @@ import { getOrder, getListing, updateOrder, getCurrentUser } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Package, Truck, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ExternalLink, MessageCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { DEMO_USERS } from '@/lib/data';
+import { OrderStepper } from '@/components/OrderStepper';
+import { useState } from 'react';
 
 const OrderTracking = () => {
   const { id } = useParams();
@@ -14,6 +18,8 @@ const OrderTracking = () => {
   const order = getOrder(id!);
   const listing = order ? getListing(order.listingId) : null;
   const currentUser = getCurrentUser();
+  const [trackingCarrier, setTrackingCarrier] = useState('');
+  const [trackingNumber, setTrackingNumber] = useState('');
 
   if (!order || !listing) {
     return (
@@ -31,26 +37,53 @@ const OrderTracking = () => {
 
   const seller = DEMO_USERS.find(u => u.id === order.sellerId);
   const isSeller = currentUser?.id === order.sellerId;
-
-  const statusSteps = [
-    { key: 'pending_payment', label: 'Created', icon: Package },
-    { key: 'paid', label: 'Paid', icon: Check },
-    { key: 'shipped', label: 'Shipped', icon: Truck },
-    { key: 'completed', label: 'Completed', icon: CheckCircle }
-  ];
-
-  const currentStepIndex = statusSteps.findIndex(s => s.key === order.status);
+  const isBuyer = currentUser?.id === order.buyerId;
 
   const handleMarkShipped = () => {
-    updateOrder(order.id, { status: 'shipped' });
+    if (!trackingCarrier || !trackingNumber) {
+      toast.error('Please enter tracking information');
+      return;
+    }
+    
+    const trackingUrl = getTrackingUrl(trackingCarrier, trackingNumber);
+    updateOrder(order.id, { 
+      status: 'shipped',
+      trackingCarrier,
+      trackingNumber,
+      trackingUrl,
+      shippedAt: new Date().toISOString()
+    });
     toast.success('Order marked as shipped!');
     navigate(0);
   };
 
-  const handleMarkCompleted = () => {
-    updateOrder(order.id, { status: 'completed' });
-    toast.success('Order marked as completed!');
+  const handleMarkDelivered = () => {
+    updateOrder(order.id, { 
+      status: 'delivered',
+      deliveredAt: new Date().toISOString()
+    });
+    toast.success('Order marked as delivered!');
     navigate(0);
+  };
+
+  const handleMarkCompleted = () => {
+    updateOrder(order.id, { 
+      status: 'completed',
+      completedAt: new Date().toISOString()
+    });
+    toast.success('Order completed! Leave a review?');
+    navigate(0);
+  };
+
+  const getTrackingUrl = (carrier: string, number: string) => {
+    const carriers: Record<string, string> = {
+      'Royal Mail': `https://www.royalmail.com/track-your-item#/tracking-results/${number}`,
+      'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${number}`,
+      'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${number}`,
+      'UPS': `https://www.ups.com/track?tracknum=${number}`,
+      'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${number}`,
+    };
+    return carriers[carrier] || '#';
   };
 
   return (
@@ -66,39 +99,38 @@ const OrderTracking = () => {
         {/* Order Status */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <div className="flex items-center justify-between mb-8">
-              {statusSteps.map((step, index) => {
-                const Icon = step.icon;
-                const isActive = index <= currentStepIndex;
-                const isComplete = index < currentStepIndex;
-                
-                return (
-                  <div key={step.key} className="flex items-center flex-1">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                        isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <span className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
-                        {step.label}
-                      </span>
-                    </div>
-                    {index < statusSteps.length - 1 && (
-                      <div className={`h-0.5 flex-1 mx-2 ${isComplete ? 'bg-primary' : 'bg-muted'}`} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="text-center">
-              <Badge variant="default" className="text-base px-4 py-2">
-                {statusSteps[currentStepIndex].label}
-              </Badge>
-            </div>
+            <OrderStepper status={order.status as any} />
           </CardContent>
         </Card>
+
+        {/* Tracking Information */}
+        {order.trackingNumber && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Tracking Information</h2>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-sm text-muted-foreground">Carrier</span>
+                  <p className="font-medium">{order.trackingCarrier}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Tracking Number</span>
+                  <p className="font-mono text-sm">{order.trackingNumber}</p>
+                </div>
+                {order.trackingUrl && (
+                  <a 
+                    href={order.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-primary hover:underline"
+                  >
+                    Track Package <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Order Details */}
         <div className="grid md:grid-cols-2 gap-6">
@@ -151,10 +183,30 @@ const OrderTracking = () => {
         {isSeller && order.status === 'paid' && (
           <Card className="mt-6 bg-primary/10 border-primary/20">
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-3">Seller Actions</h3>
-              <Button onClick={handleMarkShipped} className="w-full">
-                Mark as Shipped
-              </Button>
+              <h3 className="font-semibold mb-3">Mark as Shipped</h3>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="carrier">Shipping Carrier</Label>
+                  <Input
+                    id="carrier"
+                    placeholder="e.g., Royal Mail, DHL, FedEx"
+                    value={trackingCarrier}
+                    onChange={(e) => setTrackingCarrier(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tracking">Tracking Number</Label>
+                  <Input
+                    id="tracking"
+                    placeholder="e.g., RM123456789GB"
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleMarkShipped} className="w-full">
+                  Mark as Shipped
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -163,12 +215,43 @@ const OrderTracking = () => {
           <Card className="mt-6 bg-primary/10 border-primary/20">
             <CardContent className="p-6">
               <h3 className="font-semibold mb-3">Seller Actions</h3>
-              <Button onClick={handleMarkCompleted} className="w-full">
-                Mark as Completed
+              <Button onClick={handleMarkDelivered} className="w-full">
+                Mark as Delivered
               </Button>
             </CardContent>
           </Card>
         )}
+
+        {/* Buyer Actions */}
+        {isBuyer && order.status === 'delivered' && (
+          <Card className="mt-6 bg-primary/10 border-primary/20">
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-3">Confirm Receipt</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Have you received your order?
+              </p>
+              <Button onClick={handleMarkCompleted} className="w-full">
+                Confirm Delivery & Complete Order
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Actions */}
+        <Card className="mt-6">
+          <CardContent className="p-6">
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Messaging coming soon!')}>
+                <MessageCircle className="w-4 h-4" />
+                Message {isSeller ? 'Buyer' : 'Seller'}
+              </Button>
+              <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Dispute system coming soon!')}>
+                <AlertCircle className="w-4 h-4" />
+                Report Issue
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

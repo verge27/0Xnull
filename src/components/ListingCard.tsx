@@ -3,9 +3,10 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/lib/types';
 import { PriceDisplay } from './PriceDisplay';
-import { DEMO_USERS } from '@/lib/data';
+import { DEMO_USERS, toggleWishlist, isInWishlist } from '@/lib/data';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star } from 'lucide-react';
+import { Star, Heart, Image as ImageIcon } from 'lucide-react';
+import { useState } from 'react';
 
 interface ListingCardProps {
   listing: Listing;
@@ -13,16 +14,39 @@ interface ListingCardProps {
 
 export const ListingCard = ({ listing }: ListingCardProps) => {
   const seller = DEMO_USERS.find(u => u.id === listing.sellerId);
+  const [isWishlisted, setIsWishlisted] = useState(isInWishlist(listing.id));
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleWishlist(listing.id);
+    setIsWishlisted(!isWishlisted);
+  };
 
   return (
     <Link to={`/listing/${listing.id}`}>
       <Card className="card-hover overflow-hidden group">
-        <div className="aspect-square overflow-hidden bg-muted">
+        <div className="aspect-square overflow-hidden bg-muted relative">
           <img
             src={listing.images[0]}
             alt={listing.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
+          <button
+            onClick={handleWishlistClick}
+            className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm p-2 rounded-full hover:bg-background transition-colors z-10"
+          >
+            <Heart 
+              className={`w-5 h-5 transition-all ${
+                isWishlisted ? 'fill-primary text-primary' : 'text-foreground'
+              }`}
+            />
+          </button>
+          {listing.images.length > 1 && (
+            <Badge variant="secondary" className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm gap-1">
+              <ImageIcon className="w-3 h-3" />
+              {listing.images.length}
+            </Badge>
+          )}
         </div>
         <CardContent className="p-4">
           <div className="flex items-start justify-between mb-2">
