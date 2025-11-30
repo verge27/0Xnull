@@ -7,6 +7,7 @@ export interface Listing {
   description: string;
   priceUsd: number;
   category: string;
+  subcategory?: string;
   images: string[];
   stock: number;
   shippingPriceUsd: number;
