@@ -4,6 +4,12 @@
  */
 
 import { Listing } from '../types';
+import rabbitVibratorImg from '@/assets/freakinthesheets/rabbit-vibrator.jpg';
+import wandMassagerImg from '@/assets/freakinthesheets/wand-massager.jpg';
+import bondageKitImg from '@/assets/freakinthesheets/bondage-kit.jpg';
+import laceBodysuitImg from '@/assets/freakinthesheets/lace-bodysuit.jpg';
+import vibratingRingImg from '@/assets/freakinthesheets/vibrating-ring.jpg';
+import waterLubeImg from '@/assets/freakinthesheets/water-lube.jpg';
 
 const FREAK_BASE_URL = 'https://freakinthesheets.co.uk';
 
@@ -20,7 +26,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 79.99,
     priceXmr: 0.48,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [rabbitVibratorImg],
     condition: 'new',
     status: 'active',
     stock: 99,
@@ -41,7 +47,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 49.99,
     priceXmr: 0.30,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [wandMassagerImg],
     condition: 'new',
     status: 'active',
     stock: 99,
@@ -62,7 +68,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 59.99,
     priceXmr: 0.36,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [bondageKitImg],
     condition: 'new',
     status: 'active',
     stock: 99,
@@ -83,7 +89,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 34.99,
     priceXmr: 0.21,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [laceBodysuitImg],
     condition: 'new',
     status: 'active',
     stock: 99,
@@ -104,7 +110,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 24.99,
     priceXmr: 0.15,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [vibratingRingImg],
     condition: 'new',
     status: 'active',
     stock: 99,
@@ -125,7 +131,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceUsd: 12.99,
     priceXmr: 0.08,
     category: 'adult-intimacy',
-    images: ['/placeholder.svg'],
+    images: [waterLubeImg],
     condition: 'new',
     status: 'active',
     stock: 99,
