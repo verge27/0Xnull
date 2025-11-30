@@ -3,12 +3,15 @@ export interface Listing {
   sellerId: string;
   title: string;
   description: string;
-  priceXmr: number;
+  priceUsd: number;
   category: string;
   images: string[];
   stock: number;
-  shippingPriceXmr: number;
+  shippingPriceUsd: number;
   status: 'active' | 'sold_out' | 'draft';
+  // Legacy fields for backward compatibility
+  priceXmr?: number;
+  shippingPriceXmr?: number;
 }
 
 export interface Order {

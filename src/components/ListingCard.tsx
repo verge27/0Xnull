@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/lib/types';
+import { PriceDisplay } from './PriceDisplay';
 
 interface ListingCardProps {
   listing: Listing;
@@ -31,12 +32,18 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
         </CardContent>
         <CardFooter className="p-4 pt-0 flex items-center justify-between">
           <div>
-            <div className="text-2xl font-bold text-primary">
-              {listing.priceXmr} XMR
-            </div>
-            {listing.shippingPriceXmr > 0 && (
-              <div className="text-xs text-muted-foreground">
-                +{listing.shippingPriceXmr} XMR shipping
+            <PriceDisplay 
+              usdAmount={listing.priceUsd} 
+              className="text-2xl font-bold text-primary block"
+              showBrackets={true}
+            />
+            {listing.shippingPriceUsd > 0 && (
+              <div className="text-xs text-muted-foreground mt-1">
+                <PriceDisplay 
+                  usdAmount={listing.shippingPriceUsd} 
+                  className="text-xs"
+                  showBrackets={false}
+                /> shipping
               </div>
             )}
           </div>
