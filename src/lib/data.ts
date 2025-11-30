@@ -24,11 +24,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user1',
     title: 'Custom Leather Wallet',
     description: 'Handcrafted genuine leather wallet with RFID protection. Perfect for storing your cards securely. Made with premium Italian leather and includes multiple card slots.',
-    priceXmr: 0.25,
+    priceUsd: 37.50,
     category: 'Physical',
     images: ['https://images.unsplash.com/photo-1627123424574-724758594e93?w=800'],
     stock: 5,
-    shippingPriceXmr: 0.02,
+    shippingPriceUsd: 3.00,
     status: 'active'
   },
   {
@@ -36,11 +36,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user2',
     title: 'VPN Subscription 1 Year',
     description: 'Premium VPN service with no-logs policy. Unlimited bandwidth, 50+ countries, and 24/7 support. Perfect for maintaining your privacy online.',
-    priceXmr: 0.15,
+    priceUsd: 22.50,
     category: 'Digital',
     images: ['https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800'],
     stock: 100,
-    shippingPriceXmr: 0,
+    shippingPriceUsd: 0,
     status: 'active'
   },
   {
@@ -48,11 +48,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user1',
     title: 'Privacy Consultation 1hr',
     description: 'One-on-one privacy consultation with a security expert. Learn how to protect your digital footprint, secure your communications, and maintain anonymity online.',
-    priceXmr: 0.3,
+    priceUsd: 45.00,
     category: 'Service',
     images: ['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'],
     stock: 10,
-    shippingPriceXmr: 0,
+    shippingPriceUsd: 0,
     status: 'active'
   },
   {
@@ -60,11 +60,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user3',
     title: 'Mechanical Keyboard',
     description: 'Custom mechanical keyboard with Cherry MX switches. RGB backlight, aluminum case, and programmable keys. Perfect for privacy-focused professionals.',
-    priceXmr: 0.85,
+    priceUsd: 127.50,
     category: 'Physical',
     images: ['https://images.unsplash.com/photo-1595225476474-87563907a212?w=800'],
     stock: 3,
-    shippingPriceXmr: 0.05,
+    shippingPriceUsd: 7.50,
     status: 'active'
   },
   {
@@ -72,11 +72,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user2',
     title: 'Digital Art Pack',
     description: 'Collection of 50 high-resolution digital artworks focused on privacy and cryptocurrency themes. Perfect for your projects or personal use.',
-    priceXmr: 0.05,
+    priceUsd: 7.50,
     category: 'Digital',
     images: ['https://images.unsplash.com/photo-1561998338-13ad7883b20f?w=800'],
     stock: 999,
-    shippingPriceXmr: 0,
+    shippingPriceUsd: 0,
     status: 'active'
   },
   {
@@ -84,11 +84,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user3',
     title: 'Encrypted USB Drive 64GB',
     description: 'Hardware-encrypted USB drive with military-grade AES-256 encryption. Water and dust resistant. Perfect for storing sensitive data.',
-    priceXmr: 0.18,
+    priceUsd: 27.00,
     category: 'Physical',
     images: ['https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=800'],
     stock: 8,
-    shippingPriceXmr: 0.02,
+    shippingPriceUsd: 3.00,
     status: 'active'
   },
   {
@@ -96,11 +96,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user1',
     title: 'Privacy-Focused Phone Setup',
     description: 'Complete setup service for a privacy-focused mobile phone. Includes degoogled OS installation, secure apps configuration, and privacy training.',
-    priceXmr: 0.45,
+    priceUsd: 67.50,
     category: 'Service',
     images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800'],
     stock: 5,
-    shippingPriceXmr: 0,
+    shippingPriceUsd: 0,
     status: 'active'
   },
   {
@@ -108,11 +108,11 @@ export const DEMO_LISTINGS: Listing[] = [
     sellerId: 'user2',
     title: 'Cryptocurrency Trading Course',
     description: 'Comprehensive video course on anonymous cryptocurrency trading. Learn best practices, privacy tools, and trading strategies. 10+ hours of content.',
-    priceXmr: 0.22,
+    priceUsd: 33.00,
     category: 'Digital',
     images: ['https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=800'],
     stock: 999,
-    shippingPriceXmr: 0,
+    shippingPriceUsd: 0,
     status: 'active'
   }
 ];

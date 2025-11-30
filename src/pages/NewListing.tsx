@@ -17,11 +17,11 @@ const NewListing = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priceXmr: '',
+    priceUsd: '',
     category: 'Physical',
     imageUrl: '',
     stock: '',
-    shippingPriceXmr: '0'
+    shippingPriceUsd: '0'
   });
 
   if (!user) {
@@ -31,7 +31,7 @@ const NewListing = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !formData.priceXmr || !formData.stock) {
+    if (!formData.title || !formData.description || !formData.priceUsd || !formData.stock) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -41,11 +41,11 @@ const NewListing = () => {
       sellerId: user.id,
       title: formData.title,
       description: formData.description,
-      priceXmr: parseFloat(formData.priceXmr),
+      priceUsd: parseFloat(formData.priceUsd),
       category: formData.category,
       images: [formData.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'],
       stock: parseInt(formData.stock),
-      shippingPriceXmr: parseFloat(formData.shippingPriceXmr),
+      shippingPriceUsd: parseFloat(formData.shippingPriceUsd),
       status: 'active' as const
     };
 
@@ -87,25 +87,25 @@ const NewListing = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="priceXmr">Price (XMR) *</Label>
+                  <Label htmlFor="priceUsd">Price (USD) *</Label>
                   <Input
-                    id="priceXmr"
+                    id="priceUsd"
                     type="number"
                     step="0.01"
-                    value={formData.priceXmr}
-                    onChange={(e) => setFormData({ ...formData, priceXmr: e.target.value })}
+                    value={formData.priceUsd}
+                    onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="shippingPriceXmr">Shipping (XMR)</Label>
+                  <Label htmlFor="shippingPriceUsd">Shipping (USD)</Label>
                   <Input
-                    id="shippingPriceXmr"
+                    id="shippingPriceUsd"
                     type="number"
                     step="0.01"
-                    value={formData.shippingPriceXmr}
-                    onChange={(e) => setFormData({ ...formData, shippingPriceXmr: e.target.value })}
+                    value={formData.shippingPriceUsd}
+                    onChange={(e) => setFormData({ ...formData, shippingPriceUsd: e.target.value })}
                     placeholder="0.00"
                   />
                 </div>

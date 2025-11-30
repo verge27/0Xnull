@@ -1,17 +1,21 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
-import { getListing, addOrder, getCurrentUser, updateListing } from '@/lib/data';
+import { getListing, addOrder, updateListing } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, ArrowLeft, Package, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { PriceDisplay } from '@/components/PriceDisplay';
+import { useAuth } from '@/hooks/useAuth';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const listing = getListing(id!);
-  const currentUser = getCurrentUser();
+  const { user } = useAuth();
+  const { usdToXmr } = useExchangeRate();
 
   if (!listing) {
     return (
@@ -28,8 +32,9 @@ const ListingDetail = () => {
   }
 
   const handleBuyNow = () => {
-    if (!currentUser) {
-      toast.error('Please select a demo user from the menu to continue');
+    if (!user) {
+      toast.error('Please sign in to make a purchase');
+      navigate('/auth');
       return;
     }
 
@@ -39,12 +44,13 @@ const ListingDetail = () => {
     }
 
     const orderId = `order-${Date.now()}`;
-    const totalXmr = listing.priceXmr + listing.shippingPriceXmr;
+    const totalUsd = listing.priceUsd + listing.shippingPriceUsd;
+    const totalXmr = usdToXmr(totalUsd);
 
     addOrder({
       id: orderId,
       listingId: listing.id,
-      buyerId: currentUser.id,
+      buyerId: user.id,
       sellerId: listing.sellerId,
       quantity: 1,
       totalXmr,
@@ -93,13 +99,14 @@ const ListingDetail = () => {
             </div>
 
             <div className="mb-6">
-              <div className="text-4xl font-bold text-primary mb-2">
-                {listing.priceXmr} XMR
-              </div>
-              {listing.shippingPriceXmr > 0 && (
+              <PriceDisplay 
+                usdAmount={listing.priceUsd} 
+                className="text-4xl font-bold text-primary block mb-2"
+              />
+              {listing.shippingPriceUsd > 0 && (
                 <div className="text-muted-foreground flex items-center gap-2">
                   <Package className="w-4 h-4" />
-                  +{listing.shippingPriceXmr} XMR shipping
+                  <PriceDisplay usdAmount={listing.shippingPriceUsd} /> shipping
                 </div>
               )}
             </div>

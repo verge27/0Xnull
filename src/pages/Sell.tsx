@@ -14,9 +14,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAuth } from '@/hooks/useAuth';
+import { PriceDisplay } from '@/components/PriceDisplay';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 const Sell = () => {
   const { user } = useAuth();
+  const { xmrToUsd } = useExchangeRate();
 
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -27,7 +30,7 @@ const Sell = () => {
   
   const totalRevenue = orders
     .filter(o => o.status !== 'pending_payment')
-    .reduce((sum, o) => sum + o.totalXmr, 0);
+    .reduce((sum, o) => sum + xmrToUsd(o.totalXmr), 0);
   
   const activeListings = listings.filter(l => l.status === 'active').length;
 
@@ -56,7 +59,7 @@ const Sell = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-muted-foreground text-sm mb-1">Total Revenue</p>
-                  <p className="text-3xl font-bold text-primary">{totalRevenue.toFixed(2)} XMR</p>
+                  <p className="text-3xl font-bold text-primary">${totalRevenue.toFixed(2)}</p>
                 </div>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-primary" />
@@ -120,7 +123,9 @@ const Sell = () => {
                         <span className="font-medium">{listing.title}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-semibold">{listing.priceXmr} XMR</TableCell>
+                    <TableCell className="font-semibold">
+                      <PriceDisplay usdAmount={listing.priceUsd} />
+                    </TableCell>
                     <TableCell>{listing.stock}</TableCell>
                     <TableCell>
                       <Badge variant={listing.status === 'active' ? 'default' : 'secondary'}>
