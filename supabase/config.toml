@@ -1,1 +1,4 @@
 project_id = "qjkojiamexufuxsrupjq"
+
+[functions.update-xmr-price]
+verify_jwt = false
