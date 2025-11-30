@@ -3,12 +3,17 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/lib/types';
 import { PriceDisplay } from './PriceDisplay';
+import { DEMO_USERS } from '@/lib/data';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Star } from 'lucide-react';
 
 interface ListingCardProps {
   listing: Listing;
 }
 
 export const ListingCard = ({ listing }: ListingCardProps) => {
+  const seller = DEMO_USERS.find(u => u.id === listing.sellerId);
+
   return (
     <Link to={`/listing/${listing.id}`}>
       <Card className="card-hover overflow-hidden group">
@@ -34,6 +39,27 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
             {listing.description}
           </p>
+          
+          {/* Seller Info */}
+          {seller && (
+            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={seller.avatar} alt={seller.displayName} />
+                <AvatarFallback className="text-xs">{seller.displayName[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <span className="text-xs text-muted-foreground truncate block">
+                  {seller.displayName}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Star className="w-3 h-3 fill-primary text-primary" />
+                <span className="text-xs text-muted-foreground">
+                  {seller.rating.toFixed(1)}
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="p-4 pt-0 flex items-center justify-between">
           <div>

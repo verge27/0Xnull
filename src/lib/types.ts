@@ -31,4 +31,11 @@ export interface User {
   id: string;
   displayName: string;
   xmrAddress: string;
+  avatar?: string;
+  bio?: string;
+  location?: string;
+  joinedAt: string;
+  totalSales: number;
+  rating: number;
+  reviewCount: number;
 }

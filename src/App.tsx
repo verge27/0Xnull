@@ -9,6 +9,7 @@ import Browse from "./pages/Browse";
 import ListingDetail from "./pages/ListingDetail";
 import Checkout from "./pages/Checkout";
 import OrderTracking from "./pages/OrderTracking";
+import SellerProfile from "./pages/SellerProfile";
 import Sell from "./pages/Sell";
 import NewListing from "./pages/NewListing";
 import Orders from "./pages/Orders";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/listing/:id" element={<ListingDetail />} />
             <Route path="/checkout/:orderId" element={<Checkout />} />
             <Route path="/order/:id" element={<OrderTracking />} />
+            <Route path="/seller/:id" element={<SellerProfile />} />
             <Route path="/sell" element={<Sell />} />
             <Route path="/sell/new" element={<NewListing />} />
             <Route path="/orders" element={<Orders />} />

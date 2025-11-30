@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
-import { getListing, addOrder, updateListing } from '@/lib/data';
+import { getListing, addOrder, updateListing, DEMO_USERS } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { useAuth } from '@/hooks/useAuth';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { SellerCard } from '@/components/SellerCard';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -16,6 +17,7 @@ const ListingDetail = () => {
   const listing = getListing(id!);
   const { user } = useAuth();
   const { usdToXmr } = useExchangeRate();
+  const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
 
   if (!listing) {
     return (
@@ -122,6 +124,14 @@ const ListingDetail = () => {
                 </p>
               </CardContent>
             </Card>
+
+            {/* Seller Card */}
+            {seller && (
+              <div className="mb-6">
+                <h2 className="font-semibold mb-3">Seller</h2>
+                <SellerCard seller={seller} />
+              </div>
+            )}
 
             <div className="flex items-center gap-4 mb-6">
               <Badge variant={listing.stock > 0 ? 'default' : 'destructive'} className="text-base py-2 px-4">

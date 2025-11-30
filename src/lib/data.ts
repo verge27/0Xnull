@@ -4,17 +4,38 @@ export const DEMO_USERS: User[] = [
   {
     id: 'user1',
     displayName: 'CryptoArtisan',
-    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H'
+    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+    bio: 'Handcrafting quality leather goods since 2019. Every piece is made to last a lifetime with premium materials.',
+    location: 'Brighton, UK',
+    joinedAt: '2024-01-15T00:00:00Z',
+    totalSales: 234,
+    rating: 4.8,
+    reviewCount: 189
   },
   {
     id: 'user2',
     displayName: 'PrivacyFirst',
-    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H'
+    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    bio: 'Digital privacy advocate selling VPNs, encrypted services, and privacy tools. Your security is my priority.',
+    location: 'Switzerland',
+    joinedAt: '2024-03-01T00:00:00Z',
+    totalSales: 1205,
+    rating: 4.9,
+    reviewCount: 892
   },
   {
     id: 'user3',
     displayName: 'TechAnon',
-    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H'
+    xmrAddress: '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H',
+    avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200',
+    bio: 'Custom mechanical keyboards and tech gear. All products tested before shipping. Quality guaranteed.',
+    location: 'Berlin, Germany',
+    joinedAt: '2024-02-10T00:00:00Z',
+    totalSales: 67,
+    rating: 4.6,
+    reviewCount: 45
   }
 ];
 
