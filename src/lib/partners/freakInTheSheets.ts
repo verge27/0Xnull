@@ -16,6 +16,7 @@ import waterLubeImg from '@/assets/freakinthesheets/water-lube.jpg';
 import masturbatorImg from '@/assets/freakinthesheets/masturbator.jpg';
 import doubleDildoImg from '@/assets/freakinthesheets/double-dildo.jpg';
 import dualisticDoubleImg from '@/assets/freakinthesheets/dualistic-double.jpg';
+import wonderloveRemoteImg from '@/assets/freakinthesheets/wonderlove-remote.jpg';
 import buttPlugBlingImg from '@/assets/freakinthesheets/butt-plug-bling.jpg';
 import wandMassagerImg from '@/assets/freakinthesheets/wand-massager.jpg';
 import cockRingsImg from '@/assets/freakinthesheets/cock-rings.jpg';
@@ -302,7 +303,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(74.99)),
     category: 'adult-intimacy',
     subcategory: 'toys-devices',
-    images: [rabbitVibratorImg],
+    images: [wonderloveRemoteImg],
     condition: 'new',
     status: 'active',
     stock: 99,
