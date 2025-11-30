@@ -8,7 +8,10 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { getListings } from '@/lib/data';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
 import { freakInTheSheetsListings } from '@/lib/partners/freakInTheSheets';
+import { peptidesUKPartnerListings } from '@/lib/partners/peptidesUK';
+import { ukPeptidesPartnerListings } from '@/lib/partners/ukPeptides';
 import { ReferralListingCard } from '@/components/ReferralListingCard';
+import { DisclaimerBanner } from '@/components/DisclaimerBanner';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,6 +69,50 @@ const Browse = () => {
       discreteShipping: item.discreteShipping,
       isPartner: true,
       partnerName: 'Freak In The Sheets'
+    })),
+    ...peptidesUKPartnerListings.map(item => ({
+      ...item,
+      id: item.id || `puk-${Math.random()}`,
+      title: item.title || '',
+      description: item.description || '',
+      priceUsd: item.priceUsd || 0,
+      category: item.category || 'health-wellness',
+      sellerId: 'peptides-uk',
+      images: item.images || ['/placeholder.svg'],
+      stock: item.stock || 99,
+      shippingPriceUsd: item.shippingPriceUsd || 0,
+      status: 'active' as const,
+      condition: item.condition || 'new' as const,
+      createdAt: item.createdAt || new Date().toISOString(),
+      referralUrl: item.referralUrl,
+      fulfillment: item.fulfillment,
+      disclaimer: item.disclaimer,
+      discreteShipping: item.discreteShipping,
+      coaAvailable: item.coaAvailable,
+      isPartner: true,
+      partnerName: 'Peptides UK'
+    })),
+    ...ukPeptidesPartnerListings.map(item => ({
+      ...item,
+      id: item.id || `ukp-${Math.random()}`,
+      title: item.title || '',
+      description: item.description || '',
+      priceUsd: item.priceUsd || 0,
+      category: item.category || 'health-wellness',
+      sellerId: 'uk-peptides',
+      images: item.images || ['/placeholder.svg'],
+      stock: item.stock || 99,
+      shippingPriceUsd: item.shippingPriceUsd || 0,
+      status: 'active' as const,
+      condition: item.condition || 'new' as const,
+      createdAt: item.createdAt || new Date().toISOString(),
+      referralUrl: item.referralUrl,
+      fulfillment: item.fulfillment,
+      disclaimer: item.disclaimer,
+      discreteShipping: item.discreteShipping,
+      coaAvailable: item.coaAvailable,
+      isPartner: true,
+      partnerName: 'UK-Peptides'
     })),
     ...demoListings
   ];
@@ -371,14 +418,26 @@ const Browse = () => {
             </div>
 
             {categoryPath.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-2xl font-semibold">
-                  {categoryPath[categoryPath.length - 1].name}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {filteredListings.length} {filteredListings.length === 1 ? 'item' : 'items'} found
-                </p>
-              </div>
+              <>
+                <div className="mb-4">
+                  <h2 className="text-2xl font-semibold">
+                    {categoryPath[categoryPath.length - 1].name}
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    {filteredListings.length} {filteredListings.length === 1 ? 'item' : 'items'} found
+                  </p>
+                </div>
+                
+                {/* Research Disclaimer for Health & Wellness categories */}
+                {(categorySlug === 'health-wellness' || 
+                  categorySlug === 'peptides-research' || 
+                  categorySlug === 'nootropics-cognitive') && (
+                  <DisclaimerBanner 
+                    type="research" 
+                    className="mb-6"
+                  />
+                )}
+              </>
             )}
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
