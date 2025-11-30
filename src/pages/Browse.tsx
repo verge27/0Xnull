@@ -33,10 +33,14 @@ const Browse = () => {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Combine all listings (Partner referrals, XMRBazaar, then demo)
-  const listings = [
+  const listings: any[] = [
     ...freakInTheSheetsListings.map(item => ({
       ...item,
       id: item.id || `fits-${Math.random()}`,
+      title: item.title || '',
+      description: item.description || '',
+      priceUsd: item.priceUsd || 0,
+      category: item.category || 'adult-intimacy',
       sellerId: 'freak-in-the-sheets',
       images: item.images || ['/placeholder.svg'],
       stock: item.stock || 99,
