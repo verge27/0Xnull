@@ -45,10 +45,18 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           />
           {/* Top left badges */}
           {listing.isXMRBazaar && (
-            <Badge className="absolute top-3 left-3 bg-emerald-500/90 text-white border-0 gap-1 z-10">
-              <ExternalLink className="w-3 h-3" />
-              XMRBazaar
-            </Badge>
+            <a
+              href={(listing as any).xmrbazaarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-3 left-3 z-10"
+            >
+              <Badge className="bg-emerald-500/90 hover:bg-emerald-600/90 text-white border-0 gap-1 cursor-pointer transition-colors">
+                <ExternalLink className="w-3 h-3" />
+                XMRBazaar
+              </Badge>
+            </a>
           )}
           
           <button
