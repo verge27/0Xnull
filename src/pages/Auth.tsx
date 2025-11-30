@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
+import { emailSchema, passwordSchema, displayNameSchema } from '@/lib/validation';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -29,8 +30,13 @@ const Auth = () => {
     const password = formData.get('signup-password') as string;
     const displayName = formData.get('display-name') as string;
 
-    if (!email || !password || !displayName) {
-      toast.error('Please fill in all fields');
+    // Validate inputs
+    try {
+      emailSchema.parse(email);
+      passwordSchema.parse(password);
+      displayNameSchema.parse(displayName);
+    } catch (error: any) {
+      toast.error(error.errors?.[0]?.message || 'Invalid input');
       setIsLoading(false);
       return;
     }
@@ -55,8 +61,14 @@ const Auth = () => {
     const email = formData.get('signin-email') as string;
     const password = formData.get('signin-password') as string;
 
-    if (!email || !password) {
-      toast.error('Please fill in all fields');
+    // Validate inputs
+    try {
+      emailSchema.parse(email);
+      if (!password || password.length === 0) {
+        throw new Error('Password is required');
+      }
+    } catch (error: any) {
+      toast.error(error.errors?.[0]?.message || error.message || 'Invalid input');
       setIsLoading(false);
       return;
     }
@@ -148,8 +160,11 @@ const Auth = () => {
                       type="password"
                       placeholder="••••••••"
                       required
-                      minLength={6}
+                      minLength={8}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Must be 8+ characters with uppercase, lowercase, and a number
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Creating account...' : 'Sign Up'}

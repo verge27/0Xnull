@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { settingsSchema } from '@/lib/validation';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -27,6 +28,17 @@ const Settings = () => {
   }
 
   const handleSave = async () => {
+    // Validate inputs
+    try {
+      settingsSchema.parse({
+        displayName,
+        xmrAddress: xmrAddress || ''
+      });
+    } catch (error: any) {
+      toast.error(error.errors?.[0]?.message || 'Invalid input');
+      return;
+    }
+
     const { error } = await updateProfile({
       display_name: displayName,
       xmr_address: xmrAddress || null

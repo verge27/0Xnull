@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { listingSchema } from '@/lib/validation';
 
 const NewListing = () => {
   const { user } = useAuth();
@@ -31,8 +32,22 @@ const NewListing = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !formData.priceUsd || !formData.stock) {
-      toast.error('Please fill in all required fields');
+    // Validate inputs
+    try {
+      listingSchema.parse({
+        title: formData.title,
+        description: formData.description,
+        priceUsd: parseFloat(formData.priceUsd),
+        category: formData.category,
+        imageUrl: formData.imageUrl || ''
+      });
+    } catch (error: any) {
+      toast.error(error.errors?.[0]?.message || 'Invalid input');
+      return;
+    }
+
+    if (!formData.stock || parseInt(formData.stock) < 1) {
+      toast.error('Stock must be at least 1');
       return;
     }
 
