@@ -42,7 +42,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
   {
     id: 'fits-spreader-bar',
     title: 'Ouch Adjustable Spreader Bar',
-    description: 'Would you like to take control during your BDSM play? This Adjustable Spreader Bar offers a variety of exciting options for couples to play. As an adjustable spreader, it allows you to customize the width between arms or legs according to your preference, providing unrestricted access to the body's most intimate areas.',
+    description: "Would you like to take control during your BDSM play? This Adjustable Spreader Bar offers a variety of exciting options for couples to play. As an adjustable spreader, it allows you to customize the width between arms or legs according to your preference, providing unrestricted access to the body's most intimate areas.",
     priceUsd: 32.99,
     priceXmr: 0.157,
     category: 'adult-intimacy',
