@@ -13,6 +13,7 @@ import clitoralSquirrelImg from '@/assets/freakinthesheets/clitoral-squirrel.jpg
 import spreaderBarImg from '@/assets/freakinthesheets/spreader-bar.jpg';
 import cottelliRedSetImg from '@/assets/freakinthesheets/cottelli-red-set.jpg';
 import teddyRedImg from '@/assets/freakinthesheets/teddy-red.jpg';
+import idFreeLubeImg from '@/assets/freakinthesheets/id-free-lube.jpg';
 import waterLubeImg from '@/assets/freakinthesheets/water-lube.jpg';
 import fleshlubeIceImg from '@/assets/freakinthesheets/fleshlube-ice.jpg';
 import fleshlightQuickshotImg from '@/assets/freakinthesheets/fleshlight-quickshot.jpg';
@@ -120,7 +121,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(13.99)),
     category: 'adult-intimacy',
     subcategory: 'wellness-enhancement',
-    images: [waterLubeImg],
+    images: [idFreeLubeImg],
     condition: 'new',
     status: 'active',
     stock: 99,
