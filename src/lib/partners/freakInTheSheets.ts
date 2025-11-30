@@ -19,6 +19,7 @@ import dualisticDoubleImg from '@/assets/freakinthesheets/dualistic-double.jpg';
 import wonderloveRemoteImg from '@/assets/freakinthesheets/wonderlove-remote.jpg';
 import lewandSwerveImg from '@/assets/freakinthesheets/lewand-swerve.jpg';
 import balldoPurpleImg from '@/assets/freakinthesheets/balldo-purple.jpg';
+import evolvedStrapOnImg from '@/assets/freakinthesheets/evolved-strapon.jpg';
 import buttPlugBlingImg from '@/assets/freakinthesheets/butt-plug-bling.jpg';
 import wandMassagerImg from '@/assets/freakinthesheets/wand-massager.jpg';
 import cockRingsImg from '@/assets/freakinthesheets/cock-rings.jpg';
@@ -185,7 +186,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(59.99)),
     category: 'adult-intimacy',
     subcategory: 'toys-devices',
-    images: [doubleDildoImg],
+    images: [evolvedStrapOnImg],
     condition: 'new',
     status: 'active',
     stock: 99,
