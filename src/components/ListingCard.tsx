@@ -5,16 +5,24 @@ import { Listing } from '@/lib/types';
 import { PriceDisplay } from './PriceDisplay';
 import { DEMO_USERS, toggleWishlist, isInWishlist } from '@/lib/data';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star, Heart, Image as ImageIcon } from 'lucide-react';
+import { Star, Heart, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
 interface ListingCardProps {
-  listing: Listing;
+  listing: Listing & { isXMRBazaar?: boolean };
 }
 
 export const ListingCard = ({ listing }: ListingCardProps) => {
-  const seller = DEMO_USERS.find(u => u.id === listing.sellerId);
   const [isWishlisted, setIsWishlisted] = useState(isInWishlist(listing.id));
+  
+  const seller = listing.isXMRBazaar 
+    ? { 
+        displayName: (listing as any).seller?.name || 'XMRBazaar Seller', 
+        rating: (listing as any).seller?.rating || 0, 
+        reviewCount: (listing as any).seller?.reviews || 0,
+        avatar: undefined
+      }
+    : DEMO_USERS.find(u => u.id === listing.sellerId);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -22,8 +30,12 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
     setIsWishlisted(!isWishlisted);
   };
 
+  const linkUrl = listing.isXMRBazaar ? (listing as any).xmrbazaarUrl : `/listing/${listing.id}`;
+  const linkTarget = listing.isXMRBazaar ? "_blank" : undefined;
+  const linkRel = listing.isXMRBazaar ? "noopener noreferrer" : undefined;
+
   return (
-    <Link to={`/listing/${listing.id}`}>
+    <Link to={linkUrl} target={linkTarget} rel={linkRel}>
       <Card className="card-hover overflow-hidden group">
         <div className="aspect-square overflow-hidden bg-muted relative">
           <img
@@ -31,6 +43,14 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
             alt={listing.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
+          {/* Top left badges */}
+          {listing.isXMRBazaar && (
+            <Badge className="absolute top-3 left-3 bg-emerald-500/90 text-white border-0 gap-1 z-10">
+              <ExternalLink className="w-3 h-3" />
+              XMRBazaar
+            </Badge>
+          )}
+          
           <button
             onClick={handleWishlistClick}
             className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm p-2 rounded-full hover:bg-background transition-colors z-10"
@@ -55,9 +75,11 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
               <Badge variant="secondary" className="text-xs">
                 {listing.category}
               </Badge>
-              <Badge variant="outline" className="text-xs">
-                Demo
-              </Badge>
+              {!listing.isXMRBazaar && (
+                <Badge variant="outline" className="text-xs">
+                  Demo
+                </Badge>
+              )}
             </div>
           </div>
           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
@@ -67,10 +89,12 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           {/* Seller Info */}
           {seller && (
             <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
-              <Avatar className="w-6 h-6">
-                <AvatarImage src={seller.avatar} alt={seller.displayName} />
-                <AvatarFallback className="text-xs">{seller.displayName[0]}</AvatarFallback>
-              </Avatar>
+              {seller.avatar && (
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src={seller.avatar} alt={seller.displayName} />
+                  <AvatarFallback className="text-xs">{seller.displayName[0]}</AvatarFallback>
+                </Avatar>
+              )}
               <div className="flex-1 min-w-0">
                 <span className="text-xs text-muted-foreground truncate block">
                   {seller.displayName}
@@ -81,6 +105,11 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
                 <span className="text-xs text-muted-foreground">
                   {seller.rating.toFixed(1)}
                 </span>
+                {seller.reviewCount && (
+                  <span className="text-xs text-muted-foreground">
+                    ({seller.reviewCount})
+                  </span>
+                )}
               </div>
             </div>
           )}

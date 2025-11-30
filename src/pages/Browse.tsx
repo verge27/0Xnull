@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { ListingCard } from '@/components/ListingCard';
 import { getListings } from '@/lib/data';
+import { xmrbazaarListings } from '@/lib/xmrbazaar';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,8 +24,26 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const listings = getListings();
+  const demoListings = getListings();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Combine demo and XMRBazaar listings
+  const listings = [
+    ...demoListings,
+    ...xmrbazaarListings.map(xmr => ({
+      ...xmr,
+      sellerId: `xmr-${xmr.seller.name}`,
+      images: xmr.images,
+      stock: 999,
+      shippingPriceUsd: 0,
+      status: 'active' as const,
+      condition: 'new' as const,
+      createdAt: new Date().toISOString(),
+      isXMRBazaar: true,
+      xmrbazaarUrl: xmr.xmrbazaarUrl,
+      seller: xmr.seller
+    }))
+  ];
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedCondition, setSelectedCondition] = useState<string>('all');
