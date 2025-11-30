@@ -7,6 +7,8 @@ import { CommentsSection } from '@/components/CommentsSection';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { getListings } from '@/lib/data';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
+import { freakInTheSheetsListings } from '@/lib/partners/freakInTheSheets';
+import { ReferralListingCard } from '@/components/ReferralListingCard';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +32,21 @@ const Browse = () => {
   const demoListings = getListings();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Combine XMRBazaar and demo listings (XMRBazaar first)
+  // Combine all listings (Partner referrals, XMRBazaar, then demo)
   const listings = [
+    ...freakInTheSheetsListings.map(item => ({
+      ...item,
+      id: item.id || `fits-${Math.random()}`,
+      sellerId: 'freak-in-the-sheets',
+      images: item.images || ['/placeholder.svg'],
+      stock: item.stock || 99,
+      shippingPriceUsd: item.shippingPriceUsd || 0,
+      status: 'active' as const,
+      condition: item.condition || 'new' as const,
+      createdAt: item.createdAt || new Date().toISOString(),
+      isPartner: true,
+      partnerName: 'Freak In The Sheets'
+    })),
     ...xmrbazaarListings.map(xmr => ({
       ...xmr,
       sellerId: `xmr-${xmr.seller.name}`,
@@ -47,6 +62,7 @@ const Browse = () => {
     })),
     ...demoListings
   ];
+
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedCondition, setSelectedCondition] = useState<string>('all');
@@ -360,7 +376,15 @@ const Browse = () => {
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sortedListings.map(listing => (
-                <ListingCard key={listing.id} listing={listing} />
+                listing.isPartner ? (
+                  <ReferralListingCard 
+                    key={listing.id} 
+                    listing={listing as any} 
+                    partnerName={listing.partnerName || 'Partner'} 
+                  />
+                ) : (
+                  <ListingCard key={listing.id} listing={listing} />
+                )
               ))}
             </div>
 
