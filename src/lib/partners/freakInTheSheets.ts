@@ -9,6 +9,7 @@
 import { Listing } from '../types';
 
 // Import product images
+import remoteEggPurpleImg from '@/assets/freakinthesheets/remote-egg-purple.jpg';
 import clitoralSquirrelImg from '@/assets/freakinthesheets/clitoral-squirrel.jpg';
 import sportsheetsBarImg from '@/assets/freakinthesheets/sportsheets-spreader.jpg';
 import spreaderBarImg from '@/assets/freakinthesheets/spreader-bar.jpg';
@@ -50,7 +51,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
     priceXmr: usdToXmr(gbpToUsd(22.99)),
     category: 'adult-intimacy',
     subcategory: 'toys-devices',
-    images: [clitoralSquirrelImg],
+    images: [remoteEggPurpleImg],
     condition: 'new',
     status: 'active',
     stock: 99,
