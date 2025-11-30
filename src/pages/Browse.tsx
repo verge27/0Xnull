@@ -32,8 +32,21 @@ const Browse = () => {
   const demoListings = getListings();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Combine all listings (Partner referrals, XMRBazaar, then demo)
+  // Combine all listings (XMRBazaar first, then partner referrals, then demo)
   const listings: any[] = [
+    ...xmrbazaarListings.map(xmr => ({
+      ...xmr,
+      sellerId: `xmr-${xmr.seller.name}`,
+      images: xmr.images,
+      stock: 999,
+      shippingPriceUsd: 0,
+      status: 'active' as const,
+      condition: 'new' as const,
+      createdAt: new Date().toISOString(),
+      isXMRBazaar: true,
+      xmrbazaarUrl: xmr.xmrbazaarUrl,
+      seller: xmr.seller
+    })),
     ...freakInTheSheetsListings.map(item => ({
       ...item,
       id: item.id || `fits-${Math.random()}`,
@@ -53,19 +66,6 @@ const Browse = () => {
       discreteShipping: item.discreteShipping,
       isPartner: true,
       partnerName: 'Freak In The Sheets'
-    })),
-    ...xmrbazaarListings.map(xmr => ({
-      ...xmr,
-      sellerId: `xmr-${xmr.seller.name}`,
-      images: xmr.images,
-      stock: 999,
-      shippingPriceUsd: 0,
-      status: 'active' as const,
-      condition: 'new' as const,
-      createdAt: new Date().toISOString(),
-      isXMRBazaar: true,
-      xmrbazaarUrl: xmr.xmrbazaarUrl,
-      seller: xmr.seller
     })),
     ...demoListings
   ];
