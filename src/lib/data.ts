@@ -132,12 +132,8 @@ export const setCurrentUser = (user: User | null): void => {
 };
 
 export const getListings = (): Listing[] => {
-  const listingsStr = localStorage.getItem('listings');
-  if (!listingsStr) {
-    localStorage.setItem('listings', JSON.stringify(DEMO_LISTINGS));
-    return DEMO_LISTINGS;
-  }
-  return JSON.parse(listingsStr);
+  // Always return demo listings
+  return DEMO_LISTINGS;
 };
 
 export const getListing = (id: string): Listing | undefined => {
