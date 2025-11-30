@@ -27,9 +27,8 @@ const Browse = () => {
   const demoListings = getListings();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Combine demo and XMRBazaar listings
+  // Combine XMRBazaar and demo listings (XMRBazaar first)
   const listings = [
-    ...demoListings,
     ...xmrbazaarListings.map(xmr => ({
       ...xmr,
       sellerId: `xmr-${xmr.seller.name}`,
@@ -42,7 +41,8 @@ const Browse = () => {
       isXMRBazaar: true,
       xmrbazaarUrl: xmr.xmrbazaarUrl,
       seller: xmr.seller
-    }))
+    })),
+    ...demoListings
   ];
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());
   const [priceRange, setPriceRange] = useState([0, 500]);
