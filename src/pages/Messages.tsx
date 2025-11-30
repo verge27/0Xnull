@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
-import { getConversations, getMessages, sendMessage, getCurrentUser, getListing } from '@/lib/data';
+import { getConversations, getMessages, sendMessage, getListing } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,18 +11,19 @@ import { Send, MessageCircle } from 'lucide-react';
 import { DEMO_USERS } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
 
 const Messages = () => {
   const { conversationId } = useParams();
   const [messageText, setMessageText] = useState('');
-  const currentUser = getCurrentUser();
+  const { user } = useAuth();
   const conversations = getConversations();
   const activeConversation = conversationId 
     ? conversations.find(c => c.id === conversationId)
     : conversations[0];
   const messages = activeConversation ? getMessages(activeConversation.id) : [];
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -37,15 +38,15 @@ const Messages = () => {
   }
 
   const handleSend = () => {
-    if (!messageText.trim() || !activeConversation) return;
+    if (!messageText.trim() || !activeConversation || !user) return;
     
-    sendMessage(activeConversation.id, currentUser.id, messageText);
+    sendMessage(activeConversation.id, user.id, messageText);
     setMessageText('');
     toast.success('Message sent');
   };
 
   const getOtherParticipant = (participantIds: string[]) => {
-    const otherId = participantIds.find(id => id !== currentUser.id);
+    const otherId = participantIds.find(id => id !== user.id);
     return DEMO_USERS.find(u => u.id === otherId);
   };
 
@@ -138,8 +139,8 @@ const Messages = () => {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map(msg => {
-                    const isSent = msg.senderId === currentUser.id;
+                {messages.map(msg => {
+                    const isSent = msg.senderId === user.id;
                     return (
                       <div key={msg.id} className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[70%] rounded-lg p-3 ${

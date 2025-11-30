@@ -296,38 +296,12 @@ export const isInWishlist = (listingId: string): boolean => {
 // Messaging functions
 export const getConversations = (): any[] => {
   const conversationsStr = localStorage.getItem('conversations');
-  return conversationsStr ? JSON.parse(conversationsStr) : [
-    {
-      id: 'conv1',
-      participants: ['user1', getCurrentUser()?.id || 'guest'],
-      listingId: 'listing1',
-      lastMessage: 'Hi, is this still available?',
-      lastMessageAt: new Date(Date.now() - 3600000).toISOString(),
-      unreadCount: 1
-    }
-  ];
+  return conversationsStr ? JSON.parse(conversationsStr) : [];
 };
 
 export const getMessages = (conversationId: string): any[] => {
   const messagesStr = localStorage.getItem(`messages_${conversationId}`);
-  return messagesStr ? JSON.parse(messagesStr) : [
-    {
-      id: 'msg1',
-      conversationId,
-      senderId: 'user1',
-      content: 'Hi, is this still available?',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      read: false
-    },
-    {
-      id: 'msg2',
-      conversationId,
-      senderId: getCurrentUser()?.id || 'guest',
-      content: 'Yes, it is! Would you like to purchase it?',
-      createdAt: new Date(Date.now() - 1800000).toISOString(),
-      read: true
-    }
-  ];
+  return messagesStr ? JSON.parse(messagesStr) : [];
 };
 
 export const sendMessage = (conversationId: string, senderId: string, content: string): void => {
