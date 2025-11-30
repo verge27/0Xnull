@@ -169,7 +169,10 @@ const Browse = () => {
     const matchesSearch = !searchTerm || 
       listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categorySlug || listing.category === categorySlug;
+    // Match both category and subcategory
+    const matchesCategory = !categorySlug || 
+      listing.category === categorySlug || 
+      listing.subcategory === categorySlug;
     const matchesPrice = listing.priceUsd >= priceRange[0] && listing.priceUsd <= priceRange[1];
     const matchesCondition = selectedCondition === 'all' || listing.condition === selectedCondition;
     
