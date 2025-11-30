@@ -61,7 +61,9 @@ const NewListing = () => {
       images: [formData.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'],
       stock: parseInt(formData.stock),
       shippingPriceUsd: parseFloat(formData.shippingPriceUsd),
-      status: 'active' as const
+      status: 'active' as const,
+      condition: 'new' as const,
+      createdAt: new Date().toISOString()
     };
 
     addListing(newListing);

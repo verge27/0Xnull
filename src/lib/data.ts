@@ -29,7 +29,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1627123424574-724758594e93?w=800'],
     stock: 5,
     shippingPriceUsd: 3.00,
-    status: 'active'
+    status: 'active',
+    condition: 'new',
+    createdAt: '2024-11-20T10:00:00Z'
   },
   {
     id: 'listing2',
@@ -41,7 +43,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800'],
     stock: 100,
     shippingPriceUsd: 0,
-    status: 'active'
+    status: 'active',
+    condition: 'digital',
+    createdAt: '2024-11-22T14:30:00Z'
   },
   {
     id: 'listing3',
@@ -53,7 +57,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'],
     stock: 10,
     shippingPriceUsd: 0,
-    status: 'active'
+    status: 'active',
+    condition: 'digital',
+    createdAt: '2024-11-18T09:00:00Z'
   },
   {
     id: 'listing4',
@@ -65,7 +71,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1595225476474-87563907a212?w=800'],
     stock: 3,
     shippingPriceUsd: 7.50,
-    status: 'active'
+    status: 'active',
+    condition: 'new',
+    createdAt: '2024-11-25T16:00:00Z'
   },
   {
     id: 'listing5',
@@ -77,7 +85,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1561998338-13ad7883b20f?w=800'],
     stock: 999,
     shippingPriceUsd: 0,
-    status: 'active'
+    status: 'active',
+    condition: 'digital',
+    createdAt: '2024-11-15T11:00:00Z'
   },
   {
     id: 'listing6',
@@ -89,7 +99,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=800'],
     stock: 8,
     shippingPriceUsd: 3.00,
-    status: 'active'
+    status: 'active',
+    condition: 'new',
+    createdAt: '2024-11-28T08:00:00Z'
   },
   {
     id: 'listing7',
@@ -101,7 +113,9 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800'],
     stock: 5,
     shippingPriceUsd: 0,
-    status: 'active'
+    status: 'active',
+    condition: 'digital',
+    createdAt: '2024-11-19T13:00:00Z'
   },
   {
     id: 'listing8',
@@ -113,7 +127,23 @@ export const DEMO_LISTINGS: Listing[] = [
     images: ['https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=800'],
     stock: 999,
     shippingPriceUsd: 0,
-    status: 'active'
+    status: 'active',
+    condition: 'digital',
+    createdAt: '2024-11-23T12:00:00Z'
+  },
+  {
+    id: 'listing9',
+    sellerId: 'user3',
+    title: 'Vintage Camera Body',
+    description: 'Classic film camera body in excellent working condition. Perfect for photography enthusiasts. Includes original leather case.',
+    priceUsd: 89.00,
+    category: 'cameras',
+    images: ['https://images.unsplash.com/photo-1606986628516-d0152cd2c963?w=800'],
+    stock: 1,
+    shippingPriceUsd: 5.00,
+    status: 'active',
+    condition: 'used',
+    createdAt: '2024-11-10T15:00:00Z'
   }
 ];
 

@@ -6,7 +6,10 @@ import { getListings } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { ALL_CATEGORIES, getCategoryPath, type Category } from '@/lib/categories';
 import {
   Breadcrumb,
@@ -23,8 +26,12 @@ const Browse = () => {
   const listings = getListings();
   const [searchQuery, setSearchQuery] = useState('');
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [selectedCondition, setSelectedCondition] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('relevance');
   
   const categorySlug = searchParams.get('category');
+  const urlSearchQuery = searchParams.get('q');
   const categoryPath = categorySlug ? getCategoryPath(categorySlug) : [];
 
   useEffect(() => {
@@ -64,12 +71,46 @@ const Browse = () => {
     }
   };
 
-  const filteredListings = listings.filter(listing => {
-    const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         listing.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // Apply filters
+  let filteredListings = listings.filter(listing => {
+    const searchTerm = urlSearchQuery || searchQuery;
+    const matchesSearch = !searchTerm || 
+      listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categorySlug || listing.category === categorySlug;
-    return matchesSearch && matchesCategory && listing.status === 'active';
+    const matchesPrice = listing.priceUsd >= priceRange[0] && listing.priceUsd <= priceRange[1];
+    const matchesCondition = selectedCondition === 'all' || listing.condition === selectedCondition;
+    
+    return matchesSearch && matchesCategory && matchesPrice && matchesCondition && listing.status === 'active';
   });
+
+  // Apply sorting
+  const sortedListings = [...filteredListings].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low-high':
+        return a.priceUsd - b.priceUsd;
+      case 'price-high-low':
+        return b.priceUsd - a.priceUsd;
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'relevance':
+      default:
+        return 0;
+    }
+  });
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    const params = new URLSearchParams(searchParams);
+    params.delete('q');
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setPriceRange([0, 500]);
+    setSelectedCondition('all');
+    setSortBy('relevance');
+  };
 
   const renderCategory = (category: Category, level: number = 0) => {
     const isOpen = openCategories.has(category.id);
@@ -124,15 +165,32 @@ const Browse = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Browse Marketplace</h1>
-          <p className="text-muted-foreground mb-4">
-            Discover products and services from privacy-focused sellers
-          </p>
+        <div className="mb-6">
+          {urlSearchQuery ? (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-3xl font-bold">Results for "{urlSearchQuery}"</h1>
+                <Button variant="ghost" size="sm" onClick={clearSearch}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-muted-foreground">
+                {sortedListings.length} {sortedListings.length === 1 ? 'result' : 'results'} found
+              </p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-4xl font-bold mb-2">Browse Marketplace</h1>
+              <p className="text-muted-foreground">
+                Discover products and services from privacy-focused sellers
+              </p>
+            </>
+          )}
+          
           
           {/* Breadcrumb Navigation */}
           {categoryPath.length > 0 && (
-            <Breadcrumb>
+            <Breadcrumb className="mt-4">
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
@@ -189,23 +247,82 @@ const Browse = () => {
                   </button>
                   {ALL_CATEGORIES.map(category => renderCategory(category))}
                 </div>
+
+                {/* Filters */}
+                <div className="mt-6 pt-6 border-t border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-semibold flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4" />
+                      Filters
+                    </h2>
+                    <button
+                      onClick={clearFilters}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="mb-6">
+                    <label className="text-sm font-medium mb-2 block">
+                      Price Range (USD)
+                    </label>
+                    <div className="space-y-2">
+                      <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        max={500}
+                        step={10}
+                        className="mb-2"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>${priceRange[0]}</span>
+                        <span>${priceRange[1]}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Condition */}
+                  <div className="mb-6">
+                    <label className="text-sm font-medium mb-2 block">
+                      Condition
+                    </label>
+                    <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+                      <SelectTrigger className="bg-secondary/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border z-50">
+                        <SelectItem value="all">All Conditions</SelectItem>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="used">Used</SelectItem>
+                        <SelectItem value="digital">Digital</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            {/* Sort & Results Count */}
+            <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+              <div className="text-sm text-muted-foreground">
+                {sortedListings.length} {sortedListings.length === 1 ? 'item' : 'items'}
               </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[200px] bg-secondary/50">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-50">
+                  <SelectItem value="relevance">Sort by Relevance</SelectItem>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {categoryPath.length > 0 && (
@@ -220,12 +337,12 @@ const Browse = () => {
             )}
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredListings.map(listing => (
+              {sortedListings.map(listing => (
                 <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
 
-            {filteredListings.length === 0 && (
+            {sortedListings.length === 0 && (
               <Card>
                 <CardContent className="p-12 text-center">
                   <p className="text-muted-foreground">

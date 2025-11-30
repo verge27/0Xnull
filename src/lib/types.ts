@@ -9,6 +9,8 @@ export interface Listing {
   stock: number;
   shippingPriceUsd: number;
   status: 'active' | 'sold_out' | 'draft';
+  condition: 'new' | 'used' | 'digital';
+  createdAt: string;
   // Legacy fields for backward compatibility
   priceXmr?: number;
   shippingPriceXmr?: number;
