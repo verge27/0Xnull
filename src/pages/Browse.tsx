@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { ListingCard } from '@/components/ListingCard';
+import { MarketInsights } from '@/components/MarketInsights';
+import { CommentsSection } from '@/components/CommentsSection';
 import { getListings } from '@/lib/data';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
 import { Input } from '@/components/ui/input';
@@ -378,6 +380,12 @@ const Browse = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Market Insights & Community Section */}
+            <div className="mt-12">
+              <MarketInsights />
+              <CommentsSection />
+            </div>
           </div>
         </div>
       </div>
