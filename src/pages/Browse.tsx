@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { ListingCard } from '@/components/ListingCard';
 import { MarketInsights } from '@/components/MarketInsights';
 import { CommentsSection } from '@/components/CommentsSection';
+import { SiteAssistant } from '@/components/SiteAssistant';
 import { getListings } from '@/lib/data';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
 import { Input } from '@/components/ui/input';
@@ -389,6 +390,9 @@ const Browse = () => {
           </div>
         </div>
       </div>
+
+      {/* Site Assistant Chatbot */}
+      <SiteAssistant />
     </div>
   );
 };

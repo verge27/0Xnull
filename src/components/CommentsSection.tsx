@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, ThumbsUp, Reply } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Reply, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Comment {
   id: string;
@@ -53,12 +55,65 @@ export const CommentsSection = () => {
   const [comments] = useState<Comment[]>(SEED_COMMENTS);
   const [newComment, setNewComment] = useState('');
   const [showReplyInput, setShowReplyInput] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmitComment = () => {
-    if (!newComment.trim()) return;
-    // In a real app, this would submit to a backend
-    console.log('New comment:', newComment);
-    setNewComment('');
+  const handleSubmitComment = async () => {
+    if (!newComment.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Moderate the comment
+      const { data, error } = await supabase.functions.invoke('moderate-comment', {
+        body: { comment: newComment }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: 'Error',
+          description: data.error,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (!data.approved) {
+        toast({
+          title: 'Comment Not Approved',
+          description: data.reason || 'Your comment did not pass moderation.',
+          variant: 'destructive',
+        });
+        
+        if (data.suggestions) {
+          toast({
+            title: 'Suggestions',
+            description: data.suggestions,
+          });
+        }
+        return;
+      }
+
+      // Comment approved - in a real app, this would save to database
+      console.log('Approved comment:', newComment);
+      toast({
+        title: 'Comment Posted',
+        description: 'Your comment has been published successfully.',
+      });
+      setNewComment('');
+
+    } catch (error) {
+      console.error('Comment submission error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit comment. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,6 +122,10 @@ export const CommentsSection = () => {
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />
           <CardTitle>Community Discussion</CardTitle>
+          <Badge variant="secondary" className="flex items-center gap-1">
+            <Shield className="w-3 h-3" />
+            AI Moderated
+          </Badge>
           <Badge variant="secondary" className="ml-auto">
             {comments.length} comments
           </Badge>
@@ -85,12 +144,15 @@ export const CommentsSection = () => {
             <Button
               variant="outline"
               onClick={() => setNewComment('')}
-              disabled={!newComment.trim()}
+              disabled={!newComment.trim() || isSubmitting}
             >
               Clear
             </Button>
-            <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
-              Post Comment
+            <Button 
+              onClick={handleSubmitComment} 
+              disabled={!newComment.trim() || isSubmitting}
+            >
+              {isSubmitting ? 'Moderating...' : 'Post Comment'}
             </Button>
           </div>
         </div>

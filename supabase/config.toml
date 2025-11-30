@@ -2,3 +2,9 @@ project_id = "qjkojiamexufuxsrupjq"
 
 [functions.update-xmr-price]
 verify_jwt = false
+
+[functions.moderate-comment]
+verify_jwt = false
+
+[functions.site-assistant]
+verify_jwt = false
