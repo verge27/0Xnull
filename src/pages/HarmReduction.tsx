@@ -57,7 +57,7 @@ const HarmReduction = () => {
           <XCircle className="h-4 w-4 text-destructive" />
           <AlertTitle>What We're NOT</AlertTitle>
           <AlertDescription>
-            Tari Market is not a darknet marketplace. We don't facilitate illegal drugs, weapons, stolen data, or any illegal services. 
+            Tari Market is not a darknet marketplace. We don't facilitate illegal drugs, weapons, stolen data or any illegal services. 
             If that's what you're looking for, this isn't the place.
           </AlertDescription>
         </Alert>
@@ -82,7 +82,7 @@ const HarmReduction = () => {
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
                   Whether you're curious about the dark web or already navigate it, understanding safety fundamentals 
-                  can protect you from scams, phishing, and worse. This guide is educational — not an endorsement of illegal activity.
+                  can protect you from scams, phishing and worse. This guide is educational — not an endorsement of illegal activity.
                 </p>
                 <div className="bg-secondary/50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">General Principles</h4>
