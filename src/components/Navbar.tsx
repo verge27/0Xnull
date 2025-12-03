@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +58,13 @@ export const Navbar = () => {
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <ShoppingBag className="w-4 h-4" />
                 <span className="hidden md:inline">Browse</span>
+              </Button>
+            </Link>
+
+            <Link to="/safety">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="hidden md:inline">Safety</span>
               </Button>
             </Link>
 

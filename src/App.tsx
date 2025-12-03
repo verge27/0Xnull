@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import Wishlist from "./pages/Wishlist";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
+import HarmReduction from "./pages/HarmReduction";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/messages/:conversationId" element={<Messages />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/safety" element={<HarmReduction />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
