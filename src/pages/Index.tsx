@@ -3,6 +3,7 @@ import { Shield, Lock, Zap, Package, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const Index = () => {
   const features = [
@@ -29,7 +30,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
       {/* Hero Section */}
@@ -142,6 +143,8 @@ const Index = () => {
           </CardContent>
         </Card>
       </section>
+
+      <Footer />
     </div>
   );
 };

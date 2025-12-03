@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -6,7 +7,7 @@ import { Shield, AlertTriangle, Lock, Eye, ExternalLink, CheckCircle, XCircle } 
 
 const HarmReduction = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <div className="container mx-auto px-4 py-12">
@@ -215,6 +216,8 @@ const HarmReduction = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Footer />
     </div>
   );
 };
