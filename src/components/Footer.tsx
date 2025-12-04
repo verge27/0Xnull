@@ -51,6 +51,11 @@ export const Footer = () => {
                   GrapheneOS
                 </Link>
               </li>
+              <li>
+                <Link to="/cashout" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Cash Out (Fiat)
+                </Link>
+              </li>
             </ul>
           </div>
 
