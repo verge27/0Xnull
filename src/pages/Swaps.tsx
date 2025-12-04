@@ -397,15 +397,15 @@ const Swaps = () => {
             <p className="text-muted-foreground">Exchange cryptocurrencies privately via Trocador aggregator</p>
           </div>
 
-          {/* Cash Out Banner */}
+          {/* Fiat Gateway Banner */}
           <Link to="/cashout" className="block mb-6">
             <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Banknote className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium">Need fiat?</p>
-                    <p className="text-sm text-muted-foreground">Cash out crypto to bank, Visa, or Google Pay</p>
+                    <p className="font-medium">Fiat Gateway</p>
+                    <p className="text-sm text-muted-foreground">Buy crypto or cash out via bank, Visa, or Google Pay</p>
                   </div>
                 </div>
                 <ArrowRightLeft className="h-5 w-5 text-muted-foreground" />
