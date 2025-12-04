@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.chat]
 verify_jwt = false
+
+[functions.simpleswap-api]
+verify_jwt = false

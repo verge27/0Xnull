@@ -28,6 +28,7 @@ import AI from "./pages/AI";
 import VpnResources from "./pages/VpnResources";
 import Philosophy from "./pages/Philosophy";
 import GrapheneOS from "./pages/GrapheneOS";
+import FiatOfframp from "./pages/FiatOfframp";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/vpn-resources" element={<VpnResources />} />
             <Route path="/philosophy" element={<Philosophy />} />
             <Route path="/grapheneos" element={<GrapheneOS />} />
+            <Route path="/cashout" element={<FiatOfframp />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
