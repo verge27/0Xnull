@@ -10,7 +10,7 @@ export const Footer = () => {
           <div>
             <Link to="/" className="flex items-center gap-2 mb-3">
               <Shield className="w-6 h-6 text-primary" />
-              <span className="text-xl font-bold text-gradient">Tari Market</span>
+              <span className="text-xl font-bold text-gradient">0xNull</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               The privacy-first marketplace for grey market goods and discreet purchases.
@@ -68,7 +68,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-border mt-8 pt-6 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Tari Market. All transactions conducted in XMR.</p>
+          <p>© {new Date().getFullYear()} 0xNull Marketplace. All transactions conducted in XMR.</p>
         </div>
       </div>
     </footer>

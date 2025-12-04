@@ -24,7 +24,7 @@ const disclaimerConfig: Record<DisclaimerType, {
   wellness: {
     icon: Info,
     title: "Health & Wellness Notice",
-    defaultMessage: "Tari Market does not make medical claims or provide medical advice. Buyers are responsible for compliance with local regulations. Consult a healthcare provider before use.",
+    defaultMessage: "0xNull Marketplace does not make medical claims or provide medical advice. Buyers are responsible for compliance with local regulations. Consult a healthcare provider before use.",
   },
   legal: {
     icon: Shield,

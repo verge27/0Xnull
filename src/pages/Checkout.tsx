@@ -121,7 +121,7 @@ const Checkout = () => {
                 
                 <div className="rounded-lg overflow-hidden border border-border">
                   <iframe
-                    src={`https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&amount=${order.totalXmr}&address=${seller.xmrAddress}&name=Tari%20Market&description=Order%20${order.id}`}
+                    src={`https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&amount=${order.totalXmr}&address=${seller.xmrAddress}&name=0xNull%20Marketplace&description=Order%20${order.id}`}
                     width="100%"
                     height="600"
                     style={{ border: 'none' }}

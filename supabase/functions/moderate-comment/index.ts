@@ -23,7 +23,7 @@ serve(async (req) => {
     const NANO_GPT_API_KEY = Deno.env.get('NANO_GPT_API_KEY');
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    const systemPrompt = `You are a content moderation AI for the Tari Market, a Monero/XMR marketplace platform. 
+    const systemPrompt = `You are a content moderation AI for 0xNull Marketplace, a Monero/XMR marketplace platform. 
 This marketplace integrates listings from XMRBazaar and features categories including Services, Electronics, Digital Goods, Accessories, Physical Goods, Food & Local, and Sports & Outdoor.
 
 Analyze comments for:

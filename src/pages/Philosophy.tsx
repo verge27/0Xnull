@@ -226,7 +226,7 @@ const Philosophy = () => {
             <h2 className="text-2xl font-bold mb-6">Where We Stand</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Tari Market builds privacy infrastructure. We operate in the cypherpunk tradition: working systems over theoretical arguments. Anonymous VPS hosting, cryptocurrency swaps and disposable phone numbers—tools that function regardless of jurisdiction.
+                0xNull Marketplace builds privacy infrastructure. We operate in the cypherpunk tradition: working systems over theoretical arguments. Anonymous VPS hosting, cryptocurrency swaps and disposable phone numbers—tools that function regardless of jurisdiction.
               </p>
               <p>
                 We don't advocate for any particular political outcome. We observe that these tools exist, that demand for privacy exists, and that we can provide services at the intersection. What you do with privacy is your business. Literally.

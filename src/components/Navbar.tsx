@@ -38,7 +38,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
             <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-            <span className="text-2xl font-bold text-gradient hidden sm:inline">Tari Market</span>
+            <span className="text-2xl font-bold text-gradient hidden sm:inline">0xNull</span>
           </Link>
 
           {/* Search Bar */}
@@ -67,7 +67,7 @@ export const Navbar = () => {
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-primary" />
-                    <span className="text-gradient">Tari Market</span>
+                    <span className="text-gradient">0xNull</span>
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-2 mt-6">

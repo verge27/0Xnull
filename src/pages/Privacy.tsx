@@ -18,7 +18,7 @@ const Privacy = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  Tari Market is built on the principle of privacy-first commerce. We collect the 
+                  0xNull Marketplace is built on the principle of privacy-first commerce. We collect the 
                   absolute minimum data necessary to facilitate transactions.
                 </p>
               </CardContent>

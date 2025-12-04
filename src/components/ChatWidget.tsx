@@ -121,7 +121,7 @@ const ChatWidget = () => {
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
-          <span className="font-semibold">Tari Assistant</span>
+          <span className="font-semibold">0xNull Assistant</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
           <X className="h-4 w-4" />
@@ -133,7 +133,7 @@ const ChatWidget = () => {
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <Bot className="h-12 w-12 mx-auto mb-2 opacity-20" />
-            <p className="text-sm">Ask me anything about Tari Market!</p>
+            <p className="text-sm">Ask me anything about 0xNull Marketplace!</p>
           </div>
         ) : (
           <div className="space-y-4">
