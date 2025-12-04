@@ -38,47 +38,47 @@ serve(async (req) => {
 
       case 'get_min_amount':
         // V3 API - get ranges (min/max) - uses tickerFrom/tickerTo
-        const rangeParams = new URLSearchParams({
-          tickerFrom: params.currency_from,
-          networkFrom: params.network_from || 'mainnet',
-          tickerTo: params.currency_to,
-          networkTo: params.network_to || 'mainnet',
-        });
+        const rangeParams = new URLSearchParams();
+        rangeParams.set('tickerFrom', params.currency_from);
+        if (params.network_from) rangeParams.set('networkFrom', params.network_from);
+        rangeParams.set('tickerTo', params.currency_to);
+        if (params.network_to) rangeParams.set('networkTo', params.network_to);
         url = `${BASE_URL}/v3/ranges?${rangeParams}`;
         break;
 
       case 'get_estimated':
         // V3 API - get estimate - uses tickerFrom/tickerTo
-        const estParams = new URLSearchParams({
-          tickerFrom: params.currency_from,
-          networkFrom: params.network_from || 'mainnet',
-          tickerTo: params.currency_to,
-          networkTo: params.network_to || 'mainnet',
-          amount: params.amount,
-          fixed: 'false',
-        });
+        const estParams = new URLSearchParams();
+        estParams.set('tickerFrom', params.currency_from);
+        if (params.network_from) estParams.set('networkFrom', params.network_from);
+        estParams.set('tickerTo', params.currency_to);
+        if (params.network_to) estParams.set('networkTo', params.network_to);
+        estParams.set('amount', params.amount);
+        estParams.set('fixed', 'false');
         url = `${BASE_URL}/v3/estimates?${estParams}`;
         break;
 
       case 'create_exchange':
         // V3 API - create exchange
         url = `${BASE_URL}/v3/exchanges`;
+        const exchangeBody: Record<string, any> = {
+          tickerFrom: params.currency_from,
+          tickerTo: params.currency_to,
+          amount: params.amount,
+          addressTo: params.address_to,
+          userRefundAddress: params.user_refund_address,
+          fixed: false,
+        };
+        if (params.network_from) exchangeBody.networkFrom = params.network_from;
+        if (params.network_to) exchangeBody.networkTo = params.network_to;
+        
         options = {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'x-api-key': SIMPLESWAP_API_KEY!,
           },
-          body: JSON.stringify({
-            tickerFrom: params.currency_from,
-            networkFrom: params.network_from || 'mainnet',
-            tickerTo: params.currency_to,
-            networkTo: params.network_to || 'mainnet',
-            amount: params.amount,
-            addressTo: params.address_to,
-            userRefundAddress: params.user_refund_address,
-            fixed: false,
-          }),
+          body: JSON.stringify(exchangeBody),
         };
         break;
 

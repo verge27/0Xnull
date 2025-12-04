@@ -24,9 +24,9 @@ interface ExchangeResult {
 }
 
 const FIAT_CURRENCIES = [
-  { ticker: 'usd', label: 'USD' },
-  { ticker: 'eur', label: 'EUR' },
-  { ticker: 'gbp', label: 'GBP' },
+  { ticker: 'usd', label: 'USD', network: '' },
+  { ticker: 'eur', label: 'EUR', network: '' },
+  { ticker: 'gbp', label: 'GBP', network: '' },
 ];
 
 const POPULAR_CRYPTO = [
@@ -85,10 +85,12 @@ const FiatOfframp = () => {
   const getCurrentPair = () => {
     if (mode === 'sell') {
       const { ticker, network } = getSelectedCryptoDetails(selectedCrypto);
-      return { fromTicker: ticker, fromNetwork: network, toTicker: toFiat, toNetwork: 'mainnet' };
+      const fiat = FIAT_CURRENCIES.find(f => f.ticker === toFiat);
+      return { fromTicker: ticker, fromNetwork: network, toTicker: toFiat, toNetwork: fiat?.network || '' };
     } else {
       const { ticker, network } = getSelectedCryptoDetails(toCrypto);
-      return { fromTicker: fromFiat, fromNetwork: 'mainnet', toTicker: ticker, toNetwork: network };
+      const fiat = FIAT_CURRENCIES.find(f => f.ticker === fromFiat);
+      return { fromTicker: fromFiat, fromNetwork: fiat?.network || '', toTicker: ticker, toNetwork: network };
     }
   };
 
