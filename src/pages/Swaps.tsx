@@ -92,7 +92,12 @@ const Swaps = () => {
   }, []);
 
   const fetchCoins = async () => {
-    const { data, error } = await supabase.from('coins').select('*').order('ticker');
+    // Fetch all coins (Supabase default limit is 1000, we need more)
+    const { data, error } = await supabase
+      .from('coins')
+      .select('*')
+      .order('ticker')
+      .limit(5000);
     if (error) {
       console.error('Error fetching coins:', error);
       toast({ title: 'Error', description: 'Failed to load coins', variant: 'destructive' });
