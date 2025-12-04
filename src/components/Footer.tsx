@@ -46,6 +46,11 @@ export const Footer = () => {
                   VPN Guide
                 </Link>
               </li>
+              <li>
+                <Link to="/grapheneos" className="text-muted-foreground hover:text-foreground transition-colors">
+                  GrapheneOS
+                </Link>
+              </li>
             </ul>
           </div>
 
