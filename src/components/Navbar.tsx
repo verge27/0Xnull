@@ -61,6 +61,24 @@ export const Navbar = () => {
               </Button>
             </Link>
 
+            <Link to="/swaps">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">Swaps</span>
+              </Button>
+            </Link>
+
+            <Link to="/vps">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">VPS</span>
+              </Button>
+            </Link>
+
+            <Link to="/ai">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">AI</span>
+              </Button>
+            </Link>
+
             <Link to="/safety">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <AlertTriangle className="w-4 h-4" />

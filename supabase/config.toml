@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.site-assistant]
 verify_jwt = false
+
+[functions.trocador-new-rate]
+verify_jwt = false
+
+[functions.trocador-new-trade]
+verify_jwt = false
+
+[functions.sync-trocador-coins]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
