@@ -59,8 +59,8 @@ export const Navbar = () => {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="sm:hidden">
-                  <Menu className="w-5 h-5" />
+                <Button variant="secondary" size="icon" className="sm:hidden border border-primary/50 animate-pulse">
+                  <Menu className="w-5 h-5 text-primary" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-72">
