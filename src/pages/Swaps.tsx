@@ -11,11 +11,21 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Priority coins for sorting - XMR first, then major liquid coins
-const PRIORITY_COINS = ['XMR', 'BTC', 'ETH', 'USDT', 'USDC', 'LTC', 'SOL', 'DOGE', 'TRX', 'BNB'];
+// Popular coins with preferred networks - XMR FIRST
+const POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
+  { ticker: 'XMR', network: 'Mainnet', label: 'Monero' },
+  { ticker: 'BTC', network: 'Mainnet', label: 'Bitcoin' },
+  { ticker: 'ETH', network: 'Mainnet', label: 'Ethereum' },
+  { ticker: 'USDT', network: 'ERC20', label: 'Tether' },
+  { ticker: 'LTC', network: 'Mainnet', label: 'Litecoin' },
+  { ticker: 'DOGE', network: 'Mainnet', label: 'Dogecoin' },
+  { ticker: 'BNB', network: 'BEP2', label: 'Binance Coin' },
+  { ticker: 'SOL', network: 'Mainnet', label: 'Solana' },
+  { ticker: 'USDC', network: 'ERC20', label: 'USD Coin' },
+];
+
 const PRIVACY_COINS = ['XMR', 'ZEC', 'DASH'];
 
-const isPriorityCoin = (ticker: string) => PRIORITY_COINS.includes(ticker.toUpperCase());
 const isPrivacyCoin = (ticker: string) => PRIVACY_COINS.includes(ticker.toUpperCase());
 
 interface Coin {
@@ -112,27 +122,30 @@ const Swaps = () => {
         unique.set(coin.ticker, coin);
       }
     });
-    
-    // Sort: Priority coins first (by their order in PRIORITY_COINS), then alphabetical
-    return Array.from(unique.values()).sort((a, b) => {
-      const aPriority = PRIORITY_COINS.indexOf(a.ticker.toUpperCase());
-      const bPriority = PRIORITY_COINS.indexOf(b.ticker.toUpperCase());
-      
-      // Both are priority coins - sort by priority order
-      if (aPriority !== -1 && bPriority !== -1) {
-        return aPriority - bPriority;
-      }
-      // Only a is priority - a comes first
-      if (aPriority !== -1) return -1;
-      // Only b is priority - b comes first
-      if (bPriority !== -1) return 1;
-      // Neither is priority - alphabetical
-      return a.ticker.localeCompare(b.ticker);
-    });
+    return Array.from(unique.values()).sort((a, b) => a.ticker.localeCompare(b.ticker));
   };
 
-  const getPriorityCoins = () => getUniqueCoins().filter(c => isPriorityCoin(c.ticker));
-  const getOtherCoins = () => getUniqueCoins().filter(c => !isPriorityCoin(c.ticker));
+  // Get popular coins with their preferred networks
+  const getPriorityCoins = () => {
+    return POPULAR_COINS.map(pc => {
+      // Find the exact ticker+network match first
+      let coin = coins.find(c => 
+        c.ticker.toUpperCase() === pc.ticker.toUpperCase() && 
+        c.network.toUpperCase() === pc.network.toUpperCase()
+      );
+      // Fallback to just ticker if exact match not found
+      if (!coin) {
+        coin = coins.find(c => c.ticker.toUpperCase() === pc.ticker.toUpperCase());
+      }
+      return coin ? { ...coin, preferredLabel: pc.label } : null;
+    }).filter((c): c is Coin & { preferredLabel: string } => c !== null);
+  };
+
+  // Get coins that are not in the popular list
+  const getOtherCoins = () => {
+    const popularTickers = POPULAR_COINS.map(p => p.ticker.toUpperCase());
+    return getUniqueCoins().filter(c => !popularTickers.includes(c.ticker.toUpperCase()));
+  };
 
   const getNetworksForCoin = (ticker: string) => {
     return coins.filter(c => c.ticker === ticker);
@@ -145,7 +158,13 @@ const Swaps = () => {
   const handleFromCoinChange = (ticker: string) => {
     setFromCoin(ticker);
     const networks = getNetworksForCoin(ticker);
-    if (networks.length === 1) {
+    
+    // Check if this is a popular coin with a preferred network
+    const popularCoin = POPULAR_COINS.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
+    if (popularCoin) {
+      const preferredNetwork = networks.find(n => n.network.toUpperCase() === popularCoin.network.toUpperCase());
+      setFromNetwork(preferredNetwork?.network || (networks.length === 1 ? networks[0].network : ''));
+    } else if (networks.length === 1) {
       setFromNetwork(networks[0].network);
     } else {
       setFromNetwork('');
@@ -157,7 +176,13 @@ const Swaps = () => {
   const handleToCoinChange = (ticker: string) => {
     setToCoin(ticker);
     const networks = getNetworksForCoin(ticker);
-    if (networks.length === 1) {
+    
+    // Check if this is a popular coin with a preferred network
+    const popularCoin = POPULAR_COINS.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
+    if (popularCoin) {
+      const preferredNetwork = networks.find(n => n.network.toUpperCase() === popularCoin.network.toUpperCase());
+      setToNetwork(preferredNetwork?.network || (networks.length === 1 ? networks[0].network : ''));
+    } else if (networks.length === 1) {
       setToNetwork(networks[0].network);
     } else {
       setToNetwork('');
@@ -376,15 +401,15 @@ const Swaps = () => {
                               <Star className="h-3 w-3" /> Popular
                             </SelectLabel>
                             {getPriorityCoins().map((coin) => (
-                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                              <SelectItem key={`${coin.ticker}-${coin.network}`} value={coin.ticker}>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-medium">{coin.ticker}</span>
-                                  <span className="text-muted-foreground text-xs">{coin.name}</span>
-                                  {isPrivacyCoin(coin.ticker) && (
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
-                                  )}
                                   {coin.ticker === 'XMR' && (
                                     <Zap className="h-3 w-3 text-primary" />
+                                  )}
+                                  <span className="font-medium">{coin.ticker}</span>
+                                  <span className="text-muted-foreground text-xs">({coin.network})</span>
+                                  {isPrivacyCoin(coin.ticker) && (
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
                                   )}
                                 </div>
                               </SelectItem>
@@ -440,15 +465,15 @@ const Swaps = () => {
                               <Star className="h-3 w-3" /> Popular
                             </SelectLabel>
                             {getPriorityCoins().map((coin) => (
-                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                              <SelectItem key={`${coin.ticker}-${coin.network}`} value={coin.ticker}>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-medium">{coin.ticker}</span>
-                                  <span className="text-muted-foreground text-xs">{coin.name}</span>
-                                  {isPrivacyCoin(coin.ticker) && (
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
-                                  )}
                                   {coin.ticker === 'XMR' && (
                                     <Zap className="h-3 w-3 text-primary" />
+                                  )}
+                                  <span className="font-medium">{coin.ticker}</span>
+                                  <span className="text-muted-foreground text-xs">({coin.network})</span>
+                                  {isPrivacyCoin(coin.ticker) && (
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
                                   )}
                                 </div>
                               </SelectItem>
