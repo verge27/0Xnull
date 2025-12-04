@@ -140,7 +140,9 @@ const FiatOfframp = () => {
       });
       if (error) throw error;
       
-      if (data?.result) {
+      if (data?.result?.estimatedAmount) {
+        setEstimatedReceive(data.result.estimatedAmount);
+      } else if (data?.result && typeof data.result === 'string') {
         setEstimatedReceive(data.result);
       } else if (typeof data === 'string' || typeof data === 'number') {
         setEstimatedReceive(String(data));
