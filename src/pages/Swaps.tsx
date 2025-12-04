@@ -396,6 +396,7 @@ const Swaps = () => {
                         otherCoins={getOtherCoins()}
                         placeholder="Select coin..."
                         isPrivacyCoin={isPrivacyCoin}
+                        selectedNetwork={fromNetwork}
                       />
                       {fromCoin && getNetworksForCoin(fromCoin).length > 1 && (
                         <Select value={fromNetwork} onValueChange={setFromNetwork}>
@@ -456,6 +457,7 @@ const Swaps = () => {
                         otherCoins={getOtherCoins()}
                         placeholder="Select coin..."
                         isPrivacyCoin={isPrivacyCoin}
+                        selectedNetwork={toNetwork}
                       />
                       {toCoin && getNetworksForCoin(toCoin).length > 1 && (
                         <Select value={toNetwork} onValueChange={setToNetwork}>
