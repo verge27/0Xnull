@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, X, RefreshCw, Server, Smartphone, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
 import { NavLink } from './NavLink';
 import { useState, FormEvent, useEffect } from 'react';
@@ -54,6 +55,56 @@ export const Navbar = () => {
           </form>
 
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="sm:hidden">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <Shield className="w-6 h-6 text-primary" />
+                    <span className="text-gradient">Tari Market</span>
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 mt-6">
+                  <Link to="/browse" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <ShoppingBag className="w-5 h-5 text-primary" />
+                    <span>Browse</span>
+                  </Link>
+                  <Link to="/swaps" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <RefreshCw className="w-5 h-5 text-primary" />
+                    <span>Swaps</span>
+                  </Link>
+                  <Link to="/vps" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Server className="w-5 h-5 text-primary" />
+                    <span>VPS</span>
+                  </Link>
+                  <Link to="/phone" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Smartphone className="w-5 h-5 text-primary" />
+                    <span>eSIM</span>
+                  </Link>
+                  <Link to="/ai" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Bot className="w-5 h-5 text-primary" />
+                    <span>AI</span>
+                  </Link>
+                  <Link to="/safety" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <AlertTriangle className="w-5 h-5 text-primary" />
+                    <span>Safety</span>
+                  </Link>
+                  {user && (
+                    <Link to="/sell" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                      <Package className="w-5 h-5 text-primary" />
+                      <span>Sell</span>
+                    </Link>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+
+            {/* Desktop Navigation */}
             <Link to="/browse">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <ShoppingBag className="w-4 h-4" />
