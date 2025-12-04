@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CoinSelector } from '@/components/CoinSelector';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
@@ -89,6 +90,7 @@ interface SwapHistoryItem {
 
 const Swaps = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [fromCoin, setFromCoin] = useState('');
@@ -363,6 +365,7 @@ const Swaps = () => {
         provider_address: data.address,
         provider_memo: data.address_memo,
         status: data.status,
+        user_id: user?.id || null,
       });
 
       // Save trade_id to localStorage for history
