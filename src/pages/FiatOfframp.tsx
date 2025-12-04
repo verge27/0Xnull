@@ -30,15 +30,15 @@ const FIAT_CURRENCIES = [
 ];
 
 const POPULAR_CRYPTO = [
-  { ticker: 'usdt', network: 'erc20', label: 'USDT (ERC20)' },
-  { ticker: 'usdt', network: 'trc20', label: 'USDT (TRC20)' },
-  { ticker: 'btc', network: 'mainnet', label: 'BTC' },
-  { ticker: 'eth', network: 'mainnet', label: 'ETH' },
-  { ticker: 'ltc', network: 'mainnet', label: 'LTC' },
-  { ticker: 'usdc', network: 'erc20', label: 'USDC (ERC20)' },
-  { ticker: 'sol', network: 'mainnet', label: 'SOL' },
+  { ticker: 'usdt', network: 'eth', label: 'USDT (ETH)' },
+  { ticker: 'usdt', network: 'tron', label: 'USDT (TRC20)' },
+  { ticker: 'btc', network: 'btc', label: 'BTC' },
+  { ticker: 'eth', network: 'eth', label: 'ETH' },
+  { ticker: 'ltc', network: 'ltc', label: 'LTC' },
+  { ticker: 'usdc', network: 'eth', label: 'USDC (ETH)' },
+  { ticker: 'sol', network: 'solana', label: 'SOL' },
   { ticker: 'bnb', network: 'bsc', label: 'BNB (BSC)' },
-  { ticker: 'xmr', network: 'mainnet', label: 'XMR' },
+  { ticker: 'xmr', network: 'xmr', label: 'XMR' },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -56,12 +56,12 @@ const FiatOfframp = () => {
   const [mode, setMode] = useState<'sell' | 'buy'>('sell');
   
   // Sell mode: crypto → fiat
-  const [selectedCrypto, setSelectedCrypto] = useState('usdt-erc20');
+  const [selectedCrypto, setSelectedCrypto] = useState('usdt-eth');
   const [toFiat, setToFiat] = useState('usd');
   
   // Buy mode: fiat → crypto
   const [fromFiat, setFromFiat] = useState('usd');
-  const [toCrypto, setToCrypto] = useState('btc-mainnet');
+  const [toCrypto, setToCrypto] = useState('btc-btc');
   
   const [amount, setAmount] = useState('');
   const [receiveAddress, setReceiveAddress] = useState('');
