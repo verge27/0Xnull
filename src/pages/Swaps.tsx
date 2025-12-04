@@ -423,6 +423,28 @@ const Swaps = () => {
                     />
                   </div>
 
+                  {/* Swap Button */}
+                  <div className="flex justify-center py-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full h-10 w-10 p-0 border border-primary/30 hover:border-primary hover:bg-primary/10"
+                      onClick={() => {
+                        const tempCoin = fromCoin;
+                        const tempNetwork = fromNetwork;
+                        setFromCoin(toCoin);
+                        setFromNetwork(toNetwork);
+                        setToCoin(tempCoin);
+                        setToNetwork(tempNetwork);
+                        setRates([]);
+                        setSelectedProvider(null);
+                      }}
+                      disabled={!fromCoin || !toCoin}
+                    >
+                      <ArrowRightLeft className="h-4 w-4 rotate-90 text-primary" />
+                    </Button>
+                  </div>
+
                   {/* To */}
                   <div className="space-y-2">
                     <Label>To</Label>
