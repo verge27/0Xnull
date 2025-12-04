@@ -27,16 +27,12 @@ const FIAT_CURRENCIES = [
   { ticker: 'gbp', label: 'GBP', network: 'gbp' },
 ];
 
-const POPULAR_CRYPTO = [
-  { ticker: 'usdt', network: 'eth', label: 'USDT (ETH)' },
+// SimpleSwap only supports USDT for fiat off-ramps
+const SUPPORTED_CRYPTO = [
+  { ticker: 'usdt', network: 'eth', label: 'USDT (ERC20)' },
   { ticker: 'usdt', network: 'tron', label: 'USDT (TRC20)' },
-  { ticker: 'btc', network: 'btc', label: 'BTC' },
-  { ticker: 'eth', network: 'eth', label: 'ETH' },
-  { ticker: 'ltc', network: 'ltc', label: 'LTC' },
-  { ticker: 'usdc', network: 'eth', label: 'USDC (ETH)' },
-  { ticker: 'sol', network: 'solana', label: 'SOL' },
-  { ticker: 'bnb', network: 'bsc', label: 'BNB (BSC)' },
-  { ticker: 'xmr', network: 'xmr', label: 'XMR' },
+  { ticker: 'usdt', network: 'bsc', label: 'USDT (BEP20)' },
+  { ticker: 'usdt', network: 'polygon', label: 'USDT (Polygon)' },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -334,7 +330,7 @@ const FiatOfframp = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {POPULAR_CRYPTO.map(c => (
+                        {SUPPORTED_CRYPTO.map(c => (
                           <SelectItem key={`${c.ticker}-${c.network}`} value={`${c.ticker}-${c.network}`}>
                             {c.label}
                           </SelectItem>
