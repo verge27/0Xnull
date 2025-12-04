@@ -41,6 +41,11 @@ export const Footer = () => {
                   Philosophy
                 </Link>
               </li>
+              <li>
+                <Link to="/vpn-resources" className="text-muted-foreground hover:text-foreground transition-colors">
+                  VPN Guide
+                </Link>
+              </li>
             </ul>
           </div>
 
