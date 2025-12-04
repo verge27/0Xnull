@@ -440,14 +440,24 @@ const Swaps = () => {
                       <>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>Min: {getSelectedFromCoin()?.minimum} • Max: {getSelectedFromCoin()?.maximum} {fromCoin.toUpperCase()}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-5 px-2 text-xs text-primary hover:text-primary"
-                            onClick={() => setAmount(String(getSelectedFromCoin()?.minimum))}
-                          >
-                            Use Min
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-5 px-2 text-xs text-primary hover:text-primary"
+                              onClick={() => setAmount(String(getSelectedFromCoin()?.minimum))}
+                            >
+                              Min
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-5 px-2 text-xs text-primary hover:text-primary"
+                              onClick={() => setAmount(String(getSelectedFromCoin()?.maximum))}
+                            >
+                              Max
+                            </Button>
+                          </div>
                         </div>
                         {amount && parseFloat(amount) < getSelectedFromCoin()!.minimum && (
                           <p className="text-xs text-destructive">
