@@ -111,6 +111,7 @@ export type Database = {
           to_network: string
           trade_id: string
           user_email: string | null
+          user_id: string | null
         }
         Insert: {
           amount: string
@@ -127,6 +128,7 @@ export type Database = {
           to_network: string
           trade_id: string
           user_email?: string | null
+          user_id?: string | null
         }
         Update: {
           amount?: string
@@ -143,6 +145,7 @@ export type Database = {
           to_network?: string
           trade_id?: string
           user_email?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
