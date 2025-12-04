@@ -53,7 +53,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/cashout" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Cash Out (Fiat)
+                  Fiat Gateway
                 </Link>
               </li>
             </ul>
