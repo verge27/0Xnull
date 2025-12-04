@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      coins: {
+        Row: {
+          id: string
+          image: string | null
+          maximum: number
+          memo: boolean
+          minimum: number
+          name: string
+          network: string
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          image?: string | null
+          maximum: number
+          memo?: boolean
+          minimum: number
+          name: string
+          network: string
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          image?: string | null
+          maximum?: number
+          memo?: boolean
+          minimum?: number
+          name?: string
+          network?: string
+          ticker?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exchange_rates: {
         Row: {
           currency_pair: string
@@ -56,6 +92,57 @@ export type Database = {
           id?: string
           updated_at?: string
           xmr_address?: string | null
+        }
+        Relationships: []
+      }
+      swap_history: {
+        Row: {
+          amount: string
+          created_at: string
+          from_coin: string
+          from_network: string
+          id: string
+          provider: string
+          provider_address: string
+          provider_memo: string | null
+          receive_address: string
+          status: string | null
+          to_coin: string
+          to_network: string
+          trade_id: string
+          user_email: string | null
+        }
+        Insert: {
+          amount: string
+          created_at?: string
+          from_coin: string
+          from_network: string
+          id?: string
+          provider: string
+          provider_address: string
+          provider_memo?: string | null
+          receive_address: string
+          status?: string | null
+          to_coin: string
+          to_network: string
+          trade_id: string
+          user_email?: string | null
+        }
+        Update: {
+          amount?: string
+          created_at?: string
+          from_coin?: string
+          from_network?: string
+          id?: string
+          provider?: string
+          provider_address?: string
+          provider_memo?: string | null
+          receive_address?: string
+          status?: string | null
+          to_coin?: string
+          to_network?: string
+          trade_id?: string
+          user_email?: string | null
         }
         Relationships: []
       }
