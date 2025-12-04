@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, Star, Zap } from 'lucide-react';
+import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CoinSelector } from '@/components/CoinSelector';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -416,40 +417,14 @@ const Swaps = () => {
                   <div className="space-y-2">
                     <Label>From</Label>
                     <div className="flex gap-2">
-                      <Select value={fromCoin} onValueChange={handleFromCoinChange}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select coin" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-80">
-                          <SelectGroup>
-                            <SelectLabel className="flex items-center gap-1 text-primary">
-                              <Star className="h-3 w-3" /> Popular
-                            </SelectLabel>
-                            {getPriorityCoins().map((coin) => (
-                              <SelectItem key={`${coin.ticker}-${coin.network}`} value={coin.ticker}>
-                                <div className="flex items-center gap-2">
-                                  {coin.ticker === 'XMR' && (
-                                    <Zap className="h-3 w-3 text-primary" />
-                                  )}
-                                  <span className="font-medium">{coin.ticker}</span>
-                                  <span className="text-muted-foreground text-xs">({coin.network})</span>
-                                  {isPrivacyCoin(coin.ticker) && (
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel className="text-muted-foreground">Other Coins</SelectLabel>
-                            {getOtherCoins().map((coin) => (
-                              <SelectItem key={coin.ticker} value={coin.ticker}>
-                                <span>{coin.ticker} - {coin.name}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                      <CoinSelector
+                        value={fromCoin}
+                        onValueChange={handleFromCoinChange}
+                        priorityCoins={getPriorityCoins()}
+                        otherCoins={getOtherCoins()}
+                        placeholder="Select coin..."
+                        isPrivacyCoin={isPrivacyCoin}
+                      />
                       {fromCoin && getNetworksForCoin(fromCoin).length > 1 && (
                         <Select value={fromNetwork} onValueChange={setFromNetwork}>
                           <SelectTrigger className="w-32">
@@ -480,40 +455,14 @@ const Swaps = () => {
                   <div className="space-y-2">
                     <Label>To</Label>
                     <div className="flex gap-2">
-                      <Select value={toCoin} onValueChange={handleToCoinChange}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select coin" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-80">
-                          <SelectGroup>
-                            <SelectLabel className="flex items-center gap-1 text-primary">
-                              <Star className="h-3 w-3" /> Popular
-                            </SelectLabel>
-                            {getPriorityCoins().map((coin) => (
-                              <SelectItem key={`${coin.ticker}-${coin.network}`} value={coin.ticker}>
-                                <div className="flex items-center gap-2">
-                                  {coin.ticker === 'XMR' && (
-                                    <Zap className="h-3 w-3 text-primary" />
-                                  )}
-                                  <span className="font-medium">{coin.ticker}</span>
-                                  <span className="text-muted-foreground text-xs">({coin.network})</span>
-                                  {isPrivacyCoin(coin.ticker) && (
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel className="text-muted-foreground">Other Coins</SelectLabel>
-                            {getOtherCoins().map((coin) => (
-                              <SelectItem key={coin.ticker} value={coin.ticker}>
-                                <span>{coin.ticker} - {coin.name}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                      <CoinSelector
+                        value={toCoin}
+                        onValueChange={handleToCoinChange}
+                        priorityCoins={getPriorityCoins()}
+                        otherCoins={getOtherCoins()}
+                        placeholder="Select coin..."
+                        isPrivacyCoin={isPrivacyCoin}
+                      />
                       {toCoin && getNetworksForCoin(toCoin).length > 1 && (
                         <Select value={toNetwork} onValueChange={setToNetwork}>
                           <SelectTrigger className="w-32">
