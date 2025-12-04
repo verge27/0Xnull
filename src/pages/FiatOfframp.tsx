@@ -24,9 +24,9 @@ interface ExchangeResult {
 }
 
 const FIAT_CURRENCIES = [
-  { ticker: 'usd', label: 'USD', network: '' },
-  { ticker: 'eur', label: 'EUR', network: '' },
-  { ticker: 'gbp', label: 'GBP', network: '' },
+  { ticker: 'usd', label: 'USD', network: 'usd' },
+  { ticker: 'eur', label: 'EUR', network: 'eur' },
+  { ticker: 'gbp', label: 'GBP', network: 'gbp' },
 ];
 
 const POPULAR_CRYPTO = [
