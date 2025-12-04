@@ -28,6 +28,7 @@ interface CoinSelectorProps {
   otherCoins: Coin[];
   placeholder?: string;
   isPrivacyCoin: (ticker: string) => boolean;
+  selectedNetwork?: string;
 }
 
 export function CoinSelector({
@@ -37,12 +38,15 @@ export function CoinSelector({
   otherCoins,
   placeholder = "Select coin...",
   isPrivacyCoin,
+  selectedNetwork,
 }: CoinSelectorProps) {
   const [open, setOpen] = useState(false);
 
-  const selectedCoin = [...priorityCoins, ...otherCoins].find(
-    (coin) => coin.ticker === value
-  );
+  // Find the coin matching both ticker and network (if network provided)
+  const allCoins = [...priorityCoins, ...otherCoins];
+  const selectedCoin = selectedNetwork 
+    ? allCoins.find((coin) => coin.ticker === value && coin.network === selectedNetwork) || allCoins.find((coin) => coin.ticker === value)
+    : allCoins.find((coin) => coin.ticker === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
