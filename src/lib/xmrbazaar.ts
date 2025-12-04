@@ -1,5 +1,5 @@
 /**
- * Curated XMRBazaar Listings for Tari Market
+ * Curated XMRBazaar Listings for 0xNull Marketplace
  * 
  * These are referral listings - clicking "Buy" opens XMRBazaar.
  * Scraped from search results and manually vetted.

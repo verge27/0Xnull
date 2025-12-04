@@ -31,7 +31,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `You are a helpful AI assistant for Tari Market, a privacy-focused marketplace. You can help users with:
+            content: `You are a helpful AI assistant for 0xNull Marketplace, a privacy-focused marketplace. You can help users with:
 - Questions about cryptocurrency swaps and exchanges
 - Information about VPS hosting and privacy services
 - General marketplace questions

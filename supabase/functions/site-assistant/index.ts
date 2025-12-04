@@ -6,10 +6,10 @@ const corsHeaders = {
 };
 
 const SITE_KNOWLEDGE = `
-You are a helpful assistant for the Tari Market, a Monero (XMR) marketplace platform.
+You are a helpful assistant for 0xNull Marketplace, a Monero (XMR) marketplace platform.
 
 PROJECT OVERVIEW:
-Tari Market is a React/TypeScript web application built with Vite, Tailwind CSS, and Lovable Cloud (Supabase backend).
+0xNull Marketplace is a React/TypeScript web application built with Vite, Tailwind CSS, and Lovable Cloud (Supabase backend).
 It serves as a curated marketplace featuring both demo listings and real XMRBazaar referral listings.
 
 COMPLETE SITE STRUCTURE:

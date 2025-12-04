@@ -18,7 +18,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  By accessing or using Tari Market, you agree to be bound by these Terms of Service. 
+                  By accessing or using 0xNull Marketplace, you agree to be bound by these Terms of Service. 
                   If you do not agree, do not use this platform.
                 </p>
               </CardContent>
@@ -30,7 +30,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  Tari Market is a privacy-focused marketplace for grey market goods, research chemicals, 
+                  0xNull Marketplace is a privacy-focused marketplace for grey market goods, research chemicals, 
                   and items users prefer to purchase discreetly. This platform does NOT facilitate:
                 </p>
                 <ul className="list-disc list-inside space-y-1">
@@ -77,7 +77,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  Tari Market acts as a facilitator between buyers and sellers. We are not responsible 
+                  0xNull Marketplace acts as a facilitator between buyers and sellers. We are not responsible 
                   for the quality, legality, or delivery of items. Use this platform at your own risk.
                 </p>
               </CardContent>

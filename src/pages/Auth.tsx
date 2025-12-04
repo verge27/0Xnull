@@ -92,7 +92,7 @@ const Auth = () => {
       <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-80px)]">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome to Tari Market</CardTitle>
+            <CardTitle>Welcome to 0xNull Marketplace</CardTitle>
             <CardDescription>Sign in to start selling or manage your orders</CardDescription>
           </CardHeader>
           <CardContent>

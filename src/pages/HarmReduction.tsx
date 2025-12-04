@@ -14,7 +14,7 @@ const HarmReduction = () => {
         {/* Hero */}
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            What is <span className="text-gradient">Tari Market</span>?
+            What is <span className="text-gradient">0xNull Marketplace</span>?
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             A privacy-focused marketplace for grey market goods, embarrassing purchases, and items you'd rather keep private — <strong>not</strong> for illegal activity.
@@ -26,7 +26,7 @@ const HarmReduction = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
-              What Tari Market Is For
+              What 0xNull Marketplace Is For
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -57,7 +57,7 @@ const HarmReduction = () => {
           <XCircle className="h-4 w-4 text-destructive" />
           <AlertTitle>What We're NOT</AlertTitle>
           <AlertDescription>
-            Tari Market is not a darknet marketplace. We don't facilitate illegal drugs, weapons, stolen data or any illegal services. 
+            0xNull Marketplace is not a darknet marketplace. We don't facilitate illegal drugs, weapons, stolen data or any illegal services. 
             If that's what you're looking for, this isn't the place.
           </AlertDescription>
         </Alert>
