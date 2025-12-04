@@ -541,7 +541,16 @@ const Swaps = () => {
                   <Button 
                     className="w-full" 
                     onClick={fetchRates}
-                    disabled={loadingRates || !fromCoin || !toCoin || !amount}
+                    disabled={
+                      loadingRates || 
+                      !fromCoin || 
+                      !toCoin || 
+                      !amount ||
+                      (getSelectedFromCoin() && (
+                        parseFloat(amount) < getSelectedFromCoin()!.minimum ||
+                        parseFloat(amount) > getSelectedFromCoin()!.maximum
+                      ))
+                    }
                   >
                     {loadingRates ? (
                       <>
