@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, History, Clock } from 'lucide-react';
+import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, History, Clock, Trash2 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -713,12 +713,27 @@ const Swaps = () => {
           {/* Swap History */}
           {swapHistory.length > 0 && (
             <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Swap History
-                </CardTitle>
-                <CardDescription>Your recent swaps on this device</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Swap History
+                  </CardTitle>
+                  <CardDescription className="mt-1">Your recent swaps on this device</CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={() => {
+                    localStorage.removeItem('swap_trade_ids');
+                    setSwapHistory([]);
+                    toast({ title: 'History cleared', description: 'Your swap history has been removed' });
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
               </CardHeader>
               <CardContent>
                 {loadingHistory ? (
