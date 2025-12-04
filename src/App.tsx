@@ -26,6 +26,7 @@ import VPS from "./pages/VPS";
 import Phone from "./pages/Phone";
 import AI from "./pages/AI";
 import VpnResources from "./pages/VpnResources";
+import Philosophy from "./pages/Philosophy";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/phone" element={<Phone />} />
             <Route path="/ai" element={<AI />} />
             <Route path="/vpn-resources" element={<VpnResources />} />
+            <Route path="/philosophy" element={<Philosophy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
