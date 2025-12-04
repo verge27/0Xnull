@@ -11,6 +11,17 @@ import { CoinSelector } from '@/components/CoinSelector';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 // Popular coins with preferred networks - XMR FIRST
 // Using exact ticker/network values from Trocador API
@@ -721,19 +732,38 @@ const Swaps = () => {
                   </CardTitle>
                   <CardDescription className="mt-1">Your recent swaps on this device</CardDescription>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive"
-                  onClick={() => {
-                    localStorage.removeItem('swap_trade_ids');
-                    setSwapHistory([]);
-                    toast({ title: 'History cleared', description: 'Your swap history has been removed' });
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Clear
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Clear swap history?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove all swap history from this device. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          localStorage.removeItem('swap_trade_ids');
+                          setSwapHistory([]);
+                          toast({ title: 'History cleared', description: 'Your swap history has been removed' });
+                        }}
+                      >
+                        Clear History
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardHeader>
               <CardContent>
                 {loadingHistory ? (
