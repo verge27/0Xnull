@@ -431,11 +431,27 @@ const Swaps = () => {
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
+                      className={fromCoin && fromNetwork && amount && getSelectedFromCoin() && (
+                        parseFloat(amount) < getSelectedFromCoin()!.minimum || 
+                        parseFloat(amount) > getSelectedFromCoin()!.maximum
+                      ) ? 'border-destructive' : ''}
                     />
                     {fromCoin && fromNetwork && getSelectedFromCoin() && (
-                      <p className="text-xs text-muted-foreground">
-                        Min: {getSelectedFromCoin()?.minimum} {fromCoin.toUpperCase()} • Max: {getSelectedFromCoin()?.maximum} {fromCoin.toUpperCase()}
-                      </p>
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          Min: {getSelectedFromCoin()?.minimum} {fromCoin.toUpperCase()} • Max: {getSelectedFromCoin()?.maximum} {fromCoin.toUpperCase()}
+                        </p>
+                        {amount && parseFloat(amount) < getSelectedFromCoin()!.minimum && (
+                          <p className="text-xs text-destructive">
+                            Amount is below minimum ({getSelectedFromCoin()?.minimum} {fromCoin.toUpperCase()})
+                          </p>
+                        )}
+                        {amount && parseFloat(amount) > getSelectedFromCoin()!.maximum && (
+                          <p className="text-xs text-destructive">
+                            Amount exceeds maximum ({getSelectedFromCoin()?.maximum} {fromCoin.toUpperCase()})
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
 
