@@ -855,20 +855,8 @@ const Swaps = () => {
 
             {/* Fiat & Support */}
             <Card className="bg-secondary/30">
-              <CardContent className="pt-6 space-y-4">
+              <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <div className="text-center sm:text-left">
-                    <h3 className="font-semibold mb-1">Need to buy crypto with fiat?</h3>
-                    <p className="text-sm text-muted-foreground">Use Trocador's buy/sell feature to onramp with card or bank transfer</p>
-                  </div>
-                  <Button asChild variant="outline">
-                    <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer">
-                      Buy/Sell Crypto <ExternalLink className="h-4 w-4 ml-2" />
-                    </a>
-                  </Button>
-                </div>
-                
-                <div className="border-t border-border pt-4 flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <div className="text-center sm:text-left">
                     <h3 className="font-semibold mb-1">Need help with a swap?</h3>
                     <p className="text-sm text-muted-foreground">Contact Trocador support directly on Telegram</p>
