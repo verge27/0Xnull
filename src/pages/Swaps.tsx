@@ -12,21 +12,22 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Popular coins with preferred networks - XMR FIRST
+// Using exact ticker/network values from Trocador API
 const POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
-  { ticker: 'XMR', network: 'Mainnet', label: 'Monero' },
-  { ticker: 'BTC', network: 'Mainnet', label: 'Bitcoin' },
-  { ticker: 'ETH', network: 'Mainnet', label: 'Ethereum' },
-  { ticker: 'USDT', network: 'ERC20', label: 'Tether' },
-  { ticker: 'LTC', network: 'Mainnet', label: 'Litecoin' },
-  { ticker: 'DOGE', network: 'Mainnet', label: 'Dogecoin' },
-  { ticker: 'BNB', network: 'BEP2', label: 'Binance Coin' },
-  { ticker: 'SOL', network: 'Mainnet', label: 'Solana' },
-  { ticker: 'USDC', network: 'ERC20', label: 'USD Coin' },
+  { ticker: 'xmr', network: 'Mainnet', label: 'Monero' },
+  { ticker: 'btc', network: 'Mainnet', label: 'Bitcoin' },
+  { ticker: 'eth', network: 'ERC20', label: 'Ethereum' },  // ETH Mainnet = ERC20 in Trocador
+  { ticker: 'usdt', network: 'ERC20', label: 'Tether' },
+  { ticker: 'ltc', network: 'Mainnet', label: 'Litecoin' },
+  { ticker: 'doge', network: 'Mainnet', label: 'Dogecoin' },
+  { ticker: 'bnb', network: 'BEP2', label: 'Binance Coin' },
+  { ticker: 'sol', network: 'Mainnet', label: 'Solana' },
+  { ticker: 'usdc', network: 'ERC20', label: 'USD Coin' },
 ];
 
-const PRIVACY_COINS = ['XMR', 'ZEC', 'DASH'];
+const PRIVACY_COINS = ['xmr', 'zec', 'dash'];
 
-const isPrivacyCoin = (ticker: string) => PRIVACY_COINS.includes(ticker.toUpperCase());
+const isPrivacyCoin = (ticker: string) => PRIVACY_COINS.includes(ticker.toLowerCase());
 
 interface Coin {
   id: string;
