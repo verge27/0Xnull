@@ -12,11 +12,12 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Currency {
-  symbol: string;
+  ticker: string;
   name: string;
-  image: string;
-  has_extra_id: boolean;
-  is_fiat: boolean;
+  network: string;
+  image?: string;
+  hasExtraId?: boolean;
+  isFiat?: boolean;
 }
 
 interface ExchangeResult {
@@ -30,7 +31,16 @@ interface ExchangeResult {
 }
 
 const FIAT_CURRENCIES = ['usd', 'eur', 'gbp'];
-const POPULAR_CRYPTO = ['usdt', 'btc', 'eth', 'xmr', 'ltc', 'usdc', 'sol', 'bnb'];
+const POPULAR_CRYPTO = [
+  { ticker: 'usdt', network: 'erc20', label: 'USDT (ERC20)' },
+  { ticker: 'usdt', network: 'trc20', label: 'USDT (TRC20)' },
+  { ticker: 'btc', network: 'mainnet', label: 'BTC' },
+  { ticker: 'eth', network: 'mainnet', label: 'ETH' },
+  { ticker: 'ltc', network: 'mainnet', label: 'LTC' },
+  { ticker: 'usdc', network: 'erc20', label: 'USDC (ERC20)' },
+  { ticker: 'sol', network: 'mainnet', label: 'SOL' },
+  { ticker: 'bnb', network: 'bsc', label: 'BNB (BSC)' },
+];
 
 const STATUS_COLORS: Record<string, string> = {
   waiting: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
@@ -44,15 +54,15 @@ const STATUS_COLORS: Record<string, string> = {
 
 const FiatOfframp = () => {
   const { toast } = useToast();
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
-  const [fromCrypto, setFromCrypto] = useState('usdt');
+  const [selectedCrypto, setSelectedCrypto] = useState('usdt-erc20');
   const [toFiat, setToFiat] = useState('usd');
   const [amount, setAmount] = useState('');
   const [refundAddress, setRefundAddress] = useState('');
   
   const [minAmount, setMinAmount] = useState<string | null>(null);
+  const [maxAmount, setMaxAmount] = useState<string | null>(null);
   const [estimatedReceive, setEstimatedReceive] = useState<string | null>(null);
   const [loadingQuote, setLoadingQuote] = useState(false);
   
@@ -61,59 +71,81 @@ const FiatOfframp = () => {
   const [copied, setCopied] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
 
-  useEffect(() => {
-    fetchCurrencies();
-  }, []);
+  const getSelectedCryptoDetails = () => {
+    const [ticker, network] = selectedCrypto.split('-');
+    return { ticker, network };
+  };
 
   useEffect(() => {
-    if (fromCrypto && toFiat) {
-      fetchMinAmount();
+    const { ticker, network } = getSelectedCryptoDetails();
+    if (ticker && toFiat) {
+      fetchRange(ticker, network, toFiat);
     }
-  }, [fromCrypto, toFiat]);
+  }, [selectedCrypto, toFiat]);
 
   useEffect(() => {
     const debounce = setTimeout(() => {
-      if (fromCrypto && toFiat && amount && parseFloat(amount) > 0) {
-        fetchEstimate();
+      const { ticker, network } = getSelectedCryptoDetails();
+      if (ticker && toFiat && amount && parseFloat(amount) > 0) {
+        fetchEstimate(ticker, network, toFiat, amount);
+      } else {
+        setEstimatedReceive(null);
       }
     }, 500);
     return () => clearTimeout(debounce);
-  }, [fromCrypto, toFiat, amount]);
+  }, [selectedCrypto, toFiat, amount]);
 
-  const fetchCurrencies = async () => {
+  const fetchRange = async (ticker: string, network: string, fiat: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('simpleswap-api', {
-        body: { action: 'get_all_currencies' },
+        body: { 
+          action: 'get_min_amount', 
+          currency_from: ticker, 
+          network_from: network,
+          currency_to: fiat,
+          network_to: 'mainnet',
+        },
       });
       if (error) throw error;
-      setCurrencies(data || []);
+      
+      // V3 API returns { min, max } object
+      if (data && typeof data === 'object') {
+        setMinAmount(data.min?.toString() || null);
+        setMaxAmount(data.max?.toString() || null);
+      } else if (typeof data === 'string' || typeof data === 'number') {
+        setMinAmount(data.toString());
+        setMaxAmount(null);
+      }
     } catch (error) {
-      console.error('Error fetching currencies:', error);
-      toast({ title: 'Error', description: 'Failed to load currencies', variant: 'destructive' });
-    }
-    setLoading(false);
-  };
-
-  const fetchMinAmount = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('simpleswap-api', {
-        body: { action: 'get_min_amount', currency_from: fromCrypto, currency_to: toFiat },
-      });
-      if (error) throw error;
-      setMinAmount(data);
-    } catch (error) {
-      console.error('Error fetching min amount:', error);
+      console.error('Error fetching range:', error);
+      setMinAmount(null);
+      setMaxAmount(null);
     }
   };
 
-  const fetchEstimate = async () => {
+  const fetchEstimate = async (ticker: string, network: string, fiat: string, amt: string) => {
     setLoadingQuote(true);
     try {
       const { data, error } = await supabase.functions.invoke('simpleswap-api', {
-        body: { action: 'get_estimated', currency_from: fromCrypto, currency_to: toFiat, amount },
+        body: { 
+          action: 'get_estimated', 
+          currency_from: ticker, 
+          network_from: network,
+          currency_to: fiat,
+          network_to: 'mainnet',
+          amount: amt,
+        },
       });
       if (error) throw error;
-      setEstimatedReceive(data);
+      
+      // V3 API returns { estimated } or just a number/string
+      if (data && typeof data === 'object' && data.estimated) {
+        setEstimatedReceive(data.estimated.toString());
+      } else if (typeof data === 'string' || typeof data === 'number') {
+        setEstimatedReceive(data.toString());
+      } else {
+        setEstimatedReceive(null);
+      }
     } catch (error) {
       console.error('Error fetching estimate:', error);
       setEstimatedReceive(null);
@@ -122,13 +154,15 @@ const FiatOfframp = () => {
   };
 
   const createExchange = async () => {
+    const { ticker, network } = getSelectedCryptoDetails();
+    
     if (!amount || !refundAddress) {
       toast({ title: 'Missing fields', description: 'Please enter amount and refund address', variant: 'destructive' });
       return;
     }
 
     if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
-      toast({ title: 'Amount too low', description: `Minimum is ${minAmount} ${fromCrypto.toUpperCase()}`, variant: 'destructive' });
+      toast({ title: 'Amount too low', description: `Minimum is ${minAmount} ${ticker.toUpperCase()}`, variant: 'destructive' });
       return;
     }
 
@@ -137,10 +171,12 @@ const FiatOfframp = () => {
       const { data, error } = await supabase.functions.invoke('simpleswap-api', {
         body: {
           action: 'create_exchange',
-          currency_from: fromCrypto,
+          currency_from: ticker,
+          network_from: network,
           currency_to: toFiat,
+          network_to: 'mainnet',
           amount,
-          address_to: 'FIAT_PAYOUT', // SimpleSwap handles this via redirect
+          address_to: 'FIAT_PAYOUT',
           user_refund_address: refundAddress,
         },
       });
@@ -148,14 +184,15 @@ const FiatOfframp = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
+      // V3 API response format
       setExchange({
-        id: data.id,
-        address_from: data.address_from,
-        extra_id_from: data.extra_id_from,
-        currency_from: data.currency_from,
-        currency_to: data.currency_to,
-        amount_to_receive: data.amount_to || estimatedReceive || '~',
-        status: data.status,
+        id: data.id || data.publicId,
+        address_from: data.addressFrom || data.address_from,
+        extra_id_from: data.extraIdFrom || data.extra_id_from,
+        currency_from: data.currencyFrom || ticker,
+        currency_to: data.currencyTo || toFiat,
+        amount_to_receive: data.amountTo || data.amount_to || estimatedReceive || '~',
+        status: data.status || 'waiting',
       });
 
       toast({ title: 'Exchange created!', description: 'Send your crypto to the address shown' });
@@ -174,7 +211,11 @@ const FiatOfframp = () => {
         body: { action: 'get_exchange', id: exchange.id },
       });
       if (error) throw error;
-      setExchange(prev => prev ? { ...prev, status: data.status, amount_to_receive: data.amount_to || prev.amount_to_receive } : null);
+      setExchange(prev => prev ? { 
+        ...prev, 
+        status: data.status, 
+        amount_to_receive: data.amountTo || data.amount_to || prev.amount_to_receive 
+      } : null);
     } catch (error) {
       console.error('Error checking status:', error);
     }
@@ -188,11 +229,7 @@ const FiatOfframp = () => {
     toast({ title: 'Copied!', description: 'Address copied to clipboard' });
   };
 
-  const cryptoCurrencies = currencies.filter(c => !c.is_fiat && POPULAR_CRYPTO.includes(c.symbol.toLowerCase()));
-  const fiatCurrencies = currencies.filter(c => c.is_fiat && FIAT_CURRENCIES.includes(c.symbol.toLowerCase()));
-  
-  // Fallback if API doesn't return fiat
-  const displayFiats = fiatCurrencies.length > 0 ? fiatCurrencies : FIAT_CURRENCIES.map(f => ({ symbol: f, name: f.toUpperCase(), image: '', has_extra_id: false, is_fiat: true }));
+  const { ticker: fromTicker } = getSelectedCryptoDetails();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -288,22 +325,16 @@ const FiatOfframp = () => {
                 <div className="space-y-2">
                   <Label>You Send</Label>
                   <div className="flex gap-2">
-                    <Select value={fromCrypto} onValueChange={setFromCrypto}>
-                      <SelectTrigger className="w-40">
+                    <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
+                      <SelectTrigger className="w-48">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {POPULAR_CRYPTO.map(symbol => {
-                          const c = cryptoCurrencies.find(cc => cc.symbol.toLowerCase() === symbol);
-                          return (
-                            <SelectItem key={symbol} value={symbol}>
-                              <span className="flex items-center gap-2">
-                                {c?.image && <img src={c.image} alt="" className="w-4 h-4" />}
-                                {symbol.toUpperCase()}
-                              </span>
-                            </SelectItem>
-                          );
-                        })}
+                        {POPULAR_CRYPTO.map(c => (
+                          <SelectItem key={`${c.ticker}-${c.network}`} value={`${c.ticker}-${c.network}`}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Input
@@ -315,7 +346,10 @@ const FiatOfframp = () => {
                     />
                   </div>
                   {minAmount && (
-                    <p className="text-xs text-muted-foreground">Min: {minAmount} {fromCrypto.toUpperCase()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Min: {minAmount} {fromTicker.toUpperCase()}
+                      {maxAmount && ` • Max: ${maxAmount} ${fromTicker.toUpperCase()}`}
+                    </p>
                   )}
                 </div>
 
@@ -328,13 +362,13 @@ const FiatOfframp = () => {
                   <Label>You Receive</Label>
                   <div className="flex gap-2">
                     <Select value={toFiat} onValueChange={setToFiat}>
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-48">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {displayFiats.map(f => (
-                          <SelectItem key={f.symbol} value={f.symbol.toLowerCase()}>
-                            {f.symbol.toUpperCase()}
+                        {FIAT_CURRENCIES.map(f => (
+                          <SelectItem key={f} value={f}>
+                            {f.toUpperCase()}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -353,9 +387,9 @@ const FiatOfframp = () => {
 
                 {/* Refund Address */}
                 <div className="space-y-2">
-                  <Label>Refund Address ({fromCrypto.toUpperCase()})</Label>
+                  <Label>Refund Address ({fromTicker.toUpperCase()})</Label>
                   <Input
-                    placeholder={`Your ${fromCrypto.toUpperCase()} address for refunds`}
+                    placeholder={`Your ${fromTicker.toUpperCase()} address for refunds`}
                     value={refundAddress}
                     onChange={(e) => setRefundAddress(e.target.value)}
                   />

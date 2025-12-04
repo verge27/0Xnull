@@ -18,63 +18,112 @@ serve(async (req) => {
     console.log(`SimpleSwap API action: ${action}`, params);
 
     let url: string;
-    let options: RequestInit = { method: 'GET' };
+    let options: RequestInit = { 
+      method: 'GET',
+      headers: {
+        'x-api-key': SIMPLESWAP_API_KEY!,
+      },
+    };
 
     switch (action) {
       case 'get_all_currencies':
-        url = `${BASE_URL}/get_all_currencies?api_key=${SIMPLESWAP_API_KEY}`;
+        // V3 API - get all currencies
+        url = `${BASE_URL}/v3/currencies`;
         break;
 
       case 'get_pairs':
-        url = `${BASE_URL}/get_pairs?api_key=${SIMPLESWAP_API_KEY}&fixed=false&symbol=${params.symbol}`;
+        // V3 API - get pairs for a currency
+        url = `${BASE_URL}/v3/pairs/${params.symbol}/${params.network || 'mainnet'}`;
         break;
 
       case 'get_min_amount':
-        url = `${BASE_URL}/get_min_amount?api_key=${SIMPLESWAP_API_KEY}&currency_from=${params.currency_from}&currency_to=${params.currency_to}`;
+        // V3 API - get ranges (min/max)
+        const rangeParams = new URLSearchParams({
+          currencyFrom: params.currency_from,
+          networkFrom: params.network_from || 'mainnet',
+          currencyTo: params.currency_to,
+          networkTo: params.network_to || 'mainnet',
+        });
+        url = `${BASE_URL}/v3/ranges?${rangeParams}`;
         break;
 
       case 'get_estimated':
-        url = `${BASE_URL}/get_estimated?api_key=${SIMPLESWAP_API_KEY}&fixed=false&currency_from=${params.currency_from}&currency_to=${params.currency_to}&amount=${params.amount}`;
+        // V3 API - get estimate
+        const estParams = new URLSearchParams({
+          currencyFrom: params.currency_from,
+          networkFrom: params.network_from || 'mainnet',
+          currencyTo: params.currency_to,
+          networkTo: params.network_to || 'mainnet',
+          amount: params.amount,
+          fixed: 'false',
+        });
+        url = `${BASE_URL}/v3/estimates?${estParams}`;
         break;
 
       case 'create_exchange':
-        url = `${BASE_URL}/create_exchange`;
+        // V3 API - create exchange
+        url = `${BASE_URL}/v3/exchanges`;
         options = {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-api-key': SIMPLESWAP_API_KEY!,
+          },
           body: JSON.stringify({
-            api_key: SIMPLESWAP_API_KEY,
-            currency_from: params.currency_from,
-            currency_to: params.currency_to,
+            currencyFrom: params.currency_from,
+            networkFrom: params.network_from || 'mainnet',
+            currencyTo: params.currency_to,
+            networkTo: params.network_to || 'mainnet',
             amount: params.amount,
-            address_to: params.address_to,
-            user_refund_address: params.user_refund_address,
+            addressTo: params.address_to,
+            userRefundAddress: params.user_refund_address,
             fixed: false,
           }),
         };
         break;
 
       case 'get_exchange':
-        url = `${BASE_URL}/get_exchange?api_key=${SIMPLESWAP_API_KEY}&id=${params.id}`;
+        // V3 API - get exchange status
+        url = `${BASE_URL}/v3/exchanges/${params.id}`;
         break;
 
       default:
         throw new Error(`Unknown action: ${action}`);
     }
 
-    console.log(`Fetching: ${url.replace(SIMPLESWAP_API_KEY!, '***')}`);
+    console.log(`Fetching: ${url}`);
     const response = await fetch(url, options);
+    
+    // Handle non-JSON responses
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.log('Non-JSON response:', text);
+      
+      // For ranges/estimates, SimpleSwap might return just a number
+      if (!isNaN(parseFloat(text))) {
+        return new Response(JSON.stringify(text), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      return new Response(JSON.stringify({ error: 'Invalid response', details: text }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const data = await response.json();
 
     if (!response.ok) {
       console.error('SimpleSwap API error:', data);
-      return new Response(JSON.stringify({ error: data.message || 'API error', details: data }), {
+      return new Response(JSON.stringify({ error: data.message || data.error || 'API error', details: data }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`SimpleSwap response for ${action}:`, typeof data === 'object' ? 'object' : data);
+    console.log(`SimpleSwap response for ${action}:`, typeof data === 'object' ? JSON.stringify(data).slice(0, 200) : data);
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
