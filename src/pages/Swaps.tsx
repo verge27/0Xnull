@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
-import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check } from 'lucide-react';
+import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, Star, Zap } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// Priority coins for sorting - XMR first, then major liquid coins
+const PRIORITY_COINS = ['XMR', 'BTC', 'ETH', 'USDT', 'USDC', 'LTC', 'SOL', 'DOGE', 'TRX', 'BNB'];
+const PRIVACY_COINS = ['XMR', 'ZEC', 'DASH'];
+
+const isPriorityCoin = (ticker: string) => PRIORITY_COINS.includes(ticker.toUpperCase());
+const isPrivacyCoin = (ticker: string) => PRIVACY_COINS.includes(ticker.toUpperCase());
 
 interface Coin {
   id: string;
@@ -105,8 +112,27 @@ const Swaps = () => {
         unique.set(coin.ticker, coin);
       }
     });
-    return Array.from(unique.values());
+    
+    // Sort: Priority coins first (by their order in PRIORITY_COINS), then alphabetical
+    return Array.from(unique.values()).sort((a, b) => {
+      const aPriority = PRIORITY_COINS.indexOf(a.ticker.toUpperCase());
+      const bPriority = PRIORITY_COINS.indexOf(b.ticker.toUpperCase());
+      
+      // Both are priority coins - sort by priority order
+      if (aPriority !== -1 && bPriority !== -1) {
+        return aPriority - bPriority;
+      }
+      // Only a is priority - a comes first
+      if (aPriority !== -1) return -1;
+      // Only b is priority - b comes first
+      if (bPriority !== -1) return 1;
+      // Neither is priority - alphabetical
+      return a.ticker.localeCompare(b.ticker);
+    });
   };
+
+  const getPriorityCoins = () => getUniqueCoins().filter(c => isPriorityCoin(c.ticker));
+  const getOtherCoins = () => getUniqueCoins().filter(c => !isPriorityCoin(c.ticker));
 
   const getNetworksForCoin = (ticker: string) => {
     return coins.filter(c => c.ticker === ticker);
@@ -344,12 +370,34 @@ const Swaps = () => {
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Select coin" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {uniqueCoins.map((coin) => (
-                            <SelectItem key={coin.ticker} value={coin.ticker}>
-                              {coin.ticker} - {coin.name}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="max-h-80">
+                          <SelectGroup>
+                            <SelectLabel className="flex items-center gap-1 text-primary">
+                              <Star className="h-3 w-3" /> Popular
+                            </SelectLabel>
+                            {getPriorityCoins().map((coin) => (
+                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{coin.ticker}</span>
+                                  <span className="text-muted-foreground text-xs">{coin.name}</span>
+                                  {isPrivacyCoin(coin.ticker) && (
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
+                                  )}
+                                  {coin.ticker === 'XMR' && (
+                                    <Zap className="h-3 w-3 text-primary" />
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel className="text-muted-foreground">Other Coins</SelectLabel>
+                            {getOtherCoins().map((coin) => (
+                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                                <span>{coin.ticker} - {coin.name}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                       {fromCoin && getNetworksForCoin(fromCoin).length > 1 && (
@@ -386,12 +434,34 @@ const Swaps = () => {
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Select coin" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {uniqueCoins.map((coin) => (
-                            <SelectItem key={coin.ticker} value={coin.ticker}>
-                              {coin.ticker} - {coin.name}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="max-h-80">
+                          <SelectGroup>
+                            <SelectLabel className="flex items-center gap-1 text-primary">
+                              <Star className="h-3 w-3" /> Popular
+                            </SelectLabel>
+                            {getPriorityCoins().map((coin) => (
+                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{coin.ticker}</span>
+                                  <span className="text-muted-foreground text-xs">{coin.name}</span>
+                                  {isPrivacyCoin(coin.ticker) && (
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Privacy</Badge>
+                                  )}
+                                  {coin.ticker === 'XMR' && (
+                                    <Zap className="h-3 w-3 text-primary" />
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel className="text-muted-foreground">Other Coins</SelectLabel>
+                            {getOtherCoins().map((coin) => (
+                              <SelectItem key={coin.ticker} value={coin.ticker}>
+                                <span>{coin.ticker} - {coin.name}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                       {toCoin && getNetworksForCoin(toCoin).length > 1 && (
