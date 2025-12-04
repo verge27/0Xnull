@@ -1,4 +1,4 @@
-import { Bot, Sparkles, Lock, Zap, DollarSign, ExternalLink, MessageCircle } from 'lucide-react';
+import { Bot, Sparkles, Lock, Zap, DollarSign, ExternalLink, Brain, Image, Video, Shield } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,8 +19,8 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: 'Multiple Models',
-    description: 'Access GPT-4, Claude, Llama, and other leading AI models.',
+    title: '480+ Models',
+    description: 'Access premium, uncensored, image, and video AI models.',
   },
   {
     icon: Zap,
@@ -29,11 +29,32 @@ const features = [
   },
 ];
 
-const models = [
-  { name: 'GPT-4 Turbo', provider: 'OpenAI', capability: 'Most capable' },
-  { name: 'Claude 3 Opus', provider: 'Anthropic', capability: 'Best for analysis' },
-  { name: 'Llama 3 70B', provider: 'Meta', capability: 'Open source' },
-  { name: 'Mixtral 8x7B', provider: 'Mistral', capability: 'Fast & efficient' },
+const premiumModels = [
+  { name: 'GPT-4 Turbo', provider: 'OpenAI', tag: 'Most Capable' },
+  { name: 'Claude 3.5 Sonnet', provider: 'Anthropic', tag: 'Best Analysis' },
+  { name: 'Perplexity Sonar', provider: 'Perplexity', tag: 'Web Search' },
+  { name: 'Gemini 2.0 Pro', provider: 'Google', tag: 'Multimodal' },
+];
+
+const uncensoredModels = [
+  { name: 'Deepseek R1 Llama 70B', tag: 'Abliterated' },
+  { name: 'Dolphin 72B', tag: 'Uncensored' },
+  { name: 'Hermes 3 Large', tag: 'No Guardrails' },
+  { name: 'Venice Uncensored Web', tag: 'Web Access' },
+];
+
+const imageModels = [
+  { name: 'Nano Banana Pro Ultra', tag: 'Best Quality' },
+  { name: 'Seedream 4.5 Sequential', tag: 'Photorealistic' },
+  { name: 'Ideogram', tag: 'Text in Images' },
+  { name: 'Lucid Origin', tag: 'Artistic' },
+];
+
+const videoModels = [
+  { name: 'Kling 1.6 Pro', tag: 'Cinematic' },
+  { name: 'Hunyuan Video', tag: 'Long Form' },
+  { name: 'Minimax Video', tag: 'Fast Generation' },
+  { name: 'Luma Dream Machine', tag: 'Creative' },
 ];
 
 const AI = () => {
@@ -84,29 +105,88 @@ const AI = () => {
             })}
           </div>
 
-          {/* Models */}
-          <Card className="mb-12">
-            <CardHeader>
-              <CardTitle>Available Models</CardTitle>
-              <CardDescription>Access leading AI models from top providers</CardDescription>
+          {/* Premium Models */}
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-primary" />
+                <CardTitle>Premium Models</CardTitle>
+              </div>
+              <CardDescription>Industry-leading AI from top providers</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {models.map((model) => (
-                  <div
-                    key={model.name}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                  >
+              <div className="grid sm:grid-cols-2 gap-3">
+                {premiumModels.map((model) => (
+                  <div key={model.name} className="flex items-center justify-between p-3 rounded-lg border bg-card">
                     <div>
-                      <h4 className="font-medium">{model.name}</h4>
-                      <p className="text-sm text-muted-foreground">{model.provider}</p>
+                      <h4 className="font-medium text-sm">{model.name}</h4>
+                      <p className="text-xs text-muted-foreground">{model.provider}</p>
                     </div>
-                    <Badge variant="secondary">{model.capability}</Badge>
+                    <Badge variant="secondary" className="text-xs">{model.tag}</Badge>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+
+          {/* Uncensored Models */}
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-orange-500" />
+                <CardTitle>Uncensored Models</CardTitle>
+              </div>
+              <CardDescription>No guardrails, no filters - complete freedom</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {uncensoredModels.map((model) => (
+                  <div key={model.name} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                    <h4 className="font-medium text-sm">{model.name}</h4>
+                    <Badge variant="outline" className="text-xs border-orange-500/50 text-orange-500">{model.tag}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {/* Image Models */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Image className="h-5 w-5 text-pink-500" />
+                  <CardTitle className="text-lg">Image Generation</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {imageModels.map((model) => (
+                  <div key={model.name} className="flex items-center justify-between p-2 rounded border bg-card/50">
+                    <span className="text-sm">{model.name}</span>
+                    <Badge variant="outline" className="text-xs">{model.tag}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Video Models */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Video className="h-5 w-5 text-blue-500" />
+                  <CardTitle className="text-lg">Video Generation</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {videoModels.map((model) => (
+                  <div key={model.name} className="flex items-center justify-between p-2 rounded border bg-card/50">
+                    <span className="text-sm">{model.name}</span>
+                    <Badge variant="outline" className="text-xs">{model.tag}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* How it works */}
           <Card className="bg-secondary/30 mb-12">
@@ -119,7 +199,7 @@ const AI = () => {
                   </div>
                   <h3 className="font-semibold mb-2">Choose a Model</h3>
                   <p className="text-sm text-muted-foreground">
-                    Select from GPT-4, Claude, Llama, or other available models.
+                    Select from 480+ models: premium, uncensored, image, or video.
                   </p>
                 </div>
                 <div className="text-center">
