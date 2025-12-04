@@ -58,7 +58,7 @@ const AI = () => {
             </p>
             <div className="mt-6">
               <Button size="lg" asChild>
-                <a href="https://nano-gpt.com/?ref=marginsyndicate" target="_blank" rel="noopener noreferrer">
+                <a href="https://nano-gpt.com/subscription/NfWFCFJi" target="_blank" rel="noopener noreferrer">
                   Try NanoGPT
                   <ExternalLink className="h-4 w-4 ml-2" />
                 </a>
@@ -151,7 +151,7 @@ const AI = () => {
               Access cutting-edge AI without compromising your privacy.
             </p>
             <Button size="lg" asChild>
-              <a href="https://nano-gpt.com/?ref=marginsyndicate" target="_blank" rel="noopener noreferrer">
+              <a href="https://nano-gpt.com/subscription/NfWFCFJi" target="_blank" rel="noopener noreferrer">
                 Get Started with NanoGPT
                 <ExternalLink className="h-4 w-4 ml-2" />
               </a>
@@ -162,7 +162,7 @@ const AI = () => {
           <div className="mt-12 text-center text-sm text-muted-foreground">
             <p>
               Powered by{' '}
-              <a href="https://nano-gpt.com/?ref=marginsyndicate" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              <a href="https://nano-gpt.com/subscription/NfWFCFJi" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 NanoGPT
               </a>
             </p>
