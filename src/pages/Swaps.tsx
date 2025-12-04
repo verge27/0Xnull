@@ -175,6 +175,10 @@ const Swaps = () => {
     return coins.find(c => c.ticker === ticker && c.network === network)?.memo || false;
   };
 
+  const getSelectedFromCoin = () => {
+    return coins.find(c => c.ticker === fromCoin && c.network === fromNetwork);
+  };
+
   const handleFromCoinChange = (ticker: string) => {
     setFromCoin(ticker);
     const networks = getNetworksForCoin(ticker);
@@ -428,6 +432,11 @@ const Swaps = () => {
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                     />
+                    {fromCoin && fromNetwork && getSelectedFromCoin() && (
+                      <p className="text-xs text-muted-foreground">
+                        Min: {getSelectedFromCoin()?.minimum} {fromCoin.toUpperCase()} • Max: {getSelectedFromCoin()?.maximum} {fromCoin.toUpperCase()}
+                      </p>
+                    )}
                   </div>
 
                   {/* Swap Button */}
