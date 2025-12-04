@@ -27,9 +27,11 @@ const FIAT_CURRENCIES = [
   { ticker: 'gbp', label: 'GBP', network: 'gbp' },
 ];
 
-// SimpleSwap only supports USDT ERC20 for fiat off-ramps
+// SimpleSwap supports ETH, USDT, and USDC on Ethereum mainnet for fiat off-ramps
 const SUPPORTED_CRYPTO = [
+  { ticker: 'eth', network: 'eth', label: 'ETH (Ethereum)' },
   { ticker: 'usdt', network: 'eth', label: 'USDT (ERC20)' },
+  { ticker: 'usdc', network: 'eth', label: 'USDC (ERC20)' },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
