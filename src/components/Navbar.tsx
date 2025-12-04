@@ -73,6 +73,12 @@ export const Navbar = () => {
               </Button>
             </Link>
 
+            <Link to="/phone">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">eSIM</span>
+              </Button>
+            </Link>
+
             <Link to="/ai">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">AI</span>
