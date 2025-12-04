@@ -87,12 +87,16 @@ const FiatOfframp = () => {
 
   useEffect(() => {
     const { fromTicker, fromNetwork, toTicker, toNetwork } = getCurrentPair();
-    if (amount && parseFloat(amount) > 0) {
+    const amtNum = parseFloat(amount);
+    const minNum = minAmount ? parseFloat(minAmount) : 0;
+    const maxNum = maxAmount ? parseFloat(maxAmount) : Infinity;
+    
+    if (amount && amtNum > 0 && amtNum >= minNum && amtNum <= maxNum) {
       fetchEstimate(fromTicker, fromNetwork, toTicker, toNetwork, amount);
     } else {
       setEstimatedReceive(null);
     }
-  }, [amount, selectedCrypto, toFiat]);
+  }, [amount, selectedCrypto, toFiat, minAmount, maxAmount]);
 
   const fetchRange = async (fromTicker: string, fromNetwork: string, toTicker: string, toNetwork: string) => {
     try {
@@ -344,7 +348,7 @@ const FiatOfframp = () => {
                     />
                   </div>
                   {minAmount && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className={`text-xs ${amount && (parseFloat(amount) < parseFloat(minAmount) || (maxAmount && parseFloat(amount) > parseFloat(maxAmount))) ? 'text-destructive' : 'text-muted-foreground'}`}>
                       Min: {minAmount} {fromTicker.toUpperCase()}
                       {maxAmount && ` • Max: ${maxAmount} ${fromTicker.toUpperCase()}`}
                     </p>
