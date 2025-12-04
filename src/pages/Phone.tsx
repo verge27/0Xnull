@@ -78,7 +78,7 @@ const Phone = () => {
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4">
               <Zap className="h-3 w-3 mr-1" />
-              Bitcoin & Lightning Accepted
+              Monero & Lightning Accepted
             </Badge>
             <h1 className="text-4xl font-bold mb-3">Anonymous Phone & eSIM</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
