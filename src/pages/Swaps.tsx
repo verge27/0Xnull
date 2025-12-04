@@ -599,9 +599,72 @@ const Swaps = () => {
           )}
 
           {/* Info Section */}
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            <p>Powered by <a href="https://trocador.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
-            <p className="mt-1">All swaps are non-custodial and anonymous</p>
+          <div className="mt-8 space-y-6">
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Powered by <a href="https://trocador.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
+              <p className="mt-1">All swaps are non-custodial and anonymous</p>
+            </div>
+
+            {/* Fiat & Support */}
+            <Card className="bg-secondary/30">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="text-center sm:text-left">
+                    <h3 className="font-semibold mb-1">Need to buy crypto with fiat?</h3>
+                    <p className="text-sm text-muted-foreground">Use Trocador's buy/sell feature to onramp with card or bank transfer</p>
+                  </div>
+                  <Button asChild variant="outline">
+                    <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer">
+                      Buy/Sell Crypto <ExternalLink className="h-4 w-4 ml-2" />
+                    </a>
+                  </Button>
+                </div>
+                
+                <div className="border-t border-border pt-4 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="text-center sm:text-left">
+                    <h3 className="font-semibold mb-1">Need help with a swap?</h3>
+                    <p className="text-sm text-muted-foreground">Contact Trocador support directly on Telegram</p>
+                  </div>
+                  <Button asChild variant="outline">
+                    <a href="https://t.me/TrocadorSupportBot" target="_blank" rel="noopener noreferrer">
+                      Trocador Support <ExternalLink className="h-4 w-4 ml-2" />
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Wallet Recommendation */}
+            <Card className="bg-secondary/30">
+              <CardContent className="pt-6">
+                <div className="text-center mb-4">
+                  <h3 className="font-semibold text-lg mb-1">Need a Wallet?</h3>
+                  <p className="text-sm text-muted-foreground">We recommend Cake Wallet - a privacy-focused multi-currency wallet with built-in exchange</p>
+                </div>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Button asChild variant="outline" size="sm">
+                    <a href="https://play.google.com/store/apps/details?id=com.cakewallet.cake_wallet" target="_blank" rel="noopener noreferrer">
+                      Android
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <a href="https://apps.apple.com/app/cake-wallet/id1334702542" target="_blank" rel="noopener noreferrer">
+                      iOS / Mac
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <a href="https://github.com/cake-tech/cake_wallet/releases" target="_blank" rel="noopener noreferrer">
+                      GitHub
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <a href="https://cakewallet.com" target="_blank" rel="noopener noreferrer">
+                      Official Website
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
