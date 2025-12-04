@@ -60,13 +60,6 @@ interface TradeResponse {
   amount_to: string;
 }
 
-const popularPairs = [
-  { from: 'XMR', to: 'BTC', label: 'XMR → BTC' },
-  { from: 'BTC', to: 'XMR', label: 'BTC → XMR' },
-  { from: 'ETH', to: 'XMR', label: 'ETH → XMR' },
-  { from: 'USDT', to: 'XMR', label: 'USDT → XMR' },
-  { from: 'LTC', to: 'XMR', label: 'LTC → XMR' },
-];
 
 const Swaps = () => {
   const { toast } = useToast();
@@ -217,10 +210,6 @@ const Swaps = () => {
     setSelectedProvider(null);
   };
 
-  const handleQuickPair = (from: string, to: string) => {
-    handleFromCoinChange(from);
-    setTimeout(() => handleToCoinChange(to), 100);
-  };
 
   const fetchRates = async () => {
     if (!fromCoin || !fromNetwork || !toCoin || !toNetwork || !amount) {
@@ -337,23 +326,6 @@ const Swaps = () => {
             <p className="text-muted-foreground">Exchange cryptocurrencies privately via Trocador aggregator</p>
           </div>
 
-          {/* Quick Pairs */}
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {popularPairs.map((pair) => (
-              <Button
-                key={pair.label}
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickPair(pair.from, pair.to)}
-              >
-                {pair.label}
-              </Button>
-            ))}
-            <Button variant="ghost" size="sm" onClick={syncCoins} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
-              Sync Coins
-            </Button>
-          </div>
 
           {trade ? (
             /* Trade Created - Show deposit info */
