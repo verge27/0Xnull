@@ -57,11 +57,12 @@ interface Coin {
 interface RateProvider {
   provider: string;
   amount_to: string;
-  min: string;
-  max: string;
   kycrating: string;
-  payment: boolean;
   eta: number;
+  fixed: string;
+  insurance: number;
+  provider_logo?: string;
+  USD_total_cost_percentage?: string;
 }
 
 interface TradeResponse {
@@ -302,14 +303,15 @@ const Swaps = () => {
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
 
-      if (Array.isArray(data)) {
-        setRates(data);
-        if (data.length > 0) {
-          setSelectedProvider(data[0]);
-        }
-      } else if (data.error) {
-        throw new Error(data.error);
+      // Trocador returns quotes in data.quotes.quotes array
+      const quotes = data?.quotes?.quotes || [];
+      if (Array.isArray(quotes) && quotes.length > 0) {
+        setRates(quotes);
+        setSelectedProvider(quotes[0]);
+      } else {
+        setRates([]);
       }
     } catch (error) {
       console.error('Error fetching rates:', error);
@@ -726,7 +728,7 @@ const Swaps = () => {
                               <span className="font-semibold text-primary">{rate.amount_to} {toCoin}</span>
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">
-                              ETA: ~{rate.eta} min • Min: {rate.min} • Max: {rate.max}
+                              ETA: ~{rate.eta} min • KYC: {rate.kycrating} • Insurance: {rate.insurance}%
                             </div>
                           </div>
                         ))}
