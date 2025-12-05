@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_call_logs: {
+        Row: {
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          function_name: string
+          id: string
+          method: string
+          response_time_ms: number | null
+          status_code: number | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          function_name: string
+          id?: string
+          method?: string
+          response_time_ms?: number | null
+          status_code?: number | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          method?: string
+          response_time_ms?: number | null
+          status_code?: number | null
+        }
+        Relationships: []
+      }
       coins: {
         Row: {
           id: string

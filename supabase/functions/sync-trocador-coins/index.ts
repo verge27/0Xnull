@@ -9,6 +9,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Log API call to database
+const logApiCall = async (
+  supabase: any,
+  functionName: string,
+  endpoint: string,
+  method: string,
+  statusCode: number | null,
+  responseTimeMs: number,
+  errorMessage: string | null
+) => {
+  try {
+    await supabase.from('api_call_logs').insert({
+      function_name: functionName,
+      endpoint,
+      method,
+      status_code: statusCode,
+      response_time_ms: responseTimeMs,
+      error_message: errorMessage,
+    });
+  } catch (err) {
+    console.error('Failed to log API call:', err);
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -26,6 +50,10 @@ serve(async (req) => {
     );
   }
 
+  const startTime = Date.now();
+  let statusCode: number | null = null;
+  let errorMessage: string | null = null;
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -37,14 +65,20 @@ serve(async (req) => {
       headers: { "API-Key": TROCADOR_API_KEY! },
     });
 
+    statusCode = response.status;
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Trocador API error:', response.status, errorText);
-      throw new Error(`Trocador API returned ${response.status}: ${errorText}`);
+      errorMessage = `Trocador API returned ${response.status}: ${errorText}`;
+      throw new Error(errorMessage);
     }
 
     const coins = await response.json();
     console.log(`Fetched ${coins.length} coins from Trocador`);
+
+    // Log successful API call
+    await logApiCall(supabase, 'sync-trocador-coins', '/coins', 'GET', statusCode, Date.now() - startTime, null);
 
     // Transform and upsert coins
     const coinRecords = coins.map((coin: any) => ({
@@ -85,7 +119,19 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    // Log failed API call (need to create supabase client for this)
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      await logApiCall(supabase, 'sync-trocador-coins', '/coins', 'GET', statusCode, Date.now() - startTime, errorMessage);
+    } catch (logErr) {
+      console.error('Failed to log error:', logErr);
+    }
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

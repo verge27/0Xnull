@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const TROCADOR_API_KEY = Deno.env.get('TROCADOR_API_KEY');
 const API_BASE = "https://api.trocador.app";
@@ -56,6 +57,33 @@ const isValidKycRating = (value: unknown): boolean =>
   value === undefined || value === null || 
   (typeof value === 'string' && ['A', 'B', 'C', 'D'].includes(value.toUpperCase()));
 
+// Log API call to database
+const logApiCall = async (
+  functionName: string,
+  endpoint: string,
+  method: string,
+  statusCode: number | null,
+  responseTimeMs: number,
+  errorMessage: string | null
+) => {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    await supabase.from('api_call_logs').insert({
+      function_name: functionName,
+      endpoint,
+      method,
+      status_code: statusCode,
+      response_time_ms: responseTimeMs,
+      error_message: errorMessage,
+    });
+  } catch (err) {
+    console.error('Failed to log API call:', err);
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,6 +98,10 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
     });
   }
+
+  const startTime = Date.now();
+  let statusCode: number | null = null;
+  let errorMessage: string | null = null;
 
   try {
     const { ticker_from, network_from, ticker_to, network_to, amount_from, min_kycrating } = await req.json();
@@ -141,21 +173,32 @@ serve(async (req) => {
       headers: { "API-Key": TROCADOR_API_KEY! },
     });
 
+    statusCode = response.status;
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Trocador API error:', response.status, errorText);
-      throw new Error(`Trocador API returned ${response.status}`);
+      errorMessage = `Trocador API returned ${response.status}`;
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
     console.log('Rate response received');
+
+    // Log successful API call
+    await logApiCall('trocador-new-rate', '/new_rate', 'GET', statusCode, Date.now() - startTime, null);
     
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Log failed API call
+    await logApiCall('trocador-new-rate', '/new_rate', 'GET', statusCode, Date.now() - startTime, errorMessage);
+    
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
