@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, History, Clock, Trash2, Banknote } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { SiteAssistant } from '@/components/SiteAssistant';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -911,6 +912,7 @@ const Swaps = () => {
       </main>
 
       <Footer />
+      <SiteAssistant />
     </div>
   );
 };

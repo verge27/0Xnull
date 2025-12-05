@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { SiteAssistant } from '@/components/SiteAssistant';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -443,6 +444,7 @@ const FiatOfframp = () => {
       </main>
 
       <Footer />
+      <SiteAssistant />
     </div>
   );
 };
