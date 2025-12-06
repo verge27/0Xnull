@@ -15,6 +15,9 @@ verify_jwt = false
 [functions.trocador-new-trade]
 verify_jwt = false
 
+[functions.trocador-trade-status]
+verify_jwt = false
+
 [functions.sync-trocador-coins]
 verify_jwt = false
 

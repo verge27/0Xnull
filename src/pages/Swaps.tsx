@@ -119,6 +119,93 @@ const Swaps = () => {
     fetchSwapHistory();
   }, []);
 
+  // Poll for status updates on active trade
+  useEffect(() => {
+    if (!trade?.trade_id) return;
+    
+    // Don't poll if already finished
+    const finalStatuses = ['finished', 'failed', 'expired', 'halted', 'refunded', 'paid partially'];
+    if (finalStatuses.includes(trade.status?.toLowerCase() || '')) return;
+
+    const pollStatus = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('trocador-trade-status', {
+          body: null,
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        // Use query params for GET-like behavior
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trocador-trade-status?trade_id=${trade.trade_id}`,
+          {
+            headers: {
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+          }
+        );
+        
+        if (response.ok) {
+          const statusData = await response.json();
+          if (statusData.status && statusData.status !== trade.status) {
+            setTrade(prev => prev ? { ...prev, status: statusData.status } : null);
+            // Also refresh history to update stored status
+            fetchSwapHistory();
+          }
+        }
+      } catch (error) {
+        console.error('Error polling trade status:', error);
+      }
+    };
+
+    // Poll immediately and then every 15 seconds
+    pollStatus();
+    const interval = setInterval(pollStatus, 15000);
+    
+    return () => clearInterval(interval);
+  }, [trade?.trade_id, trade?.status]);
+
+  // Poll for status updates on history items
+  useEffect(() => {
+    if (swapHistory.length === 0) return;
+    
+    const finalStatuses = ['finished', 'failed', 'expired', 'halted', 'refunded', 'paid partially'];
+    const pendingSwaps = swapHistory.filter(s => !finalStatuses.includes(s.status?.toLowerCase() || ''));
+    
+    if (pendingSwaps.length === 0) return;
+
+    const pollHistoryStatuses = async () => {
+      for (const swap of pendingSwaps) {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trocador-trade-status?trade_id=${swap.trade_id}`,
+            {
+              headers: {
+                'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              },
+            }
+          );
+          
+          if (response.ok) {
+            const statusData = await response.json();
+            if (statusData.status && statusData.status !== swap.status) {
+              // Update local state
+              setSwapHistory(prev => 
+                prev.map(s => s.trade_id === swap.trade_id ? { ...s, status: statusData.status } : s)
+              );
+            }
+          }
+        } catch (error) {
+          console.error('Error polling swap status:', error);
+        }
+      }
+    };
+
+    // Poll every 30 seconds for history items
+    const interval = setInterval(pollHistoryStatuses, 30000);
+    
+    return () => clearInterval(interval);
+  }, [swapHistory]);
+
   const fetchCoins = async () => {
     // First fetch popular coins specifically to ensure they're loaded
     const popularTickers = POPULAR_COINS.map(p => p.ticker.toLowerCase());
@@ -459,9 +546,25 @@ const Swaps = () => {
                     <span>You receive:</span>
                     <span className="font-semibold">{trade.amount_to} {toCoin}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm items-center">
                     <span>Status:</span>
-                    <Badge variant="outline">{trade.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant={
+                          trade.status === 'finished' ? 'default' : 
+                          trade.status === 'sending' ? 'default' :
+                          trade.status === 'confirming' ? 'secondary' :
+                          trade.status === 'failed' || trade.status === 'expired' ? 'destructive' :
+                          'outline'
+                        }
+                        className={trade.status === 'finished' ? 'bg-green-600' : trade.status === 'sending' ? 'bg-blue-600' : ''}
+                      >
+                        {trade.status}
+                      </Badge>
+                      {!['finished', 'failed', 'expired', 'halted', 'refunded'].includes(trade.status?.toLowerCase() || '') && (
+                        <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Button className="w-full" onClick={() => setTrade(null)}>
@@ -823,9 +926,23 @@ const Swaps = () => {
                             <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">{swap.to_coin.toUpperCase()}</span>
                           </div>
-                          <Badge variant={swap.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                            {swap.status || 'pending'}
-                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Badge 
+                              variant={
+                                swap.status === 'finished' ? 'default' : 
+                                swap.status === 'sending' ? 'default' :
+                                swap.status === 'confirming' ? 'secondary' :
+                                swap.status === 'failed' || swap.status === 'expired' ? 'destructive' :
+                                'outline'
+                              }
+                              className={`text-xs ${swap.status === 'finished' ? 'bg-green-600' : swap.status === 'sending' ? 'bg-blue-600' : ''}`}
+                            >
+                              {swap.status || 'waiting'}
+                            </Badge>
+                            {!['finished', 'failed', 'expired', 'halted', 'refunded', 'paid partially'].includes(swap.status?.toLowerCase() || '') && (
+                              <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                            )}
+                          </div>
                         </div>
                         <div className="flex justify-between items-center text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
