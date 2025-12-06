@@ -143,7 +143,7 @@ export type Database = {
           to_coin: string
           to_network: string
           trade_id: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           amount: string
@@ -159,7 +159,7 @@ export type Database = {
           to_coin: string
           to_network: string
           trade_id: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           amount?: string
@@ -175,7 +175,7 @@ export type Database = {
           to_coin?: string
           to_network?: string
           trade_id?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
