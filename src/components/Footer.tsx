@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield } from 'lucide-react';
+import { Shield, Mail } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -59,9 +59,9 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Legal & Contact */}
           <div>
-            <h4 className="font-semibold mb-3">Legal</h4>
+            <h4 className="font-semibold mb-3">Legal & Contact</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -72,6 +72,15 @@ export const Footer = () => {
                 <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
+              </li>
+              <li>
+                <a 
+                  href="mailto:admin@0xnull.io" 
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  admin@0xnull.io
+                </a>
               </li>
             </ul>
           </div>
