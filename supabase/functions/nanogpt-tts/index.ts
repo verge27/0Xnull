@@ -35,6 +35,18 @@ serve(async (req) => {
 
     console.log(`TTS request: ${text.length} chars, voice: ${voice || 'default'}`);
 
+    // Map voice to Kokoro-compatible voices
+    const kokoroVoices: Record<string, string> = {
+      'bella': 'af_bella',
+      'nicole': 'af_nicole',
+      'sarah': 'af_sarah',
+      'sky': 'af_sky',
+      'adam': 'am_adam',
+      'michael': 'am_michael',
+    };
+    
+    const selectedVoice = kokoroVoices[voice] || 'af_bella';
+
     // Proxy to NanoGPT TTS endpoint
     const response = await fetch('https://nano-gpt.com/api/tts', {
       method: 'POST',
@@ -45,7 +57,7 @@ serve(async (req) => {
       body: JSON.stringify({
         text,
         model: 'Kokoro-82m',
-        voice: voice || 'af_bella',
+        voice: selectedVoice,
       }),
     });
 

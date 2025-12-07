@@ -11,12 +11,12 @@ import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 
 const voices = [
-  { id: "alloy", name: "Alloy", description: "Neutral and balanced" },
-  { id: "echo", name: "Echo", description: "Warm and conversational" },
-  { id: "fable", name: "Fable", description: "Expressive and dynamic" },
-  { id: "onyx", name: "Onyx", description: "Deep and authoritative" },
-  { id: "nova", name: "Nova", description: "Friendly and upbeat" },
-  { id: "shimmer", name: "Shimmer", description: "Clear and gentle" },
+  { id: "bella", name: "Bella", description: "Warm and friendly" },
+  { id: "nicole", name: "Nicole", description: "Clear and professional" },
+  { id: "sarah", name: "Sarah", description: "Soft and gentle" },
+  { id: "sky", name: "Sky", description: "Bright and energetic" },
+  { id: "adam", name: "Adam", description: "Deep and confident" },
+  { id: "michael", name: "Michael", description: "Calm and authoritative" },
 ];
 
 const features = [
@@ -44,7 +44,7 @@ const features = [
 
 const Voice = () => {
   const [text, setText] = useState("");
-  const [voice, setVoice] = useState("alloy");
+  const [voice, setVoice] = useState("bella");
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
