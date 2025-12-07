@@ -50,10 +50,9 @@ serve(async (req) => {
     const data = await response.json();
     console.log(`Trade ${tradeId} raw response:`, JSON.stringify(data));
     
-    // Trocador API returns trade data in a nested structure or directly
-    // Handle both cases
-    const tradeData = data.trade || data;
-    const status = tradeData.status || tradeData.trade_status;
+    // Trocador API returns an array with the trade object
+    const tradeData = Array.isArray(data) ? data[0] : (data.trade || data);
+    const status = tradeData?.status || tradeData?.trade_status;
     console.log(`Trade ${tradeId} status: ${status}`);
 
     // Update swap_history in database if status changed
