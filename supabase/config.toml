@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.nanogpt-tts]
 verify_jwt = false
+
+[functions.therapy-chat]
+verify_jwt = false

@@ -61,6 +61,11 @@ export const Footer = () => {
                   Voice Cloning
                 </Link>
               </li>
+              <li>
+                <Link to="/therapy" className="text-muted-foreground hover:text-foreground transition-colors">
+                  AI Therapy
+                </Link>
+              </li>
             </ul>
           </div>
 
