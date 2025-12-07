@@ -175,17 +175,16 @@ const Therapy = () => {
                             : 'bg-secondary/50 text-foreground'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                        {msg.content ? (
+                          <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                        ) : msg.role === 'assistant' && isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                        ) : (
+                          <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                        )}
                       </div>
                     </div>
                   ))}
-                  {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                    <div className="flex justify-start">
-                      <div className="bg-secondary/50 rounded-2xl px-4 py-3">
-                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </ScrollArea>
