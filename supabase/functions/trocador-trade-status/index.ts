@@ -48,17 +48,23 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`Trade ${tradeId} status: ${data.status}`);
+    console.log(`Trade ${tradeId} raw response:`, JSON.stringify(data));
+    
+    // Trocador API returns trade data in a nested structure or directly
+    // Handle both cases
+    const tradeData = data.trade || data;
+    const status = tradeData.status || tradeData.trade_status;
+    console.log(`Trade ${tradeId} status: ${status}`);
 
     // Update swap_history in database if status changed
-    if (data.status) {
+    if (status) {
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       const { error: updateError } = await supabase
         .from('swap_history')
-        .update({ status: data.status })
+        .update({ status: status })
         .eq('trade_id', tradeId);
 
       if (updateError) {
@@ -68,14 +74,14 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        trade_id: data.trade_id || tradeId,
-        status: data.status,
-        amount_from: data.amount_from,
-        amount_to: data.amount_to,
-        ticker_from: data.ticker_from,
-        ticker_to: data.ticker_to,
-        tx_hash_to: data.tx_hash_to || null,
-        tx_hash_from: data.tx_hash_from || null,
+        trade_id: tradeData.trade_id || tradeId,
+        status: status,
+        amount_from: tradeData.amount_from,
+        amount_to: tradeData.amount_to,
+        ticker_from: tradeData.ticker_from,
+        ticker_to: tradeData.ticker_to,
+        tx_hash_to: tradeData.tx_hash_to || null,
+        tx_hash_from: tradeData.tx_hash_from || null,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
