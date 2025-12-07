@@ -56,6 +56,11 @@ export const Footer = () => {
                   Fiat Gateway
                 </Link>
               </li>
+              <li>
+                <Link to="/voice" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Voice Cloning
+                </Link>
+              </li>
             </ul>
           </div>
 

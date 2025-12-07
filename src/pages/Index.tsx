@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Navbar } from '@/components/Navbar';
@@ -55,6 +55,12 @@ const Index = () => {
             <Link to="/sell">
               <Button size="lg" variant="secondary" className="gap-2 text-lg px-8">
                 Start Selling
+              </Button>
+            </Link>
+            <Link to="/voice">
+              <Button size="lg" variant="outline" className="gap-2 text-lg px-8">
+                <Volume2 className="w-5 h-5" />
+                Voice Cloning
               </Button>
             </Link>
           </div>
