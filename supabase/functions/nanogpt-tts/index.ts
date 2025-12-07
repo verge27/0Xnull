@@ -36,15 +36,16 @@ serve(async (req) => {
     console.log(`TTS request: ${text.length} chars, voice: ${voice || 'default'}`);
 
     // Proxy to NanoGPT TTS endpoint
-    const response = await fetch('https://nano-gpt.com/api/v1/tts', {
+    const response = await fetch('https://nano-gpt.com/api/tts', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${NANOGPT_API_KEY}`,
+        'x-api-key': NANOGPT_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         text,
-        voice: voice || 'alloy',
+        model: 'Kokoro-82m',
+        voice: voice || 'af_bella',
       }),
     });
 
