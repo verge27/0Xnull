@@ -128,6 +128,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rpc_rate_limits: {
+        Row: {
+          created_at: string
+          function_name: string
+          id: string
+          ip_address: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          function_name: string
+          id?: string
+          ip_address: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          function_name?: string
+          id?: string
+          ip_address?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       swap_history: {
         Row: {
           amount: string
@@ -205,8 +232,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_rate_limits: { Args: never; Returns: undefined }
       get_swap_by_trade_id: {
         Args: { p_trade_id: string }
+        Returns: {
+          amount: string
+          created_at: string
+          from_coin: string
+          from_network: string
+          id: string
+          provider: string
+          provider_address: string
+          provider_memo: string | null
+          receive_address: string
+          status: string | null
+          to_coin: string
+          to_network: string
+          trade_id: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "swap_history"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_swap_by_trade_id_limited: {
+        Args: { p_client_ip?: string; p_trade_id: string }
         Returns: {
           amount: string
           created_at: string

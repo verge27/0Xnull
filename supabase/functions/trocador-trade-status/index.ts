@@ -31,16 +31,24 @@ serve(async (req) => {
       );
     }
 
+    // Helper to mask trade ID for logging (show first 3 and last 2 chars only)
+    const maskTradeId = (id: string) => {
+      if (id.length <= 5) return '***';
+      return `${id.slice(0, 3)}...${id.slice(-2)}`;
+    };
+    
+    const maskedId = maskTradeId(tradeId);
+
     // Fetch trade status from Trocador
     const trocadorUrl = `https://trocador.app/api/trade?api_key=${apiKey}&id=${tradeId}`;
-    console.log(`Fetching trade status for: ${tradeId}`);
+    console.log(`Fetching trade status for: ${maskedId}`);
 
     const response = await fetch(trocadorUrl);
     const statusCode = response.status;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Trocador API error: ${statusCode} - ${errorText}`);
+      console.error(`Trocador API error for ${maskedId}: ${statusCode}`);
       return new Response(
         JSON.stringify({ error: 'Failed to fetch trade status', details: errorText }),
         { status: statusCode, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -48,12 +56,12 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`Trade ${tradeId} raw response:`, JSON.stringify(data));
+    // Don't log raw response - may contain sensitive data
     
     // Trocador API returns an array with the trade object
     const tradeData = Array.isArray(data) ? data[0] : (data.trade || data);
     const status = tradeData?.status || tradeData?.trade_status;
-    console.log(`Trade ${tradeId} status: ${status}`);
+    console.log(`Trade ${maskedId} status: ${status}`);
 
     // Update swap_history in database if status changed
     if (status) {
