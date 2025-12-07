@@ -253,25 +253,6 @@ const Voice = () => {
             </div>
           </div>
         </section>
-
-        {/* Pricing */}
-        <section className="py-12 container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-8">Pay As You Go</h2>
-          <div className="max-w-md mx-auto text-center">
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-3xl font-bold mb-2">$0.002</p>
-                <p className="text-muted-foreground mb-4">per 1,000 characters</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  <Badge variant="secondary">XMR</Badge>
-                  <Badge variant="secondary">BTC</Badge>
-                  <Badge variant="secondary">ETH</Badge>
-                  <Badge variant="secondary">USDT</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
       </main>
 
       <Footer />
