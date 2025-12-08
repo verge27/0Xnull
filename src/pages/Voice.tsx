@@ -12,10 +12,7 @@ import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe, Uploa
 import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
-import * as apiService from "@/services/api";
-import { type Voice, TIER_CONFIG } from "@/services/api";
-
-// Voice interface imported from api.ts
+import { api, type Voice, TIER_CONFIG } from "@/services/api";
 
 const tiers = [
   { id: "free", name: "Free", price: "Free", description: "100 chars max", maxChars: 100 },
@@ -46,7 +43,7 @@ const features = [
   },
 ];
 
-const Voice = () => {
+const VoicePage = () => {
   const { hasToken, token, refreshBalance } = useToken();
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("");
@@ -81,7 +78,7 @@ const Voice = () => {
     const fetchVoices = async () => {
       setIsLoadingVoices(true);
       try {
-        const result = await apiService.getVoices();
+        const result = await api.getVoices();
         if (result.voices) {
           setVoices(result.voices);
           // Set default voice to first preset
@@ -102,7 +99,7 @@ const Voice = () => {
   // Refresh voices after cloning
   const refreshVoices = async () => {
     try {
-      const result = await apiService.getVoices();
+      const result = await api.getVoices();
       if (result.voices) {
         setVoices(result.voices);
       }
@@ -171,7 +168,7 @@ const Voice = () => {
     setIsCloning(true);
 
     try {
-      const result = await apiService.createClone(token, cloneName.trim(), cloneFile);
+      const result = await api.createClone(token, cloneName.trim(), cloneFile);
       
       // Refresh balance after clone
       await refreshBalance();
@@ -227,7 +224,7 @@ const Voice = () => {
     setAudioUrl(null);
 
     try {
-      const result = await apiService.generateSpeech(text, voice, tier, token || undefined);
+      const result = await api.generateSpeech(text, voice, tier, token || undefined);
       
       // Refresh balance after paid generation
       if (isPremium) {
@@ -458,7 +455,7 @@ const Voice = () => {
                           ) : (
                             <>
                               <Sparkles className="h-4 w-4 mr-2" />
-                              Clone Voice ($2.00)
+                              Clone Voice - $2.00
                             </>
                           )}
                         </Button>
@@ -471,40 +468,40 @@ const Voice = () => {
                   <SelectTrigger>
                     <SelectValue placeholder={isLoadingVoices ? "Loading voices..." : "Select a voice"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    {/* Cloned voices first */}
+                  <SelectContent>
+                    {/* Preset voices */}
+                    {voices.filter(v => !v.is_custom).map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{v.name}</span>
+                          <span className="text-xs text-muted-foreground">{v.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                    
+                    {/* Cloned voices */}
                     {voices.filter(v => v.is_custom).length > 0 && (
                       <>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
                           Your Cloned Voices
                         </div>
                         {voices.filter(v => v.is_custom).map((v) => (
                           <SelectItem key={v.id} value={v.id}>
                             <div className="flex items-center gap-2">
                               <Sparkles className="h-3 w-3 text-primary" />
-                              <span className="font-medium">{v.name}</span>
-                              <Badge variant="outline" className="text-[10px] ml-auto">cloned</Badge>
+                              <span>{v.name}</span>
                             </div>
                           </SelectItem>
                         ))}
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
-                          Preset Voices
-                        </div>
                       </>
                     )}
-                    {voices.filter(v => !v.is_custom).map((v) => (
-                      <SelectItem key={v.id} value={v.id}>
-                        <span className="font-medium">{v.name}</span>
-                        <span className="text-muted-foreground ml-2">— {v.description}</span>
-                      </SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <Button
                 onClick={generateSpeech}
-                disabled={isLoading || !text.trim() || (isPremium && !hasToken)}
+                disabled={isLoading || !text.trim() || !voice}
                 className="w-full"
               >
                 {isLoading ? (
@@ -515,34 +512,43 @@ const Voice = () => {
                 ) : (
                   <>
                     <Volume2 className="h-4 w-4 mr-2" />
-                    Generate Speech {isPremium && text.length > 0 && `($${estimatedCost.toFixed(3)})`}
+                    Generate Speech
+                    {isPremium && text.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        ~${estimatedCost.toFixed(3)}
+                      </Badge>
+                    )}
                   </>
                 )}
               </Button>
 
-              {isPremium && !hasToken && (
-                <p className="text-xs text-center text-muted-foreground">
-                  Premium tiers require a token. Click "Get Started" in the header to create one.
-                </p>
-              )}
-
               {audioUrl && (
-                <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
+                <div className="mt-4 p-4 bg-muted rounded-lg">
                   <audio
                     ref={audioRef}
                     src={audioUrl}
                     onEnded={() => setIsPlaying(false)}
                     className="hidden"
                   />
-                  <Button variant="outline" size="icon" onClick={togglePlayback}>
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <div className="flex-1 h-2 bg-background rounded-full overflow-hidden">
-                    <div className="h-full bg-primary w-0 transition-all" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={togglePlayback}
+                    >
+                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={downloadAudio}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      {isPlaying ? "Playing..." : "Ready to play"}
+                    </span>
                   </div>
-                  <Button variant="outline" size="icon" onClick={downloadAudio}>
-                    <Download className="h-4 w-4" />
-                  </Button>
                 </div>
               )}
             </CardContent>
@@ -550,20 +556,19 @@ const Voice = () => {
         </section>
 
         {/* Features */}
-        <section className="py-12 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold text-center mb-8">Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {features.map((feature) => (
-                <Card key={feature.title}>
-                  <CardContent className="pt-6">
-                    <feature.icon className="h-8 w-8 text-primary mb-4" />
-                    <h3 className="font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <section className="py-12 container mx-auto px-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className="border-border/50">
+                <CardHeader>
+                  <feature.icon className="h-8 w-8 text-primary mb-2" />
+                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
       </main>
@@ -574,4 +579,4 @@ const Voice = () => {
   );
 };
 
-export default Voice;
+export default VoicePage;
