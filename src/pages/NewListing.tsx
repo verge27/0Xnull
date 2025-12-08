@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
-import { addListing } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useListings } from '@/hooks/useListings';
 import { listingSchema } from '@/lib/validation';
 
 const NewListing = () => {
   const { user } = useAuth();
+  const { createListing } = useListings();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,7 +31,7 @@ const NewListing = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate inputs
@@ -51,24 +53,25 @@ const NewListing = () => {
       return;
     }
 
-    const newListing = {
-      id: `listing-${Date.now()}`,
-      sellerId: user.id,
+    setIsSubmitting(true);
+
+    const result = await createListing({
       title: formData.title,
       description: formData.description,
-      priceUsd: parseFloat(formData.priceUsd),
+      price_usd: parseFloat(formData.priceUsd),
       category: formData.category,
-      images: [formData.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'],
+      images: formData.imageUrl ? [formData.imageUrl] : [],
       stock: parseInt(formData.stock),
-      shippingPriceUsd: parseFloat(formData.shippingPriceUsd),
-      status: 'active' as const,
-      condition: 'new' as const,
-      createdAt: new Date().toISOString()
-    };
+      shipping_price_usd: parseFloat(formData.shippingPriceUsd),
+      condition: 'new'
+    });
 
-    addListing(newListing);
-    toast.success('Listing created successfully!');
-    navigate('/sell');
+    setIsSubmitting(false);
+
+    if (result) {
+      toast.success('Listing created successfully!');
+      navigate('/sell');
+    }
   };
 
   return (
@@ -168,8 +171,8 @@ const NewListing = () => {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Create Listing
+              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Listing'}
               </Button>
             </form>
           </CardContent>

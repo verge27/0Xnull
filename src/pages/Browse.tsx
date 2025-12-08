@@ -6,6 +6,7 @@ import { MarketInsights } from '@/components/MarketInsights';
 import { CommentsSection } from '@/components/CommentsSection';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { getListings } from '@/lib/data';
+import { useListings } from '@/hooks/useListings';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
 import { freakInTheSheetsListings } from '@/lib/partners/freakInTheSheets';
 import { peptidesUKPartnerListings } from '@/lib/partners/peptidesUK';
@@ -33,9 +34,27 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const demoListings = getListings();
+  const { listings: dbListings } = useListings();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Combine all listings (XMRBazaar first, then partner referrals, then demo)
+  // Convert database listings to the expected format
+  const databaseListings = dbListings.map(listing => ({
+    id: listing.id,
+    sellerId: listing.seller_id,
+    title: listing.title,
+    description: listing.description,
+    priceUsd: listing.price_usd,
+    category: listing.category,
+    images: listing.images.length > 0 ? listing.images : ['/placeholder.svg'],
+    stock: listing.stock,
+    shippingPriceUsd: listing.shipping_price_usd,
+    status: listing.status as 'active' | 'sold_out' | 'draft',
+    condition: listing.condition as 'new' | 'used' | 'digital',
+    createdAt: listing.created_at,
+    isDbListing: true
+  }));
+  
+  // Combine all listings (XMRBazaar first, then partner referrals, then database, then demo)
   const listings: any[] = [
     ...xmrbazaarListings.map(xmr => ({
       ...xmr,
@@ -114,6 +133,7 @@ const Browse = () => {
       isPartner: true,
       partnerName: 'UK-Peptides'
     })),
+    ...databaseListings,
     ...demoListings
   ];
 
