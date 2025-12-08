@@ -34,6 +34,7 @@ import FiatOnramp from "./pages/FiatOnramp";
 import ApiAnalytics from "./pages/ApiAnalytics";
 import Voice from "./pages/Voice";
 import Therapy from "./pages/Therapy";
+import Kokoro from "./pages/Kokoro";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/api-analytics" element={<ApiAnalytics />} />
             <Route path="/voice" element={<Voice />} />
             <Route path="/therapy" element={<Therapy />} />
+            <Route path="/kokoro" element={<Kokoro />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
