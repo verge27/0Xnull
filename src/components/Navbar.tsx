@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -96,6 +96,10 @@ export const Navbar = () => {
                     <Heart className="w-5 h-5 text-primary" />
                     <span>Therapy</span>
                   </Link>
+                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <span>Kokoro</span>
+                  </Link>
                   <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <AlertTriangle className="w-5 h-5 text-primary" />
                     <span>Safety</span>
@@ -139,6 +143,13 @@ export const Navbar = () => {
             <Link to="/ai">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">AI</span>
+              </Button>
+            </Link>
+
+            <Link to="/kokoro">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden md:inline">Kokoro</span>
               </Button>
             </Link>
 

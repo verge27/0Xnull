@@ -32,3 +32,12 @@ verify_jwt = false
 
 [functions.therapy-chat]
 verify_jwt = false
+
+[functions.voice-clone]
+verify_jwt = false
+
+[functions.voice-generate]
+verify_jwt = false
+
+[functions.voice-voices]
+verify_jwt = false

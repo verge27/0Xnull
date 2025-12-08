@@ -13,22 +13,14 @@ import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
 
-interface ClonedVoice {
+interface Voice {
   id: string;
   name: string;
-  created_at: string;
+  description: string;
+  is_custom?: boolean;
 }
 
 const CLONED_VOICES_KEY = "0xnull_cloned_voices";
-
-const presetVoices = [
-  { id: "bella", name: "Bella", description: "Warm and friendly" },
-  { id: "nicole", name: "Nicole", description: "Clear and professional" },
-  { id: "sarah", name: "Sarah", description: "Soft and gentle" },
-  { id: "sky", name: "Sky", description: "Bright and energetic" },
-  { id: "adam", name: "Adam", description: "Deep and confident" },
-  { id: "michael", name: "Michael", description: "Calm and authoritative" },
-];
 
 const tiers = [
   { id: "free", name: "Free", price: "Free", description: "Basic quality" },
@@ -60,9 +52,9 @@ const features = [
 ];
 
 const Voice = () => {
-  const { hasToken } = useToken();
+  const { hasToken, token, updateBalance } = useToken();
   const [text, setText] = useState("");
-  const [voice, setVoice] = useState("bella");
+  const [voice, setVoice] = useState("");
   const [tier, setTier] = useState<"free" | "standard" | "ultra">("free");
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -70,8 +62,11 @@ const Voice = () => {
   const [estimatedCost, setEstimatedCost] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Voices from API
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [isLoadingVoices, setIsLoadingVoices] = useState(true);
+
   // Voice cloning state
-  const [clonedVoices, setClonedVoices] = useState<ClonedVoice[]>([]);
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
   const [cloneName, setCloneName] = useState("");
   const [cloneFile, setCloneFile] = useState<File | null>(null);
@@ -81,24 +76,48 @@ const Voice = () => {
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
 
   const isPremium = tier !== "free";
-  const isClonedVoice = voice.startsWith("clone_");
+  const selectedVoice = voices.find(v => v.id === voice);
+  const isClonedVoice = selectedVoice?.is_custom === true;
 
-  // Load cloned voices from localStorage
+  // Fetch voices from API
   useEffect(() => {
-    const saved = localStorage.getItem(CLONED_VOICES_KEY);
-    if (saved) {
+    const fetchVoices = async () => {
+      setIsLoadingVoices(true);
       try {
-        setClonedVoices(JSON.parse(saved));
-      } catch {
-        console.error("Failed to parse cloned voices");
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-voices?include_custom=true`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setVoices(data.voices || []);
+          // Set default voice to first preset
+          const firstPreset = data.voices?.find((v: Voice) => !v.is_custom);
+          if (firstPreset && !voice) {
+            setVoice(firstPreset.id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch voices:", error);
+      } finally {
+        setIsLoadingVoices(false);
       }
-    }
+    };
+    fetchVoices();
   }, []);
 
-  // Save cloned voices to localStorage
-  const saveClonedVoices = (voices: ClonedVoice[]) => {
-    setClonedVoices(voices);
-    localStorage.setItem(CLONED_VOICES_KEY, JSON.stringify(voices));
+  // Refresh voices after cloning
+  const refreshVoices = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-voices?include_custom=true`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setVoices(data.voices || []);
+      }
+    } catch (error) {
+      console.error("Failed to refresh voices:", error);
+    }
   };
 
   const calculateCost = (charCount: number, selectedTier: "free" | "standard" | "ultra") => {
@@ -161,30 +180,36 @@ const Voice = () => {
     setIsCloning(true);
 
     try {
-      const { api } = await import("@/lib/api");
-      const result = await api.cloneVoice(cloneFile, cloneName.trim());
+      const formData = new FormData();
+      formData.append("name", cloneName.trim());
+      formData.append("audio", cloneFile);
+      if (token) formData.append("token", token);
 
-      if (result.error) {
-        throw new Error(result.error);
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-clone`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Clone failed");
       }
 
-      if (result.data) {
-        const newVoice: ClonedVoice = {
-          id: result.data.voice_id,
-          name: result.data.name,
-          created_at: new Date().toISOString(),
-        };
-
-        saveClonedVoices([...clonedVoices, newVoice]);
-        setVoice(newVoice.id);
-        toast.success(`Voice "${newVoice.name}" cloned! Cost: $2.00`);
-        
-        // Reset and close dialog
-        setCloneDialogOpen(false);
-        setCloneName("");
-        setCloneFile(null);
-        setClonePreviewUrl(null);
-      }
+      const result = await response.json();
+      
+      // Refresh voices list
+      await refreshVoices();
+      setVoice(result.voice_id);
+      toast.success(`Voice "${result.name}" cloned! Cost: $2.00`);
+      
+      // Reset and close dialog
+      setCloneDialogOpen(false);
+      setCloneName("");
+      setCloneFile(null);
+      setClonePreviewUrl(null);
     } catch (error) {
       console.error("Clone error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to clone voice");
@@ -201,6 +226,11 @@ const Voice = () => {
 
     if (text.length > 5000) {
       toast.error("Text must be under 5000 characters");
+      return;
+    }
+
+    if (!voice) {
+      toast.error("Please select a voice");
       return;
     }
 
@@ -221,13 +251,13 @@ const Voice = () => {
 
     try {
       if (tier === "free" && !isClonedVoice) {
-        // Free tier uses existing Supabase edge function
+        // Free tier uses existing NanoGPT edge function
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nanogpt-tts`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, voice }),
+            body: JSON.stringify({ text, voice: selectedVoice?.name?.toLowerCase() || "sarah" }),
           }
         );
 
@@ -239,20 +269,41 @@ const Voice = () => {
         const audioBlob = await response.blob();
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
-        toast.success("Audio generated successfully");
+        toast.success("Audio generated successfully (Free)");
       } else {
-        // Premium tiers use FastAPI backend with token
-        const { api } = await import("@/lib/api");
-        const result = await api.generateVoice(text, voice, tier === "free" ? "standard" : tier);
+        // Premium tiers use ElevenLabs via edge function
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-generate`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              text, 
+              voice_id: voice, 
+              tier: tier === "free" ? "standard" : tier 
+            }),
+          }
+        );
 
-        if (result.error) {
-          throw new Error(result.error);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to generate speech");
         }
 
-        if (result.data?.audio_url) {
-          setAudioUrl(result.data.audio_url);
-          toast.success(`Audio generated! Cost: $${result.data.cost_usd.toFixed(3)}`);
+        const result = await response.json();
+        
+        // Convert base64 to audio URL
+        const audioData = atob(result.audio_base64);
+        const audioArray = new Uint8Array(audioData.length);
+        for (let i = 0; i < audioData.length; i++) {
+          audioArray[i] = audioData.charCodeAt(i);
         }
+        const audioBlob = new Blob([audioArray], { type: "audio/mpeg" });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        
+        const costUsd = result.cost_cents / 100;
+        toast.success(`Audio generated! Cost: $${costUsd.toFixed(3)}`);
       }
     } catch (error) {
       console.error("TTS error:", error);
@@ -477,18 +528,18 @@ const Voice = () => {
                   </Dialog>
                 </div>
 
-                <Select value={voice} onValueChange={setVoice}>
+                <Select value={voice} onValueChange={setVoice} disabled={isLoadingVoices}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder={isLoadingVoices ? "Loading voices..." : "Select a voice"} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
                     {/* Cloned voices first */}
-                    {clonedVoices.length > 0 && (
+                    {voices.filter(v => v.is_custom).length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                           Your Cloned Voices
                         </div>
-                        {clonedVoices.map((v) => (
+                        {voices.filter(v => v.is_custom).map((v) => (
                           <SelectItem key={v.id} value={v.id}>
                             <div className="flex items-center gap-2">
                               <Sparkles className="h-3 w-3 text-primary" />
@@ -502,7 +553,7 @@ const Voice = () => {
                         </div>
                       </>
                     )}
-                    {presetVoices.map((v) => (
+                    {voices.filter(v => !v.is_custom).map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         <span className="font-medium">{v.name}</span>
                         <span className="text-muted-foreground ml-2">— {v.description}</span>
