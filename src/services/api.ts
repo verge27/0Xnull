@@ -109,8 +109,8 @@ export const api = {
     
     const formData = new FormData();
     formData.append('audio', audioFile);
-    formData.append('token', token);
-    formData.append('name', name);
+    // FastAPI expects nested fields as separate form entries
+    formData.append('req', new Blob([JSON.stringify({ token, name })], { type: 'application/json' }));
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
