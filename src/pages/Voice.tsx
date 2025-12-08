@@ -12,13 +12,9 @@ import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe, Uploa
 import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
+import { api, type Voice } from "@/lib/api";
 
-interface Voice {
-  id: string;
-  name: string;
-  description: string;
-  is_custom?: boolean;
-}
+// Voice interface imported from api.ts
 
 const CLONED_VOICES_KEY = "0xnull_cloned_voices";
 
@@ -84,17 +80,16 @@ const Voice = () => {
     const fetchVoices = async () => {
       setIsLoadingVoices(true);
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-voices?include_custom=true`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setVoices(data.voices || []);
+        const result = await api.getVoices();
+        if (result.data) {
+          setVoices(result.data);
           // Set default voice to first preset
-          const firstPreset = data.voices?.find((v: Voice) => !v.is_custom);
+          const firstPreset = result.data.find((v: Voice) => !v.is_custom);
           if (firstPreset && !voice) {
             setVoice(firstPreset.id);
           }
+        } else if (result.error) {
+          console.error("Failed to fetch voices:", result.error);
         }
       } catch (error) {
         console.error("Failed to fetch voices:", error);
@@ -108,12 +103,9 @@ const Voice = () => {
   // Refresh voices after cloning
   const refreshVoices = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-voices?include_custom=true`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setVoices(data.voices || []);
+      const result = await api.getVoices();
+      if (result.data) {
+        setVoices(result.data);
       }
     } catch (error) {
       console.error("Failed to refresh voices:", error);
@@ -180,36 +172,29 @@ const Voice = () => {
     setIsCloning(true);
 
     try {
-      const formData = new FormData();
-      formData.append("name", cloneName.trim());
-      formData.append("audio", cloneFile);
-      if (token) formData.append("token", token);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-clone`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Clone failed");
+      const result = await api.cloneVoice(cloneFile, cloneName.trim());
+      
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      const result = await response.json();
-      
-      // Refresh voices list
-      await refreshVoices();
-      setVoice(result.voice_id);
-      toast.success(`Voice "${result.name}" cloned! Cost: $2.00`);
-      
-      // Reset and close dialog
-      setCloneDialogOpen(false);
-      setCloneName("");
-      setCloneFile(null);
-      setClonePreviewUrl(null);
+      if (result.data) {
+        // Update balance if returned
+        if (result.new_balance_usd !== undefined) {
+          updateBalance(result.new_balance_usd);
+        }
+        
+        // Refresh voices list
+        await refreshVoices();
+        setVoice(result.data.voice_id);
+        toast.success(`Voice "${result.data.name}" cloned! Cost: $${result.data.cost_usd.toFixed(2)}`);
+        
+        // Reset and close dialog
+        setCloneDialogOpen(false);
+        setCloneName("");
+        setCloneFile(null);
+        setClonePreviewUrl(null);
+      }
     } catch (error) {
       console.error("Clone error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to clone voice");
@@ -241,8 +226,9 @@ const Voice = () => {
       return;
     }
 
-    if (isPremium && !hasToken) {
-      toast.error("Premium tiers require a token. Create one to continue.");
+    // All tiers now require token (API-based)
+    if (!hasToken) {
+      toast.error("Voice generation requires a token. Create one to continue.");
       return;
     }
 
@@ -250,60 +236,30 @@ const Voice = () => {
     setAudioUrl(null);
 
     try {
-      if (tier === "free" && !isClonedVoice) {
-        // Free tier uses existing NanoGPT edge function
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nanogpt-tts`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, voice: selectedVoice?.name?.toLowerCase() || "sarah" }),
-          }
-        );
+      const selectedTier = tier === "free" ? "standard" : tier;
+      const result = await api.generateVoice(text, voice, selectedTier);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Failed to generate speech");
+      if (result.data) {
+        // Update balance if returned
+        if (result.new_balance_usd !== undefined) {
+          updateBalance(result.new_balance_usd);
         }
-
-        const audioBlob = await response.blob();
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        toast.success("Audio generated successfully (Free)");
-      } else {
-        // Premium tiers use ElevenLabs via edge function
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-generate`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              text, 
-              voice_id: voice, 
-              tier: tier === "free" ? "standard" : tier 
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Failed to generate speech");
-        }
-
-        const result = await response.json();
         
-        // Convert base64 to audio URL
-        const audioData = atob(result.audio_base64);
-        const audioArray = new Uint8Array(audioData.length);
-        for (let i = 0; i < audioData.length; i++) {
-          audioArray[i] = audioData.charCodeAt(i);
+        // Fetch the audio from the URL
+        const audioResponse = await fetch(result.data.audio_url);
+        if (!audioResponse.ok) {
+          throw new Error("Failed to fetch audio");
         }
-        const audioBlob = new Blob([audioArray], { type: "audio/mpeg" });
+        
+        const audioBlob = await audioResponse.blob();
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         
-        const costUsd = result.cost_cents / 100;
-        toast.success(`Audio generated! Cost: $${costUsd.toFixed(3)}`);
+        toast.success(`Audio generated! Cost: $${result.data.cost_usd.toFixed(3)}`);
       }
     } catch (error) {
       console.error("TTS error:", error);
@@ -565,7 +521,7 @@ const Voice = () => {
 
               <Button
                 onClick={generateSpeech}
-                disabled={isLoading || !text.trim() || (isPremium && !hasToken)}
+                disabled={isLoading || !text.trim() || !hasToken}
                 className="w-full"
               >
                 {isLoading ? (
@@ -581,9 +537,9 @@ const Voice = () => {
                 )}
               </Button>
 
-              {isPremium && !hasToken && (
+              {!hasToken && (
                 <p className="text-xs text-center text-muted-foreground">
-                  Premium tiers require a token. Click "Get Started" in the header to create one.
+                  Voice generation requires a token. Click "Get Started" in the header to create one.
                 </p>
               )}
 
