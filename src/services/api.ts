@@ -104,27 +104,20 @@ export const api = {
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
-    const proxyUrl = new URL(PROXY_URL);
-    proxyUrl.searchParams.set('path', '/api/voice/clone');
+    // Convert file to base64
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
     
-    const formData = new FormData();
-    formData.append('audio', audioFile);
-    // FastAPI with model_validator expects JSON string for the nested object
-    formData.append('req', JSON.stringify({ token, name }));
-    
-    const res = await fetch(proxyUrl.toString(), {
+    return proxyRequest<{ clone_id: string; name: string }>('/api/voice/clone', {
       method: 'POST',
-      body: formData,
+      body: JSON.stringify({
+        req: { token, name },
+        audio: {
+          filename: audioFile.name,
+          content: base64,
+          content_type: audioFile.type
+        }
+      }),
     });
-    
-    if (res.status === 402) {
-      throw new Error('INSUFFICIENT_BALANCE');
-    }
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.detail || data.error || 'Clone failed');
-    }
-    return data;
   },
 };
