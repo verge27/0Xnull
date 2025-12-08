@@ -104,29 +104,28 @@ export const api = {
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
-    // Convert file to base64 using FileReader (handles large files)
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        // Remove the data URL prefix (e.g., "data:audio/mpeg;base64,")
-        const base64Data = result.split(',')[1];
-        resolve(base64Data);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(audioFile);
+    const proxyUrl = new URL(PROXY_URL);
+    proxyUrl.searchParams.set('path', '/api/voice/clone');
+    
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('name', name);
+    formData.append('description', '');
+    formData.append('audio', audioFile);
+    
+    const res = await fetch(proxyUrl.toString(), {
+      method: 'POST',
+      body: formData,
     });
     
-    return proxyRequest<{ clone_id: string; name: string }>('/api/voice/clone', {
-      method: 'POST',
-      body: JSON.stringify({
-        req: { token, name },
-        audio: {
-          filename: audioFile.name,
-          content: base64,
-          content_type: audioFile.type
-        }
-      }),
-    });
+    if (res.status === 402) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || data.error || 'Clone failed');
+    }
+    return data;
   },
 };
