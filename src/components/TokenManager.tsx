@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from '@/components/ui/badge';
 import { Wallet, Plus, Key, Copy, Check, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 export function TokenBadge() {
   const { balance, hasToken, isLoading, refreshBalance } = useToken();
@@ -322,6 +323,16 @@ export function TopupDialog() {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* QR Code */}
+            <div className="flex justify-center p-4 bg-white rounded-lg">
+              <QRCodeSVG 
+                value={`monero:${address}?tx_amount=${xmrAmount}`}
+                size={180}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Send Exactly</CardTitle>
@@ -349,7 +360,7 @@ export function TopupDialog() {
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              Balance updates automatically after 1 confirmation
+              Scan QR with your Monero wallet • Balance updates after 1 confirmation
             </p>
 
             <Button variant="outline" onClick={() => setOpen(false)} className="w-full">
