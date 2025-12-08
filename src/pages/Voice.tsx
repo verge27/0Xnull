@@ -185,7 +185,13 @@ const VoicePage = () => {
       setClonePreviewUrl(null);
     } catch (error) {
       console.error("Clone error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to clone voice");
+      const errorMessage = error instanceof Error ? error.message : "Failed to clone voice";
+      
+      if (errorMessage === 'INSUFFICIENT_BALANCE') {
+        toast.error("Insufficient balance. Voice cloning costs $2.00. Please top up your account.");
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsCloning(false);
     }
