@@ -108,7 +108,7 @@ export const api = {
     proxyUrl.searchParams.set('path', `/api/voice/clone?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}`);
     
     const formData = new FormData();
-    formData.append('audio', audioFile);
+    formData.append('req', audioFile);
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
