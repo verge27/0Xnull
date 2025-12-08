@@ -1,6 +1,6 @@
 // 0xNull Backend API Client
 // Configure this to your FastAPI backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.0xnull.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.0xnull.io';
 
 interface ApiResponse<T> {
   data?: T;
