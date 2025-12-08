@@ -71,7 +71,11 @@ export function TokenProvider({ children }: { children: ReactNode }) {
       const data = await apiService.createToken();
       const newToken = data.token;
       setToken(newToken);
-      setBalance(data.balance_cents / 100);
+      // API returns balance_usd, convert to balance if needed
+      const balanceValue = data.balance_cents !== undefined 
+        ? data.balance_cents / 100 
+        : data.balance_usd;
+      setBalance(balanceValue);
       localStorage.setItem(STORAGE_KEY, newToken);
       return newToken;
     } catch (err) {
@@ -89,7 +93,11 @@ export function TokenProvider({ children }: { children: ReactNode }) {
     try {
       const data = await apiService.getTokenInfo(inputToken);
       setToken(inputToken);
-      setBalance(data.balance_cents / 100);
+      // Handle both balance_cents and balance_usd
+      const balanceValue = data.balance_cents !== undefined 
+        ? data.balance_cents / 100 
+        : data.balance_usd;
+      setBalance(balanceValue);
       localStorage.setItem(STORAGE_KEY, inputToken);
       return true;
     } catch (err) {

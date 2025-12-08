@@ -7,7 +7,8 @@ const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
 export interface TokenInfo {
   token: string;
   balance_usd: number;
-  balance_cents: number;
+  balance_cents?: number;
+  message?: string;
 }
 
 export interface TopupResponse {
