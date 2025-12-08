@@ -109,7 +109,8 @@ export const api = {
     
     const formData = new FormData();
     formData.append('audio', audioFile);
-    formData.append('req', JSON.stringify({ token, name }));
+    formData.append('token', token);
+    formData.append('name', name);
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
