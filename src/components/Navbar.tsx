@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
 import { NavLink } from './NavLink';
+import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 
@@ -147,6 +148,9 @@ export const Navbar = () => {
                 <span className="hidden md:inline">Safety</span>
               </Button>
             </Link>
+
+            {/* Token Balance Badge */}
+            <TokenBadge />
 
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative">
