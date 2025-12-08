@@ -134,12 +134,14 @@ const VPS = () => {
   };
 
   const generateToken = () => {
-    // SporeStack requires ss_t_ prefix + 27 random chars (32 total)
+    // SporeStack requires 64 hex characters for existing API calls
+    // For new token format: ss_t_<13 chars>_<13 chars> (32 total with 3 underscores)
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    const array = new Uint8Array(27);
+    const array = new Uint8Array(26);
     crypto.getRandomValues(array);
-    const randomPart = Array.from(array).map(b => chars[b % chars.length]).join('');
-    const newToken = `ss_t_${randomPart}`;
+    const part1 = Array.from(array.slice(0, 13)).map(b => chars[b % chars.length]).join('');
+    const part2 = Array.from(array.slice(13, 26)).map(b => chars[b % chars.length]).join('');
+    const newToken = `ss_t_${part1}_${part2}`;
     setToken(newToken);
     setIsNewToken(true);
     setTokenCopied(false);
@@ -195,14 +197,20 @@ const VPS = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currency: 'xmr', dollars: amountUsd }),
       });
+      
+      const text = await response.text();
+      
       if (response.ok) {
-        const data = await response.json();
-        setFundingAddress(data.address || '');
-        setFundingXmrAmount(data.amount || '');
-        setFundingAmount(amountUsd);
+        try {
+          const data = JSON.parse(text);
+          setFundingAddress(data.address || '');
+          setFundingXmrAmount(data.amount || '');
+          setFundingAmount(amountUsd);
+        } catch {
+          throw new Error(text || 'Invalid response from server');
+        }
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to get funding address');
+        throw new Error(text || 'Failed to get funding address');
       }
     } catch (error: any) {
       console.error('Error getting funding address:', error);
