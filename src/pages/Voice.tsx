@@ -12,16 +12,14 @@ import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe, Uploa
 import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
-import { api, type Voice } from "@/lib/api";
+import { api, type Voice, TIER_CONFIG } from "@/lib/api";
 
 // Voice interface imported from api.ts
 
-const CLONED_VOICES_KEY = "0xnull_cloned_voices";
-
 const tiers = [
-  { id: "free", name: "Free", price: "Free", description: "Basic quality" },
-  { id: "standard", name: "Standard", price: "$0.15/1k", description: "Fast" },
-  { id: "ultra", name: "Ultra", price: "$0.25/1k", description: "Best" },
+  { id: "free", name: "Free", price: "Free", description: "100 chars max", maxChars: 100 },
+  { id: "standard", name: "Standard", price: "$0.15/1k", description: "Fast", maxChars: 5000 },
+  { id: "ultra", name: "Ultra", price: "$0.25/1k", description: "Best", maxChars: 5000 },
 ];
 
 const features = [
@@ -74,6 +72,8 @@ const Voice = () => {
   const isPremium = tier !== "free";
   const selectedVoice = voices.find(v => v.id === voice);
   const isClonedVoice = selectedVoice?.is_custom === true;
+  const currentTierConfig = TIER_CONFIG[tier];
+  const maxChars = currentTierConfig.maxChars;
 
   // Fetch voices from API
   useEffect(() => {
@@ -186,8 +186,8 @@ const Voice = () => {
         
         // Refresh voices list
         await refreshVoices();
-        setVoice(result.data.voice_id);
-        toast.success(`Voice "${result.data.name}" cloned! Cost: $${result.data.cost_usd.toFixed(2)}`);
+        setVoice(result.data.clone_id);
+        toast.success(`Voice "${result.data.name}" cloned! Cost: $2.00`);
         
         // Reset and close dialog
         setCloneDialogOpen(false);
@@ -209,8 +209,8 @@ const Voice = () => {
       return;
     }
 
-    if (text.length > 5000) {
-      toast.error("Text must be under 5000 characters");
+    if (text.length > maxChars) {
+      toast.error(`Text must be under ${maxChars} characters for ${tier} tier`);
       return;
     }
 
@@ -226,9 +226,9 @@ const Voice = () => {
       return;
     }
 
-    // All tiers now require token (API-based)
-    if (!hasToken) {
-      toast.error("Voice generation requires a token. Create one to continue.");
+    // Premium tiers require token
+    if (isPremium && !hasToken) {
+      toast.error("Premium tiers require a token. Create one to continue.");
       return;
     }
 
@@ -236,30 +236,28 @@ const Voice = () => {
     setAudioUrl(null);
 
     try {
-      const selectedTier = tier === "free" ? "standard" : tier;
-      const result = await api.generateVoice(text, voice, selectedTier);
+      const result = await api.generateVoice(text, voice, tier);
       
       if (result.error) {
         throw new Error(result.error);
       }
 
       if (result.data) {
-        // Update balance if returned
+        // Update balance if returned (for paid tiers)
         if (result.new_balance_usd !== undefined) {
           updateBalance(result.new_balance_usd);
         }
         
-        // Fetch the audio from the URL
-        const audioResponse = await fetch(result.data.audio_url);
-        if (!audioResponse.ok) {
-          throw new Error("Failed to fetch audio");
+        // Create audio URL from base64
+        const audioDataUrl = `data:audio/${result.data.format};base64,${result.data.audio}`;
+        setAudioUrl(audioDataUrl);
+        
+        const costDollars = result.data.cost_cents / 100;
+        if (costDollars > 0) {
+          toast.success(`Audio generated! Cost: $${costDollars.toFixed(3)}`);
+        } else {
+          toast.success("Audio generated!");
         }
-        
-        const audioBlob = await audioResponse.blob();
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        
-        toast.success(`Audio generated! Cost: $${result.data.cost_usd.toFixed(3)}`);
       }
     } catch (error) {
       console.error("TTS error:", error);
@@ -330,7 +328,7 @@ const Voice = () => {
                   value={text}
                   onChange={(e) => handleTextChange(e.target.value)}
                   className="min-h-[150px] resize-none"
-                  maxLength={5000}
+                  maxLength={maxChars}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>
@@ -338,7 +336,7 @@ const Voice = () => {
                       <>Est. cost: <span className="text-primary font-medium">${estimatedCost.toFixed(3)}</span></>
                     )}
                   </span>
-                  <span>{text.length}/5000 characters</span>
+                  <span>{text.length}/{maxChars} characters</span>
                 </div>
               </div>
 
@@ -521,7 +519,7 @@ const Voice = () => {
 
               <Button
                 onClick={generateSpeech}
-                disabled={isLoading || !text.trim() || !hasToken}
+                disabled={isLoading || !text.trim() || (isPremium && !hasToken)}
                 className="w-full"
               >
                 {isLoading ? (
@@ -537,9 +535,9 @@ const Voice = () => {
                 )}
               </Button>
 
-              {!hasToken && (
+              {isPremium && !hasToken && (
                 <p className="text-xs text-center text-muted-foreground">
-                  Voice generation requires a token. Click "Get Started" in the header to create one.
+                  Premium tiers require a token. Click "Get Started" in the header to create one.
                 </p>
               )}
 
