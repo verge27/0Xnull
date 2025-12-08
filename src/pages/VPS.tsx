@@ -144,14 +144,22 @@ const VPS = () => {
   };
 
   const generateToken = () => {
-    // SporeStack token format: ss_t_{11 random hex chars}_{4 char checksum}
+    // SporeStack token format: ss_t_{22 hex chars}_{4 char checksum}
+    // Python: secrets.token_hex(11) gives 22 hex chars
     const array = new Uint8Array(11);
     crypto.getRandomValues(array);
-    const randomHex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 22);
+    const randomHex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
     const toHash = `ss_t_${randomHex}`;
     const hash = adler32(toHash);
-    // Pack as unsigned int and take last 4 hex chars
-    const checksum = hash.toString(16).padStart(8, '0').slice(-4);
+    // Python: b16encode(pack("I", hash)) packs as little-endian unsigned int
+    // Then takes last 4 chars lowercase
+    const packed = new Uint8Array(4);
+    packed[0] = hash & 0xff;
+    packed[1] = (hash >> 8) & 0xff;
+    packed[2] = (hash >> 16) & 0xff;
+    packed[3] = (hash >> 24) & 0xff;
+    const b16 = Array.from(packed).map(b => b.toString(16).padStart(2, '0')).join('');
+    const checksum = b16.slice(-4);
     const newToken = `${toHash}_${checksum}`;
     setToken(newToken);
     setIsNewToken(true);
