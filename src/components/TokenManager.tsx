@@ -239,13 +239,13 @@ export function TopupDialog() {
     
     setIsLoading(true);
     const { api } = await import('@/lib/api');
-    const result = await api.topupToken(parseFloat(amount));
+    const result = await api.createDeposit(parseFloat(amount));
     
     if (result.error) {
       toast.error(result.error);
     } else if (result.data) {
-      setAddress(result.data.address);
-      setXmrAmount(result.data.amount_xmr);
+      setAddress(result.data.xmr_address);
+      setXmrAmount(result.data.xmr_amount);
     }
     setIsLoading(false);
   };

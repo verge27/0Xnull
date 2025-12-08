@@ -1,6 +1,5 @@
 // 0xNull Backend API Client
-// Configure this to your FastAPI backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.0xnull.io';
+const API_BASE_URL = 'https://api.0xnull.io';
 
 interface ApiResponse<T> {
   data?: T;
@@ -11,35 +10,42 @@ interface ApiResponse<T> {
 interface TokenInfo {
   token: string;
   balance_usd: number;
-  created_at: string;
+  balance_cents?: number;
+  created_at?: string;
 }
 
 interface TopupResponse {
-  address: string;
-  amount_xmr: number;
-  amount_usd: number;
-  expires_at: string;
+  xmr_address: string;
+  xmr_amount: number;
+  deposit_id: string;
+  qr_code?: string;
+}
+
+interface DepositStatus {
+  confirmed: boolean;
+  amount_usd?: number;
 }
 
 interface VoiceGenerateResponse {
-  audio_url: string;
-  duration_seconds: number;
-  characters_used: number;
-  cost_usd: number;
-  new_balance_usd: number;
+  audio: string; // base64 encoded
+  format: 'mp3' | 'wav';
+  cost_cents: number;
+  duration_seconds?: number;
+  characters_used?: number;
 }
 
 interface VoiceCloneResponse {
-  voice_id: string;
+  clone_id: string;
   name: string;
-  cost_usd: number;
-  new_balance_usd: number;
+  status: string;
+  cost_usd?: number;
 }
 
 interface Voice {
   id: string;
   name: string;
   description: string;
+  provider?: string;
   is_custom?: boolean;
 }
 
@@ -76,6 +82,13 @@ interface SwapStatus {
   receive_amount: string;
   receive_address: string;
 }
+
+// Tier configuration
+export const TIER_CONFIG = {
+  free: { maxChars: 100, requiresToken: false },
+  standard: { maxChars: 5000, requiresToken: true },
+  ultra: { maxChars: 5000, requiresToken: true }
+} as const;
 
 class ApiClient {
   private token: string | null = null;
@@ -116,6 +129,9 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 402) {
+          return { error: 'Insufficient balance' };
+        }
         return { error: data.detail || data.error || 'Request failed' };
       }
 
@@ -137,36 +153,61 @@ class ApiClient {
     if (!this.token) {
       return { error: 'No token set' };
     }
-    return this.request<TokenInfo>(`/api/token/info?token=${this.token}`);
+    const result = await this.request<{ balance_cents: number }>(`/api/token/balance?token=${this.token}`);
+    if (result.data) {
+      return {
+        data: {
+          token: this.token,
+          balance_usd: result.data.balance_cents / 100,
+          balance_cents: result.data.balance_cents
+        }
+      };
+    }
+    return { error: result.error };
   }
 
-  async topupToken(amount_usd: number): Promise<ApiResponse<TopupResponse>> {
+  async createDeposit(amount_usd: number): Promise<ApiResponse<TopupResponse>> {
     if (!this.token) {
       return { error: 'No token set' };
     }
-    return this.request<TopupResponse>('/api/token/topup', {
+    return this.request<TopupResponse>('/api/token/deposit', {
       method: 'POST',
       body: JSON.stringify({ token: this.token, amount_usd }),
     });
   }
 
+  async getDepositStatus(deposit_id: string): Promise<ApiResponse<DepositStatus>> {
+    return this.request<DepositStatus>(`/api/token/deposit/${deposit_id}/status`);
+  }
+
   // Voice Services
   async getVoices(): Promise<ApiResponse<Voice[]>> {
-    const tokenParam = this.token ? `?token=${this.token}` : '';
-    return this.request<Voice[]>(`/api/voice/voices${tokenParam}`);
+    const result = await this.request<{ voices: Voice[] }>('/api/voice/voices');
+    if (result.data?.voices) {
+      return { data: result.data.voices };
+    }
+    return { error: result.error };
   }
 
   async generateVoice(
     text: string,
     voice_id: string,
-    tier: 'standard' | 'ultra' = 'standard'
+    tier: 'free' | 'standard' | 'ultra' = 'standard'
   ): Promise<ApiResponse<VoiceGenerateResponse>> {
-    if (!this.token) {
-      return { error: 'No token set' };
+    const body: Record<string, unknown> = {
+      text,
+      voice: voice_id,
+      tier
+    };
+    
+    // Only include token for paid tiers
+    if (tier !== 'free' && this.token) {
+      body.token = this.token;
     }
+
     return this.request<VoiceGenerateResponse>('/api/voice/generate', {
       method: 'POST',
-      body: JSON.stringify({ token: this.token, text, voice_id, tier }),
+      body: JSON.stringify(body),
     });
   }
 
@@ -190,6 +231,10 @@ class ApiClient {
         body: formData,
       });
 
+      if (response.status === 402) {
+        return { error: 'Insufficient balance - need $2.00' };
+      }
+
       const data = await response.json();
       if (!response.ok) {
         return { error: data.detail || data.error || 'Clone failed' };
@@ -198,6 +243,13 @@ class ApiClient {
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Network error' };
     }
+  }
+
+  async getClones(): Promise<ApiResponse<Voice[]>> {
+    if (!this.token) {
+      return { error: 'No token set' };
+    }
+    return this.request<Voice[]>(`/api/voice/clones?token=${this.token}`);
   }
 
   // AI Chat Services
@@ -302,7 +354,8 @@ class ApiClient {
 export const api = new ApiClient();
 export type { 
   TokenInfo, 
-  TopupResponse, 
+  TopupResponse,
+  DepositStatus,
   VoiceGenerateResponse, 
   Voice, 
   ChatMessage, 
