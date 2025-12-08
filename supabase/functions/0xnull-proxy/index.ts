@@ -45,6 +45,18 @@ serve(async (req) => {
       if (contentType.includes('multipart/form-data')) {
         // For file uploads, read the form data and re-create it for the target API
         const formData = await req.formData();
+        
+        // Log what we're sending
+        const entries: string[] = [];
+        formData.forEach((value, key) => {
+          if (value instanceof File) {
+            entries.push(`${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+          } else {
+            entries.push(`${key}: ${String(value).substring(0, 100)}`);
+          }
+        });
+        console.log(`FormData entries: ${entries.join(', ')}`);
+        
         fetchOptions.body = formData;
         // Don't set Content-Type - let fetch set the correct boundary
       } else {

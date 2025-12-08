@@ -109,9 +109,8 @@ export const api = {
     
     const formData = new FormData();
     formData.append('audio', audioFile);
-    // Use bracket notation for nested fields
-    formData.append('req[token]', token);
-    formData.append('req[name]', name);
+    // FastAPI with model_validator expects JSON string for the nested object
+    formData.append('req', JSON.stringify({ token, name }));
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
