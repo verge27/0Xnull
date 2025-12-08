@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTriangle, Check } from 'lucide-react';
+import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTriangle, Check, Wallet } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,11 @@ const VPS = () => {
   
   const [fundingOpen, setFundingOpen] = useState(false);
   const [fundingAddress, setFundingAddress] = useState('');
+  const [fundingAmount, setFundingAmount] = useState<number | null>(null);
+  const [fundingXmrAmount, setFundingXmrAmount] = useState<string>('');
+  const [fundingLoading, setFundingLoading] = useState(false);
+  const [selectedFundAmount, setSelectedFundAmount] = useState<number | 'custom'>(25);
+  const [customFundAmount, setCustomFundAmount] = useState('');
 
   useEffect(() => {
     const stored = localStorage.getItem('sporestack_token');
@@ -170,8 +176,18 @@ const VPS = () => {
     }
   };
 
-  const getFundingAddress = async () => {
+  const openFundingDialog = () => {
+    setFundingOpen(true);
+    setFundingAddress('');
+    setFundingXmrAmount('');
+    setFundingAmount(null);
+    setSelectedFundAmount(25);
+    setCustomFundAmount('');
+  };
+
+  const getFundingAddress = async (amountUsd: number) => {
     if (!savedToken) return;
+    setFundingLoading(true);
     try {
       const response = await fetch(`${SPORESTACK_API}/token/topup`, {
         method: 'POST',
@@ -179,17 +195,36 @@ const VPS = () => {
           Authorization: `Bearer ${savedToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ currency: 'xmr' }),
+        body: JSON.stringify({ currency: 'xmr', amount_usd: amountUsd }),
       });
       if (response.ok) {
         const data = await response.json();
         setFundingAddress(data.address || '');
-        setFundingOpen(true);
+        setFundingXmrAmount(data.amount || '');
+        setFundingAmount(amountUsd);
+      } else {
+        throw new Error('Failed to get funding address');
       }
     } catch (error) {
       console.error('Error getting funding address:', error);
       toast({ title: 'Error', description: 'Failed to get funding address', variant: 'destructive' });
     }
+    setFundingLoading(false);
+  };
+
+  const handleFundAmountSubmit = () => {
+    const amount = selectedFundAmount === 'custom' ? parseFloat(customFundAmount) : selectedFundAmount;
+    if (amount && amount >= 1) {
+      getFundingAddress(amount);
+    } else {
+      toast({ title: 'Invalid amount', description: 'Please enter at least $1', variant: 'destructive' });
+    }
+  };
+
+  const refreshFundingBalance = async () => {
+    if (!savedToken) return;
+    await fetchBalance(savedToken);
+    toast({ title: 'Balance refreshed' });
   };
 
   const launchServer = async () => {
@@ -373,7 +408,8 @@ const VPS = () => {
                   <Badge variant="outline" className="text-sm">
                     Balance: ${balance?.toFixed(2) || '0.00'}
                   </Badge>
-                  <Button variant="outline" size="sm" onClick={getFundingAddress}>
+                  <Button variant="outline" size="sm" onClick={openFundingDialog}>
+                    <Wallet className="h-4 w-4 mr-1" />
                     Add Funds
                   </Button>
                   <Button variant="ghost" size="sm" onClick={clearToken}>
@@ -559,22 +595,142 @@ const VPS = () => {
 
           {/* Funding Dialog */}
           <Dialog open={fundingOpen} onOpenChange={setFundingOpen}>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add Funds (XMR)</DialogTitle>
                 <DialogDescription>
-                  Send Monero to the address below to top up your balance
+                  {fundingAddress 
+                    ? 'Send the exact amount of Monero shown below'
+                    : 'Select how much you want to add to your balance'
+                  }
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="bg-secondary p-4 rounded-lg">
-                  <code className="text-sm break-all">{fundingAddress}</code>
+              
+              {!fundingAddress ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[10, 25, 50, 100].map((amount) => (
+                      <Button
+                        key={amount}
+                        variant={selectedFundAmount === amount ? 'default' : 'outline'}
+                        onClick={() => setSelectedFundAmount(amount)}
+                        className="w-full"
+                      >
+                        ${amount}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={selectedFundAmount === 'custom' ? 'default' : 'outline'}
+                      onClick={() => setSelectedFundAmount('custom')}
+                      className="shrink-0"
+                    >
+                      Custom
+                    </Button>
+                    {selectedFundAmount === 'custom' && (
+                      <div className="flex items-center gap-1 flex-1">
+                        <span className="text-muted-foreground">$</span>
+                        <Input
+                          type="number"
+                          placeholder="Enter amount"
+                          value={customFundAmount}
+                          onChange={(e) => setCustomFundAmount(e.target.value)}
+                          min="1"
+                          className="flex-1"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button 
+                    className="w-full" 
+                    onClick={handleFundAmountSubmit}
+                    disabled={fundingLoading || (selectedFundAmount === 'custom' && !customFundAmount)}
+                  >
+                    {fundingLoading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Getting Address...
+                      </>
+                    ) : (
+                      'Get Payment Address'
+                    )}
+                  </Button>
                 </div>
-                <Button className="w-full" onClick={() => copyToClipboard(fundingAddress)}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Address
-                </Button>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-center p-4 bg-white rounded-lg">
+                    <QRCodeSVG
+                      value={`monero:${fundingAddress}?tx_amount=${fundingXmrAmount}`}
+                      size={200}
+                      level="M"
+                    />
+                  </div>
+                  
+                  <div className="bg-secondary/50 p-4 rounded-lg space-y-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Amount (USD)</Label>
+                      <p className="font-semibold">${fundingAmount?.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Send exactly (XMR)</Label>
+                      <div className="flex items-center gap-2">
+                        <code className="font-mono text-lg font-bold text-primary">{fundingXmrAmount}</code>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-6 w-6"
+                          onClick={() => copyToClipboard(fundingXmrAmount)}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">To Address</Label>
+                      <div className="flex items-start gap-2">
+                        <code className="text-xs break-all flex-1">{fundingAddress}</code>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-6 w-6 shrink-0"
+                          onClick={() => copyToClipboard(fundingAddress)}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        setFundingAddress('');
+                        setFundingXmrAmount('');
+                        setFundingAmount(null);
+                      }}
+                    >
+                      Change Amount
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={refreshFundingBalance}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      Check Balance
+                    </Button>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground text-center">
+                    Balance updates after 1 confirmation (~2 min)
+                  </p>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 
