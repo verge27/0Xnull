@@ -73,19 +73,37 @@ const VoicePage = () => {
   const currentTierConfig = TIER_CONFIG[tier];
   const maxChars = currentTierConfig.maxChars;
 
-  // Fetch voices from API
+  // Fetch voices and clones from API
   useEffect(() => {
     const fetchVoices = async () => {
       setIsLoadingVoices(true);
       try {
+        // Fetch preset voices
         const result = await api.getVoices();
-        if (result.voices) {
-          setVoices(result.voices);
-          // Set default voice to first preset
-          const firstPreset = result.voices.find((v: Voice) => !v.is_custom);
-          if (firstPreset && !voice) {
-            setVoice(firstPreset.id);
+        let allVoices: Voice[] = result.voices || [];
+        
+        // Also fetch user's cloned voices if they have a token
+        if (token) {
+          try {
+            const clonesResult = await api.getClones(token);
+            if (clonesResult.clones && clonesResult.clones.length > 0) {
+              // Mark clones as custom and add to list
+              const clonedVoices = clonesResult.clones.map(c => ({
+                ...c,
+                is_custom: true
+              }));
+              allVoices = [...clonedVoices, ...allVoices];
+            }
+          } catch (e) {
+            console.error("Failed to fetch clones:", e);
           }
+        }
+        
+        setVoices(allVoices);
+        // Set default voice to first preset
+        const firstPreset = allVoices.find((v: Voice) => !v.is_custom);
+        if (firstPreset && !voice) {
+          setVoice(firstPreset.id);
         }
       } catch (error) {
         console.error("Failed to fetch voices:", error);
@@ -94,15 +112,32 @@ const VoicePage = () => {
       }
     };
     fetchVoices();
-  }, []);
+  }, [token]);
 
   // Refresh voices after cloning
   const refreshVoices = async () => {
     try {
+      // Fetch preset voices
       const result = await api.getVoices();
-      if (result.voices) {
-        setVoices(result.voices);
+      let allVoices: Voice[] = result.voices || [];
+      
+      // Also fetch user's cloned voices
+      if (token) {
+        try {
+          const clonesResult = await api.getClones(token);
+          if (clonesResult.clones && clonesResult.clones.length > 0) {
+            const clonedVoices = clonesResult.clones.map(c => ({
+              ...c,
+              is_custom: true
+            }));
+            allVoices = [...clonedVoices, ...allVoices];
+          }
+        } catch (e) {
+          console.error("Failed to fetch clones:", e);
+        }
       }
+      
+      setVoices(allVoices);
     } catch (error) {
       console.error("Failed to refresh voices:", error);
     }
