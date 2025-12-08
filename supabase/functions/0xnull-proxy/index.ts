@@ -36,9 +36,6 @@ serve(async (req) => {
     // Forward the request
     const fetchOptions: RequestInit = {
       method: req.method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     };
 
     // Forward body for POST/PUT requests
@@ -46,13 +43,13 @@ serve(async (req) => {
       const contentType = req.headers.get('content-type') || '';
       
       if (contentType.includes('multipart/form-data')) {
-        // For file uploads, forward as-is
-        fetchOptions.body = await req.arrayBuffer();
-        fetchOptions.headers = {
-          'Content-Type': contentType,
-        };
+        // For file uploads, read the form data and re-create it for the target API
+        const formData = await req.formData();
+        fetchOptions.body = formData;
+        // Don't set Content-Type - let fetch set the correct boundary
       } else {
         // For JSON, parse and forward
+        fetchOptions.headers = { 'Content-Type': 'application/json' };
         try {
           const body = await req.text();
           if (body) {
@@ -62,6 +59,8 @@ serve(async (req) => {
           // No body
         }
       }
+    } else {
+      fetchOptions.headers = { 'Content-Type': 'application/json' };
     }
 
     console.log(`Proxying ${req.method} to: ${targetUrl.toString()}`);
