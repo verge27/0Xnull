@@ -5,18 +5,35 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, Plus, Key, Copy, Check, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Wallet, Plus, Key, Copy, Check, AlertTriangle, Loader2, RefreshCw, Eye, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 
 export function TokenBadge() {
-  const { balance, hasToken, isLoading, refreshBalance } = useToken();
+  const { balance, hasToken, token, isLoading, refreshBalance, clearToken } = useToken();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refreshBalance();
     setIsRefreshing(false);
+  };
+
+  const handleCopyToken = () => {
+    if (token) {
+      navigator.clipboard.writeText(token);
+      setCopied(true);
+      toast.success('Token copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleLogout = () => {
+    clearToken();
+    toast.success('Token cleared');
   };
 
   if (!hasToken) {
@@ -30,19 +47,80 @@ export function TokenBadge() {
 
   return (
     <div className="flex items-center gap-2">
-      <Badge 
-        variant="outline" 
-        className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-        onClick={handleRefresh}
-      >
-        <Wallet className="h-3 w-3" />
-        {isLoading || isRefreshing ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
-        ) : (
-          <span>${balance?.toFixed(2) ?? '0.00'}</span>
-        )}
-      </Badge>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Badge 
+            variant="outline" 
+            className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+          >
+            <Wallet className="h-3 w-3" />
+            {isLoading || isRefreshing ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <span>${balance?.toFixed(2) ?? '0.00'}</span>
+            )}
+          </Badge>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Balance
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowTokenDialog(true)}>
+            <Eye className="h-4 w-4 mr-2" />
+            View Token
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+            <LogOut className="h-4 w-4 mr-2" />
+            Clear Token
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <TopupDialog />
+
+      {/* View Token Dialog */}
+      <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Your Token</DialogTitle>
+            <DialogDescription>
+              Save this token to restore your balance on any device.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-semibold text-destructive">Keep this token safe!</p>
+                  <p className="text-muted-foreground">
+                    There is no account recovery. If you lose this token, your balance is gone forever.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Input 
+                value={token || ''} 
+                readOnly 
+                className="font-mono text-sm"
+              />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleCopyToken}
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            <Button onClick={() => setShowTokenDialog(false)} className="w-full">
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
