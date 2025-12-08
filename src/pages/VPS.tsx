@@ -133,15 +133,26 @@ const VPS = () => {
     setTokenCopied(false);
   };
 
+  // Adler32 checksum for SporeStack token
+  const adler32 = (str: string): number => {
+    let a = 1, b = 0;
+    for (let i = 0; i < str.length; i++) {
+      a = (a + str.charCodeAt(i)) % 65521;
+      b = (b + a) % 65521;
+    }
+    return (b << 16) | a;
+  };
+
   const generateToken = () => {
-    // SporeStack requires 64 hex characters for existing API calls
-    // For new token format: ss_t_<13 chars>_<13 chars> (32 total with 3 underscores)
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    const array = new Uint8Array(26);
+    // SporeStack token format: ss_t_{11 random hex chars}_{4 char checksum}
+    const array = new Uint8Array(11);
     crypto.getRandomValues(array);
-    const part1 = Array.from(array.slice(0, 13)).map(b => chars[b % chars.length]).join('');
-    const part2 = Array.from(array.slice(13, 26)).map(b => chars[b % chars.length]).join('');
-    const newToken = `ss_t_${part1}_${part2}`;
+    const randomHex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 22);
+    const toHash = `ss_t_${randomHex}`;
+    const hash = adler32(toHash);
+    // Pack as unsigned int and take last 4 hex chars
+    const checksum = hash.toString(16).padStart(8, '0').slice(-4);
+    const newToken = `${toHash}_${checksum}`;
     setToken(newToken);
     setIsNewToken(true);
     setTokenCopied(false);
