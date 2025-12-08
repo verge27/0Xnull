@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -230,9 +230,12 @@ export function TopupDialog() {
   const [amount, setAmount] = useState('10');
   const [address, setAddress] = useState<string | null>(null);
   const [xmrAmount, setXmrAmount] = useState<number | null>(null);
+  const [depositId, setDepositId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { token } = useToken();
+  const { token, refreshBalance } = useToken();
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleTopup = async () => {
     if (!token) return;
@@ -246,9 +249,48 @@ export function TopupDialog() {
     } else if (result.data) {
       setAddress(result.data.xmr_address);
       setXmrAmount(result.data.xmr_amount);
+      setDepositId(result.data.deposit_id);
+      setIsPolling(true);
     }
     setIsLoading(false);
   };
+
+  // Poll for deposit confirmation
+  useEffect(() => {
+    if (!depositId || !isPolling) return;
+
+    const checkStatus = async () => {
+      const { api } = await import('@/lib/api');
+      const result = await api.getDepositStatus(depositId);
+      
+      if (result.data?.confirmed) {
+        setIsPolling(false);
+        toast.success(`Payment confirmed! $${amount} added to your balance.`);
+        await refreshBalance();
+        // Keep dialog open briefly to show success, then close
+        setTimeout(() => setOpen(false), 2000);
+      }
+    };
+
+    // Check immediately, then every 10 seconds
+    checkStatus();
+    pollIntervalRef.current = setInterval(checkStatus, 10000);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [depositId, isPolling, amount, refreshBalance]);
+
+  // Cleanup on dialog close
+  useEffect(() => {
+    if (!open && pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  }, [open]);
 
   const handleCopy = () => {
     if (address) {
@@ -263,7 +305,13 @@ export function TopupDialog() {
     setAmount('10');
     setAddress(null);
     setXmrAmount(null);
+    setDepositId(null);
+    setIsPolling(false);
     setCopied(false);
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
   };
 
   return (
@@ -358,6 +406,15 @@ export function TopupDialog() {
                 </Button>
               </div>
             </div>
+
+            {isPolling && (
+              <div className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">
+                  Waiting for payment confirmation...
+                </span>
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground text-center">
               Scan QR with your Monero wallet • Balance updates after 1 confirmation
