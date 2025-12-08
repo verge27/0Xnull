@@ -149,9 +149,7 @@ const VPS = () => {
   const fetchServers = async (apiToken: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${SPORESTACK_API}/servers`, {
-        headers: { Authorization: `Bearer ${apiToken}` },
-      });
+      const response = await fetch(`${SPORESTACK_API}/token/${apiToken}/servers`);
       if (response.ok) {
         const data = await response.json();
         setServers(data.servers || []);
@@ -164,9 +162,7 @@ const VPS = () => {
 
   const fetchBalance = async (apiToken: string) => {
     try {
-      const response = await fetch(`${SPORESTACK_API}/token`, {
-        headers: { Authorization: `Bearer ${apiToken}` },
-      });
+      const response = await fetch(`${SPORESTACK_API}/token/${apiToken}/balance`);
       if (response.ok) {
         const data = await response.json();
         setBalance(data.balance_usd || 0);
@@ -189,13 +185,10 @@ const VPS = () => {
     if (!savedToken) return;
     setFundingLoading(true);
     try {
-      const response = await fetch(`${SPORESTACK_API}/token/topup`, {
+      const response = await fetch(`${SPORESTACK_API}/token/${savedToken}/add`, {
         method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${savedToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ currency: 'xmr', amount_usd: amountUsd }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currency: 'xmr', dollars: amountUsd }),
       });
       if (response.ok) {
         const data = await response.json();
@@ -203,11 +196,12 @@ const VPS = () => {
         setFundingXmrAmount(data.amount || '');
         setFundingAmount(amountUsd);
       } else {
-        throw new Error('Failed to get funding address');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to get funding address');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting funding address:', error);
-      toast({ title: 'Error', description: 'Failed to get funding address', variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || 'Failed to get funding address', variant: 'destructive' });
     }
     setFundingLoading(false);
   };
@@ -235,12 +229,9 @@ const VPS = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${SPORESTACK_API}/servers`, {
+      const response = await fetch(`${SPORESTACK_API}/token/${savedToken}/servers`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${savedToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           flavor: selectedFlavor,
           region: selectedRegion,
@@ -258,7 +249,7 @@ const VPS = () => {
         fetchBalance(savedToken);
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to launch server');
+        throw new Error(error.detail || error.message || 'Failed to launch server');
       }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -271,9 +262,8 @@ const VPS = () => {
     if (!confirm('Are you sure you want to delete this server?')) return;
 
     try {
-      const response = await fetch(`${SPORESTACK_API}/servers/${machineId}`, {
+      const response = await fetch(`${SPORESTACK_API}/token/${savedToken}/servers/${machineId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${savedToken}` },
       });
       if (response.ok) {
         toast({ title: 'Server deleted' });
