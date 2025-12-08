@@ -1,17 +1,27 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe, Upload, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
 
-const voices = [
+interface ClonedVoice {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+const CLONED_VOICES_KEY = "0xnull_cloned_voices";
+
+const presetVoices = [
   { id: "bella", name: "Bella", description: "Warm and friendly" },
   { id: "nicole", name: "Nicole", description: "Clear and professional" },
   { id: "sarah", name: "Sarah", description: "Soft and gentle" },
@@ -60,7 +70,36 @@ const Voice = () => {
   const [estimatedCost, setEstimatedCost] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Voice cloning state
+  const [clonedVoices, setClonedVoices] = useState<ClonedVoice[]>([]);
+  const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
+  const [cloneName, setCloneName] = useState("");
+  const [cloneFile, setCloneFile] = useState<File | null>(null);
+  const [isCloning, setIsCloning] = useState(false);
+  const [clonePreviewUrl, setClonePreviewUrl] = useState<string | null>(null);
+  const cloneAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+
   const isPremium = tier !== "free";
+  const isClonedVoice = voice.startsWith("clone_");
+
+  // Load cloned voices from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(CLONED_VOICES_KEY);
+    if (saved) {
+      try {
+        setClonedVoices(JSON.parse(saved));
+      } catch {
+        console.error("Failed to parse cloned voices");
+      }
+    }
+  }, []);
+
+  // Save cloned voices to localStorage
+  const saveClonedVoices = (voices: ClonedVoice[]) => {
+    setClonedVoices(voices);
+    localStorage.setItem(CLONED_VOICES_KEY, JSON.stringify(voices));
+  };
 
   const calculateCost = (charCount: number, selectedTier: "free" | "standard" | "ultra") => {
     if (selectedTier === "free") return 0;
@@ -78,6 +117,82 @@ const Voice = () => {
     setEstimatedCost(calculateCost(text.length, newTier));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("audio/")) {
+        toast.error("Please upload an audio file");
+        return;
+      }
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File must be under 10MB");
+        return;
+      }
+      setCloneFile(file);
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setClonePreviewUrl(url);
+    }
+  };
+
+  const togglePreviewPlayback = () => {
+    if (!cloneAudioRef.current) return;
+    if (isPreviewPlaying) {
+      cloneAudioRef.current.pause();
+    } else {
+      cloneAudioRef.current.play();
+    }
+    setIsPreviewPlaying(!isPreviewPlaying);
+  };
+
+  const handleCloneVoice = async () => {
+    if (!cloneFile || !cloneName.trim()) {
+      toast.error("Please provide a name and audio file");
+      return;
+    }
+
+    if (!hasToken) {
+      toast.error("Voice cloning requires a token. Create one to continue.");
+      return;
+    }
+
+    setIsCloning(true);
+
+    try {
+      const { api } = await import("@/lib/api");
+      const result = await api.cloneVoice(cloneFile, cloneName.trim());
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (result.data) {
+        const newVoice: ClonedVoice = {
+          id: result.data.voice_id,
+          name: result.data.name,
+          created_at: new Date().toISOString(),
+        };
+
+        saveClonedVoices([...clonedVoices, newVoice]);
+        setVoice(newVoice.id);
+        toast.success(`Voice "${newVoice.name}" cloned! Cost: $2.00`);
+        
+        // Reset and close dialog
+        setCloneDialogOpen(false);
+        setCloneName("");
+        setCloneFile(null);
+        setClonePreviewUrl(null);
+      }
+    } catch (error) {
+      console.error("Clone error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to clone voice");
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
   const generateSpeech = async () => {
     if (!text.trim()) {
       toast.error("Please enter some text");
@@ -86,6 +201,13 @@ const Voice = () => {
 
     if (text.length > 5000) {
       toast.error("Text must be under 5000 characters");
+      return;
+    }
+
+    // Cloned voices always require premium tier
+    if (isClonedVoice && tier === "free") {
+      toast.error("Cloned voices require Standard or Ultra tier");
+      handleTierChange("standard");
       return;
     }
 
@@ -98,7 +220,7 @@ const Voice = () => {
     setAudioUrl(null);
 
     try {
-      if (tier === "free") {
+      if (tier === "free" && !isClonedVoice) {
         // Free tier uses existing Supabase edge function
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nanogpt-tts`,
@@ -121,7 +243,7 @@ const Voice = () => {
       } else {
         // Premium tiers use FastAPI backend with token
         const { api } = await import("@/lib/api");
-        const result = await api.generateVoice(text, voice, tier);
+        const result = await api.generateVoice(text, voice, tier === "free" ? "standard" : tier);
 
         if (result.error) {
           throw new Error(result.error);
@@ -175,8 +297,8 @@ const Voice = () => {
                 Private Text-to-Speech
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Convert text to natural-sounding speech. No accounts, no tracking.
-                Pay with crypto and maintain your privacy.
+                Convert text to natural-sounding speech. Clone any voice for $2.
+                No accounts, no tracking.
               </p>
             </div>
           </div>
@@ -223,6 +345,7 @@ const Voice = () => {
                       variant={tier === t.id ? "default" : "outline"}
                       className="h-auto py-3 flex-col items-center relative"
                       onClick={() => handleTierChange(t.id as "free" | "standard" | "ultra")}
+                      disabled={isClonedVoice && t.id === "free"}
                     >
                       {t.id !== "free" && !hasToken && (
                         <Badge variant="secondary" className="absolute -top-2 -right-2 text-[10px]">
@@ -236,17 +359,150 @@ const Voice = () => {
                     </Button>
                   ))}
                 </div>
+                {isClonedVoice && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Cloned voices require Standard or Ultra tier
+                  </p>
+                )}
               </div>
 
-              {/* Voice Selector */}
+              {/* Voice Selector with Clone Button */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Voice</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Voice</label>
+                  <Dialog open={cloneDialogOpen} onOpenChange={setCloneDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                        <Plus className="h-3 w-3" />
+                        Clone Voice
+                        <Badge variant="secondary" className="ml-1 text-[10px]">$2</Badge>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                          Clone a Voice
+                        </DialogTitle>
+                        <DialogDescription>
+                          Upload 10+ seconds of clear audio to clone any voice. Cost: $2.00
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="space-y-4 py-4">
+                        {!hasToken && (
+                          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm">
+                            Voice cloning requires a token. Click "Get Started" in the header to create one.
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Voice Name</label>
+                          <Input
+                            placeholder="e.g., My Voice, Morgan Freeman..."
+                            value={cloneName}
+                            onChange={(e) => setCloneName(e.target.value)}
+                            maxLength={50}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Audio Sample</label>
+                          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                            <input
+                              type="file"
+                              accept="audio/*"
+                              onChange={handleFileChange}
+                              className="hidden"
+                              id="audio-upload"
+                            />
+                            <label htmlFor="audio-upload" className="cursor-pointer">
+                              {cloneFile ? (
+                                <div className="space-y-2">
+                                  <Mic className="h-8 w-8 mx-auto text-primary" />
+                                  <p className="text-sm font-medium">{cloneFile.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {(cloneFile.size / 1024 / 1024).toFixed(2)} MB
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">
+                                    Click to upload audio file
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    MP3, WAV, M4A • Max 10MB • 10+ seconds recommended
+                                  </p>
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+
+                        {clonePreviewUrl && (
+                          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                            <audio
+                              ref={cloneAudioRef}
+                              src={clonePreviewUrl}
+                              onEnded={() => setIsPreviewPlaying(false)}
+                              className="hidden"
+                            />
+                            <Button variant="outline" size="sm" onClick={togglePreviewPlayback}>
+                              {isPreviewPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            </Button>
+                            <span className="text-sm text-muted-foreground">Preview audio</span>
+                          </div>
+                        )}
+
+                        <Button
+                          onClick={handleCloneVoice}
+                          disabled={!cloneFile || !cloneName.trim() || isCloning || !hasToken}
+                          className="w-full"
+                        >
+                          {isCloning ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Cloning...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Clone Voice ($2.00)
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
                 <Select value={voice} onValueChange={setVoice}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    {voices.map((v) => (
+                  <SelectContent className="bg-popover">
+                    {/* Cloned voices first */}
+                    {clonedVoices.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          Your Cloned Voices
+                        </div>
+                        {clonedVoices.map((v) => (
+                          <SelectItem key={v.id} value={v.id}>
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-3 w-3 text-primary" />
+                              <span className="font-medium">{v.name}</span>
+                              <Badge variant="outline" className="text-[10px] ml-auto">cloned</Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                          Preset Voices
+                        </div>
+                      </>
+                    )}
+                    {presetVoices.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         <span className="font-medium">{v.name}</span>
                         <span className="text-muted-foreground ml-2">— {v.description}</span>
