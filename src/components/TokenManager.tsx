@@ -41,20 +41,25 @@ export function TokenBadge() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Balance badge - click to view token */}
+      {/* Balance display (non-clickable) */}
+      <Badge 
+        variant="outline" 
+        className="gap-1"
+      >
+        <Wallet className="h-3 w-3" />
+        {isLoading || isRefreshing ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : (
+          <span>${balance?.toFixed(2) ?? '0.00'}</span>
+        )}
+      </Badge>
+
+      {/* View Token button */}
       <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
         <DialogTrigger asChild>
-          <Badge 
-            variant="outline" 
-            className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-          >
-            <Wallet className="h-3 w-3" />
-            {isLoading || isRefreshing ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <span>${balance?.toFixed(2) ?? '0.00'}</span>
-            )}
-          </Badge>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="View Token">
+            <Key className="h-4 w-4" />
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
