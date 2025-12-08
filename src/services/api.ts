@@ -106,11 +106,11 @@ export const api = {
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
     const proxyUrl = new URL(PROXY_URL);
     proxyUrl.searchParams.set('path', '/api/voice/clone');
+    proxyUrl.searchParams.set('token', token);
+    proxyUrl.searchParams.set('name', name);
     
     const formData = new FormData();
     formData.append('audio', audioFile);
-    // FastAPI expects nested fields as separate form entries
-    formData.append('req', new Blob([JSON.stringify({ token, name })], { type: 'application/json' }));
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
