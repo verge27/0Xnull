@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTriangle, Check, Wallet } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
@@ -93,6 +93,9 @@ const VPS = () => {
   const [fundingLoading, setFundingLoading] = useState(false);
   const [selectedFundAmount, setSelectedFundAmount] = useState<number | 'custom'>(25);
   const [customFundAmount, setCustomFundAmount] = useState('');
+  const [isPolling, setIsPolling] = useState(false);
+  const [initialBalance, setInitialBalance] = useState<number | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('sporestack_token');
@@ -186,17 +189,69 @@ const VPS = () => {
     setLoading(false);
   };
 
-  const fetchBalance = async (apiToken: string) => {
+  const fetchBalance = useCallback(async (apiToken: string): Promise<number | null> => {
     try {
       const response = await fetch(`${SPORESTACK_API}/token/${apiToken}/balance`);
       if (response.ok) {
         const data = await response.json();
-        setBalance(data.balance_usd || 0);
+        const balanceValue = parseFloat(data.usd?.replace('$', '') || '0');
+        setBalance(balanceValue);
+        return balanceValue;
       }
     } catch (error) {
       console.error('Error fetching balance:', error);
     }
-  };
+    return null;
+  }, []);
+
+  // Start polling when payment address is shown
+  const startPolling = useCallback(() => {
+    if (!savedToken || pollingIntervalRef.current) return;
+    
+    setIsPolling(true);
+    setInitialBalance(balance);
+    
+    pollingIntervalRef.current = setInterval(async () => {
+      const newBalance = await fetchBalance(savedToken);
+      if (newBalance !== null && initialBalance !== null && newBalance > initialBalance) {
+        // Payment received!
+        toast({ 
+          title: 'Payment received!', 
+          description: `Your balance has been updated to $${newBalance.toFixed(2)}` 
+        });
+        stopPolling();
+        setFundingAddress('');
+        setFundingOpen(false);
+      }
+    }, 10000); // Poll every 10 seconds
+  }, [savedToken, balance, initialBalance, fetchBalance, toast]);
+
+  // Stop polling
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    setIsPolling(false);
+  }, []);
+
+  // Cleanup polling on unmount or when dialog closes
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Start/stop polling based on funding address
+  useEffect(() => {
+    if (fundingAddress && savedToken) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+  }, [fundingAddress, savedToken, startPolling, stopPolling]);
 
   const openFundingDialog = () => {
     setFundingOpen(true);
@@ -751,9 +806,17 @@ const VPS = () => {
                     </Button>
                   </div>
                   
-                  <p className="text-xs text-muted-foreground text-center">
-                    Balance updates after 1 confirmation (~2 min)
-                  </p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                    {isPolling && (
+                      <RefreshCw className="h-3 w-3 animate-spin text-primary" />
+                    )}
+                    <span>
+                      {isPolling 
+                        ? 'Auto-checking for payment every 10s...' 
+                        : 'Balance updates after 1 confirmation (~2 min)'
+                      }
+                    </span>
+                  </div>
                 </div>
               )}
             </DialogContent>
