@@ -104,9 +104,18 @@ export const api = {
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
-    // Convert file to base64
-    const arrayBuffer = await audioFile.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    // Convert file to base64 using FileReader (handles large files)
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:audio/mpeg;base64,")
+        const base64Data = result.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(audioFile);
+    });
     
     return proxyRequest<{ clone_id: string; name: string }>('/api/voice/clone', {
       method: 'POST',
