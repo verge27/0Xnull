@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield } from 'lucide-react';
+import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTriangle, Check } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -73,6 +73,10 @@ const VPS = () => {
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   
+  // Token generation flow
+  const [isNewToken, setIsNewToken] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
+  
   // New server config
   const [selectedFlavor, setSelectedFlavor] = useState('vps-1vcpu-1gb');
   const [selectedRegion, setSelectedRegion] = useState('ams');
@@ -93,13 +97,24 @@ const VPS = () => {
     }
   }, []);
 
-  const saveToken = () => {
+  const confirmTokenSaved = () => {
+    if (!token) return;
+    localStorage.setItem('sporestack_token', token);
+    setSavedToken(token);
+    setIsNewToken(false);
+    setTokenCopied(false);
+    fetchServers(token);
+    fetchBalance(token);
+    toast({ title: 'Token saved', description: 'Your API token has been saved locally' });
+  };
+
+  const saveExistingToken = () => {
     if (!token) return;
     localStorage.setItem('sporestack_token', token);
     setSavedToken(token);
     fetchServers(token);
     fetchBalance(token);
-    toast({ title: 'Token saved', description: 'Your API token has been saved locally' });
+    toast({ title: 'Token loaded', description: 'Your existing token has been loaded' });
   };
 
   const clearToken = () => {
@@ -108,12 +123,21 @@ const VPS = () => {
     setServers([]);
     setBalance(null);
     setToken('');
+    setIsNewToken(false);
+    setTokenCopied(false);
   };
 
   const generateToken = () => {
     const newToken = crypto.randomUUID();
     setToken(newToken);
-    toast({ title: 'Token generated', description: 'Save this token securely before using' });
+    setIsNewToken(true);
+    setTokenCopied(false);
+  };
+
+  const copyToken = () => {
+    navigator.clipboard.writeText(token);
+    setTokenCopied(true);
+    toast({ title: 'Token copied to clipboard' });
   };
 
   const fetchServers = async (apiToken: string) => {
@@ -252,30 +276,89 @@ const VPS = () => {
                   API Token Setup
                 </CardTitle>
                 <CardDescription>
-                  Enter an existing SporeStack token or generate a new one
+                  {isNewToken 
+                    ? 'Save this token! It cannot be recovered.'
+                    : 'Enter an existing SporeStack token or generate a new one'
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>API Token</Label>
-                  <Input
-                    type="password"
-                    placeholder="Enter or generate token"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={generateToken} variant="outline" className="flex-1">
-                    Generate New
-                  </Button>
-                  <Button onClick={saveToken} disabled={!token} className="flex-1">
-                    Save Token
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Your token is stored locally. Keep it safe - it's the only way to access your servers.
-                </p>
+                {isNewToken ? (
+                  /* Show generated token in plain text */
+                  <>
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <p className="font-semibold text-destructive">Save this token now!</p>
+                          <p className="text-muted-foreground">
+                            There is no account recovery. If you lose this token, you lose access to your servers forever.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Your API Token</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={token}
+                          readOnly
+                          className="font-mono text-sm"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={copyToken}
+                        >
+                          {tokenCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={confirmTokenSaved} 
+                      className="w-full"
+                    >
+                      I've Saved My Token
+                    </Button>
+
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
+                        setIsNewToken(false);
+                        setToken('');
+                      }}
+                      className="w-full"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  /* Enter existing or generate new */
+                  <>
+                    <div className="space-y-2">
+                      <Label>API Token</Label>
+                      <Input
+                        type="password"
+                        placeholder="Enter existing token..."
+                        value={token}
+                        onChange={(e) => setToken(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={generateToken} variant="outline" className="flex-1">
+                        Generate New
+                      </Button>
+                      <Button onClick={saveExistingToken} disabled={!token} className="flex-1">
+                        Load Token
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your token is stored locally. Keep it safe - it's the only way to access your servers.
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           ) : (
