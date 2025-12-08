@@ -134,7 +134,10 @@ const VPS = () => {
   };
 
   const generateToken = () => {
-    const newToken = crypto.randomUUID();
+    // SporeStack requires 32 or 64 hex characters
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const newToken = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
     setToken(newToken);
     setIsNewToken(true);
     setTokenCopied(false);
