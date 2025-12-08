@@ -11,10 +11,13 @@ import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 
 export function TokenBadge() {
-  const { balance, hasToken, token, loading, refreshBalance } = useToken();
+  const { balance, hasToken, token, loading, refreshBalance, setCustomToken } = useToken();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editToken, setEditToken] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -28,6 +31,25 @@ export function TokenBadge() {
       setCopied(true);
       toast.success('Token copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSaveToken = async () => {
+    if (!editToken.trim()) {
+      toast.error('Please enter a token');
+      return;
+    }
+
+    setIsSaving(true);
+    const success = await setCustomToken(editToken.trim());
+    setIsSaving(false);
+
+    if (success) {
+      toast.success('Token updated successfully');
+      setEditMode(false);
+      setEditToken('');
+    } else {
+      toast.error('Invalid token. Please check and try again.');
     }
   };
 
@@ -56,7 +78,13 @@ export function TokenBadge() {
       </Badge>
 
       {/* View Token button */}
-      <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
+      <Dialog open={showTokenDialog} onOpenChange={(open) => {
+        setShowTokenDialog(open);
+        if (!open) {
+          setEditMode(false);
+          setEditToken('');
+        }
+      }}>
         <DialogTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Token">
             <Key className="h-4 w-4" />
@@ -64,47 +92,93 @@ export function TokenBadge() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Your Token</DialogTitle>
+            <DialogTitle>{editMode ? 'Edit Token' : 'Your Token'}</DialogTitle>
             <DialogDescription>
-              Save this token to restore your balance on any device.
+              {editMode 
+                ? 'Enter a token to restore your balance from another device.'
+                : 'Save this token to restore your balance on any device.'
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-destructive">Keep this token safe!</p>
-                  <p className="text-muted-foreground">
-                    There is no account recovery. If you lose this token, your balance is gone forever.
-                  </p>
+            {!editMode && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-destructive">Keep this token safe!</p>
+                    <p className="text-muted-foreground">
+                      There is no account recovery. If you lose this token, your balance is gone forever.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="flex gap-2">
-              <Input 
-                value={token || ''} 
-                readOnly 
-                className="font-mono text-xs"
-              />
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleCopyToken}
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+            {editMode ? (
+              <div className="space-y-3">
+                <Input 
+                  value={editToken}
+                  onChange={(e) => setEditToken(e.target.value)}
+                  placeholder="Paste your token here (0xn_...)"
+                  className="font-mono text-xs"
+                />
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditMode(false);
+                      setEditToken('');
+                    }}
+                    className="flex-1"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleSaveToken}
+                    className="flex-1"
+                    disabled={isSaving || !editToken.trim()}
+                  >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Token'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <Input 
+                    value={token || ''} 
+                    readOnly 
+                    className="font-mono text-xs"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={handleCopyToken}
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleRefresh} className="flex-1">
-                Refresh Balance
-              </Button>
-              <Button onClick={() => setShowTokenDialog(false)} className="flex-1">
-                Done
-              </Button>
-            </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleRefresh} className="flex-1">
+                    Refresh Balance
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => setEditMode(true)} 
+                    className="flex-1"
+                  >
+                    Use Different Token
+                  </Button>
+                </div>
+
+                <Button onClick={() => setShowTokenDialog(false)} className="w-full">
+                  Done
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

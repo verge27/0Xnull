@@ -9,6 +9,7 @@ interface TokenContextType {
   loading: boolean;
   hasToken: boolean;
   refreshBalance: () => Promise<number | undefined>;
+  setCustomToken: (newToken: string) => Promise<boolean>;
 }
 
 const TokenContext = createContext<TokenContextType | undefined>(undefined);
@@ -59,6 +60,22 @@ export function TokenProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
+  const setCustomToken = useCallback(async (newToken: string): Promise<boolean> => {
+    try {
+      // Validate the token by fetching its balance
+      const info = await api.getBalance(newToken);
+      
+      // If successful, save and update state
+      localStorage.setItem(STORAGE_KEY, newToken);
+      setToken(newToken);
+      setBalance(info.balance_usd);
+      return true;
+    } catch (e) {
+      console.error('Invalid token:', e);
+      return false;
+    }
+  }, []);
+
   return (
     <TokenContext.Provider value={{
       token,
@@ -66,6 +83,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
       loading,
       hasToken: !!token,
       refreshBalance,
+      setCustomToken,
     }}>
       {children}
     </TokenContext.Provider>
