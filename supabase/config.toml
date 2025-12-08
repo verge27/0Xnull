@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.voice-voices]
 verify_jwt = false
+
+[functions.0xnull-proxy]
+verify_jwt = false
