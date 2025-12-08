@@ -96,9 +96,9 @@ export const Navbar = () => {
                     <Heart className="w-5 h-5 text-primary" />
                     <span>Therapy</span>
                   </Link>
-                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Sparkles className="w-5 h-5 text-primary" />
-                    <span>Kokoro</span>
+                    <span>Voice Clone</span>
                   </Link>
                   <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <AlertTriangle className="w-5 h-5 text-primary" />
@@ -146,10 +146,10 @@ export const Navbar = () => {
               </Button>
             </Link>
 
-            <Link to="/kokoro">
+            <Link to="/voice">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <Sparkles className="w-4 h-4" />
-                <span className="hidden md:inline">Kokoro</span>
+                <span className="hidden md:inline">Voice Clone</span>
               </Button>
             </Link>
 
