@@ -105,10 +105,11 @@ export const api = {
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
     const proxyUrl = new URL(PROXY_URL);
-    proxyUrl.searchParams.set('path', `/api/voice/clone?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}`);
+    proxyUrl.searchParams.set('path', '/api/voice/clone');
     
     const formData = new FormData();
-    formData.append('req', audioFile);
+    formData.append('audio', audioFile);
+    formData.append('req', JSON.stringify({ token, name }));
     
     const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
