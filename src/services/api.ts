@@ -1,6 +1,7 @@
-// 0xNull API Client
+// 0xNull API Client - Uses Supabase proxy to avoid CORS
 
-const API_BASE = 'https://api.0xnull.io/api';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
 
 export interface TokenInfo {
   token: string;
@@ -39,34 +40,47 @@ export const TIER_CONFIG = {
   ultra: { maxChars: 5000, requiresToken: true }
 } as const;
 
+// Helper to make requests through the proxy
+async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const proxyUrl = new URL(PROXY_URL);
+  proxyUrl.searchParams.set('path', path);
+  
+  const res = await fetch(proxyUrl.toString(), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  
+  const data = await res.json();
+  
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Request failed');
+  }
+  
+  return data;
+}
+
 export const api = {
   async createToken(): Promise<string> {
-    const res = await fetch(`${API_BASE}/token/create`, { method: 'POST' });
-    if (!res.ok) throw new Error('Failed to create token');
-    const data = await res.json();
+    const data = await proxyRequest<{ token: string }>('/api/token/create', { method: 'POST' });
     return data.token;
   },
 
   async getBalance(token: string): Promise<TokenInfo> {
-    const res = await fetch(`${API_BASE}/token/info?token=${encodeURIComponent(token)}`);
-    if (!res.ok) throw new Error('Failed to get balance');
-    return res.json();
+    return proxyRequest<TokenInfo>(`/api/token/info?token=${encodeURIComponent(token)}`);
   },
 
   async topup(token: string, amountUsd: number): Promise<TopupResponse> {
-    const res = await fetch(`${API_BASE}/token/topup`, {
+    return proxyRequest<TopupResponse>('/api/token/topup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, amount_usd: amountUsd }),
     });
-    if (!res.ok) throw new Error('Failed to create topup');
-    return res.json();
   },
 
   async getVoices(): Promise<{ voices: Voice[] }> {
-    const res = await fetch(`${API_BASE}/voice/voices`);
-    if (!res.ok) throw new Error('Failed to get voices');
-    return res.json();
+    return proxyRequest<{ voices: Voice[] }>('/api/voice/voices');
   },
 
   async generateSpeech(
@@ -75,41 +89,40 @@ export const api = {
     tier: string,
     token?: string
   ): Promise<GenerateResponse> {
-    const res = await fetch(`${API_BASE}/voice/generate`, {
+    return proxyRequest<GenerateResponse>('/api/voice/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice, tier, token }),
     });
-    if (res.status === 402) {
-      throw new Error('INSUFFICIENT_BALANCE');
-    }
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Generation failed');
-    }
-    return res.json();
   },
 
   async getClones(token: string): Promise<{ clones: Voice[] }> {
-    const res = await fetch(`${API_BASE}/voice/clones?token=${encodeURIComponent(token)}`);
-    if (!res.ok) return { clones: [] };
-    return res.json();
+    try {
+      return await proxyRequest<{ clones: Voice[] }>(`/api/voice/clones?token=${encodeURIComponent(token)}`);
+    } catch {
+      return { clones: [] };
+    }
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
+    const proxyUrl = new URL(PROXY_URL);
+    proxyUrl.searchParams.set('path', `/api/voice/clone?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}`);
+    
     const formData = new FormData();
     formData.append('audio', audioFile);
-    const res = await fetch(`${API_BASE}/voice/clone?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}`, {
+    
+    const res = await fetch(proxyUrl.toString(), {
       method: 'POST',
       body: formData,
     });
+    
     if (res.status === 402) {
       throw new Error('INSUFFICIENT_BALANCE');
     }
+    
+    const data = await res.json();
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Clone failed');
+      throw new Error(data.detail || data.error || 'Clone failed');
     }
-    return res.json();
+    return data;
   },
 };
