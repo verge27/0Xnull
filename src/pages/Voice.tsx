@@ -12,7 +12,8 @@ import { Volume2, Play, Pause, Download, Loader2, Mic, Shield, Zap, Globe, Uploa
 import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
-import { api, type Voice, TIER_CONFIG } from "@/lib/api";
+import * as apiService from "@/services/api";
+import { type Voice, TIER_CONFIG } from "@/services/api";
 
 // Voice interface imported from api.ts
 
@@ -46,7 +47,7 @@ const features = [
 ];
 
 const Voice = () => {
-  const { hasToken, token, updateBalance } = useToken();
+  const { hasToken, token, refreshBalance } = useToken();
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("");
   const [tier, setTier] = useState<"free" | "standard" | "ultra">("free");
@@ -80,16 +81,14 @@ const Voice = () => {
     const fetchVoices = async () => {
       setIsLoadingVoices(true);
       try {
-        const result = await api.getVoices();
-        if (result.data) {
-          setVoices(result.data);
+        const result = await apiService.getVoices();
+        if (result.voices) {
+          setVoices(result.voices);
           // Set default voice to first preset
-          const firstPreset = result.data.find((v: Voice) => !v.is_custom);
+          const firstPreset = result.voices.find((v: Voice) => !v.is_custom);
           if (firstPreset && !voice) {
             setVoice(firstPreset.id);
           }
-        } else if (result.error) {
-          console.error("Failed to fetch voices:", result.error);
         }
       } catch (error) {
         console.error("Failed to fetch voices:", error);
@@ -103,9 +102,9 @@ const Voice = () => {
   // Refresh voices after cloning
   const refreshVoices = async () => {
     try {
-      const result = await api.getVoices();
-      if (result.data) {
-        setVoices(result.data);
+      const result = await apiService.getVoices();
+      if (result.voices) {
+        setVoices(result.voices);
       }
     } catch (error) {
       console.error("Failed to refresh voices:", error);
@@ -164,7 +163,7 @@ const Voice = () => {
       return;
     }
 
-    if (!hasToken) {
+    if (!hasToken || !token) {
       toast.error("Voice cloning requires a token. Create one to continue.");
       return;
     }
@@ -172,29 +171,21 @@ const Voice = () => {
     setIsCloning(true);
 
     try {
-      const result = await api.cloneVoice(cloneFile, cloneName.trim());
+      const result = await apiService.createClone(token, cloneName.trim(), cloneFile);
       
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      if (result.data) {
-        // Update balance if returned
-        if (result.new_balance_usd !== undefined) {
-          updateBalance(result.new_balance_usd);
-        }
-        
-        // Refresh voices list
-        await refreshVoices();
-        setVoice(result.data.clone_id);
-        toast.success(`Voice "${result.data.name}" cloned! Cost: $2.00`);
-        
-        // Reset and close dialog
-        setCloneDialogOpen(false);
-        setCloneName("");
-        setCloneFile(null);
-        setClonePreviewUrl(null);
-      }
+      // Refresh balance after clone
+      await refreshBalance();
+      
+      // Refresh voices list
+      await refreshVoices();
+      setVoice(result.clone_id);
+      toast.success(`Voice "${result.name}" cloned! Cost: $2.00`);
+      
+      // Reset and close dialog
+      setCloneDialogOpen(false);
+      setCloneName("");
+      setCloneFile(null);
+      setClonePreviewUrl(null);
     } catch (error) {
       console.error("Clone error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to clone voice");
@@ -236,28 +227,22 @@ const Voice = () => {
     setAudioUrl(null);
 
     try {
-      const result = await api.generateVoice(text, voice, tier);
+      const result = await apiService.generateSpeech(text, voice, tier, token || undefined);
       
-      if (result.error) {
-        throw new Error(result.error);
+      // Refresh balance after paid generation
+      if (isPremium) {
+        await refreshBalance();
       }
-
-      if (result.data) {
-        // Update balance if returned (for paid tiers)
-        if (result.new_balance_usd !== undefined) {
-          updateBalance(result.new_balance_usd);
-        }
-        
-        // Create audio URL from base64
-        const audioDataUrl = `data:audio/${result.data.format};base64,${result.data.audio}`;
-        setAudioUrl(audioDataUrl);
-        
-        const costDollars = result.data.cost_cents / 100;
-        if (costDollars > 0) {
-          toast.success(`Audio generated! Cost: $${costDollars.toFixed(3)}`);
-        } else {
-          toast.success("Audio generated!");
-        }
+      
+      // Create audio URL from base64
+      const audioDataUrl = `data:audio/${result.format};base64,${result.audio}`;
+      setAudioUrl(audioDataUrl);
+      
+      const costDollars = result.cost_cents / 100;
+      if (costDollars > 0) {
+        toast.success(`Audio generated! Cost: $${costDollars.toFixed(3)}`);
+      } else {
+        toast.success("Audio generated!");
       }
     } catch (error) {
       console.error("TTS error:", error);

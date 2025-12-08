@@ -241,34 +241,38 @@ export function TopupDialog() {
     if (!token) return;
     
     setIsLoading(true);
-    const { api } = await import('@/lib/api');
-    const result = await api.createDeposit(parseFloat(amount));
-    
-    if (result.error) {
-      toast.error(result.error);
-    } else if (result.data) {
-      setAddress(result.data.xmr_address);
-      setXmrAmount(result.data.xmr_amount);
-      setDepositId(result.data.deposit_id);
+    try {
+      const apiService = await import('@/services/api');
+      const result = await apiService.topupToken(token, parseFloat(amount));
+      setAddress(result.address);
+      setXmrAmount(result.amount_xmr);
+      setDepositId(result.deposit_id || 'pending');
       setIsPolling(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create deposit');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  // Poll for deposit confirmation
+  // Poll for deposit confirmation by checking balance
   useEffect(() => {
-    if (!depositId || !isPolling) return;
+    if (!depositId || !isPolling || !token) return;
 
     const checkStatus = async () => {
-      const { api } = await import('@/lib/api');
-      const result = await api.getDepositStatus(depositId);
-      
-      if (result.data?.confirmed) {
-        setIsPolling(false);
-        toast.success(`Payment confirmed! $${amount} added to your balance.`);
-        await refreshBalance();
-        // Keep dialog open briefly to show success, then close
-        setTimeout(() => setOpen(false), 2000);
+      try {
+        const apiService = await import('@/services/api');
+        const result = await apiService.getBalance(token);
+        
+        // If balance increased, payment was received
+        if (result.balance_cents > 0) {
+          setIsPolling(false);
+          toast.success(`Payment confirmed! $${amount} added to your balance.`);
+          await refreshBalance();
+          setTimeout(() => setOpen(false), 2000);
+        }
+      } catch (error) {
+        console.error('Failed to check balance:', error);
       }
     };
 
@@ -282,7 +286,7 @@ export function TopupDialog() {
         pollIntervalRef.current = null;
       }
     };
-  }, [depositId, isPolling, amount, refreshBalance]);
+  }, [depositId, isPolling, amount, refreshBalance, token]);
 
   // Cleanup on dialog close
   useEffect(() => {

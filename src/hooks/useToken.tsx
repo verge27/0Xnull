@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { api, TokenInfo } from '@/lib/api';
+import * as apiService from '@/services/api';
 
 interface TokenContextType {
   token: string | null;
@@ -16,6 +16,8 @@ interface TokenContextType {
 
 const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'oxnull_token';
+
 export function TokenProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -24,102 +26,88 @@ export function TokenProvider({ children }: { children: ReactNode }) {
 
   // Initialize from localStorage
   useEffect(() => {
-    const savedToken = localStorage.getItem('0xnull_token');
+    const savedToken = localStorage.getItem(STORAGE_KEY);
     if (savedToken) {
       setToken(savedToken);
-      api.setToken(savedToken);
-      refreshBalance();
+      refreshBalanceWithToken(savedToken);
     } else {
       setIsLoading(false);
     }
   }, []);
 
+  const refreshBalanceWithToken = async (t: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await apiService.getBalance(t);
+      setBalance(data.balance_cents / 100);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get balance';
+      if (message.includes('not found') || message.includes('invalid') || message.includes('Invalid')) {
+        clearTokenState();
+        setError('Token is invalid or expired');
+      } else {
+        setError(message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const refreshBalance = useCallback(async () => {
-    if (!api.getToken()) {
+    if (!token) {
       setIsLoading(false);
       return;
     }
+    await refreshBalanceWithToken(token);
+  }, [token]);
 
+  const createTokenHandler = async (): Promise<string | null> => {
     setIsLoading(true);
     setError(null);
 
-    const result = await api.getTokenInfo();
-    
-    if (result.error) {
-      // Token might be invalid
-      if (result.error.includes('not found') || result.error.includes('invalid')) {
-        clearToken();
-        setError('Token is invalid or expired');
-      } else {
-        setError(result.error);
-      }
-    } else if (result.data) {
-      setBalance(result.data.balance_usd);
-    }
-
-    setIsLoading(false);
-  }, []);
-
-  const createToken = async (): Promise<string | null> => {
-    setIsLoading(true);
-    setError(null);
-
-    const result = await api.createToken();
-
-    if (result.error) {
-      setError(result.error);
-      setIsLoading(false);
-      return null;
-    }
-
-    if (result.data) {
-      const newToken = result.data.token;
+    try {
+      const data = await apiService.createToken();
+      const newToken = data.token;
       setToken(newToken);
-      setBalance(result.data.balance_usd);
-      api.setToken(newToken);
-      setIsLoading(false);
+      setBalance(data.balance_cents / 100);
+      localStorage.setItem(STORAGE_KEY, newToken);
       return newToken;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create token');
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-    return null;
   };
 
   const enterToken = async (inputToken: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
 
-    // Temporarily set the token to check it
-    api.setToken(inputToken);
-    const result = await api.getTokenInfo();
-
-    if (result.error) {
-      api.clearToken();
-      setError('Invalid token');
-      setIsLoading(false);
-      return false;
-    }
-
-    if (result.data) {
+    try {
+      const data = await apiService.getTokenInfo(inputToken);
       setToken(inputToken);
-      setBalance(result.data.balance_usd);
-      setIsLoading(false);
+      setBalance(data.balance_cents / 100);
+      localStorage.setItem(STORAGE_KEY, inputToken);
       return true;
+    } catch (err) {
+      setError('Invalid token');
+      return false;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    api.clearToken();
-    setIsLoading(false);
-    return false;
+  const clearTokenState = () => {
+    setToken(null);
+    setBalance(null);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const updateBalance = (newBalance: number) => {
     setBalance(newBalance);
-  };
-
-  const clearToken = () => {
-    setToken(null);
-    setBalance(null);
-    api.clearToken();
   };
 
   return (
@@ -130,11 +118,11 @@ export function TokenProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         hasToken: !!token,
-        createToken,
+        createToken: createTokenHandler,
         enterToken,
         refreshBalance,
         updateBalance,
-        clearToken,
+        clearToken: clearTokenState,
       }}
     >
       {children}
