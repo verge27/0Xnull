@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToken } from '@/hooks/useToken';
+import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Wallet, Plus, Key, Copy, Check, AlertTriangle, Loader2 } from 'lucide-react';
@@ -10,7 +11,7 @@ import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 
 export function TokenBadge() {
-  const { balance, hasToken, token, isLoading, refreshBalance } = useToken();
+  const { balance, hasToken, token, loading, refreshBalance } = useToken();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -31,12 +32,12 @@ export function TokenBadge() {
   };
 
   if (!hasToken) {
-    return <TokenDialog trigger={
-      <Button variant="outline" size="sm" className="gap-2">
-        <Wallet className="h-4 w-4" />
-        <span className="hidden sm:inline">Get Started</span>
-      </Button>
-    } />;
+    return (
+      <Badge variant="outline" className="gap-1">
+        <Wallet className="h-3 w-3" />
+        <Loader2 className="h-3 w-3 animate-spin" />
+      </Badge>
+    );
   }
 
   return (
@@ -47,7 +48,7 @@ export function TokenBadge() {
         className="gap-1"
       >
         <Wallet className="h-3 w-3" />
-        {isLoading || isRefreshing ? (
+        {loading || isRefreshing ? (
           <Loader2 className="h-3 w-3 animate-spin" />
         ) : (
           <span>${balance?.toFixed(2) ?? '0.00'}</span>
@@ -113,206 +114,27 @@ export function TokenBadge() {
   );
 }
 
-interface TokenDialogProps {
-  trigger?: React.ReactNode;
-}
-
-export function TokenDialog({ trigger }: TokenDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<'choose' | 'create' | 'enter'>('choose');
-  const [inputToken, setInputToken] = useState('');
-  const [newToken, setNewToken] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const { createToken, enterToken, isLoading, error } = useToken();
-
-  const handleCreate = async () => {
-    const token = await createToken();
-    if (token) {
-      setNewToken(token);
-      setMode('create');
-    }
-  };
-
-  const handleEnter = async () => {
-    const success = await enterToken(inputToken);
-    if (success) {
-      toast.success('Token loaded successfully');
-      setOpen(false);
-      resetState();
-    }
-  };
-
-  const handleCopy = () => {
-    if (newToken) {
-      navigator.clipboard.writeText(newToken);
-      setCopied(true);
-      toast.success('Token copied to clipboard');
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleDone = () => {
-    setOpen(false);
-    resetState();
-  };
-
-  const resetState = () => {
-    setMode('choose');
-    setInputToken('');
-    setNewToken(null);
-    setCopied(false);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetState();
-    }}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" size="sm" className="gap-2">
-            <Wallet className="h-4 w-4" />
-            Token
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'choose' && 'Access 0xNull Services'}
-            {mode === 'create' && 'Your New Token'}
-            {mode === 'enter' && 'Enter Your Token'}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'choose' && 'Create a token or enter an existing one to use paid services.'}
-            {mode === 'create' && 'Save this token! It cannot be recovered.'}
-            {mode === 'enter' && 'Enter your existing token to restore your balance.'}
-          </DialogDescription>
-        </DialogHeader>
-
-        {mode === 'choose' && (
-          <div className="space-y-3">
-            <Button 
-              onClick={handleCreate} 
-              className="w-full gap-2" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-              Create New Token
-            </Button>
-            <Button 
-              onClick={() => setMode('enter')} 
-              variant="outline" 
-              className="w-full gap-2"
-            >
-              <Key className="h-4 w-4" />
-              Enter Existing Token
-            </Button>
-            {error && (
-              <p className="text-sm text-destructive text-center">{error}</p>
-            )}
-          </div>
-        )}
-
-        {mode === 'create' && newToken && (
-          <div className="space-y-4">
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-destructive">Save this token now!</p>
-                  <p className="text-muted-foreground">
-                    There is no account recovery. If you lose this token, your balance is gone forever.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Input 
-                value={newToken} 
-                readOnly 
-                className="font-mono text-sm"
-              />
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleCopy}
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-
-            <Button onClick={handleDone} className="w-full">
-              I've Saved My Token
-            </Button>
-          </div>
-        )}
-
-        {mode === 'enter' && (
-          <div className="space-y-4">
-            <Input 
-              value={inputToken}
-              onChange={(e) => setInputToken(e.target.value)}
-              placeholder="Enter your token..."
-              className="font-mono"
-            />
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setMode('choose')}
-                className="flex-1"
-              >
-                Back
-              </Button>
-              <Button 
-                onClick={handleEnter}
-                disabled={!inputToken || isLoading}
-                className="flex-1"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Load Token'
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function TopupDialog() {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('10');
   const [address, setAddress] = useState<string | null>(null);
   const [xmrAmount, setXmrAmount] = useState<number | null>(null);
-  const [depositId, setDepositId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { token, refreshBalance } = useToken();
+  const { token, refreshBalance, balance } = useToken();
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const initialBalanceRef = useRef<number>(0);
 
   const handleTopup = async () => {
     if (!token) return;
     
+    initialBalanceRef.current = balance;
     setIsLoading(true);
     try {
-      const apiService = await import('@/services/api');
-      const result = await apiService.topupToken(token, parseFloat(amount));
+      const result = await api.topup(token, parseFloat(amount));
       setAddress(result.address);
       setXmrAmount(result.amount_xmr);
-      setDepositId(result.deposit_id || 'pending');
       setIsPolling(true);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create deposit');
@@ -323,18 +145,16 @@ export function TopupDialog() {
 
   // Poll for deposit confirmation by checking balance
   useEffect(() => {
-    if (!depositId || !isPolling || !token) return;
+    if (!isPolling || !token) return;
 
     const checkStatus = async () => {
       try {
-        const apiService = await import('@/services/api');
-        const result = await apiService.getBalance(token);
+        const newBalance = await refreshBalance();
         
         // If balance increased, payment was received
-        if (result.balance_cents > 0) {
+        if (newBalance && newBalance > initialBalanceRef.current) {
           setIsPolling(false);
           toast.success(`Payment confirmed! $${amount} added to your balance.`);
-          await refreshBalance();
           setTimeout(() => setOpen(false), 2000);
         }
       } catch (error) {
@@ -352,7 +172,7 @@ export function TopupDialog() {
         pollIntervalRef.current = null;
       }
     };
-  }, [depositId, isPolling, amount, refreshBalance, token]);
+  }, [isPolling, amount, refreshBalance, token]);
 
   // Cleanup on dialog close
   useEffect(() => {
@@ -375,7 +195,6 @@ export function TopupDialog() {
     setAmount('10');
     setAddress(null);
     setXmrAmount(null);
-    setDepositId(null);
     setIsPolling(false);
     setCopied(false);
     if (pollIntervalRef.current) {
@@ -500,33 +319,31 @@ export function TopupDialog() {
   );
 }
 
-export function TokenRequired({ children }: { children: React.ReactNode }) {
-  const { hasToken } = useToken();
+interface TokenRequiredProps {
+  children: React.ReactNode;
+}
+
+export function TokenRequired({ children }: TokenRequiredProps) {
+  const { hasToken, loading } = useToken();
+
+  if (loading) {
+    return (
+      <Card className="p-8 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+        <p className="text-sm text-muted-foreground mt-2">Initializing...</p>
+      </Card>
+    );
+  }
 
   if (!hasToken) {
     return (
-      <Card className="max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <Wallet className="h-12 w-12 mx-auto mb-4 text-primary" />
-          <CardTitle>Token Required</CardTitle>
-          <CardDescription>
-            Create or enter a token to use this service. No email or password needed.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <TokenDialog trigger={
-            <Button className="w-full gap-2">
-              <Plus className="h-4 w-4" />
-              Create New Token
-            </Button>
-          } />
-          <TokenDialog trigger={
-            <Button variant="outline" className="w-full gap-2">
-              <Key className="h-4 w-4" />
-              Enter Existing Token
-            </Button>
-          } />
-        </CardContent>
+      <Card className="p-8 text-center">
+        <Wallet className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Token Required</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          A token is being created automatically. Please wait...
+        </p>
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
       </Card>
     );
   }

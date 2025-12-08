@@ -9,12 +9,16 @@ import { Sparkles, Send, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useToken } from '@/hooks/useToken';
 import { TokenRequired } from '@/components/TokenManager';
-import { api, ChatMessage } from '@/lib/api';
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 const STORAGE_KEY = 'kokoro-chat-history';
 
 const Kokoro = () => {
-  const { hasToken, updateBalance } = useToken();
+  const { hasToken } = useToken();
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
@@ -44,20 +48,8 @@ const Kokoro = () => {
     setIsLoading(true);
 
     try {
-      let assistantContent = '';
-      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-
-      for await (const chunk of api.streamChat('/api/kokoro/chat', newMessages)) {
-        assistantContent += chunk;
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: 'assistant',
-            content: assistantContent,
-          };
-          return updated;
-        });
-      }
+      // TODO: Implement chat API
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Chat API not yet implemented.' }]);
     } catch (error) {
       console.error('Chat error:', error);
       toast.error('Failed to send message. Please try again.');

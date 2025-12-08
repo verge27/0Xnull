@@ -1,50 +1,35 @@
 // 0xNull API Client
-// Uses Supabase Edge Function proxy to avoid CORS issues
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const API_BASE = 'https://api.0xnull.io/api';
 
 export interface TokenInfo {
   token: string;
   balance_usd: number;
-  balance_cents?: number;
-  message?: string;
+  balance_cents: number;
 }
 
 export interface TopupResponse {
   address: string;
   amount_xmr: number;
-  deposit_id?: string;
-}
-
-export interface VoiceGenerateResponse {
-  audio: string; // base64 encoded
-  format: 'mp3' | 'wav';
-  cost_cents: number;
-  duration_seconds?: number;
-  characters_used?: number;
-}
-
-export interface VoiceCloneResponse {
-  clone_id: string;
-  name: string;
-  status: string;
-  cost_usd?: number;
+  amount_usd: number;
+  xmr_price: number;
+  expires_at: number;
 }
 
 export interface Voice {
   id: string;
   name: string;
   description: string;
-  provider?: string;
+  provider: string;
   is_custom?: boolean;
 }
 
-export interface PricingInfo {
-  free: { max_chars: number; cost_per_1k: number };
-  standard: { max_chars: number; cost_per_1k: number };
-  ultra: { max_chars: number; cost_per_1k: number };
-  clone_cost_usd: number;
+export interface GenerateResponse {
+  audio: string; // base64
+  format: string;
+  characters: number;
+  cost_cents: number;
+  provider: string;
 }
 
 // Tier configuration
@@ -54,101 +39,77 @@ export const TIER_CONFIG = {
   ultra: { maxChars: 5000, requiresToken: true }
 } as const;
 
-// Helper to make requests through the proxy
-async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const proxyUrl = new URL(PROXY_URL);
-  proxyUrl.searchParams.set('path', path);
-  
-  const res = await fetch(proxyUrl.toString(), {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  
-  const data = await res.json();
-  
-  if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Request failed');
-  }
-  
-  return data;
-}
+export const api = {
+  async createToken(): Promise<string> {
+    const res = await fetch(`${API_BASE}/token/create`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to create token');
+    const data = await res.json();
+    return data.token;
+  },
 
-// Token Management
-export const createToken = async (): Promise<TokenInfo> => {
-  return proxyRequest<TokenInfo>('/api/token/create', { method: 'POST' });
-};
+  async getBalance(token: string): Promise<TokenInfo> {
+    const res = await fetch(`${API_BASE}/token/info?token=${encodeURIComponent(token)}`);
+    if (!res.ok) throw new Error('Failed to get balance');
+    return res.json();
+  },
 
-export const getBalance = async (token: string): Promise<{ balance_cents: number }> => {
-  return proxyRequest<{ balance_cents: number }>(`/api/token/balance?token=${token}`);
-};
+  async topup(token: string, amountUsd: number): Promise<TopupResponse> {
+    const res = await fetch(`${API_BASE}/token/topup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, amount_usd: amountUsd }),
+    });
+    if (!res.ok) throw new Error('Failed to create topup');
+    return res.json();
+  },
 
-export const getTokenInfo = async (token: string): Promise<TokenInfo> => {
-  return proxyRequest<TokenInfo>(`/api/token/info?token=${token}`);
-};
+  async getVoices(): Promise<{ voices: Voice[] }> {
+    const res = await fetch(`${API_BASE}/voice/voices`);
+    if (!res.ok) throw new Error('Failed to get voices');
+    return res.json();
+  },
 
-export const topupToken = async (token: string, amountUsd: number): Promise<TopupResponse> => {
-  return proxyRequest<TopupResponse>('/api/token/topup', {
-    method: 'POST',
-    body: JSON.stringify({ token, amount_usd: amountUsd })
-  });
-};
+  async generateSpeech(
+    text: string,
+    voice: string,
+    tier: string,
+    token?: string
+  ): Promise<GenerateResponse> {
+    const res = await fetch(`${API_BASE}/voice/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice, tier, token }),
+    });
+    if (res.status === 402) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Generation failed');
+    }
+    return res.json();
+  },
 
-// Voice
-export const getVoices = async (): Promise<{ voices: Voice[]; provider?: string }> => {
-  return proxyRequest<{ voices: Voice[]; provider?: string }>('/api/voice/voices');
-};
+  async getClones(token: string): Promise<{ clones: Voice[] }> {
+    const res = await fetch(`${API_BASE}/voice/clones?token=${encodeURIComponent(token)}`);
+    if (!res.ok) return { clones: [] };
+    return res.json();
+  },
 
-export const getPricing = async (): Promise<PricingInfo> => {
-  return proxyRequest<PricingInfo>('/api/voice/pricing');
-};
-
-export const generateSpeech = async (
-  text: string, 
-  voice: string, 
-  tier: string, 
-  token?: string
-): Promise<VoiceGenerateResponse> => {
-  const body: Record<string, unknown> = { text, voice, tier };
-  if (token) body.token = token;
-  
-  return proxyRequest<VoiceGenerateResponse>('/api/voice/generate', {
-    method: 'POST',
-    body: JSON.stringify(body)
-  });
-};
-
-export const getClones = async (token: string): Promise<{ clones: Voice[] }> => {
-  return proxyRequest<{ clones: Voice[] }>(`/api/voice/clones?token=${token}`);
-};
-
-export const createClone = async (
-  token: string, 
-  name: string, 
-  audioFile: File
-): Promise<VoiceCloneResponse> => {
-  const proxyUrl = new URL(PROXY_URL);
-  proxyUrl.searchParams.set('path', '/api/voice/clone');
-  
-  const formData = new FormData();
-  formData.append('token', token);
-  formData.append('name', name);
-  formData.append('audio', audioFile);
-  
-  const res = await fetch(proxyUrl.toString(), { 
-    method: 'POST', 
-    body: formData 
-  });
-  
-  if (res.status === 402) {
-    throw new Error('Insufficient balance - need $2.00');
-  }
-  
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to clone voice');
-  }
-  return data;
+  async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    const res = await fetch(`${API_BASE}/voice/clone?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (res.status === 402) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Clone failed');
+    }
+    return res.json();
+  },
 };

@@ -1,138 +1,72 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import * as apiService from '@/services/api';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+import { api } from '@/services/api';
+
+const STORAGE_KEY = 'oxnull_token';
 
 interface TokenContextType {
   token: string | null;
-  balance: number | null;
-  isLoading: boolean;
-  error: string | null;
+  balance: number;
+  loading: boolean;
   hasToken: boolean;
-  createToken: () => Promise<string | null>;
-  enterToken: (token: string) => Promise<boolean>;
-  refreshBalance: () => Promise<void>;
-  updateBalance: (newBalance: number) => void;
-  clearToken: () => void;
+  refreshBalance: () => Promise<number | undefined>;
 }
 
 const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'oxnull_token';
-
 export function TokenProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize from localStorage
   useEffect(() => {
-    const savedToken = localStorage.getItem(STORAGE_KEY);
-    if (savedToken) {
-      setToken(savedToken);
-      refreshBalanceWithToken(savedToken);
-    } else {
-      setIsLoading(false);
+    async function init() {
+      let stored = localStorage.getItem(STORAGE_KEY);
+      
+      if (!stored) {
+        try {
+          stored = await api.createToken();
+          localStorage.setItem(STORAGE_KEY, stored);
+        } catch (e) {
+          console.error('Failed to create token:', e);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      setToken(stored);
+      
+      try {
+        const info = await api.getBalance(stored);
+        setBalance(info.balance_usd);
+      } catch (e) {
+        console.error('Failed to get balance:', e);
+      }
+      
+      setLoading(false);
     }
+    
+    init();
   }, []);
 
-  const refreshBalanceWithToken = async (t: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiService.getBalance(t);
-      setBalance(data.balance_cents / 100);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to get balance';
-      if (message.includes('not found') || message.includes('invalid') || message.includes('Invalid')) {
-        clearTokenState();
-        setError('Token is invalid or expired');
-      } else {
-        setError(message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const refreshBalance = useCallback(async () => {
-    if (!token) {
-      setIsLoading(false);
-      return;
+    if (!token) return;
+    try {
+      const info = await api.getBalance(token);
+      setBalance(info.balance_usd);
+      return info.balance_usd;
+    } catch (e) {
+      console.error('Failed to refresh balance:', e);
     }
-    await refreshBalanceWithToken(token);
   }, [token]);
 
-  const createTokenHandler = async (): Promise<string | null> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiService.createToken();
-      const newToken = data.token;
-      setToken(newToken);
-      // API returns balance_usd, convert to balance if needed
-      const balanceValue = data.balance_cents !== undefined 
-        ? data.balance_cents / 100 
-        : data.balance_usd;
-      setBalance(balanceValue);
-      localStorage.setItem(STORAGE_KEY, newToken);
-      return newToken;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create token');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const enterToken = async (inputToken: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiService.getTokenInfo(inputToken);
-      setToken(inputToken);
-      // Handle both balance_cents and balance_usd
-      const balanceValue = data.balance_cents !== undefined 
-        ? data.balance_cents / 100 
-        : data.balance_usd;
-      setBalance(balanceValue);
-      localStorage.setItem(STORAGE_KEY, inputToken);
-      return true;
-    } catch (err) {
-      setError('Invalid token');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearTokenState = () => {
-    setToken(null);
-    setBalance(null);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
-  const updateBalance = (newBalance: number) => {
-    setBalance(newBalance);
-  };
-
   return (
-    <TokenContext.Provider
-      value={{
-        token,
-        balance,
-        isLoading,
-        error,
-        hasToken: !!token,
-        createToken: createTokenHandler,
-        enterToken,
-        refreshBalance,
-        updateBalance,
-        clearToken: clearTokenState,
-      }}
-    >
+    <TokenContext.Provider value={{
+      token,
+      balance,
+      loading,
+      hasToken: !!token,
+      refreshBalance,
+    }}>
       {children}
     </TokenContext.Provider>
   );
