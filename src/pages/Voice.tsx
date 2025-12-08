@@ -87,9 +87,12 @@ const VoicePage = () => {
           try {
             const clonesResult = await api.getClones(token);
             if (clonesResult.clones && clonesResult.clones.length > 0) {
-              // Mark clones as custom and add to list
-              const clonedVoices = clonesResult.clones.map(c => ({
-                ...c,
+              // Map clones to voice format - use elevenlabs_id as the voice ID
+              const clonedVoices = clonesResult.clones.map((c: any) => ({
+                id: c.elevenlabs_id || String(c.id), // Use elevenlabs_id for TTS
+                name: c.name,
+                description: 'Cloned voice',
+                provider: 'elevenlabs',
                 is_custom: true
               }));
               allVoices = [...clonedVoices, ...allVoices];
@@ -126,8 +129,12 @@ const VoicePage = () => {
         try {
           const clonesResult = await api.getClones(token);
           if (clonesResult.clones && clonesResult.clones.length > 0) {
-            const clonedVoices = clonesResult.clones.map(c => ({
-              ...c,
+            // Map clones to voice format - use elevenlabs_id as the voice ID
+            const clonedVoices = clonesResult.clones.map((c: any) => ({
+              id: c.elevenlabs_id || String(c.id),
+              name: c.name,
+              description: 'Cloned voice',
+              provider: 'elevenlabs',
               is_custom: true
             }));
             allVoices = [...clonedVoices, ...allVoices];
