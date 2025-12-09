@@ -35,6 +35,7 @@ import ApiAnalytics from "./pages/ApiAnalytics";
 import Voice from "./pages/Voice";
 import Therapy from "./pages/Therapy";
 import Kokoro from "./pages/Kokoro";
+import Verify from "./pages/Verify";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/voice" element={<Voice />} />
             <Route path="/therapy" element={<Therapy />} />
             <Route path="/kokoro" element={<Kokoro />} />
+            <Route path="/verify" element={<Verify />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

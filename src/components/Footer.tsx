@@ -84,6 +84,11 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/verify" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Verify & Security
+                </Link>
+              </li>
+              <li>
                 <a 
                   href="mailto:admin@0xnull.io" 
                   className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
