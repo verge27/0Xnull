@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
@@ -46,8 +47,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <TokenProvider>
-          <Routes>
+          <PrivateKeyAuthProvider>
+            <TokenProvider>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/browse" element={<Browse />} />
             <Route path="/listing/:id" element={<ListingDetail />} />
@@ -82,7 +84,8 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </TokenProvider>
+            </TokenProvider>
+          </PrivateKeyAuthProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

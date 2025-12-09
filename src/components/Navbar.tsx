@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
+import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { NavLink } from './NavLink';
 import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
@@ -12,11 +13,15 @@ import { getWishlist, getConversations } from '@/lib/data';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated } = usePrivateKeyAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Check if authenticated via either method
+  const isAuthenticated = !!user || isPkAuthenticated;
 
   useEffect(() => {
     setWishlistCount(getWishlist().length);
@@ -104,7 +109,7 @@ export const Navbar = () => {
                     <AlertTriangle className="w-5 h-5 text-primary" />
                     <span>Safety</span>
                   </Link>
-                  {user && (
+                  {isAuthenticated && (
                     <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                       <Package className="w-5 h-5 text-primary" />
                       <span>Sell</span>
@@ -174,7 +179,7 @@ export const Navbar = () => {
               </Button>
             </Link>
             
-            {user && (
+            {isAuthenticated && (
               <>
                 <Link to="/messages">
                   <Button variant="ghost" size="icon" className="relative">
@@ -196,18 +201,36 @@ export const Navbar = () => {
                     Sell
                   </Button>
                 </Link>
-                <Link to="/settings">
-                  <Button variant="ghost" size="icon">
-                    <User className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="icon" onClick={() => signOut()} className="hidden sm:inline-flex">
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                
+                {/* Show user info based on auth type */}
+                {privateKeyUser && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1 font-mono text-xs">
+                      <Key className="w-3 h-3" />
+                      {privateKeyUser.keyId}
+                    </Badge>
+                    <Button variant="ghost" size="icon" onClick={() => pkSignOut()} className="hidden sm:inline-flex">
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                
+                {user && (
+                  <>
+                    <Link to="/settings">
+                      <Button variant="ghost" size="icon">
+                        <User className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" size="icon" onClick={() => signOut()} className="hidden sm:inline-flex">
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
               </>
             )}
 
-            {!user && (
+            {!isAuthenticated && (
               <Link to="/auth">
                 <Button>Sign In</Button>
               </Link>

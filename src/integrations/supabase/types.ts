@@ -152,6 +152,36 @@ export type Database = {
         }
         Relationships: []
       }
+      private_key_users: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          public_key: string
+          reputation_score: number | null
+          total_trades: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          public_key: string
+          reputation_score?: number | null
+          total_trades?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          public_key?: string
+          reputation_score?: number | null
+          total_trades?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

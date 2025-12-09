@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface PrivateKeyUser {
+  id: string;
   publicKey: string;
   keyId: string;
   displayName: string;
@@ -47,13 +48,16 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       const keyId = getKeyId(publicKey);
       const displayName = `Anon_${keyId}`;
 
-      // Register the public key in the database
-      const { error } = await supabase
+      // Register the public key in the database using any type to bypass type checking
+      // until types are regenerated
+      const { data, error } = await (supabase as any)
         .from('private_key_users')
         .insert({
           public_key: publicKey,
           display_name: displayName
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Failed to register key:', error);
@@ -61,7 +65,12 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         return null;
       }
 
-      const user: PrivateKeyUser = { publicKey, keyId, displayName };
+      const user: PrivateKeyUser = { 
+        id: data.id,
+        publicKey, 
+        keyId, 
+        displayName 
+      };
       setPrivateKeyUser(user);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
 
@@ -83,19 +92,26 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       const publicKey = await derivePublicKey(privateKey);
       
       // Look up the public key in the database
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('private_key_users')
         .select('*')
         .eq('public_key', publicKey)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
+        console.error('Lookup failed:', error);
+        toast.error('Failed to verify key');
+        return false;
+      }
+
+      if (!data) {
         toast.error('Private key not registered. Generate a new key pair first.');
         return false;
       }
 
       const keyId = getKeyId(publicKey);
       const user: PrivateKeyUser = {
+        id: data.id,
         publicKey,
         keyId,
         displayName: data.display_name
