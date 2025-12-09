@@ -6,12 +6,17 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Calendar, ShoppingBag, MessageCircle } from 'lucide-react';
+import { MapPin, Calendar, ShoppingBag, MessageCircle } from 'lucide-react';
+import { SellerReviews, ReputationBadge } from '@/components/SellerReviews';
+import { useSellerReviews } from '@/hooks/useReviews';
 
 const SellerProfile = () => {
   const { id } = useParams();
   const seller = DEMO_USERS.find(u => u.id === id);
   const listings = getListings().filter(l => l.sellerId === id && l.status === 'active');
+  
+  // Fetch real reviews from database
+  const { reputation } = useSellerReviews(id, false);
 
   if (!seller) {
     return (
@@ -26,29 +31,6 @@ const SellerProfile = () => {
       </div>
     );
   }
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(
-          <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-        );
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(
-          <Star key={i} className="w-5 h-5 fill-primary/50 text-primary" />
-        );
-      } else {
-        stars.push(
-          <Star key={i} className="w-5 h-5 text-muted-foreground" />
-        );
-      }
-    }
-    return stars;
-  };
 
   const joinDate = new Date(seller.joinedAt);
   const formattedJoinDate = joinDate.toLocaleDateString('en-US', { 
@@ -74,12 +56,11 @@ const SellerProfile = () => {
                 <h1 className="text-3xl font-bold mb-3">{seller.displayName}</h1>
                 
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-1">
-                    {renderStars(seller.rating)}
-                  </div>
-                  <span className="text-lg font-medium">({seller.rating.toFixed(1)})</span>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="text-muted-foreground">{seller.reviewCount} reviews</span>
+                  <ReputationBadge 
+                    score={reputation.reputation_score || seller.rating} 
+                    reviewCount={reputation.total_reviews || seller.reviewCount} 
+                    size="md"
+                  />
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
@@ -116,7 +97,7 @@ const SellerProfile = () => {
               Listings ({listings.length})
             </TabsTrigger>
             <TabsTrigger value="reviews">
-              Reviews ({seller.reviewCount})
+              Reviews ({reputation.total_reviews || seller.reviewCount})
             </TabsTrigger>
           </TabsList>
 
@@ -156,13 +137,7 @@ const SellerProfile = () => {
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">
-                  Reviews will be displayed here once implemented.
-                </p>
-              </CardContent>
-            </Card>
+            {id && <SellerReviews sellerId={id} showForm={true} />}
           </TabsContent>
         </Tabs>
       </div>

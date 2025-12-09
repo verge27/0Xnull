@@ -304,6 +304,8 @@ export type Database = {
           display_name: string
           id: string
           payment_token: string | null
+          reputation_score: number | null
+          total_reviews: number | null
           updated_at: string
           xmr_address: string | null
         }
@@ -312,6 +314,8 @@ export type Database = {
           display_name: string
           id: string
           payment_token?: string | null
+          reputation_score?: number | null
+          total_reviews?: number | null
           updated_at?: string
           xmr_address?: string | null
         }
@@ -320,10 +324,76 @@ export type Database = {
           display_name?: string
           id?: string
           payment_token?: string | null
+          reputation_score?: number | null
+          total_reviews?: number | null
           updated_at?: string
           xmr_address?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          listing_id: string | null
+          rating: number
+          reviewer_pk_user_id: string | null
+          reviewer_user_id: string | null
+          seller_pk_user_id: string | null
+          seller_user_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          rating: number
+          reviewer_pk_user_id?: string | null
+          reviewer_user_id?: string | null
+          seller_pk_user_id?: string | null
+          seller_user_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          rating?: number
+          reviewer_pk_user_id?: string | null
+          reviewer_user_id?: string | null
+          seller_pk_user_id?: string | null
+          seller_user_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_pk_user_id_fkey"
+            columns: ["reviewer_pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_seller_pk_user_id_fkey"
+            columns: ["seller_pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rpc_rate_limits: {
         Row: {
