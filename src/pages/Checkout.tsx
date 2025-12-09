@@ -7,8 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { DEMO_USERS } from '@/lib/data';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { isTorBrowser } from '@/services/api';
+import { Copy } from 'lucide-react';
 
 const Checkout = () => {
+  const isOnTor = isTorBrowser();
   const { orderId } = useParams();
   const navigate = useNavigate();
   const order = getOrder(orderId!);
@@ -115,19 +118,48 @@ const Checkout = () => {
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Complete Payment</h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Use Trocador AnonPay to complete your purchase with cryptocurrency.
-                </p>
                 
-                <div className="rounded-lg overflow-hidden border border-border">
-                  <iframe
-                    src={`https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&amount=${order.totalXmr}&address=${seller.xmrAddress}&name=0xNull%20Marketplace&description=Order%20${order.id}`}
-                    width="100%"
-                    height="600"
-                    style={{ border: 'none' }}
-                    title="Trocador Payment"
-                  />
-                </div>
+                {isOnTor ? (
+                  // Tor: Show manual payment details (iframe won't work on .onion)
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Send <span className="font-mono font-bold text-foreground">{order.totalXmr} XMR</span> to the seller's address:
+                    </p>
+                    <div className="bg-muted p-4 rounded-lg">
+                      <code className="text-xs sm:text-sm break-all font-mono">{seller.xmrAddress}</code>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="mt-2 w-full"
+                        onClick={() => {
+                          navigator.clipboard.writeText(seller.xmrAddress);
+                          toast.success('Address copied to clipboard');
+                        }}
+                      >
+                        <Copy className="h-4 w-4 mr-2" /> Copy Address
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      After sending, click "Payment Sent" to notify the seller.
+                    </p>
+                  </div>
+                ) : (
+                  // Clearnet: Use Trocador iframe
+                  <>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Use Trocador AnonPay to complete your purchase with cryptocurrency.
+                    </p>
+                    <div className="rounded-lg overflow-hidden border border-border">
+                      <iframe
+                        src={`https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&amount=${order.totalXmr}&address=${seller.xmrAddress}&name=0xNull%20Marketplace&description=Order%20${order.id}`}
+                        width="100%"
+                        height="600"
+                        style={{ border: 'none' }}
+                        title="Trocador Payment"
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
