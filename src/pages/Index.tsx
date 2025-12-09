@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, Volume2 } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, Volume2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
@@ -37,6 +38,22 @@ const Index = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
+          {/* KYCNOT.ME Badge */}
+          <a 
+            href="https://kycnot.me/service/0xnull"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors group"
+          >
+            <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+              7/10
+            </Badge>
+            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+              Verified on KYCNOT.ME
+            </span>
+            <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </a>
+          
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
             Buy & Sell
             <br />
