@@ -1,7 +1,21 @@
-// 0xNull API Client - Uses Supabase proxy to avoid CORS
+// 0xNull API Client - Adapts for clearnet (via proxy) and Tor (direct)
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const ONION_API = 'http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion/api';
+
+// Detect if we're running on Tor (.onion)
+export const isTorBrowser = (): boolean => {
+  return typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
+};
+
+// Get the appropriate API base URL
+export const getApiBaseUrl = (): string => {
+  if (isTorBrowser()) {
+    return ONION_API;
+  }
+  return PROXY_URL;
+};
 
 export interface TokenInfo {
   token: string;
@@ -40,12 +54,22 @@ export const TIER_CONFIG = {
   ultra: { maxChars: 5000, requiresToken: true }
 } as const;
 
-// Helper to make requests through the proxy
+// Helper to make requests - adapts for Tor vs clearnet
 async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const proxyUrl = new URL(PROXY_URL);
-  proxyUrl.searchParams.set('path', path);
+  const isOnion = isTorBrowser();
   
-  const res = await fetch(proxyUrl.toString(), {
+  let url: string;
+  if (isOnion) {
+    // Direct API call on Tor
+    url = `${ONION_API}${path}`;
+  } else {
+    // Use Supabase proxy on clearnet
+    const proxyUrl = new URL(PROXY_URL);
+    proxyUrl.searchParams.set('path', path);
+    url = proxyUrl.toString();
+  }
+  
+  const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -104,8 +128,16 @@ export const api = {
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
-    const proxyUrl = new URL(PROXY_URL);
-    proxyUrl.searchParams.set('path', '/api/voice/clone');
+    const isOnion = isTorBrowser();
+    
+    let url: string;
+    if (isOnion) {
+      url = `${ONION_API}/voice/clone`;
+    } else {
+      const proxyUrl = new URL(PROXY_URL);
+      proxyUrl.searchParams.set('path', '/api/voice/clone');
+      url = proxyUrl.toString();
+    }
     
     const formData = new FormData();
     formData.append('token', token);
@@ -113,7 +145,7 @@ export const api = {
     formData.append('description', '');
     formData.append('audio', audioFile);
     
-    const res = await fetch(proxyUrl.toString(), {
+    const res = await fetch(url, {
       method: 'POST',
       body: formData,
     });
