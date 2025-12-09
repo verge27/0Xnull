@@ -157,6 +157,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          payment_token: string | null
           public_key: string
           reputation_score: number | null
           total_trades: number | null
@@ -166,6 +167,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          payment_token?: string | null
           public_key: string
           reputation_score?: number | null
           total_trades?: number | null
@@ -175,6 +177,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          payment_token?: string | null
           public_key?: string
           reputation_score?: number | null
           total_trades?: number | null
@@ -187,6 +190,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          payment_token: string | null
           updated_at: string
           xmr_address: string | null
         }
@@ -194,6 +198,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id: string
+          payment_token?: string | null
           updated_at?: string
           xmr_address?: string | null
         }
@@ -201,6 +206,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          payment_token?: string | null
           updated_at?: string
           xmr_address?: string | null
         }
