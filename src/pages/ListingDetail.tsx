@@ -1,24 +1,47 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
-import { getListing, addOrder, updateListing, DEMO_USERS } from '@/lib/data';
+import { getListing, DEMO_USERS } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, ArrowLeft, Package, Shield, MessageCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ShoppingCart, ArrowLeft, Package, Shield, MessageCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { useAuth } from '@/hooks/useAuth';
+import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { SellerCard } from '@/components/SellerCard';
 import { ImageGallery } from '@/components/ImageGallery';
+import { startConversation } from '@/hooks/useMessages';
+import { createOrder } from '@/hooks/useOrders';
 
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const listing = getListing(id!);
   const { user } = useAuth();
+  const { privateKeyUser } = usePrivateKeyAuth();
   const { usdToXmr } = useExchangeRate();
   const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
+
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [showBuyDialog, setShowBuyDialog] = useState(false);
+  const [message, setMessage] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const isAuthenticated = !!user || !!privateKeyUser;
 
   if (!listing) {
     return (
@@ -34,39 +57,76 @@ const ListingDetail = () => {
     );
   }
 
-  const handleBuyNow = () => {
+  const handleContactSeller = async () => {
+    if (!user) {
+      toast.error('Please sign in to contact seller');
+      navigate('/auth');
+      return;
+    }
+
+    if (!message.trim()) {
+      toast.error('Please enter a message');
+      return;
+    }
+
+    setLoading(true);
+    const conversationId = await startConversation(
+      listing.id,
+      listing.sellerId,
+      user.id,
+      message.trim()
+    );
+    setLoading(false);
+
+    if (conversationId) {
+      toast.success('Message sent!');
+      setShowContactDialog(false);
+      setMessage('');
+      navigate(`/messages/${conversationId}`);
+    } else {
+      toast.error('Failed to send message');
+    }
+  };
+
+  const handleBuyNow = async () => {
     if (!user) {
       toast.error('Please sign in to make a purchase');
       navigate('/auth');
       return;
     }
 
-    if (listing.stock < 1) {
-      toast.error('This item is out of stock');
+    if (listing.stock < quantity) {
+      toast.error('Not enough stock available');
       return;
     }
 
-    const orderId = `order-${Date.now()}`;
-    const totalUsd = listing.priceUsd + listing.shippingPriceUsd;
-    const totalXmr = usdToXmr(totalUsd);
+    if (!shippingAddress.trim()) {
+      toast.error('Please enter a shipping address');
+      return;
+    }
 
-    addOrder({
-      id: orderId,
-      listingId: listing.id,
-      buyerId: user.id,
-      sellerId: listing.sellerId,
-      quantity: 1,
-      totalXmr,
-      status: 'created',
-      createdAt: new Date().toISOString()
-    });
+    setLoading(true);
+    const orderId = await createOrder(
+      listing.id,
+      listing.sellerId,
+      false, // assuming demo sellers are regular users
+      quantity,
+      listing.priceUsd,
+      listing.shippingPriceUsd,
+      shippingAddress.trim()
+    );
+    setLoading(false);
 
-    // Decrease stock
-    updateListing(listing.id, { stock: listing.stock - 1 });
-
-    toast.success('Order created! Redirecting to checkout...');
-    setTimeout(() => navigate(`/checkout/${orderId}`), 500);
+    if (orderId) {
+      toast.success('Order created! Redirecting to checkout...');
+      setShowBuyDialog(false);
+      navigate(`/checkout/${orderId}`);
+    } else {
+      toast.error('Failed to create order');
+    }
   };
+
+  const totalPrice = (listing.priceUsd * quantity) + listing.shippingPriceUsd;
 
   return (
     <div className="min-h-screen">
@@ -141,16 +201,30 @@ const ListingDetail = () => {
                 <Button
                   size="lg"
                   className="flex-1 gap-2 text-lg"
-                  onClick={handleBuyNow}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error('Please sign in to make a purchase');
+                      navigate('/auth');
+                      return;
+                    }
+                    setShowBuyDialog(true);
+                  }}
                   disabled={listing.stock < 1}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  Buy Now with XMR
+                  Buy Now
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => toast.info('Messaging feature coming soon!')}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error('Please sign in to contact seller');
+                      navigate('/auth');
+                      return;
+                    }
+                    setShowContactDialog(true);
+                  }}
                 >
                   <MessageCircle className="w-5 h-5" />
                 </Button>
@@ -171,6 +245,129 @@ const ListingDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Contact Seller Dialog */}
+      <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contact Seller</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Send a message to {seller?.displayName || 'the seller'} about "{listing.title}"
+              </p>
+              <Textarea
+                placeholder="Hi, I'm interested in this item..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContactDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleContactSeller} disabled={loading || !message.trim()}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Send Message
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Buy Now Dialog */}
+      <Dialog open={showBuyDialog} onOpenChange={setShowBuyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Complete Purchase</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+              {listing.images[0] && (
+                <img
+                  src={listing.images[0]}
+                  alt={listing.title}
+                  className="w-16 h-16 object-cover rounded"
+                />
+              )}
+              <div className="flex-1">
+                <p className="font-semibold">{listing.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  ${listing.priceUsd.toFixed(2)} each
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Quantity</label>
+              <Input
+                type="number"
+                min={1}
+                max={listing.stock}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Math.min(listing.stock, parseInt(e.target.value) || 1)))}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Shipping Address</label>
+              <Textarea
+                placeholder="Enter your shipping address..."
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Subtotal ({quantity} item{quantity > 1 ? 's' : ''})</span>
+                <span>${(listing.priceUsd * quantity).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Shipping</span>
+                <span>${listing.shippingPriceUsd.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span>${totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                ≈ {usdToXmr(totalPrice).toFixed(6)} XMR
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBuyDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBuyNow} disabled={loading || !shippingAddress.trim()}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Creating Order...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Place Order
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
