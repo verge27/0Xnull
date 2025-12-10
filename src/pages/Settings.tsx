@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { usePGP } from '@/hooks/usePGP';
 import { settingsSchema } from '@/lib/validation';
-import { Shield, Download, Key, Copy, Check, AlertTriangle, Upload, FileKey, QrCode } from 'lucide-react';
+import { Shield, Download, Key, Copy, Check, AlertTriangle, Upload, FileKey, QrCode, Fingerprint } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
 import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
@@ -31,8 +31,9 @@ const Settings = () => {
   const [displayName, setDisplayName] = useState('');
   const [xmrAddress, setXmrAddress] = useState('');
   const [pgpKeys, setPgpKeys] = useState<{ publicKey: string; encryptedPrivateKey: string } | null>(null);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [loadingKeys, setLoadingKeys] = useState(true);
-  const [copied, setCopied] = useState<'public' | 'private' | null>(null);
+  const [copied, setCopied] = useState<'public' | 'private' | 'fingerprint' | null>(null);
   const [showPGPDialog, setShowPGPDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importStep, setImportStep] = useState<'upload' | 'passphrase'>('upload');
@@ -50,7 +51,7 @@ const Settings = () => {
     }
   }, [profile]);
 
-  // Fetch PGP keys
+  // Fetch PGP keys and calculate fingerprint
   useEffect(() => {
     const fetchKeys = async () => {
       if (!user) return;
@@ -67,6 +68,17 @@ const Settings = () => {
             publicKey: data.pgp_public_key,
             encryptedPrivateKey: data.pgp_encrypted_private_key || ''
           });
+          
+          // Calculate fingerprint
+          try {
+            const key = await openpgp.readKey({ armoredKey: data.pgp_public_key });
+            const fp = key.getFingerprint().toUpperCase();
+            // Format as groups of 4 characters
+            const formatted = fp.match(/.{1,4}/g)?.join(' ') || fp;
+            setFingerprint(formatted);
+          } catch (e) {
+            console.error('Failed to calculate fingerprint:', e);
+          }
         }
       } catch (e) {
         console.error('Failed to fetch PGP keys:', e);
@@ -106,13 +118,19 @@ const Settings = () => {
     }
   };
 
-  const handleCopy = async (type: 'public' | 'private') => {
-    if (!pgpKeys) return;
-    
-    const text = type === 'public' ? pgpKeys.publicKey : pgpKeys.encryptedPrivateKey;
+  const handleCopy = async (type: 'public' | 'private' | 'fingerprint') => {
+    let text = '';
+    if (type === 'fingerprint') {
+      if (!fingerprint) return;
+      text = fingerprint;
+    } else {
+      if (!pgpKeys) return;
+      text = type === 'public' ? pgpKeys.publicKey : pgpKeys.encryptedPrivateKey;
+    }
     await navigator.clipboard.writeText(text);
     setCopied(type);
-    toast.success(`${type === 'public' ? 'Public' : 'Private'} key copied to clipboard`);
+    const label = type === 'public' ? 'Public key' : type === 'private' ? 'Private key' : 'Fingerprint';
+    toast.success(`${label} copied to clipboard`);
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -345,6 +363,37 @@ const Settings = () => {
                   <div className="bg-muted rounded-lg p-3 font-mono text-xs overflow-auto max-h-24">
                     {pgpKeys.publicKey.substring(0, 200)}...
                   </div>
+                  
+                  {/* Fingerprint */}
+                  {fingerprint && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2 text-xs">
+                          <Fingerprint className="w-3.5 h-3.5 text-primary" />
+                          Key Fingerprint
+                        </Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2"
+                          onClick={() => handleCopy('fingerprint')}
+                        >
+                          {copied === 'fingerprint' ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="font-mono text-xs tracking-wider text-primary/80 break-all">
+                        {fingerprint}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Verify this fingerprint matches when sharing your key to ensure authenticity.
+                      </p>
+                    </div>
+                  )}
+                  
                   <p className="text-xs text-muted-foreground">
                     Share this key with others so they can send you encrypted messages.
                   </p>
