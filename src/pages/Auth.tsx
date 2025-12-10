@@ -126,8 +126,8 @@ const Auth = () => {
 
   const handleContinueAfterSignIn = () => {
     if (signedInKey?.user) {
-      // NOW confirm the sign-in (sets state and localStorage)
-      confirmSignIn(signedInKey.user);
+      // NOW confirm the sign-in (sets state and localStorage) - also store the private key
+      confirmSignIn(signedInKey.user, signedInKey.privateKey);
     }
     navigate('/');
   };

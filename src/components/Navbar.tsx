@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
-  const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated } = usePrivateKeyAuth();
+  const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey } = usePrivateKeyAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -24,6 +24,13 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [keyInput, setKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
+
+  // Use stored private key if available
+  useEffect(() => {
+    if (storedPrivateKey && !keyInput) {
+      setKeyInput(storedPrivateKey);
+    }
+  }, [storedPrivateKey]);
 
   // Check if authenticated via either method
   const isAuthenticated = !!user || isPkAuthenticated;
@@ -233,7 +240,9 @@ export const Navbar = () => {
                             <div className="font-mono text-sm text-primary">Anon_{privateKeyUser.keyId}</div>
                           </div>
                           <div>
-                            <Label className="text-xs text-muted-foreground">Enter private key to copy</Label>
+                            <Label className="text-xs text-muted-foreground">
+                              {storedPrivateKey ? 'Your stored private key' : 'Enter private key to copy'}
+                            </Label>
                             <div className="flex gap-2 mt-1">
                               <Input
                                 type="password"
@@ -253,6 +262,20 @@ export const Navbar = () => {
                               </Button>
                             </div>
                           </div>
+                          {storedPrivateKey && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                clearStoredPrivateKey();
+                                setKeyInput('');
+                              }}
+                              className="w-full gap-2"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              Clear stored key
+                            </Button>
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>

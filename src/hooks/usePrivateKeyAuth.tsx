@@ -16,18 +16,22 @@ interface PrivateKeyAuthContextType {
   generateNewKeys: () => Promise<{ privateKey: string; publicKey: string; keyId: string } | null>;
   signInWithKey: (privateKey: string) => Promise<boolean>;
   validateKey: (privateKey: string) => Promise<PrivateKeyUser | null>;
-  confirmSignIn: (user: PrivateKeyUser) => void;
+  confirmSignIn: (user: PrivateKeyUser, privateKey?: string) => void;
   signOut: () => void;
   isAuthenticated: boolean;
+  storedPrivateKey: string | null;
+  clearStoredPrivateKey: () => void;
 }
 
 const STORAGE_KEY = 'pk_session';
+const PRIVATE_KEY_STORAGE = 'pk_private_key';
 
 const PrivateKeyAuthContext = createContext<PrivateKeyAuthContextType | undefined>(undefined);
 
 export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) => {
   const [privateKeyUser, setPrivateKeyUser] = useState<PrivateKeyUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [storedPrivateKey, setStoredPrivateKey] = useState<string | null>(null);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -40,8 +44,19 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         localStorage.removeItem(STORAGE_KEY);
       }
     }
+    // Load stored private key
+    const storedKey = localStorage.getItem(PRIVATE_KEY_STORAGE);
+    if (storedKey) {
+      setStoredPrivateKey(storedKey);
+    }
     setIsLoading(false);
   }, []);
+
+  const clearStoredPrivateKey = () => {
+    localStorage.removeItem(PRIVATE_KEY_STORAGE);
+    setStoredPrivateKey(null);
+    toast.success('Private key cleared from storage');
+  };
 
   const generateNewKeys = async () => {
     try {
@@ -75,6 +90,9 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       };
       setPrivateKeyUser(user);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      // Also store the private key for easy access
+      localStorage.setItem(PRIVATE_KEY_STORAGE, privateKey);
+      setStoredPrivateKey(privateKey);
 
       return { privateKey, publicKey, keyId };
     } catch (error) {
@@ -126,16 +144,21 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
   };
 
   // Confirms sign-in by setting state (call after user copies key)
-  const confirmSignIn = (user: PrivateKeyUser) => {
+  const confirmSignIn = (user: PrivateKeyUser, privateKey?: string) => {
     setPrivateKeyUser(user);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    // Store private key if provided
+    if (privateKey) {
+      localStorage.setItem(PRIVATE_KEY_STORAGE, privateKey);
+      setStoredPrivateKey(privateKey);
+    }
     toast.success(`Welcome back, ${user.displayName}!`);
   };
 
   const signInWithKey = async (privateKey: string): Promise<boolean> => {
     const user = await validateKey(privateKey);
     if (user) {
-      confirmSignIn(user);
+      confirmSignIn(user, privateKey);
       return true;
     }
     return false;
@@ -144,6 +167,8 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
   const signOut = () => {
     setPrivateKeyUser(null);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PRIVATE_KEY_STORAGE);
+    setStoredPrivateKey(null);
     toast.success('Signed out');
   };
 
@@ -157,7 +182,9 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         validateKey,
         confirmSignIn,
         signOut,
-        isAuthenticated: !!privateKeyUser
+        isAuthenticated: !!privateKeyUser,
+        storedPrivateKey,
+        clearStoredPrivateKey
       }}
     >
       {children}
