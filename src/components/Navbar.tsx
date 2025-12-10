@@ -26,13 +26,6 @@ export const Navbar = () => {
   const [keyInput, setKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
 
-  // Debug: log when privateKeyUser changes
-  useEffect(() => {
-    if (privateKeyUser) {
-      console.log('Navbar: privateKeyUser is set', privateKeyUser.keyId);
-    }
-  }, [privateKeyUser]);
-
   // Use stored private key if available
   useEffect(() => {
     if (storedPrivateKey && !keyInput) {
@@ -238,11 +231,7 @@ export const Navbar = () => {
                       variant="secondary" 
                       size="sm" 
                       className="gap-1 font-mono text-xs h-7 px-2"
-                      onClick={() => {
-                        console.log('Key button clicked!');
-                        alert('Button clicked! Opening dialog...');
-                        setKeyPopoverOpen(true);
-                      }}
+                      onClick={() => setKeyPopoverOpen(true)}
                     >
                       <Key className="w-3 h-3" />
                       {privateKeyUser.keyId}

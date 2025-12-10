@@ -24,8 +24,8 @@ const Auth = () => {
   const [keyCopied, setKeyCopied] = useState(false);
 
   // Redirect if already logged in (either method)
-  // But NOT if we're showing the confirmation screen after sign-in
-  if ((user || privateKeyUser) && !signedInKey) {
+  // But NOT if we're showing the confirmation screen after sign-in OR key generation
+  if ((user || privateKeyUser) && !signedInKey && !generatedKey) {
     navigate('/');
     return null;
   }
