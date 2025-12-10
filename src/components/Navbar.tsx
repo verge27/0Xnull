@@ -228,10 +228,10 @@ export const Navbar = () => {
                   <div className="flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Badge variant="secondary" className="gap-1 font-mono text-xs cursor-pointer hover:bg-secondary">
+                        <Button variant="secondary" size="sm" className="gap-1 font-mono text-xs h-7 px-2">
                           <Key className="w-3 h-3" />
                           {privateKeyUser.keyId}
-                        </Badge>
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80" align="end">
                         <div className="space-y-3">
