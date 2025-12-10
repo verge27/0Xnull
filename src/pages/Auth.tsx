@@ -16,10 +16,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 const Auth = () => {
   const navigate = useNavigate();
   const { signUp, signIn, user } = useAuth();
-  const { generateNewKeys, signInWithKey, privateKeyUser } = usePrivateKeyAuth();
+  const { generateNewKeys, validateKey, confirmSignIn, privateKeyUser } = usePrivateKeyAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<{ privateKey: string; publicKey: string; keyId: string } | null>(null);
-  const [signedInKey, setSignedInKey] = useState<{ privateKey: string; keyId: string } | null>(null);
+  const [signedInKey, setSignedInKey] = useState<{ privateKey: string; keyId: string; user: any } | null>(null);
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
 
@@ -105,19 +105,12 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Prepare key info BEFORE calling signInWithKey so signedInKey is set
-    // before the context update triggers a re-render
-    const { derivePublicKey, getKeyId } = await import('@/lib/crypto');
-    const publicKey = await derivePublicKey(privateKeyInput);
-    const keyId = getKeyId(publicKey);
+    // Use validateKey which does NOT set state - just validates and returns user data
+    const user = await validateKey(privateKeyInput);
     
-    // Set signedInKey FIRST so redirect check sees it
-    setSignedInKey({ privateKey: privateKeyInput, keyId });
-    
-    const success = await signInWithKey(privateKeyInput);
-    if (!success) {
-      // Sign-in failed, clear signedInKey
-      setSignedInKey(null);
+    if (user) {
+      // Show confirmation screen with key info (don't set privateKeyUser yet)
+      setSignedInKey({ privateKey: privateKeyInput, keyId: user.keyId, user });
     }
     setIsLoading(false);
   };
@@ -132,6 +125,10 @@ const Auth = () => {
   };
 
   const handleContinueAfterSignIn = () => {
+    if (signedInKey?.user) {
+      // NOW confirm the sign-in (sets state and localStorage)
+      confirmSignIn(signedInKey.user);
+    }
     navigate('/');
   };
 

@@ -15,6 +15,8 @@ interface PrivateKeyAuthContextType {
   isLoading: boolean;
   generateNewKeys: () => Promise<{ privateKey: string; publicKey: string; keyId: string } | null>;
   signInWithKey: (privateKey: string) => Promise<boolean>;
+  validateKey: (privateKey: string) => Promise<PrivateKeyUser | null>;
+  confirmSignIn: (user: PrivateKeyUser) => void;
   signOut: () => void;
   isAuthenticated: boolean;
 }
@@ -82,16 +84,16 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
     }
   };
 
-  const signInWithKey = async (privateKey: string): Promise<boolean> => {
+  // Validates key and returns user data WITHOUT setting state
+  const validateKey = async (privateKey: string): Promise<PrivateKeyUser | null> => {
     if (!isValidPrivateKey(privateKey)) {
       toast.error('Invalid private key format');
-      return false;
+      return null;
     }
 
     try {
       const publicKey = await derivePublicKey(privateKey);
       
-      // Look up the public key in the database
       const { data, error } = await (supabase as any)
         .from('private_key_users')
         .select('*')
@@ -101,31 +103,42 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       if (error) {
         console.error('Lookup failed:', error);
         toast.error('Failed to verify key');
-        return false;
+        return null;
       }
 
       if (!data) {
         toast.error('Private key not registered. Generate a new key pair first.');
-        return false;
+        return null;
       }
 
       const keyId = getKeyId(publicKey);
-      const user: PrivateKeyUser = {
+      return {
         id: data.id,
         publicKey,
         keyId,
         displayName: data.display_name
       };
-
-      setPrivateKeyUser(user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      toast.success(`Welcome back, ${user.displayName}!`);
-      return true;
     } catch (error) {
-      console.error('Sign in failed:', error);
-      toast.error('Failed to sign in');
-      return false;
+      console.error('Validation failed:', error);
+      toast.error('Failed to verify key');
+      return null;
     }
+  };
+
+  // Confirms sign-in by setting state (call after user copies key)
+  const confirmSignIn = (user: PrivateKeyUser) => {
+    setPrivateKeyUser(user);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    toast.success(`Welcome back, ${user.displayName}!`);
+  };
+
+  const signInWithKey = async (privateKey: string): Promise<boolean> => {
+    const user = await validateKey(privateKey);
+    if (user) {
+      confirmSignIn(user);
+      return true;
+    }
+    return false;
   };
 
   const signOut = () => {
@@ -141,6 +154,8 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         isLoading,
         generateNewKeys,
         signInWithKey,
+        validateKey,
+        confirmSignIn,
         signOut,
         isAuthenticated: !!privateKeyUser
       }}
