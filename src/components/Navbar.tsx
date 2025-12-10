@@ -233,7 +233,7 @@ export const Navbar = () => {
                           {privateKeyUser.keyId}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80" align="end">
+                      <PopoverContent className="w-80 z-[100]" align="end">
                         <div className="space-y-3">
                           <div>
                             <Label className="text-xs text-muted-foreground">Key ID</Label>
