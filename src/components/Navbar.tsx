@@ -1,15 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { NavLink } from './NavLink';
 import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
+import { toast } from 'sonner';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -19,6 +22,8 @@ export const Navbar = () => {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [keyInput, setKeyInput] = useState('');
+  const [keyCopied, setKeyCopied] = useState(false);
 
   // Check if authenticated via either method
   const isAuthenticated = !!user || isPkAuthenticated;
@@ -35,6 +40,15 @@ export const Navbar = () => {
       navigate(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
       navigate('/browse');
+    }
+  };
+
+  const copyKey = () => {
+    if (keyInput.length === 64) {
+      navigator.clipboard.writeText(keyInput);
+      setKeyCopied(true);
+      toast.success('Private key copied!');
+      setTimeout(() => setKeyCopied(false), 2000);
     }
   };
 
@@ -205,10 +219,43 @@ export const Navbar = () => {
                 {/* Show user info based on auth type */}
                 {privateKeyUser && (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="gap-1 font-mono text-xs">
-                      <Key className="w-3 h-3" />
-                      {privateKeyUser.keyId}
-                    </Badge>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Badge variant="secondary" className="gap-1 font-mono text-xs cursor-pointer hover:bg-secondary">
+                          <Key className="w-3 h-3" />
+                          {privateKeyUser.keyId}
+                        </Badge>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80" align="end">
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Key ID</Label>
+                            <div className="font-mono text-sm text-primary">Anon_{privateKeyUser.keyId}</div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Enter private key to copy</Label>
+                            <div className="flex gap-2 mt-1">
+                              <Input
+                                type="password"
+                                placeholder="64-character key"
+                                value={keyInput}
+                                onChange={(e) => setKeyInput(e.target.value)}
+                                className="font-mono text-xs"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={copyKey}
+                                disabled={keyInput.length !== 64}
+                                className={keyCopied ? 'text-green-500' : ''}
+                              >
+                                {keyCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                     <Button variant="ghost" size="icon" onClick={() => pkSignOut()} className="hidden sm:inline-flex">
                       <LogOut className="w-4 h-4" />
                     </Button>
