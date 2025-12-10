@@ -6,28 +6,38 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageCircle, Loader2 } from 'lucide-react';
+import { Send, MessageCircle, Loader2, Shield, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMessages, useConversation } from '@/hooks/useMessages';
+import { usePGP } from '@/hooks/usePGP';
+import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
 
 const Messages = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
+  const [showPGPDialog, setShowPGPDialog] = useState(false);
+  const [decryptedMessages, setDecryptedMessages] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
   const { conversations, loading: convLoading, isAuthenticated } = useMessages();
-  const { messages, loading: msgLoading, sendMessage, currentUserId } = useConversation(conversationId);
+  const { messages, loading: msgLoading, sendMessage, sendEncryptedMessage, currentUserId, getRecipientIds } = useConversation(conversationId);
+  const { isUnlocked, isPGPEncrypted, decryptMessage, restoreSession, checkHasKeys } = usePGP();
 
   const activeConversation = conversationId 
     ? conversations.find(c => c.id === conversationId)
     : conversations[0];
+
+  // Try to restore PGP session on mount
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -40,6 +50,30 @@ const Messages = () => {
       navigate(`/messages/${conversations[0].id}`, { replace: true });
     }
   }, [conversationId, conversations, navigate]);
+
+  // Decrypt encrypted messages when unlocked
+  useEffect(() => {
+    if (!isUnlocked) return;
+
+    const decryptMessages = async () => {
+      const newDecrypted: Record<string, string> = {};
+      
+      for (const msg of messages) {
+        if (isPGPEncrypted(msg.content) && !decryptedMessages[msg.id]) {
+          const decrypted = await decryptMessage(msg.content);
+          if (decrypted) {
+            newDecrypted[msg.id] = decrypted;
+          }
+        }
+      }
+
+      if (Object.keys(newDecrypted).length > 0) {
+        setDecryptedMessages(prev => ({ ...prev, ...newDecrypted }));
+      }
+    };
+
+    decryptMessages();
+  }, [messages, isUnlocked, isPGPEncrypted, decryptMessage, decryptedMessages]);
 
   if (!isAuthenticated) {
     return (
@@ -62,8 +96,27 @@ const Messages = () => {
   const handleSend = async () => {
     if (!messageText.trim() || !activeConversation || sending) return;
     
+    // Check if we should send encrypted
+    if (!isUnlocked) {
+      // Check if user has keys set up
+      const hasKeys = await checkHasKeys();
+      if (hasKeys || !hasKeys) {
+        // Prompt to unlock/create keys for encryption
+        setShowPGPDialog(true);
+        return;
+      }
+    }
+
     setSending(true);
-    const success = await sendMessage(messageText);
+    
+    // Get recipient info for encryption
+    const recipientIds = getRecipientIds();
+    const success = await sendEncryptedMessage(
+      messageText,
+      recipientIds?.recipientUserId,
+      recipientIds?.recipientPkUserId
+    );
+    
     setSending(false);
     
     if (success) {
@@ -71,6 +124,20 @@ const Messages = () => {
     } else {
       toast.error('Failed to send message');
     }
+  };
+
+  const getDisplayContent = (msg: typeof messages[0]) => {
+    // Check if message is encrypted
+    if (isPGPEncrypted(msg.content)) {
+      // Check if we have decrypted version
+      if (decryptedMessages[msg.id]) {
+        return decryptedMessages[msg.id];
+      }
+      // Not decrypted yet
+      return null;
+    }
+    // Plain text message
+    return msg.content;
   };
 
   const getOtherParticipant = (participants: typeof activeConversation.participants) => {
@@ -197,6 +264,9 @@ const Messages = () => {
                   ) : messages.length > 0 ? (
                     messages.map(msg => {
                       const isSent = isSentByMe(msg);
+                      const displayContent = getDisplayContent(msg);
+                      const isEncrypted = isPGPEncrypted(msg.content);
+                      
                       return (
                         <div key={msg.id} className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[70%] rounded-lg p-3 ${
@@ -207,7 +277,24 @@ const Messages = () => {
                             {!isSent && (
                               <p className="text-xs font-medium mb-1">{getSenderName(msg)}</p>
                             )}
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            {displayContent ? (
+                              <div className="flex items-start gap-2">
+                                {isEncrypted && (
+                                  <Lock className={`w-3 h-3 mt-0.5 flex-shrink-0 ${isSent ? 'text-primary-foreground/70' : 'text-green-500'}`} />
+                                )}
+                                <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+                              </div>
+                            ) : isEncrypted ? (
+                              <button
+                                onClick={() => setShowPGPDialog(true)}
+                                className={`flex items-center gap-2 text-sm ${isSent ? 'text-primary-foreground/80' : 'text-muted-foreground'} hover:underline`}
+                              >
+                                <Lock className="w-3 h-3" />
+                                <span>Encrypted message - click to unlock</span>
+                              </button>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
                             <p className={`text-xs mt-1 ${
                               isSent ? 'text-primary-foreground/70' : 'text-muted-foreground'
                             }`}>
@@ -227,9 +314,15 @@ const Messages = () => {
 
                 {/* Input */}
                 <div className="border-t border-border p-4">
+                  {isUnlocked && (
+                    <div className="flex items-center gap-1.5 text-xs text-green-500 mb-2">
+                      <Shield className="w-3 h-3" />
+                      <span>End-to-end encrypted</span>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Type a message..."
+                      placeholder={isUnlocked ? "Type an encrypted message..." : "Type a message..."}
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
@@ -261,6 +354,15 @@ const Messages = () => {
           </Card>
         </div>
       </div>
+
+      <PGPPassphraseDialog 
+        open={showPGPDialog}
+        onOpenChange={setShowPGPDialog}
+        onUnlocked={() => {
+          // Re-decrypt messages after unlocking
+          setDecryptedMessages({});
+        }}
+      />
     </div>
   );
 };

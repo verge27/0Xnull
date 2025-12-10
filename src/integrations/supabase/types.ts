@@ -362,6 +362,8 @@ export type Database = {
           display_name: string
           id: string
           payment_token: string | null
+          pgp_encrypted_private_key: string | null
+          pgp_public_key: string | null
           public_key: string
           reputation_score: number | null
           total_trades: number | null
@@ -372,6 +374,8 @@ export type Database = {
           display_name: string
           id?: string
           payment_token?: string | null
+          pgp_encrypted_private_key?: string | null
+          pgp_public_key?: string | null
           public_key: string
           reputation_score?: number | null
           total_trades?: number | null
@@ -382,6 +386,8 @@ export type Database = {
           display_name?: string
           id?: string
           payment_token?: string | null
+          pgp_encrypted_private_key?: string | null
+          pgp_public_key?: string | null
           public_key?: string
           reputation_score?: number | null
           total_trades?: number | null
@@ -395,6 +401,8 @@ export type Database = {
           display_name: string
           id: string
           payment_token: string | null
+          pgp_encrypted_private_key: string | null
+          pgp_public_key: string | null
           reputation_score: number | null
           total_reviews: number | null
           updated_at: string
@@ -405,6 +413,8 @@ export type Database = {
           display_name: string
           id: string
           payment_token?: string | null
+          pgp_encrypted_private_key?: string | null
+          pgp_public_key?: string | null
           reputation_score?: number | null
           total_reviews?: number | null
           updated_at?: string
@@ -415,6 +425,8 @@ export type Database = {
           display_name?: string
           id?: string
           payment_token?: string | null
+          pgp_encrypted_private_key?: string | null
+          pgp_public_key?: string | null
           reputation_score?: number | null
           total_reviews?: number | null
           updated_at?: string

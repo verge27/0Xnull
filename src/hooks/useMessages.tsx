@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { usePrivateKeyAuth } from './usePrivateKeyAuth';
+import { usePGP } from './usePGP';
 
 export interface Conversation {
   id: string;
@@ -181,19 +182,43 @@ export function useMessages() {
 export function useConversation(conversationId: string | undefined) {
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
+  const { encryptMessage, getRecipientPublicKey, isUnlocked } = usePGP();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recipientInfo, setRecipientInfo] = useState<{
+    recipientUserId?: string;
+    recipientPkUserId?: string;
+  } | null>(null);
 
-  const currentUserId = user?.id;
+  const currentUserId = user?.id || '';
 
   const fetchMessages = useCallback(async () => {
     if (!conversationId) {
       setMessages([]);
       setLoading(false);
+      setRecipientInfo(null);
       return;
     }
 
     try {
+      // First, get participants to find recipient
+      const { data: participants } = await supabase
+        .from('conversation_participants')
+        .select('user_id, private_key_user_id')
+        .eq('conversation_id', conversationId);
+
+      if (participants) {
+        const recipient = participants.find(p => 
+          (p.user_id && p.user_id !== user?.id) ||
+          (p.private_key_user_id && p.private_key_user_id !== privateKeyUser?.id)
+        );
+        if (recipient) {
+          setRecipientInfo({
+            recipientUserId: recipient.user_id || undefined,
+            recipientPkUserId: recipient.private_key_user_id || undefined,
+          });
+        }
+      }
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -307,10 +332,56 @@ export function useConversation(conversationId: string | undefined) {
     }
   };
 
+  const sendEncryptedMessage = async (
+    content: string,
+    recipientUserId?: string,
+    recipientPkUserId?: string
+  ) => {
+    if (!conversationId || !user || !content.trim()) return false;
+
+    try {
+      let finalContent = content.trim();
+
+      // Try to encrypt if unlocked and recipient has public key
+      if (isUnlocked && (recipientUserId || recipientPkUserId)) {
+        const recipientPublicKey = await getRecipientPublicKey(recipientUserId, recipientPkUserId);
+        if (recipientPublicKey) {
+          const encrypted = await encryptMessage(finalContent, recipientPublicKey);
+          if (encrypted) {
+            finalContent = encrypted;
+          }
+        }
+      }
+
+      const { error } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_user_id: user.id,
+        content: finalContent,
+      });
+
+      if (error) throw error;
+
+      // Update conversation updated_at
+      await supabase
+        .from('conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
+      return true;
+    } catch (e) {
+      console.error('Failed to send encrypted message:', e);
+      return false;
+    }
+  };
+
+  const getRecipientIds = () => recipientInfo;
+
   return {
     messages,
     loading,
     sendMessage,
+    sendEncryptedMessage,
+    getRecipientIds,
     currentUserId,
     refetch: fetchMessages,
   };
