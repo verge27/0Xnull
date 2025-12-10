@@ -188,6 +188,7 @@ export function useConversation(conversationId: string | undefined) {
   const [recipientInfo, setRecipientInfo] = useState<{
     recipientUserId?: string;
     recipientPkUserId?: string;
+    recipientHasPGP?: boolean;
   } | null>(null);
 
   const currentUserId = user?.id || '';
@@ -213,9 +214,24 @@ export function useConversation(conversationId: string | undefined) {
           (p.private_key_user_id && p.private_key_user_id !== privateKeyUser?.id)
         );
         if (recipient) {
+          // Check if recipient has PGP keys
+          let hasPGP = false;
+          if (recipient.user_id) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('pgp_public_key')
+              .eq('id', recipient.user_id)
+              .maybeSingle();
+            hasPGP = !!profile?.pgp_public_key;
+          } else if (recipient.private_key_user_id) {
+            const stored = localStorage.getItem(`pgp_keys_${recipient.private_key_user_id}`);
+            hasPGP = !!stored;
+          }
+
           setRecipientInfo({
             recipientUserId: recipient.user_id || undefined,
             recipientPkUserId: recipient.private_key_user_id || undefined,
+            recipientHasPGP: hasPGP,
           });
         }
       }
