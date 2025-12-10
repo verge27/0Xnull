@@ -241,9 +241,21 @@ const Messages = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h2 className="font-semibold">
-                      {getOtherParticipant(activeConversation.participants)}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-semibold">
+                        {getOtherParticipant(activeConversation.participants)}
+                      </h2>
+                      {getRecipientIds()?.recipientHasPGP ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                          <Shield className="w-2.5 h-2.5" />
+                          PGP
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                          No PGP
+                        </span>
+                      )}
+                    </div>
                     {activeConversation.listing && (
                       <Link 
                         to={`/listing/${activeConversation.listing_id}`}
