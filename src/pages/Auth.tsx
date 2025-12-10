@@ -104,13 +104,20 @@ const Auth = () => {
   const handleKeySignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Prepare key info BEFORE calling signInWithKey so signedInKey is set
+    // before the context update triggers a re-render
+    const { derivePublicKey, getKeyId } = await import('@/lib/crypto');
+    const publicKey = await derivePublicKey(privateKeyInput);
+    const keyId = getKeyId(publicKey);
+    
+    // Set signedInKey FIRST so redirect check sees it
+    setSignedInKey({ privateKey: privateKeyInput, keyId });
+    
     const success = await signInWithKey(privateKeyInput);
-    if (success) {
-      // Don't navigate immediately - show confirmation with key copy
-      const { derivePublicKey, getKeyId } = await import('@/lib/crypto');
-      const publicKey = await derivePublicKey(privateKeyInput);
-      const keyId = getKeyId(publicKey);
-      setSignedInKey({ privateKey: privateKeyInput, keyId });
+    if (!success) {
+      // Sign-in failed, clear signedInKey
+      setSignedInKey(null);
     }
     setIsLoading(false);
   };
