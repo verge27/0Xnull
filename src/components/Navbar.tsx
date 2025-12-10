@@ -227,17 +227,16 @@ export const Navbar = () => {
                 {/* Show user info based on auth type */}
                 {privateKeyUser && (
                   <div className="flex items-center gap-2">
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="gap-1 font-mono text-xs h-7 px-2"
+                      onClick={() => setKeyPopoverOpen(true)}
+                    >
+                      <Key className="w-3 h-3" />
+                      {privateKeyUser.keyId}
+                    </Button>
                     <Dialog open={keyPopoverOpen} onOpenChange={setKeyPopoverOpen}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="secondary" 
-                          size="sm" 
-                          className="gap-1 font-mono text-xs h-7 px-2"
-                        >
-                          <Key className="w-3 h-3" />
-                          {privateKeyUser.keyId}
-                        </Button>
-                      </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                           <DialogTitle>Your Private Key</DialogTitle>
