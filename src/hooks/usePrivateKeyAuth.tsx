@@ -21,6 +21,7 @@ interface PrivateKeyAuthContextType {
   isAuthenticated: boolean;
   storedPrivateKey: string | null;
   clearStoredPrivateKey: () => void;
+  savePrivateKey: (key: string) => void;
 }
 
 const STORAGE_KEY = 'pk_session';
@@ -56,6 +57,14 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
     localStorage.removeItem(PRIVATE_KEY_STORAGE);
     setStoredPrivateKey(null);
     toast.success('Private key cleared from storage');
+  };
+
+  const savePrivateKey = (key: string) => {
+    if (key.length === 64) {
+      localStorage.setItem(PRIVATE_KEY_STORAGE, key);
+      setStoredPrivateKey(key);
+      toast.success('Private key saved to storage');
+    }
   };
 
   const generateNewKeys = async () => {
@@ -184,7 +193,8 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         signOut,
         isAuthenticated: !!privateKeyUser,
         storedPrivateKey,
-        clearStoredPrivateKey
+        clearStoredPrivateKey,
+        savePrivateKey
       }}
     >
       {children}

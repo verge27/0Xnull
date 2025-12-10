@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
-  const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey } = usePrivateKeyAuth();
+  const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -262,6 +262,17 @@ export const Navbar = () => {
                               </Button>
                             </div>
                           </div>
+                          {!storedPrivateKey && keyInput.length === 64 && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => savePrivateKey(keyInput)}
+                              className="w-full gap-2"
+                            >
+                              <Key className="h-3 w-3" />
+                              Save key to storage
+                            </Button>
+                          )}
                           {storedPrivateKey && (
                             <Button
                               variant="destructive"
