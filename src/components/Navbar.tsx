@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
@@ -227,27 +227,25 @@ export const Navbar = () => {
                 {/* Show user info based on auth type */}
                 {privateKeyUser && (
                   <div className="flex items-center gap-2">
-                    <Popover open={keyPopoverOpen} onOpenChange={setKeyPopoverOpen}>
-                      <PopoverTrigger asChild>
+                    <Dialog open={keyPopoverOpen} onOpenChange={setKeyPopoverOpen}>
+                      <DialogTrigger asChild>
                         <Button 
                           variant="secondary" 
                           size="sm" 
-                          className="gap-1 font-mono text-xs h-7 px-2 relative z-[60]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.info('Key button clicked');
-                            setKeyPopoverOpen(!keyPopoverOpen);
-                          }}
+                          className="gap-1 font-mono text-xs h-7 px-2"
                         >
                           <Key className="w-3 h-3" />
                           {privateKeyUser.keyId}
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 z-[100]" align="end" sideOffset={5}>
-                        <div className="space-y-3">
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Your Private Key</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
                           <div>
                             <Label className="text-xs text-muted-foreground">Key ID</Label>
-                            <div className="font-mono text-sm text-primary">Anon_{privateKeyUser.keyId}</div>
+                            <div className="font-mono text-lg text-primary">Anon_{privateKeyUser.keyId}</div>
                           </div>
                           <div>
                             <Label className="text-xs text-muted-foreground">
@@ -298,8 +296,8 @@ export const Navbar = () => {
                             </Button>
                           )}
                         </div>
-                      </PopoverContent>
-                    </Popover>
+                      </DialogContent>
+                    </Dialog>
                     <Button variant="ghost" size="icon" onClick={() => pkSignOut()} className="hidden sm:inline-flex">
                       <LogOut className="w-4 h-4" />
                     </Button>
