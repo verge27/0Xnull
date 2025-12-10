@@ -22,6 +22,7 @@ export const Navbar = () => {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [keyPopoverOpen, setKeyPopoverOpen] = useState(false);
   const [keyInput, setKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
 
@@ -226,14 +227,19 @@ export const Navbar = () => {
                 {/* Show user info based on auth type */}
                 {privateKeyUser && (
                   <div className="flex items-center gap-2">
-                    <Popover>
+                    <Popover open={keyPopoverOpen} onOpenChange={setKeyPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="secondary" size="sm" className="gap-1 font-mono text-xs h-7 px-2">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="gap-1 font-mono text-xs h-7 px-2"
+                          onClick={() => setKeyPopoverOpen(true)}
+                        >
                           <Key className="w-3 h-3" />
                           {privateKeyUser.keyId}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80 z-[100]" align="end">
+                      <PopoverContent className="w-80 z-[100]" align="end" sideOffset={5}>
                         <div className="space-y-3">
                           <div>
                             <Label className="text-xs text-muted-foreground">Key ID</Label>
