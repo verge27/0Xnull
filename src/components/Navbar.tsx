@@ -3,8 +3,8 @@ import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircl
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
@@ -13,7 +13,6 @@ import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 import { toast } from 'sonner';
-
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
@@ -84,84 +83,133 @@ export const Navbar = () => {
           </form>
 
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            {/* Mobile Menu */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="secondary" size="icon" className="sm:hidden border border-primary/50 animate-pulse">
-                  <Menu className="w-5 h-5 text-primary" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 flex flex-col">
-                <SheetHeader className="flex flex-row items-center justify-between">
-                  <SheetTitle className="flex items-center gap-2">
+            {/* Mobile Sidebar Menu */}
+            <SidebarProvider open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="sm:hidden border border-primary/50"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="w-5 h-5 text-primary" />
+              </Button>
+              <Sidebar className="sm:hidden fixed inset-y-0 left-0 z-50 w-72 pt-[env(safe-area-inset-top)]" collapsible="offcanvas">
+                <SidebarHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
+                  <div className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-primary" />
-                    <span className="text-gradient">0xNull</span>
-                  </SheetTitle>
-                  <SheetClose asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </SheetClose>
-                </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-6 flex-1 overflow-y-auto">
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <ShoppingBag className="w-5 h-5 text-primary" />
-                    <span>Browse</span>
-                  </Link>
-                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <RefreshCw className="w-5 h-5 text-primary" />
-                    <span>Swaps</span>
-                  </Link>
-                  <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Server className="w-5 h-5 text-primary" />
-                    <span>VPS</span>
-                  </Link>
-                  <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Smartphone className="w-5 h-5 text-primary" />
-                    <span>eSIM</span>
-                  </Link>
-                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Bot className="w-5 h-5 text-primary" />
-                    <span>AI</span>
-                  </Link>
-                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Heart className="w-5 h-5 text-primary" />
-                    <span>Therapy</span>
-                  </Link>
-                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <span>Voice Clone</span>
-                  </Link>
-                  <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <AlertTriangle className="w-5 h-5 text-primary" />
-                    <span>Safety</span>
-                  </Link>
-                  {isAuthenticated && (
-                    <>
-                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>Sell</span>
-                      </Link>
-                      <div className="border-t border-border my-2" />
-                      <button 
-                        onClick={() => {
-                          if (privateKeyUser) {
-                            pkSignOut();
-                          } else {
-                            signOut();
-                          }
-                          setMobileMenuOpen(false);
-                        }} 
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/20 transition-colors text-destructive"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Log Out</span>
-                      </button>
-                    </>
-                  )}
-                </nav>
-              </SheetContent>
-            </Sheet>
+                    <span className="text-gradient font-bold text-xl">0xNull</span>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMobileMenuOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </SidebarHeader>
+                <SidebarContent className="p-2">
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <ShoppingBag className="w-5 h-5 text-primary" />
+                          <span>Browse</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <RefreshCw className="w-5 h-5 text-primary" />
+                          <span>Swaps</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <Server className="w-5 h-5 text-primary" />
+                          <span>VPS</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <Smartphone className="w-5 h-5 text-primary" />
+                          <span>eSIM</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <Bot className="w-5 h-5 text-primary" />
+                          <span>AI</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <Heart className="w-5 h-5 text-primary" />
+                          <span>Therapy</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <Sparkles className="w-5 h-5 text-primary" />
+                          <span>Voice Clone</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                          <AlertTriangle className="w-5 h-5 text-primary" />
+                          <span>Safety</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    {isAuthenticated && (
+                      <>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3">
+                              <Package className="w-5 h-5 text-primary" />
+                              <span>Sell</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <div className="border-t border-border my-2 mx-3" />
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <button 
+                              onClick={() => {
+                                if (privateKeyUser) {
+                                  pkSignOut();
+                                } else {
+                                  signOut();
+                                }
+                                setMobileMenuOpen(false);
+                              }} 
+                              className="flex items-center gap-3 px-3 py-3 w-full text-destructive hover:bg-destructive/20"
+                            >
+                              <LogOut className="w-5 h-5" />
+                              <span>Log Out</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </>
+                    )}
+                  </SidebarMenu>
+                </SidebarContent>
+              </Sidebar>
+              {mobileMenuOpen && (
+                <div 
+                  className="fixed inset-0 bg-black/60 z-40 sm:hidden" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                />
+              )}
+            </SidebarProvider>
 
             {/* Desktop Navigation */}
             <Link to="/browse">
