@@ -232,8 +232,12 @@ export const Navbar = () => {
                         <Button 
                           variant="secondary" 
                           size="sm" 
-                          className="gap-1 font-mono text-xs h-7 px-2"
-                          onClick={() => setKeyPopoverOpen(true)}
+                          className="gap-1 font-mono text-xs h-7 px-2 relative z-[60]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.info('Key button clicked');
+                            setKeyPopoverOpen(!keyPopoverOpen);
+                          }}
                         >
                           <Key className="w-3 h-3" />
                           {privateKeyUser.keyId}
