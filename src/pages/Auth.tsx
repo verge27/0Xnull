@@ -16,16 +16,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 const Auth = () => {
   const navigate = useNavigate();
   const { signUp, signIn, user } = useAuth();
-  const { generateNewKeys, validateKey, confirmSignIn, privateKeyUser } = usePrivateKeyAuth();
+  const { generateNewKeys, signInWithKey, privateKeyUser } = usePrivateKeyAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<{ privateKey: string; publicKey: string; keyId: string } | null>(null);
-  const [signedInKey, setSignedInKey] = useState<{ privateKey: string; keyId: string; user: any } | null>(null);
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
 
   // Redirect if already logged in (either method)
-  // But NOT if we're showing the confirmation screen after sign-in OR key generation
-  if ((user || privateKeyUser) && !signedInKey && !generatedKey) {
+  // But NOT if we're showing the confirmation screen after key generation
+  if ((user || privateKeyUser) && !generatedKey) {
     navigate('/');
     return null;
   }
@@ -105,31 +104,11 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Use validateKey which does NOT set state - just validates and returns user data
-    const user = await validateKey(privateKeyInput);
-    
-    if (user) {
-      // Show confirmation screen with key info (don't set privateKeyUser yet)
-      setSignedInKey({ privateKey: privateKeyInput, keyId: user.keyId, user });
+    const success = await signInWithKey(privateKeyInput);
+    if (success) {
+      navigate('/');
     }
     setIsLoading(false);
-  };
-
-  const copySignedInKey = () => {
-    if (signedInKey) {
-      navigator.clipboard.writeText(signedInKey.privateKey);
-      setKeyCopied(true);
-      toast.success('Private key copied!');
-      setTimeout(() => setKeyCopied(false), 3000);
-    }
-  };
-
-  const handleContinueAfterSignIn = () => {
-    if (signedInKey?.user) {
-      // NOW confirm the sign-in (sets state and localStorage) - also store the private key
-      confirmSignIn(signedInKey.user, signedInKey.privateKey);
-    }
-    navigate('/');
   };
 
   const copyPrivateKey = () => {
@@ -170,50 +149,7 @@ const Auth = () => {
               </TabsList>
 
               <TabsContent value="key" className="space-y-4">
-                {signedInKey ? (
-                  <div className="space-y-4 py-4">
-                    <Alert className="border-green-500/50 bg-green-500/10">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <AlertDescription className="text-green-200">
-                        Successfully signed in! Save your key before continuing.
-                      </AlertDescription>
-                    </Alert>
-
-                    <div>
-                      <Label>Your Key ID</Label>
-                      <div className="font-mono text-lg text-primary">
-                        Anon_{signedInKey.keyId}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label>Private Key (keep secret!)</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input
-                          readOnly
-                          value={signedInKey.privateKey}
-                          className="font-mono text-xs"
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={copySignedInKey}
-                          className={keyCopied ? 'text-green-500' : ''}
-                        >
-                          {keyCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <Button 
-                      onClick={handleContinueAfterSignIn} 
-                      className="w-full"
-                      disabled={!keyCopied}
-                    >
-                      {keyCopied ? 'Continue to Marketplace' : 'Copy key first to continue'}
-                    </Button>
-                  </div>
-                ) : !generatedKey ? (
+                {!generatedKey ? (
                   <>
                     <div className="text-sm text-muted-foreground space-y-2 py-4">
                       <p>
