@@ -91,14 +91,14 @@ export const Navbar = () => {
                   <Menu className="w-5 h-5 text-primary" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72">
+              <SheetContent side="left" className="w-72 flex flex-col">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-primary" />
                     <span className="text-gradient">0xNull</span>
                   </SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-6">
+                <nav className="flex flex-col gap-2 mt-6 flex-1 overflow-y-auto">
                   <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <ShoppingBag className="w-5 h-5 text-primary" />
                     <span>Browse</span>
@@ -132,10 +132,27 @@ export const Navbar = () => {
                     <span>Safety</span>
                   </Link>
                   {isAuthenticated && (
-                    <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                      <Package className="w-5 h-5 text-primary" />
-                      <span>Sell</span>
-                    </Link>
+                    <>
+                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                        <Package className="w-5 h-5 text-primary" />
+                        <span>Sell</span>
+                      </Link>
+                      <div className="border-t border-border my-2" />
+                      <button 
+                        onClick={() => {
+                          if (privateKeyUser) {
+                            pkSignOut();
+                          } else {
+                            signOut();
+                          }
+                          setMobileMenuOpen(false);
+                        }} 
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/20 transition-colors text-destructive"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span>Log Out</span>
+                      </button>
+                    </>
                   )}
                 </nav>
               </SheetContent>
