@@ -85,6 +85,8 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          {/* Spacer for bottom nav on mobile */}
+          <div className="h-16 md:hidden" />
           <BottomNav />
             </TokenProvider>
           </PrivateKeyAuthProvider>
