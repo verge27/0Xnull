@@ -12,7 +12,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { usePGP } from '@/hooks/usePGP';
 import { usePasskey } from '@/hooks/usePasskey';
 import { settingsSchema } from '@/lib/validation';
-import { Shield, Download, Key, Copy, Check, AlertTriangle, Upload, FileKey, QrCode, Fingerprint, Trash2 } from 'lucide-react';
+import { Shield, Download, Key, Copy, Check, AlertTriangle, Upload, FileKey, QrCode, Fingerprint, Trash2, Lock } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
 import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
@@ -28,7 +28,7 @@ import {
 const Settings = () => {
   const { user } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
-  const { isUnlocked, checkHasKeys, restoreSession, unlockKeys } = usePGP();
+  const { isUnlocked, checkHasKeys, restoreSession, unlockKeys, lockKeys } = usePGP();
   const { isSupported: passkeySupported, hasPasskey, checkAvailability, registerPasskey, removePasskey } = usePasskey();
   const [displayName, setDisplayName] = useState('');
   const [xmrAddress, setXmrAddress] = useState('');
@@ -343,14 +343,41 @@ const Settings = () => {
               <p className="text-muted-foreground">Loading keys...</p>
             ) : pgpKeys ? (
               <>
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-green-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-green-500">Encryption Enabled</p>
-                    <p className="text-sm text-muted-foreground">
-                      Your messages are encrypted with PGP. Only you and the recipient can read them.
-                    </p>
+                {/* Session Status */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-green-500/10' : 'bg-amber-500/10'}`}>
+                      {isUnlocked ? (
+                        <Shield className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <Lock className="w-5 h-5 text-amber-500" />
+                      )}
+                    </div>
+                    <div>
+                      <p className={`font-medium ${isUnlocked ? 'text-green-500' : 'text-amber-500'}`}>
+                        {isUnlocked ? 'Session Active' : 'Session Locked'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isUnlocked 
+                          ? 'Your keys are unlocked. You can read and send encrypted messages.' 
+                          : 'Enter your passphrase to unlock encrypted messages.'}
+                      </p>
+                    </div>
                   </div>
+                  {isUnlocked && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        lockKeys();
+                        toast.success('Session locked');
+                      }}
+                      className="shrink-0"
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      Lock Now
+                    </Button>
+                  )}
                 </div>
 
                 <Separator />
