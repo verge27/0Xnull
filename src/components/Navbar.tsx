@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2, X } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
@@ -61,8 +61,8 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50 pt-6 sm:pt-0">
-      <div className="container mx-auto px-6 sm:px-4 py-3">
+    <nav className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
             <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
@@ -84,89 +84,62 @@ export const Navbar = () => {
           </form>
 
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            {/* Mobile Menu Button */}
-            <Button 
-              variant="secondary" 
-              size="icon" 
-              className="sm:hidden border border-primary/50"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="w-5 h-5 text-primary" />
-            </Button>
-
-            {/* Mobile Drawer Menu */}
-            <Drawer open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} direction="left">
-              <DrawerContent className="h-full w-72 fixed left-0 top-0 rounded-none pt-[env(safe-area-inset-top)]">
-                <DrawerHeader className="flex flex-row items-center justify-between border-b border-border">
-                  <DrawerTitle className="flex items-center gap-2">
+            {/* Mobile Menu */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="secondary" size="icon" className="sm:hidden border border-primary/50 animate-pulse">
+                  <Menu className="w-5 h-5 text-primary" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-primary" />
-                    <span className="text-gradient font-bold text-xl">0xNull</span>
-                  </DrawerTitle>
-                  <DrawerClose asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </DrawerClose>
-                </DrawerHeader>
-                <nav className="flex flex-col gap-1 p-4 overflow-y-auto flex-1">
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <span className="text-gradient">0xNull</span>
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 mt-6">
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <ShoppingBag className="w-5 h-5 text-primary" />
                     <span>Browse</span>
                   </Link>
-                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <RefreshCw className="w-5 h-5 text-primary" />
                     <span>Swaps</span>
                   </Link>
-                  <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Server className="w-5 h-5 text-primary" />
                     <span>VPS</span>
                   </Link>
-                  <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Smartphone className="w-5 h-5 text-primary" />
                     <span>eSIM</span>
                   </Link>
-                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Bot className="w-5 h-5 text-primary" />
                     <span>AI</span>
                   </Link>
-                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Heart className="w-5 h-5 text-primary" />
                     <span>Therapy</span>
                   </Link>
-                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Sparkles className="w-5 h-5 text-primary" />
                     <span>Voice Clone</span>
                   </Link>
-                  <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <AlertTriangle className="w-5 h-5 text-primary" />
                     <span>Safety</span>
                   </Link>
                   {isAuthenticated && (
-                    <>
-                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>Sell</span>
-                      </Link>
-                      <div className="border-t border-border my-2" />
-                      <button 
-                        onClick={() => {
-                          if (privateKeyUser) {
-                            pkSignOut();
-                          } else {
-                            signOut();
-                          }
-                          setMobileMenuOpen(false);
-                        }} 
-                        className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-destructive/20 transition-colors text-destructive"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Log Out</span>
-                      </button>
-                    </>
+                    <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                      <Package className="w-5 h-5 text-primary" />
+                      <span>Sell</span>
+                    </Link>
                   )}
                 </nav>
-              </DrawerContent>
-            </Drawer>
+              </SheetContent>
+            </Sheet>
 
             {/* Desktop Navigation */}
             <Link to="/browse">

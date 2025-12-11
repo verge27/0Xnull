@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { BottomNav } from "@/components/BottomNav";
 import { AuthProvider } from "./hooks/useAuth";
 import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
@@ -50,46 +49,41 @@ const App = () => (
         <AuthProvider>
           <PrivateKeyAuthProvider>
             <TokenProvider>
-            <div className="pl-6 pr-4 sm:pl-0 sm:pr-0">
-              <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/listing/:id" element={<ListingDetail />} />
-              <Route path="/checkout/:orderId" element={<Checkout />} />
-              <Route path="/order/:id" element={<OrderTracking />} />
-              <Route path="/seller/:id" element={<SellerProfile />} />
-              <Route path="/sell" element={<Sell />} />
-              <Route path="/sell/new" element={<NewListing />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/messages/:conversationId" element={<Messages />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/safety" element={<HarmReduction />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/swaps" element={<Swaps />} />
-              <Route path="/vps" element={<VPS />} />
-              <Route path="/phone" element={<Phone />} />
-              <Route path="/ai" element={<AI />} />
-              <Route path="/vpn-resources" element={<VpnResources />} />
-              <Route path="/philosophy" element={<Philosophy />} />
-              <Route path="/grapheneos" element={<GrapheneOS />} />
-              <Route path="/cashout" element={<FiatOfframp />} />
-              <Route path="/buy" element={<FiatOnramp />} />
-              <Route path="/api-analytics" element={<ApiAnalytics />} />
-              <Route path="/voice" element={<Voice />} />
-              <Route path="/therapy" element={<Therapy />} />
-              <Route path="/kokoro" element={<Kokoro />} />
-              <Route path="/verify" element={<Verify />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </div>
-            {/* Spacer for bottom nav on mobile */}
-            <div className="h-16 md:hidden" />
-          <BottomNav />
+            <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
+            <Route path="/checkout/:orderId" element={<Checkout />} />
+            <Route path="/order/:id" element={<OrderTracking />} />
+            <Route path="/seller/:id" element={<SellerProfile />} />
+            <Route path="/sell" element={<Sell />} />
+            <Route path="/sell/new" element={<NewListing />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:conversationId" element={<Messages />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/safety" element={<HarmReduction />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/swaps" element={<Swaps />} />
+            <Route path="/vps" element={<VPS />} />
+            <Route path="/phone" element={<Phone />} />
+            <Route path="/ai" element={<AI />} />
+            <Route path="/vpn-resources" element={<VpnResources />} />
+            <Route path="/philosophy" element={<Philosophy />} />
+            <Route path="/grapheneos" element={<GrapheneOS />} />
+            <Route path="/cashout" element={<FiatOfframp />} />
+            <Route path="/buy" element={<FiatOnramp />} />
+            <Route path="/api-analytics" element={<ApiAnalytics />} />
+            <Route path="/voice" element={<Voice />} />
+            <Route path="/therapy" element={<Therapy />} />
+            <Route path="/kokoro" element={<Kokoro />} />
+            <Route path="/verify" element={<Verify />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
             </TokenProvider>
           </PrivateKeyAuthProvider>
         </AuthProvider>
