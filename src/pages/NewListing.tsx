@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useListings } from '@/hooks/useListings';
 import { listingSchema } from '@/lib/validation';
 import { useCurrencyConversion, SUPPORTED_CURRENCIES } from '@/hooks/useCurrencyConversion';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Loader2 } from 'lucide-react';
 
 const NewListing = () => {
@@ -20,13 +21,13 @@ const NewListing = () => {
   const { convertToUsd, loading: conversionLoading } = useCurrencyConversion();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
     priceCurrency: 'USD',
     category: 'Physical',
-    imageUrl: '',
     stock: '',
     shippingPrice: '',
     shippingCurrency: 'USD'
@@ -95,7 +96,7 @@ const NewListing = () => {
         description: formData.description,
         priceUsd: convertedPrice,
         category: formData.category,
-        imageUrl: formData.imageUrl || ''
+        imageUrl: images[0] || ''
       });
     } catch (error: any) {
       toast.error(error.errors?.[0]?.message || 'Invalid input');
@@ -114,7 +115,7 @@ const NewListing = () => {
       description: formData.description,
       price_usd: convertedPrice,
       category: formData.category,
-      images: formData.imageUrl ? [formData.imageUrl] : [],
+      images: images,
       stock: parseInt(formData.stock),
       shipping_price_usd: convertedShipping ?? 0,
       condition: 'new'
@@ -291,18 +292,7 @@ const NewListing = () => {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://example.com/image.jpg (optional)"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Leave empty for default placeholder
-                </p>
-              </div>
+              <ImageUpload images={images} onImagesChange={setImages} />
 
               <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || (formData.priceCurrency !== 'USD' && convertedPrice === null)}>
                 {isSubmitting ? 'Creating...' : 'Create Listing'}
