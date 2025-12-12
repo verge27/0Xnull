@@ -426,7 +426,7 @@ const ListingDetail = () => {
                   <div className="text-sm">
                     <div className="font-semibold text-foreground mb-1">End-to-End Encrypted</div>
                     <div className="text-muted-foreground">
-                      Your shipping address is PGP-encrypted so only the seller can read it. Anonymous payment via XMR or any method you agree.
+                      Your shipping address is PGP-encrypted so only the seller can read it. Pay via XMR, crypto, or any method you negotiate with the seller (including bank transfer).
                     </div>
                   </div>
                 </CardContent>

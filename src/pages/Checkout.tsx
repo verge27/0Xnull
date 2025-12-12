@@ -304,7 +304,7 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle>Payment Method</CardTitle>
                 <CardDescription>
-                  Choose how you'd like to pay
+                  Choose a method below, or message the seller to arrange alternative payment (bank transfer, etc.)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
