@@ -28,6 +28,7 @@ export interface CreateListingInput {
   stock: number;
   shipping_price_usd: number;
   condition?: string;
+  status?: string;
 }
 
 export const useListings = () => {

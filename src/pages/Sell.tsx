@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from '@/hooks/useAuth';
 import { useListings } from '@/hooks/useListings';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import {
@@ -32,7 +34,7 @@ import {
 
 const Sell = () => {
   const { user } = useAuth();
-  const { userListings, loading, createManyListings, deleteListing } = useListings();
+  const { userListings, loading, createManyListings, deleteListing, updateListing } = useListings();
   const { xmrToUsd } = useExchangeRate();
 
   if (!user) {
@@ -49,6 +51,14 @@ const Sell = () => {
 
   const handleDelete = async (id: string) => {
     await deleteListing(id);
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    const success = await updateListing(id, { status: newStatus } as any);
+    if (success) {
+      toast.success(`Listing ${newStatus === 'active' ? 'activated' : 'paused'}`);
+    }
   };
 
   return (
@@ -155,9 +165,15 @@ const Sell = () => {
                         </TableCell>
                         <TableCell>{listing.stock}</TableCell>
                         <TableCell>
-                          <Badge variant={listing.status === 'active' ? 'default' : 'secondary'}>
-                            {listing.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={listing.status === 'active'}
+                              onCheckedChange={() => handleToggleStatus(listing.id, listing.status)}
+                            />
+                            <Badge variant={listing.status === 'active' ? 'default' : 'secondary'}>
+                              {listing.status}
+                            </Badge>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
