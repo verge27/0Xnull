@@ -26,7 +26,18 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>2. Platform Purpose & Prohibited Items</CardTitle>
+                <CardTitle>2. Age Restriction</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p className="font-medium">
+                  You must be 18 years or older to use this platform.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>3. Platform Purpose & Prohibited Items</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -56,7 +67,20 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>3. No Geographic Knowledge</CardTitle>
+                <CardTitle>4. No Agency Relationship</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p>
+                  Nothing in these Terms creates any agency, partnership, joint venture, or employment 
+                  relationship between you and 0xNull. Sellers are independent parties, not agents or 
+                  employees of the platform.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>5. No Geographic Knowledge</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -74,7 +98,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>4. User Responsibilities & Legal Compliance</CardTitle>
+                <CardTitle>6. User Responsibilities & Legal Compliance</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>Users are solely and exclusively responsible for:</p>
@@ -96,7 +120,19 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>5. Payments</CardTitle>
+                <CardTitle>7. Communication Monitoring</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p>
+                  The platform does not monitor, read, or have access to encrypted communications 
+                  between users. We cannot and do not review message content.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>8. Payments</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -114,7 +150,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>6. No Dispute Resolution</CardTitle>
+                <CardTitle>9. No Dispute Resolution</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -142,7 +178,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>7. Limitation of Liability</CardTitle>
+                <CardTitle>10. Limitation of Liability</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -166,7 +202,22 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>8. Indemnification</CardTitle>
+                <CardTitle>11. Intellectual Property</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p>
+                  Users retain full ownership of all content, images, and descriptions they upload 
+                  to their listings. 0xNull does not claim any intellectual property rights over 
+                  user-generated content. By posting content, you grant the platform a limited, 
+                  non-exclusive license to display your listings for the purpose of operating the 
+                  marketplace.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>12. Indemnification</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -193,7 +244,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>9. Privacy & Data</CardTitle>
+                <CardTitle>13. Privacy & Data</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -205,7 +256,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>10. Modifications</CardTitle>
+                <CardTitle>14. Modifications</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -218,7 +269,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>11. Severability</CardTitle>
+                <CardTitle>15. Severability</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
@@ -229,15 +280,28 @@ const Terms = () => {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle>16. Governing Law</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p>
+                  These Terms shall be governed by the laws of England and Wales. Any disputes 
+                  shall be subject to the exclusive jurisdiction of the courts of England and Wales.
+                </p>
+              </CardContent>
+            </Card>
+
             <Card className="border-destructive/50">
               <CardHeader>
-                <CardTitle className="text-destructive">12. Acknowledgment of Risk</CardTitle>
+                <CardTitle className="text-destructive">17. Acknowledgment of Risk</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p className="font-medium">
                   BY USING THIS PLATFORM, YOU ACKNOWLEDGE THAT:
                 </p>
                 <ul className="list-disc list-inside space-y-1">
+                  <li>You are at least 18 years of age</li>
                   <li>You are solely responsible for determining legality in your jurisdiction</li>
                   <li>The platform has no knowledge of your location or applicable laws</li>
                   <li>All transactions are final and at your own risk</li>

@@ -13,7 +13,7 @@ export const Footer = () => {
               <span className="text-xl font-bold text-gradient">0xNull</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              The privacy-first marketplace for grey market goods and discreet purchases.
+              The privacy-first marketplace for discreet purchases.
             </p>
           </div>
 
