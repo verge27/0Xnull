@@ -148,6 +148,19 @@ export const CATEGORIES: Category[] = [
       { id: 1205, name: "Supplements & Vitamins", slug: "supplements-vitamins" },
     ]
   },
+  {
+    id: 13,
+    name: "Tools & Outdoors",
+    slug: "tools-outdoors",
+    children: [
+      { id: 1301, name: "Knives & Blades", slug: "knives-blades" },
+      { id: 1302, name: "Multi-Tools", slug: "multi-tools" },
+      { id: 1303, name: "Camping & Survival", slug: "camping-survival" },
+      { id: 1304, name: "Flashlights & Lighting", slug: "flashlights-lighting" },
+      { id: 1305, name: "Hand Tools", slug: "hand-tools" },
+      { id: 1306, name: "Hunting & Fishing", slug: "hunting-fishing" },
+    ]
+  },
 ];
 
 export const ALL_CATEGORIES = CATEGORIES;
