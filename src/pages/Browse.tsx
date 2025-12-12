@@ -16,7 +16,7 @@ import { DisclaimerBanner } from '@/components/DisclaimerBanner';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronRight, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, X, SlidersHorizontal, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -30,6 +30,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -421,16 +422,31 @@ const Browse = () => {
 
             {/* Jobs Link */}
             <Card className="mt-4">
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-2">Jobs</h3>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-4">Jobs</h3>
                 <a 
                   href="https://monero.jobs/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm flex items-center gap-1"
+                  className="block hover:opacity-80 transition-opacity"
                 >
-                  Monero Jobs
-                  <ChevronRight className="w-4 h-4" />
+                  <img 
+                    src={moneroJobsLogo} 
+                    alt="Monero Jobs" 
+                    className="w-full rounded-md"
+                  />
+                </a>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Find privacy-focused job opportunities
+                </p>
+                <a 
+                  href="https://monero.jobs/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                >
+                  Visit Site
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </CardContent>
             </Card>
