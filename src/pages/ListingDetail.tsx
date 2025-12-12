@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { getListing, DEMO_USERS } from '@/lib/data';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,16 +25,17 @@ import { SellerCard } from '@/components/SellerCard';
 import { ImageGallery } from '@/components/ImageGallery';
 import { startConversation } from '@/hooks/useMessages';
 import { createOrder } from '@/hooks/useOrders';
+import { Listing } from '@/lib/types';
 
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const listing = getListing(id!);
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
   const { usdToXmr } = useExchangeRate();
-  const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
-
+  
+  const [listing, setListing] = useState<(Listing & { isDbListing?: boolean }) | null>(null);
+  const [loadingListing, setLoadingListing] = useState(true);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [message, setMessage] = useState('');
@@ -42,6 +44,62 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(false);
 
   const isAuthenticated = !!user || !!privateKeyUser;
+
+  // Fetch listing from Supabase first, then fallback to demo
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!id) return;
+      
+      setLoadingListing(true);
+      
+      // Try Supabase first
+      const { data: dbListing, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (dbListing && !error) {
+        setListing({
+          id: dbListing.id,
+          sellerId: dbListing.seller_id,
+          title: dbListing.title,
+          description: dbListing.description,
+          priceUsd: dbListing.price_usd,
+          category: dbListing.category,
+          images: dbListing.images?.length > 0 ? dbListing.images : ['/placeholder.svg'],
+          stock: dbListing.stock,
+          shippingPriceUsd: dbListing.shipping_price_usd,
+          status: dbListing.status as 'active' | 'sold_out' | 'draft',
+          condition: dbListing.condition as 'new' | 'used' | 'digital',
+          createdAt: dbListing.created_at,
+          isDbListing: true
+        });
+      } else {
+        // Fallback to demo listings
+        const demoListing = getListing(id);
+        setListing(demoListing || null);
+      }
+      
+      setLoadingListing(false);
+    };
+    
+    fetchListing();
+  }, [id]);
+
+  const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
+
+  if (loadingListing) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+          <p className="mt-4 text-muted-foreground">Loading listing...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!listing) {
     return (
@@ -154,7 +212,7 @@ const ListingDetail = () => {
               <div>
                 <div className="flex gap-2 mb-2">
                   <Badge>{listing.category}</Badge>
-                  <Badge variant="secondary">Demo Listing</Badge>
+                  {!listing.isDbListing && <Badge variant="secondary">Demo Listing</Badge>}
                 </div>
                 <h1 className="text-4xl font-bold mb-2">{listing.title}</h1>
               </div>

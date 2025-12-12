@@ -134,7 +134,7 @@ const Browse = () => {
       partnerName: 'UK-Peptides'
     })),
     ...databaseListings,
-    ...demoListings
+    ...demoListings.map(demo => ({ ...demo, isDemo: true }))
   ];
 
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());

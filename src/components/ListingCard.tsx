@@ -9,7 +9,7 @@ import { Star, Heart, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
 interface ListingCardProps {
-  listing: Listing & { isXMRBazaar?: boolean };
+  listing: Listing & { isXMRBazaar?: boolean; isDbListing?: boolean; isPartner?: boolean; isDemo?: boolean };
 }
 
 export const ListingCard = ({ listing }: ListingCardProps) => {
@@ -83,7 +83,7 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
               <Badge variant="secondary" className="text-xs">
                 {listing.category}
               </Badge>
-              {!listing.isXMRBazaar && (
+              {!listing.isXMRBazaar && !listing.isDbListing && !listing.isPartner && (
                 <Badge variant="outline" className="text-xs">
                   Demo
                 </Badge>
