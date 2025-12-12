@@ -418,6 +418,22 @@ const Browse = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Jobs Link */}
+            <Card className="mt-4">
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-2">Jobs</h3>
+                <a 
+                  href="https://monero.jobs/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm flex items-center gap-1"
+                >
+                  Monero Jobs
+                  <ChevronRight className="w-4 h-4" />
+                </a>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content */}
