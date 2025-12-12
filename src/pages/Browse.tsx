@@ -54,8 +54,9 @@ const Browse = () => {
     isDbListing: true
   }));
   
-  // Combine all listings (XMRBazaar first, then partner referrals, then database, then demo)
+  // Combine all listings (Database first, then XMRBazaar, then partners, then demo)
   const listings: any[] = [
+    ...databaseListings,
     ...xmrbazaarListings.map(xmr => ({
       ...xmr,
       sellerId: `xmr-${xmr.seller.name}`,
@@ -133,7 +134,6 @@ const Browse = () => {
       isPartner: true,
       partnerName: 'UK-Peptides'
     })),
-    ...databaseListings,
     ...demoListings.map(demo => ({ ...demo, isDemo: true }))
   ];
 
