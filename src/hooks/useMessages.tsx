@@ -356,23 +356,33 @@ export function useConversation(conversationId: string | undefined) {
     if (!conversationId || !user || !content.trim()) return false;
 
     try {
-      let finalContent = content.trim();
+      // PGP encryption is mandatory - no fallback
+      if (!isUnlocked) {
+        console.error('PGP not unlocked - cannot send message');
+        return false;
+      }
 
-      // Try to encrypt if unlocked and recipient has public key
-      if (isUnlocked && (recipientUserId || recipientPkUserId)) {
-        const recipientPublicKey = await getRecipientPublicKey(recipientUserId, recipientPkUserId);
-        if (recipientPublicKey) {
-          const encrypted = await encryptMessage(finalContent, recipientPublicKey);
-          if (encrypted) {
-            finalContent = encrypted;
-          }
-        }
+      if (!recipientUserId && !recipientPkUserId) {
+        console.error('No recipient specified - cannot send message');
+        return false;
+      }
+
+      const recipientPublicKey = await getRecipientPublicKey(recipientUserId, recipientPkUserId);
+      if (!recipientPublicKey) {
+        console.error('Recipient has no PGP public key - cannot send encrypted message');
+        return false;
+      }
+
+      const encrypted = await encryptMessage(content.trim(), recipientPublicKey);
+      if (!encrypted) {
+        console.error('Encryption failed - cannot send message');
+        return false;
       }
 
       const { error } = await supabase.from('messages').insert({
         conversation_id: conversationId,
         sender_user_id: user.id,
-        content: finalContent,
+        content: encrypted,
       });
 
       if (error) throw error;
