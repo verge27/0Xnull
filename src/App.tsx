@@ -14,6 +14,7 @@ import OrderTracking from "./pages/OrderTracking";
 import SellerProfile from "./pages/SellerProfile";
 import Sell from "./pages/Sell";
 import NewListing from "./pages/NewListing";
+import EditListing from "./pages/EditListing";
 import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/seller/:id" element={<SellerProfile />} />
             <Route path="/sell" element={<Sell />} />
             <Route path="/sell/new" element={<NewListing />} />
+            <Route path="/sell/edit/:id" element={<EditListing />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/messages" element={<Messages />} />
