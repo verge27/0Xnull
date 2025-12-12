@@ -640,7 +640,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          pgp_public_key: string | null
+          reputation_score: number | null
+          total_reviews: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          pgp_public_key?: string | null
+          reputation_score?: number | null
+          total_reviews?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          pgp_public_key?: string | null
+          reputation_score?: number | null
+          total_reviews?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
