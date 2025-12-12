@@ -10,6 +10,8 @@ export interface DbListing {
   description: string;
   price_usd: number;
   category: string;
+  secondary_category: string | null;
+  tertiary_category: string | null;
   images: string[];
   stock: number;
   shipping_price_usd: number;
@@ -26,6 +28,8 @@ export interface CreateListingInput {
   description: string;
   price_usd: number;
   category: string;
+  secondary_category?: string | null;
+  tertiary_category?: string | null;
   images?: string[];
   stock: number;
   shipping_price_usd: number;
@@ -97,6 +101,8 @@ export const useListings = () => {
         description: input.description,
         price_usd: input.price_usd,
         category: input.category,
+        secondary_category: input.secondary_category || null,
+        tertiary_category: input.tertiary_category || null,
         images: input.images || [],
         stock: input.stock,
         shipping_price_usd: input.shipping_price_usd,
@@ -129,6 +135,8 @@ export const useListings = () => {
       description: input.description,
       price_usd: input.price_usd,
       category: input.category,
+      secondary_category: input.secondary_category || null,
+      tertiary_category: input.tertiary_category || null,
       images: input.images || [],
       stock: input.stock,
       shipping_price_usd: input.shipping_price_usd,

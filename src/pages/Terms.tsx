@@ -26,21 +26,25 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>2. Platform Purpose</CardTitle>
+                <CardTitle>2. Platform Purpose & Prohibited Items</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
                   0xNull Marketplace is a privacy-focused marketplace connecting buyers and sellers. 
-                  This platform does NOT facilitate or permit:
+                  This platform does NOT facilitate or permit the sale of:
                 </p>
                 <ul className="list-disc list-inside space-y-1">
-                  <li>Child sexual abuse material (CSAM) or exploitation of minors</li>
-                  <li>Human trafficking or exploitation</li>
-                  <li>Weapons of mass destruction (biological, chemical, nuclear, radiological)</li>
-                  <li>Stolen goods, data, or credentials</li>
-                  <li>Murder for hire or violence-for-hire services</li>
+                  <li><strong>Child sexual abuse material (CSAM)</strong> or any exploitation of minors</li>
+                  <li><strong>Human trafficking</strong> or any form of human exploitation</li>
+                  <li><strong>Weapons of mass destruction</strong> (biological, chemical, nuclear, radiological agents)</li>
+                  <li><strong>Stolen property</strong>, data, credentials, or identity documents</li>
+                  <li><strong>Services intended to cause physical harm</strong>, including murder-for-hire or violence-for-hire</li>
                   <li>Fentanyl or fentanyl analogues</li>
                 </ul>
+                <p className="mt-4 font-medium">
+                  The platform does NOT verify, endorse, authenticate, or guarantee any listing. 
+                  All items and services are provided by independent sellers without platform verification.
+                </p>
               </CardContent>
             </Card>
 

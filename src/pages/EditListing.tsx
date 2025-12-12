@@ -36,6 +36,8 @@ const EditListing = () => {
     price: '',
     priceCurrency: 'USD',
     category: 'Physical',
+    secondaryCategory: '',
+    tertiaryCategory: '',
     stock: '',
     shippingPrice: '',
     shippingCurrency: 'USD'
@@ -69,6 +71,8 @@ const EditListing = () => {
         price: data.price_usd.toString(),
         priceCurrency: 'USD',
         category: data.category,
+        secondaryCategory: data.secondary_category || '',
+        tertiaryCategory: data.tertiary_category || '',
         stock: data.stock.toString(),
         shippingPrice: data.shipping_price_usd.toString(),
         shippingCurrency: 'USD'
@@ -167,6 +171,8 @@ const EditListing = () => {
       description: formData.description,
       price_usd: convertedPrice,
       category: formData.category,
+      secondary_category: formData.secondaryCategory || null,
+      tertiary_category: formData.tertiaryCategory || null,
       images: images,
       stock: parseInt(formData.stock),
       shipping_price_usd: convertedShipping ?? 0,
@@ -334,12 +340,56 @@ const EditListing = () => {
               </div>
 
               <div>
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category">Primary Category *</Label>
                 <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent className="max-h-80">
+                    {ALL_CATEGORIES.map((category) => (
+                      <SelectGroup key={category.id}>
+                        <SelectLabel className="font-semibold text-foreground">{category.name}</SelectLabel>
+                        {category.children?.map((child) => (
+                          <SelectItem key={child.id} value={child.slug}>
+                            {child.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="secondaryCategory">Secondary Category (Optional)</Label>
+                <Select value={formData.secondaryCategory} onValueChange={(value) => setFormData({ ...formData, secondaryCategory: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a secondary category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    <SelectItem value="">None</SelectItem>
+                    {ALL_CATEGORIES.map((category) => (
+                      <SelectGroup key={category.id}>
+                        <SelectLabel className="font-semibold text-foreground">{category.name}</SelectLabel>
+                        {category.children?.map((child) => (
+                          <SelectItem key={child.id} value={child.slug}>
+                            {child.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="tertiaryCategory">Tertiary Category (Optional)</Label>
+                <Select value={formData.tertiaryCategory} onValueChange={(value) => setFormData({ ...formData, tertiaryCategory: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a tertiary category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    <SelectItem value="">None</SelectItem>
                     {ALL_CATEGORIES.map((category) => (
                       <SelectGroup key={category.id}>
                         <SelectLabel className="font-semibold text-foreground">{category.name}</SelectLabel>

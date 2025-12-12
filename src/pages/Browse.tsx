@@ -46,6 +46,8 @@ const Browse = () => {
     description: listing.description,
     priceUsd: listing.price_usd,
     category: listing.category,
+    secondary_category: listing.secondary_category,
+    tertiary_category: listing.tertiary_category,
     images: listing.images && listing.images.length > 0 ? listing.images : ['/placeholder.svg'],
     stock: listing.stock,
     shippingPriceUsd: listing.shipping_price_usd,
@@ -190,10 +192,12 @@ const Browse = () => {
     const matchesSearch = !searchTerm || 
       listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.description.toLowerCase().includes(searchTerm.toLowerCase());
-    // Match both category and subcategory
+    // Match primary, secondary, or tertiary category
     const matchesCategory = !categorySlug || 
       listing.category === categorySlug || 
-      listing.subcategory === categorySlug;
+      listing.subcategory === categorySlug ||
+      listing.secondary_category === categorySlug ||
+      listing.tertiary_category === categorySlug;
     const matchesPrice = listing.priceUsd >= priceRange[0] && listing.priceUsd <= priceRange[1];
     const matchesCondition = selectedCondition === 'all' || listing.condition === selectedCondition;
     

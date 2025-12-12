@@ -161,6 +161,18 @@ export const CATEGORIES: Category[] = [
       { id: 1306, name: "Hunting & Fishing", slug: "hunting-fishing" },
     ]
   },
+  {
+    id: 14,
+    name: "Food & Drink",
+    slug: "food-drink",
+    children: [
+      { id: 1401, name: "Artisan & Gourmet", slug: "artisan-gourmet" },
+      { id: 1402, name: "Chocolate & Confectionery", slug: "chocolate-confectionery" },
+      { id: 1403, name: "Beverages", slug: "beverages" },
+      { id: 1404, name: "Supplements & Edibles", slug: "supplements-edibles" },
+      { id: 1405, name: "Specialty & Imported", slug: "specialty-imported" },
+    ]
+  },
 ];
 
 export const ALL_CATEGORIES = CATEGORIES;

@@ -26,6 +26,7 @@ import { ImageGallery } from '@/components/ImageGallery';
 import { startConversation } from '@/hooks/useMessages';
 import { createOrder } from '@/hooks/useOrders';
 import { Listing } from '@/lib/types';
+import { findCategoryBySlug } from '@/lib/categories';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -34,7 +35,7 @@ const ListingDetail = () => {
   const { privateKeyUser } = usePrivateKeyAuth();
   const { usdToXmr } = useExchangeRate();
   
-  const [listing, setListing] = useState<(Listing & { isDbListing?: boolean }) | null>(null);
+  const [listing, setListing] = useState<(Listing & { isDbListing?: boolean; secondaryCategory?: string | null; tertiaryCategory?: string | null }) | null>(null);
   const [loadingListing, setLoadingListing] = useState(true);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
@@ -67,6 +68,8 @@ const ListingDetail = () => {
           description: dbListing.description,
           priceUsd: dbListing.price_usd,
           category: dbListing.category,
+          secondaryCategory: dbListing.secondary_category,
+          tertiaryCategory: dbListing.tertiary_category,
           images: dbListing.images?.length > 0 ? dbListing.images : ['/placeholder.svg'],
           stock: dbListing.stock,
           shippingPriceUsd: dbListing.shipping_price_usd,
@@ -219,9 +222,15 @@ const ListingDetail = () => {
           <div>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <div className="flex gap-2 mb-2">
-                  <Badge>{listing.category}</Badge>
-                  {!listing.isDbListing && <Badge variant="secondary">Demo Listing</Badge>}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge>{findCategoryBySlug(listing.category)?.name || listing.category}</Badge>
+                  {listing.secondaryCategory && (
+                    <Badge variant="secondary">{findCategoryBySlug(listing.secondaryCategory)?.name || listing.secondaryCategory}</Badge>
+                  )}
+                  {listing.tertiaryCategory && (
+                    <Badge variant="secondary">{findCategoryBySlug(listing.tertiaryCategory)?.name || listing.tertiaryCategory}</Badge>
+                  )}
+                  {!listing.isDbListing && <Badge variant="outline">Demo Listing</Badge>}
                 </div>
                 <h1 className="text-4xl font-bold mb-2">{listing.title}</h1>
               </div>

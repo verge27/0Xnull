@@ -226,11 +226,13 @@ export type Database = {
           id: string
           images: string[] | null
           price_usd: number
+          secondary_category: string | null
           seller_id: string
           shipping_countries: string[] | null
           shipping_price_usd: number
           status: string
           stock: number
+          tertiary_category: string | null
           title: string
           updated_at: string
           views: number
@@ -243,11 +245,13 @@ export type Database = {
           id?: string
           images?: string[] | null
           price_usd: number
+          secondary_category?: string | null
           seller_id: string
           shipping_countries?: string[] | null
           shipping_price_usd?: number
           status?: string
           stock?: number
+          tertiary_category?: string | null
           title: string
           updated_at?: string
           views?: number
@@ -260,11 +264,13 @@ export type Database = {
           id?: string
           images?: string[] | null
           price_usd?: number
+          secondary_category?: string | null
           seller_id?: string
           shipping_countries?: string[] | null
           shipping_price_usd?: number
           status?: string
           stock?: number
+          tertiary_category?: string | null
           title?: string
           updated_at?: string
           views?: number
