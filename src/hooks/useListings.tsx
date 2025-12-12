@@ -13,6 +13,7 @@ export interface DbListing {
   images: string[];
   stock: number;
   shipping_price_usd: number;
+  shipping_countries: string[] | null;
   status: string;
   condition: string;
   created_at: string;
@@ -28,6 +29,7 @@ export interface CreateListingInput {
   images?: string[];
   stock: number;
   shipping_price_usd: number;
+  shipping_countries?: string[] | null;
   condition?: string;
   status?: string;
 }
@@ -98,6 +100,7 @@ export const useListings = () => {
         images: input.images || [],
         stock: input.stock,
         shipping_price_usd: input.shipping_price_usd,
+        shipping_countries: input.shipping_countries || null,
         condition: input.condition || 'new',
         status: 'active'
       })
@@ -129,6 +132,7 @@ export const useListings = () => {
       images: input.images || [],
       stock: input.stock,
       shipping_price_usd: input.shipping_price_usd,
+      shipping_countries: input.shipping_countries || null,
       condition: input.condition || 'new',
       status: 'active'
     }));

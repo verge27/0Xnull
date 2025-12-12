@@ -6,16 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useListings, DbListing } from '@/hooks/useListings';
 import { listingSchema } from '@/lib/validation';
 import { useCurrencyConversion, SUPPORTED_CURRENCIES } from '@/hooks/useCurrencyConversion';
 import { ImageUpload } from '@/components/ImageUpload';
+import { CountrySelect } from '@/components/CountrySelect';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
+import { ALL_CATEGORIES } from '@/lib/categories';
 
 const EditListing = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +29,7 @@ const EditListing = () => {
   const [loading, setLoading] = useState(true);
   const [listing, setListing] = useState<DbListing | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const [shippingCountries, setShippingCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -59,6 +62,7 @@ const EditListing = () => {
 
       setListing(data);
       setImages(data.images || []);
+      setShippingCountries(data.shipping_countries || []);
       setFormData({
         title: data.title,
         description: data.description,
@@ -166,6 +170,7 @@ const EditListing = () => {
       images: images,
       stock: parseInt(formData.stock),
       shipping_price_usd: convertedShipping ?? 0,
+      shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
     });
 
     setIsSubmitting(false);
@@ -328,21 +333,34 @@ const EditListing = () => {
                 )}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Physical">Physical</SelectItem>
-                      <SelectItem value="Digital">Digital</SelectItem>
-                      <SelectItem value="Service">Service</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="category">Category *</Label>
+                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    {ALL_CATEGORIES.map((category) => (
+                      <SelectGroup key={category.id}>
+                        <SelectLabel className="font-semibold text-foreground">{category.name}</SelectLabel>
+                        {category.children?.map((child) => (
+                          <SelectItem key={child.id} value={child.slug}>
+                            {child.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
+              <div>
+                <Label>Ships To</Label>
+                <CountrySelect value={shippingCountries} onChange={setShippingCountries} />
+                <p className="text-xs text-muted-foreground mt-1">Leave empty for no shipping restrictions</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="stock">Stock *</Label>
                   <Input

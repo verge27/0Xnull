@@ -227,6 +227,7 @@ export type Database = {
           images: string[] | null
           price_usd: number
           seller_id: string
+          shipping_countries: string[] | null
           shipping_price_usd: number
           status: string
           stock: number
@@ -243,6 +244,7 @@ export type Database = {
           images?: string[] | null
           price_usd: number
           seller_id: string
+          shipping_countries?: string[] | null
           shipping_price_usd?: number
           status?: string
           stock?: number
@@ -259,6 +261,7 @@ export type Database = {
           images?: string[] | null
           price_usd?: number
           seller_id?: string
+          shipping_countries?: string[] | null
           shipping_price_usd?: number
           status?: string
           stock?: number

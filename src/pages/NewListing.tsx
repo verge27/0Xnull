@@ -13,6 +13,7 @@ import { useListings } from '@/hooks/useListings';
 import { listingSchema } from '@/lib/validation';
 import { useCurrencyConversion, SUPPORTED_CURRENCIES } from '@/hooks/useCurrencyConversion';
 import { ImageUpload } from '@/components/ImageUpload';
+import { CountrySelect } from '@/components/CountrySelect';
 import { Loader2 } from 'lucide-react';
 import { ALL_CATEGORIES } from '@/lib/categories';
 
@@ -23,6 +24,7 @@ const NewListing = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [shippingCountries, setShippingCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -119,6 +121,7 @@ const NewListing = () => {
       images: images,
       stock: parseInt(formData.stock),
       shipping_price_usd: convertedShipping ?? 0,
+      shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
       condition: 'new'
     });
 
@@ -284,7 +287,13 @@ const NewListing = () => {
                       </SelectGroup>
                     ))}
                   </SelectContent>
-                </Select>
+              </Select>
+              </div>
+
+              <div>
+                <Label>Ships To</Label>
+                <CountrySelect value={shippingCountries} onChange={setShippingCountries} />
+                <p className="text-xs text-muted-foreground mt-1">Leave empty for no shipping restrictions</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
