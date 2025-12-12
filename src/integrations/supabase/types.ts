@@ -187,6 +187,7 @@ export type Database = {
           stock: number
           title: string
           updated_at: string
+          views: number
         }
         Insert: {
           category: string
@@ -202,6 +203,7 @@ export type Database = {
           stock?: number
           title: string
           updated_at?: string
+          views?: number
         }
         Update: {
           category?: string
@@ -217,6 +219,7 @@ export type Database = {
           stock?: number
           title?: string
           updated_at?: string
+          views?: number
         }
         Relationships: []
       }
@@ -659,6 +662,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_listing_views: {
+        Args: { listing_id: string }
+        Returns: undefined
       }
       is_conversation_participant: {
         Args: {

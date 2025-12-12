@@ -75,6 +75,15 @@ const ListingDetail = () => {
           createdAt: dbListing.created_at,
           isDbListing: true
         });
+        
+        // Increment view count for DB listings (fire and forget)
+        (async () => {
+          try {
+            await supabase.rpc('increment_listing_views', { listing_id: id });
+          } catch (e) {
+            console.error('Failed to increment views:', e);
+          }
+        })();
       } else {
         // Fallback to demo listings
         const demoListing = getListing(id);

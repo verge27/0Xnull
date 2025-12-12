@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
@@ -6,8 +6,9 @@ import { getOrders } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Package, DollarSign, ShoppingBag, Trash2, Pencil, Copy, Pause, Play } from 'lucide-react';
+import { Plus, Package, DollarSign, ShoppingBag, Trash2, Pencil, Copy, Pause, Play, Eye, TrendingUp } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
   TableBody,
@@ -39,6 +40,31 @@ const Sell = () => {
   const { userListings, loading, createManyListings, deleteListing, updateListing, createListing } = useListings();
   const { xmrToUsd } = useExchangeRate();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [salesByListing, setSalesByListing] = useState<Record<string, number>>({});
+
+  // Fetch sales counts per listing
+  useEffect(() => {
+    const fetchSalesCounts = async () => {
+      if (!user) return;
+      
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('listing_id, quantity')
+        .eq('seller_user_id', user.id);
+      
+      if (orders) {
+        const counts: Record<string, number> = {};
+        orders.forEach(order => {
+          if (order.listing_id) {
+            counts[order.listing_id] = (counts[order.listing_id] || 0) + order.quantity;
+          }
+        });
+        setSalesByListing(counts);
+      }
+    };
+    
+    fetchSalesCounts();
+  }, [user, userListings]);
 
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -265,6 +291,18 @@ const Sell = () => {
                       <TableHead>Product</TableHead>
                       <TableHead>Price</TableHead>
                       <TableHead>Stock</TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          Views
+                        </div>
+                      </TableHead>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3" />
+                          Sales
+                        </div>
+                      </TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -292,6 +330,12 @@ const Sell = () => {
                           <PriceDisplay usdAmount={listing.price_usd} />
                         </TableCell>
                         <TableCell>{listing.stock}</TableCell>
+                        <TableCell>
+                          <span className="text-muted-foreground">{listing.views || 0}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium text-primary">{salesByListing[listing.id] || 0}</span>
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Switch

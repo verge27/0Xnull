@@ -17,6 +17,7 @@ export interface DbListing {
   condition: string;
   created_at: string;
   updated_at: string;
+  views: number;
 }
 
 export interface CreateListingInput {
