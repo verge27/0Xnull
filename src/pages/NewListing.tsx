@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useListings } from '@/hooks/useListings';
@@ -14,6 +14,7 @@ import { listingSchema } from '@/lib/validation';
 import { useCurrencyConversion, SUPPORTED_CURRENCIES } from '@/hooks/useCurrencyConversion';
 import { ImageUpload } from '@/components/ImageUpload';
 import { Loader2 } from 'lucide-react';
+import { ALL_CATEGORIES } from '@/lib/categories';
 
 const NewListing = () => {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ const NewListing = () => {
     description: '',
     price: '',
     priceCurrency: 'USD',
-    category: 'Physical',
+    category: '',
     stock: '',
     shippingPrice: '',
     shippingCurrency: 'USD'
@@ -265,21 +266,28 @@ const NewListing = () => {
                 )}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Physical">Physical</SelectItem>
-                      <SelectItem value="Digital">Digital</SelectItem>
-                      <SelectItem value="Service">Service</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="category">Category *</Label>
+                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    {ALL_CATEGORIES.map((category) => (
+                      <SelectGroup key={category.id}>
+                        <SelectLabel className="font-semibold text-foreground">{category.name}</SelectLabel>
+                        {category.children?.map((child) => (
+                          <SelectItem key={child.id} value={child.slug}>
+                            {child.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="stock">Stock *</Label>
                   <Input
@@ -294,7 +302,7 @@ const NewListing = () => {
 
               <ImageUpload images={images} onImagesChange={setImages} />
 
-              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || (formData.priceCurrency !== 'USD' && convertedPrice === null)}>
+              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || !formData.category || (formData.priceCurrency !== 'USD' && convertedPrice === null)}>
                 {isSubmitting ? 'Creating...' : 'Create Listing'}
               </Button>
             </form>
