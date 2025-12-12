@@ -379,13 +379,13 @@ const VPS = () => {
   const selectedFlavorDetails = flavors.find(f => f.slug === selectedFlavor);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative">
       {/* Background image */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat -z-10"
-        style={{ backgroundImage: `url(${vpsBackground})` }}
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${vpsBackground})`, zIndex: -2 }}
       />
-      <div className="fixed inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90 -z-10" />
+      <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
       
       <Navbar />
       
