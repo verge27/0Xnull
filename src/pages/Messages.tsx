@@ -123,14 +123,21 @@ const Messages = () => {
     // Require encryption - prompt if not unlocked
     if (!isUnlocked) {
       setShowPGPDialog(true);
-      toast.info('Please set up encryption first');
+      toast.error('You must set up PGP encryption before sending messages');
+      return;
+    }
+
+    const recipientIds = getRecipientIds();
+    
+    // Check if recipient has PGP
+    if (!recipientIds?.recipientHasPGP) {
+      toast.error('Cannot send message: recipient has not set up PGP encryption yet. Messaging will work once they enable encryption.');
       return;
     }
 
     setSending(true);
     
     // Always send encrypted
-    const recipientIds = getRecipientIds();
     const success = await sendEncryptedMessage(
       messageText,
       recipientIds?.recipientUserId,
@@ -142,7 +149,7 @@ const Messages = () => {
     if (success) {
       setMessageText('');
     } else {
-      toast.error('Failed to send message');
+      toast.error('Failed to encrypt message. Please try again or check your PGP setup.');
     }
   };
 
