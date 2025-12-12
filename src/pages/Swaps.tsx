@@ -993,7 +993,7 @@ const Swaps = () => {
                         </div>
                         <div className="mt-2 text-xs">
                           <a 
-                            href={`https://trocador.app/en/checkout/${swap.trade_id}`}
+                            href={`https://trocador.app/en/checkout/${swap.trade_id}?ref=mkaShKWUZA`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline flex items-center gap-1"
@@ -1012,7 +1012,7 @@ const Swaps = () => {
           {/* Info Section */}
           <div className="mt-8 space-y-6">
             <div className="text-center text-sm text-muted-foreground">
-              <p>Powered by <a href="https://trocador.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
+              <p>Powered by <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
               <p className="mt-1">All swaps are non-custodial and anonymous</p>
             </div>
 
