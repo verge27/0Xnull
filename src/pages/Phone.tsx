@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import esimBackground from '@/assets/esim-background.png';
 
 const AFFILIATE_BASE = "https://lnvpn.net";
 const REF = "?ref=syndicate";
@@ -69,7 +70,14 @@ const useCases = [
 
 const Phone = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Background image */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${esimBackground})`, zIndex: -2 }}
+      />
+      <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
+      
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
