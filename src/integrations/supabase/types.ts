@@ -334,6 +334,7 @@ export type Database = {
           buyer_pk_user_id: string | null
           buyer_user_id: string | null
           completed_at: string | null
+          conversation_id: string | null
           created_at: string
           delivered_at: string | null
           id: string
@@ -356,6 +357,7 @@ export type Database = {
           buyer_pk_user_id?: string | null
           buyer_user_id?: string | null
           completed_at?: string | null
+          conversation_id?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: string
@@ -378,6 +380,7 @@ export type Database = {
           buyer_pk_user_id?: string | null
           buyer_user_id?: string | null
           completed_at?: string | null
+          conversation_id?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: string
@@ -409,6 +412,13 @@ export type Database = {
             columns: ["buyer_pk_user_id"]
             isOneToOne: false
             referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
           {
@@ -485,6 +495,8 @@ export type Database = {
           total_reviews: number | null
           updated_at: string
           xmr_address: string | null
+          xmr_balance: number | null
+          xmr_subaddress: string | null
         }
         Insert: {
           created_at?: string
@@ -497,6 +509,8 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string
           xmr_address?: string | null
+          xmr_balance?: number | null
+          xmr_subaddress?: string | null
         }
         Update: {
           created_at?: string
@@ -509,6 +523,8 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string
           xmr_address?: string | null
+          xmr_balance?: number | null
+          xmr_subaddress?: string | null
         }
         Relationships: []
       }

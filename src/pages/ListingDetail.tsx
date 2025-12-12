@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ShoppingCart, ArrowLeft, Package, Shield, MessageCircle, Loader2 } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Package, Shield, MessageCircle, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,6 +27,10 @@ import { startConversation } from '@/hooks/useMessages';
 import { createOrder } from '@/hooks/useOrders';
 import { Listing } from '@/lib/types';
 import { findCategoryBySlug } from '@/lib/categories';
+import { usePGP } from '@/hooks/usePGP';
+import { PGPRequiredDialog } from '@/components/PGPRequiredDialog';
+import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
+import { PaymentMethodSelector, PaymentMethod } from '@/components/PaymentMethodSelector';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -34,6 +38,7 @@ const ListingDetail = () => {
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
   const { usdToXmr } = useExchangeRate();
+  const { checkHasKeys, getRecipientPublicKey, encryptMessage, isUnlocked, restoreSession } = usePGP();
   
   const [listing, setListing] = useState<(Listing & { isDbListing?: boolean; secondaryCategory?: string | null; tertiaryCategory?: string | null }) | null>(null);
   const [loadingListing, setLoadingListing] = useState(true);
@@ -43,6 +48,13 @@ const ListingDetail = () => {
   const [shippingAddress, setShippingAddress] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('direct_xmr');
+  
+  // PGP state
+  const [pgpDialogType, setPgpDialogType] = useState<'buyer_missing' | 'seller_missing' | 'buyer_locked' | null>(null);
+  const [showPgpPassphraseDialog, setShowPgpPassphraseDialog] = useState(false);
+  const [sellerHasPGP, setSellerHasPGP] = useState<boolean | null>(null);
+  const [pendingBuyAction, setPendingBuyAction] = useState(false);
 
   const isAuthenticated = !!user || !!privateKeyUser;
 
@@ -98,6 +110,32 @@ const ListingDetail = () => {
     
     fetchListing();
   }, [id]);
+
+  // Restore PGP session on mount
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
+  // Check seller PGP status when listing loads
+  useEffect(() => {
+    const checkSellerPGP = async () => {
+      if (!listing) return;
+      
+      // For DB listings, check if seller has PGP
+      if (listing.isDbListing && listing.sellerId) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('pgp_public_key')
+          .eq('id', listing.sellerId)
+          .maybeSingle();
+        setSellerHasPGP(!!data?.pgp_public_key);
+      } else {
+        // Demo sellers - assume they have PGP for testing
+        setSellerHasPGP(true);
+      }
+    };
+    checkSellerPGP();
+  }, [listing]);
 
   const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
 
@@ -158,8 +196,49 @@ const ListingDetail = () => {
     }
   };
 
-  const handleBuyNow = async () => {
+  // Handle the Buy Now button click - check PGP requirements first
+  const handleBuyNowClick = async () => {
     if (!user) {
+      toast.error('Please sign in to make a purchase');
+      navigate('/auth');
+      return;
+    }
+
+    // Check buyer PGP keys
+    const buyerHasKeys = await checkHasKeys();
+    if (!buyerHasKeys) {
+      setPgpDialogType('buyer_missing');
+      return;
+    }
+
+    // Check seller PGP keys (for DB listings)
+    if (listing?.isDbListing && sellerHasPGP === false) {
+      setPgpDialogType('seller_missing');
+      return;
+    }
+
+    // If buyer keys are locked, prompt for unlock
+    if (!isUnlocked) {
+      setPendingBuyAction(true);
+      setShowPgpPassphraseDialog(true);
+      return;
+    }
+
+    // All checks passed, show buy dialog
+    setShowBuyDialog(true);
+  };
+
+  // Handle PGP unlock success
+  const handlePgpUnlocked = () => {
+    setShowPgpPassphraseDialog(false);
+    if (pendingBuyAction) {
+      setPendingBuyAction(false);
+      setShowBuyDialog(true);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!user || !listing) {
       toast.error('Please sign in to make a purchase');
       navigate('/auth');
       return;
@@ -176,23 +255,65 @@ const ListingDetail = () => {
     }
 
     setLoading(true);
-    const orderId = await createOrder(
-      listing.id,
-      listing.sellerId,
-      false, // assuming demo sellers are regular users
-      quantity,
-      listing.priceUsd,
-      listing.shippingPriceUsd,
-      shippingAddress.trim()
-    );
-    setLoading(false);
 
-    if (orderId) {
-      toast.success('Order created! Redirecting to checkout...');
-      setShowBuyDialog(false);
-      navigate(`/checkout/${orderId}`);
-    } else {
-      toast.error('Failed to create order');
+    try {
+      // Step 1: Encrypt shipping address with seller's public key
+      let encryptedAddress = shippingAddress.trim();
+      
+      if (listing.isDbListing) {
+        const sellerPublicKey = await getRecipientPublicKey(listing.sellerId, undefined);
+        if (sellerPublicKey) {
+          const encrypted = await encryptMessage(shippingAddress.trim(), sellerPublicKey);
+          if (encrypted) {
+            encryptedAddress = encrypted;
+          } else {
+            toast.error('Failed to encrypt shipping address');
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      // Step 2: Auto-start conversation with order context
+      let conversationId: string | null = null;
+      try {
+        const orderMessage = `📦 New Order Placed!\n\nItem: ${listing.title}\nQuantity: ${quantity}\nTotal: $${totalPrice.toFixed(2)} (≈ ${usdToXmr(totalPrice).toFixed(6)} XMR)\n\nShipping address has been encrypted and attached to the order.`;
+        
+        conversationId = await startConversation(
+          listing.id,
+          listing.sellerId,
+          user.id,
+          orderMessage
+        );
+      } catch (e) {
+        console.error('Failed to create conversation:', e);
+        // Continue with order creation even if conversation fails
+      }
+
+      // Step 3: Create order with encrypted address and conversation link
+      const orderId = await createOrder({
+        listingId: listing.id,
+        sellerId: listing.sellerId,
+        isSellerPrivateKey: false,
+        quantity,
+        unitPrice: listing.priceUsd,
+        shippingPrice: listing.shippingPriceUsd,
+        encryptedShippingAddress: encryptedAddress,
+        conversationId: conversationId || undefined,
+      });
+
+      if (orderId) {
+        toast.success('Order created! Redirecting to checkout...');
+        setShowBuyDialog(false);
+        navigate(`/checkout/${orderId}`);
+      } else {
+        toast.error('Failed to create order');
+      }
+    } catch (e) {
+      console.error('Buy flow error:', e);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -277,14 +398,7 @@ const ListingDetail = () => {
                 <Button
                   size="lg"
                   className="flex-1 gap-2 text-lg"
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      toast.error('Please sign in to make a purchase');
-                      navigate('/auth');
-                      return;
-                    }
-                    setShowBuyDialog(true);
-                  }}
+                  onClick={handleBuyNowClick}
                   disabled={listing.stock < 1}
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -308,11 +422,11 @@ const ListingDetail = () => {
 
               <Card className="bg-primary/10 border-primary/20">
                 <CardContent className="p-4 flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <Lock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-semibold text-foreground mb-1">Anonymous Payment</div>
+                    <div className="font-semibold text-foreground mb-1">End-to-End Encrypted</div>
                     <div className="text-muted-foreground">
-                      Pay securely with cryptocurrency through Trocador AnonPay. Your privacy is protected.
+                      Your shipping address is PGP-encrypted so only the seller can read it. Anonymous payment via XMR or any crypto.
                     </div>
                   </div>
                 </CardContent>
@@ -397,7 +511,11 @@ const ListingDetail = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Shipping Address</label>
+              <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                <Lock className="w-4 h-4 text-primary" />
+                Shipping Address
+                <span className="text-xs text-muted-foreground">(will be PGP encrypted)</span>
+              </label>
               <Textarea
                 placeholder="Enter your shipping address..."
                 value={shippingAddress}
@@ -405,6 +523,13 @@ const ListingDetail = () => {
                 rows={3}
               />
             </div>
+
+            {/* Payment Method Selector */}
+            <PaymentMethodSelector
+              selected={paymentMethod}
+              onChange={setPaymentMethod}
+              totalXmr={usdToXmr(totalPrice)}
+            />
 
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between text-sm">
@@ -444,6 +569,24 @@ const ListingDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* PGP Required Dialog */}
+      <PGPRequiredDialog
+        open={pgpDialogType !== null}
+        onOpenChange={(open) => !open && setPgpDialogType(null)}
+        type={pgpDialogType || 'buyer_missing'}
+        onUnlock={() => {
+          setPgpDialogType(null);
+          setShowPgpPassphraseDialog(true);
+        }}
+      />
+
+      {/* PGP Passphrase Dialog */}
+      <PGPPassphraseDialog
+        open={showPgpPassphraseDialog}
+        onOpenChange={setShowPgpPassphraseDialog}
+        onUnlocked={handlePgpUnlocked}
+      />
     </div>
   );
 };

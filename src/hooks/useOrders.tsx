@@ -26,6 +26,7 @@ export interface Order {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  conversation_id: string | null;
   // Enriched data
   listing?: {
     id: string;
@@ -112,6 +113,7 @@ export function useOrders() {
           completed_at: order.completed_at,
           created_at: order.created_at,
           updated_at: order.updated_at,
+          conversation_id: order.conversation_id,
           listing: order.listings as Order['listing'],
           buyer_name: buyerName,
           seller_name: sellerName,
@@ -178,17 +180,31 @@ export function useOrders() {
   };
 }
 
-export async function createOrder(
-  listingId: string,
-  sellerId: string,
-  isSellerPrivateKey: boolean,
-  quantity: number,
-  unitPrice: number,
-  shippingPrice: number,
-  shippingAddress?: string
-): Promise<string | null> {
+export interface CreateOrderParams {
+  listingId: string;
+  sellerId: string;
+  isSellerPrivateKey: boolean;
+  quantity: number;
+  unitPrice: number;
+  shippingPrice: number;
+  encryptedShippingAddress: string;
+  conversationId?: string;
+}
+
+export async function createOrder(params: CreateOrderParams): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
+
+  const {
+    listingId,
+    sellerId,
+    isSellerPrivateKey,
+    quantity,
+    unitPrice,
+    shippingPrice,
+    encryptedShippingAddress,
+    conversationId
+  } = params;
 
   try {
     const totalPrice = (unitPrice * quantity) + shippingPrice;
@@ -200,7 +216,8 @@ export async function createOrder(
       unit_price_usd: unitPrice,
       shipping_price_usd: shippingPrice,
       total_price_usd: totalPrice,
-      shipping_address: shippingAddress || null,
+      shipping_address: encryptedShippingAddress,
+      conversation_id: conversationId || null,
     };
 
     if (isSellerPrivateKey) {
@@ -233,4 +250,25 @@ export async function createOrder(
     console.error('Failed to create order:', e);
     return null;
   }
+}
+
+// Legacy function signature for backward compatibility
+export async function createOrderLegacy(
+  listingId: string,
+  sellerId: string,
+  isSellerPrivateKey: boolean,
+  quantity: number,
+  unitPrice: number,
+  shippingPrice: number,
+  shippingAddress?: string
+): Promise<string | null> {
+  return createOrder({
+    listingId,
+    sellerId,
+    isSellerPrivateKey,
+    quantity,
+    unitPrice,
+    shippingPrice,
+    encryptedShippingAddress: shippingAddress || '',
+  });
 }
