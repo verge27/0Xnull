@@ -46,7 +46,7 @@ const Browse = () => {
     description: listing.description,
     priceUsd: listing.price_usd,
     category: listing.category,
-    images: listing.images.length > 0 ? listing.images : ['/placeholder.svg'],
+    images: listing.images && listing.images.length > 0 ? listing.images : ['/placeholder.svg'],
     stock: listing.stock,
     shippingPriceUsd: listing.shipping_price_usd,
     status: listing.status as 'active' | 'sold_out' | 'draft',
