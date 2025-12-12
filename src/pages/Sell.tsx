@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
+import { ListingAnalyticsChart } from '@/components/ListingAnalyticsChart';
 import { getOrders } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -271,6 +272,9 @@ const Sell = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Chart */}
+        <ListingAnalyticsChart listings={userListings} />
 
         {/* Listings */}
         <Card className="mb-8">

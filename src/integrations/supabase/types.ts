@@ -172,6 +172,44 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_analytics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          listing_id: string
+          revenue: number
+          sales: number
+          views: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          listing_id: string
+          revenue?: number
+          sales?: number
+          views?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          listing_id?: string
+          revenue?: number
+          sales?: number
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_analytics_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           category: string
@@ -674,6 +712,10 @@ export type Database = {
           _user_id?: string
         }
         Returns: boolean
+      }
+      record_listing_sale: {
+        Args: { p_listing_id: string; p_quantity: number; p_revenue: number }
+        Returns: undefined
       }
     }
     Enums: {

@@ -216,6 +216,18 @@ export async function createOrder(
       .single();
 
     if (error) throw error;
+    
+    // Record sale in analytics
+    try {
+      await supabase.rpc('record_listing_sale', {
+        p_listing_id: listingId,
+        p_quantity: quantity,
+        p_revenue: totalPrice
+      });
+    } catch (analyticsError) {
+      console.error('Failed to record sale analytics:', analyticsError);
+    }
+    
     return data.id;
   } catch (e) {
     console.error('Failed to create order:', e);
