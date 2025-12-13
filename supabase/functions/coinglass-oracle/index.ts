@@ -9,14 +9,33 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-// CoinGecko ID mapping
+// CoinGecko ID mapping (ticker -> coingecko id)
 const COINGECKO_IDS: Record<string, string> = {
+  // Major
   'BTC': 'bitcoin',
   'ETH': 'ethereum',
-  'XMR': 'monero',
   'SOL': 'solana',
-  'DOGE': 'dogecoin',
   'LTC': 'litecoin',
+  // Privacy
+  'XMR': 'monero',
+  'DASH': 'dash',
+  'ZEC': 'zcash',
+  'ARRR': 'pirate-chain',
+  // L1s
+  'ADA': 'cardano',
+  'AVAX': 'avalanche-2',
+  'DOT': 'polkadot',
+  'ATOM': 'cosmos',
+  'NEAR': 'near',
+  // Memes
+  'DOGE': 'dogecoin',
+  'SHIB': 'shiba-inu',
+  'PEPE': 'pepe',
+  'BONK': 'bonk',
+  // DeFi
+  'LINK': 'chainlink',
+  'UNI': 'uniswap',
+  'AAVE': 'aave',
 };
 
 serve(async (req) => {
