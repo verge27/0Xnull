@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.0xnull-proxy]
 verify_jwt = false
+
+[functions.coinglass-oracle]
+verify_jwt = false
