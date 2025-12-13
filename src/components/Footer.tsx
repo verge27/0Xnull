@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Mail, ExternalLink } from 'lucide-react';
+import { Shield, ExternalLink } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -102,15 +102,6 @@ export const Footer = () => {
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   KYCNOT.ME Listing
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="mailto:admin@0xnull.io" 
-                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  admin@0xnull.io
                 </a>
               </li>
             </ul>
