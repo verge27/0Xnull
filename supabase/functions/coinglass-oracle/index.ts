@@ -10,18 +10,15 @@ const COINGLASS_API_KEY = Deno.env.get('COINGLASS_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-interface CoinglassResponse {
-  code: string;
-  msg: string;
-  data: {
-    symbol: string;
-    price: number;
-    priceChange24h: number;
-    high24h: number;
-    low24h: number;
-    volume24h: number;
-    openInterest: number;
-  }[];
+// Helper to make Coinglass API requests
+async function coinglassRequest(endpoint: string): Promise<Response> {
+  const response = await fetch(`https://open-api-v3.coinglass.com/api${endpoint}`, {
+    headers: {
+      'CG-API-KEY': COINGLASS_API_KEY!,
+      'Content-Type': 'application/json',
+    },
+  });
+  return response;
 }
 
 serve(async (req) => {
@@ -39,29 +36,28 @@ serve(async (req) => {
     }
 
     if (action === 'price') {
-      // Fetch current price from Coinglass
-      const response = await fetch(
-        `https://open-api.coinglass.com/public/v2/index/price?symbol=${symbol}`,
-        {
-          headers: {
-            'coinglassSecret': COINGLASS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // Fetch current price from Coinglass spot markets endpoint
+      const response = await coinglassRequest(`/spot/coins-markets?symbol=${symbol}`);
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Coinglass API error:', errorText);
-        throw new Error(`Coinglass API error: ${response.status}`);
+        throw new Error(`Coinglass API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
       console.log('Coinglass price response:', JSON.stringify(data));
 
+      // Extract price from the response
+      const coinData = data.data?.[0];
+      const price = coinData?.current_price || coinData?.price;
+
       return new Response(JSON.stringify({
         symbol,
-        price: data.data?.price || data.data,
+        price,
+        priceChange24h: coinData?.price_change_24h,
+        priceChangePercent24h: coinData?.price_change_percent_24h,
+        volume24h: coinData?.volume_usd_24h,
         timestamp: Date.now(),
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -77,22 +73,20 @@ serve(async (req) => {
       }
 
       // Fetch current BTC price
-      const priceResponse = await fetch(
-        `https://open-api.coinglass.com/public/v2/index/price?symbol=${symbol}`,
-        {
-          headers: {
-            'coinglassSecret': COINGLASS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const priceResponse = await coinglassRequest(`/spot/coins-markets?symbol=${symbol}`);
 
       if (!priceResponse.ok) {
         throw new Error('Failed to fetch price from Coinglass');
       }
 
       const priceData = await priceResponse.json();
-      const currentPrice = priceData.data?.price || priceData.data;
+      const coinData = priceData.data?.[0];
+      const currentPrice = coinData?.current_price || coinData?.price;
+      
+      if (!currentPrice) {
+        throw new Error('Could not fetch current price');
+      }
+
       console.log(`Current ${symbol} price: $${currentPrice}, Target: $${targetPrice}, Comparison: ${comparison}`);
 
       // Determine outcome based on comparison
@@ -141,18 +135,11 @@ serve(async (req) => {
 
     if (action === 'funding-rates') {
       // Fetch funding rates
-      const response = await fetch(
-        `https://open-api.coinglass.com/public/v2/funding?symbol=${symbol}`,
-        {
-          headers: {
-            'coinglassSecret': COINGLASS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await coinglassRequest(`/futures/funding-rate?symbol=${symbol}`);
 
       if (!response.ok) {
-        throw new Error(`Coinglass API error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Coinglass API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -163,18 +150,11 @@ serve(async (req) => {
 
     if (action === 'open-interest') {
       // Fetch open interest
-      const response = await fetch(
-        `https://open-api.coinglass.com/public/v2/open_interest?symbol=${symbol}`,
-        {
-          headers: {
-            'coinglassSecret': COINGLASS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await coinglassRequest(`/futures/open-interest?symbol=${symbol}`);
 
       if (!response.ok) {
-        throw new Error(`Coinglass API error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Coinglass API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
