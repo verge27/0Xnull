@@ -2,7 +2,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, MessageSquare, Shield, ExternalLink } from 'lucide-react';
+import { MessageSquare, Shield, ExternalLink } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const SIMPLEX_LINK = 'https://smp18.simplex.im/g#o0awCwkgXWzbKUyPb5Z-hOOWZAoghJl2SfyzOHv4Uas';
@@ -21,34 +21,11 @@ const Support = () => {
             </div>
             <h1 className="text-4xl font-bold mb-4">Support</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Need help? We're here to assist you. Choose your preferred method of contact below.
+              Need help? We're here to assist you. Contact us through SimpleX for private, real-time support.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Email Support */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Mail className="w-5 h-5 text-primary" />
-                  </div>
-                  Email Support
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  For general inquiries, account issues, or feedback, reach out via email. We typically respond within 24-48 hours.
-                </p>
-                <Button asChild className="w-full">
-                  <a href="mailto:admin@oxnull.io">
-                    <Mail className="w-4 h-4 mr-2" />
-                    admin@oxnull.io
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-
+          <div className="max-w-md mx-auto">
             {/* SimpleX Support */}
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
@@ -56,7 +33,7 @@ const Support = () => {
                   <div className="p-2 rounded-lg bg-primary/10">
                     <MessageSquare className="w-5 h-5 text-primary" />
                   </div>
-                  Interactive Support (SimpleX)
+                  SimpleX Support
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -76,7 +53,7 @@ const Support = () => {
                   </div>
                 </div>
                 
-                <Button asChild variant="outline" className="w-full">
+                <Button asChild className="w-full">
                   <a 
                     href={SIMPLEX_LINK}
                     target="_blank"
@@ -95,7 +72,7 @@ const Support = () => {
           </div>
 
           {/* Additional Info */}
-          <Card className="mt-8 border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="mt-8 border-border/50 bg-card/50 backdrop-blur-sm max-w-md mx-auto">
             <CardContent className="p-6">
               <h3 className="font-semibold mb-3">Before Contacting Support</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
