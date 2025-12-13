@@ -16,8 +16,9 @@ import { ImageUpload } from '@/components/ImageUpload';
 import { CountrySelect } from '@/components/CountrySelect';
 import { Loader2 } from 'lucide-react';
 import { ALL_CATEGORIES } from '@/lib/categories';
+import { ListingErrorBoundary } from '@/components/ListingErrorBoundary';
 
-const NewListing = () => {
+const NewListingContent = () => {
   const { user } = useAuth();
   const { createListing } = useListings();
   const { convertToUsd, loading: conversionLoading } = useCurrencyConversion();
@@ -114,26 +115,36 @@ const NewListing = () => {
     }
 
     setIsSubmitting(true);
+    console.log('[NewListing] Creating listing...');
 
-    const result = await createListing({
-      title: formData.title,
-      description: formData.description,
-      price_usd: convertedPrice,
-      category: formData.category,
-      secondary_category: formData.secondaryCategory || null,
-      tertiary_category: formData.tertiaryCategory || null,
-      images: images,
-      stock: parseInt(formData.stock),
-      shipping_price_usd: convertedShipping ?? 0,
-      shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
-      condition: 'new'
-    });
+    try {
+      const result = await createListing({
+        title: formData.title,
+        description: formData.description,
+        price_usd: convertedPrice,
+        category: formData.category,
+        secondary_category: formData.secondaryCategory || null,
+        tertiary_category: formData.tertiaryCategory || null,
+        images: images,
+        stock: parseInt(formData.stock),
+        shipping_price_usd: convertedShipping ?? 0,
+        shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
+        condition: 'new'
+      });
 
-    setIsSubmitting(false);
+      setIsSubmitting(false);
 
-    if (result) {
-      toast.success('Listing created successfully!');
-      navigate('/sell');
+      if (result) {
+        console.log('[NewListing] Listing created successfully:', result.id);
+        toast.success('Listing created successfully!');
+        navigate('/sell');
+      } else {
+        console.error('[NewListing] Failed to create listing - no result returned');
+      }
+    } catch (err: any) {
+      console.error('[NewListing] Error creating listing:', err);
+      toast.error(err.message || 'Failed to create listing');
+      setIsSubmitting(false);
     }
   };
 
@@ -369,5 +380,11 @@ const NewListing = () => {
     </div>
   );
 };
+
+const NewListing = () => (
+  <ListingErrorBoundary fallbackPath="/sell">
+    <NewListingContent />
+  </ListingErrorBoundary>
+);
 
 export default NewListing;

@@ -14,12 +14,13 @@ import { listingSchema } from '@/lib/validation';
 import { useCurrencyConversion, SUPPORTED_CURRENCIES } from '@/hooks/useCurrencyConversion';
 import { ImageUpload } from '@/components/ImageUpload';
 import { CountrySelect } from '@/components/CountrySelect';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { ALL_CATEGORIES } from '@/lib/categories';
+import { ListingErrorBoundary } from '@/components/ListingErrorBoundary';
 
-const EditListing = () => {
+const EditListingContent = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { updateListing } = useListings();
@@ -27,6 +28,7 @@ const EditListing = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [listing, setListing] = useState<DbListing | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [shippingCountries, setShippingCountries] = useState<string[]>([]);
@@ -50,40 +52,58 @@ const EditListing = () => {
     const fetchListing = async () => {
       if (!id) return;
       
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+      console.log('[EditListing] Fetching listing:', id);
+      setFetchError(null);
+      
+      try {
+        const { data, error } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
 
-      if (error || !data) {
-        toast.error('Listing not found');
-        navigate('/sell');
-        return;
+        if (error) {
+          console.error('[EditListing] Fetch error:', error);
+          setFetchError(error.message);
+          setLoading(false);
+          return;
+        }
+        
+        if (!data) {
+          console.error('[EditListing] Listing not found');
+          setFetchError('Listing not found');
+          setLoading(false);
+          return;
+        }
+
+        console.log('[EditListing] Listing loaded:', data.id);
+        setListing(data);
+        setImages(data.images || []);
+        setShippingCountries(data.shipping_countries || []);
+        setFormData({
+          title: data.title,
+          description: data.description,
+          price: data.price_usd.toString(),
+          priceCurrency: 'USD',
+          category: data.category,
+          secondaryCategory: data.secondary_category || '',
+          tertiaryCategory: data.tertiary_category || '',
+          stock: data.stock.toString(),
+          shippingPrice: data.shipping_price_usd.toString(),
+          shippingCurrency: 'USD'
+        });
+        setConvertedPrice(data.price_usd);
+        setConvertedShipping(data.shipping_price_usd);
+        setLoading(false);
+      } catch (err: any) {
+        console.error('[EditListing] Unexpected error:', err);
+        setFetchError(err.message || 'Failed to load listing');
+        setLoading(false);
       }
-
-      setListing(data);
-      setImages(data.images || []);
-      setShippingCountries(data.shipping_countries || []);
-      setFormData({
-        title: data.title,
-        description: data.description,
-        price: data.price_usd.toString(),
-        priceCurrency: 'USD',
-        category: data.category,
-        secondaryCategory: data.secondary_category || '',
-        tertiaryCategory: data.tertiary_category || '',
-        stock: data.stock.toString(),
-        shippingPrice: data.shipping_price_usd.toString(),
-        shippingCurrency: 'USD'
-      });
-      setConvertedPrice(data.price_usd);
-      setConvertedShipping(data.shipping_price_usd);
-      setLoading(false);
     };
 
     fetchListing();
-  }, [id, navigate]);
+  }, [id]);
 
   // Auto-convert price when currency or amount changes
   useEffect(() => {
@@ -202,6 +222,37 @@ const EditListing = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 max-w-md">
+          <Card>
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Failed to load listing</h2>
+                <p className="text-sm text-muted-foreground">{fetchError}</p>
+              </div>
+              <div className="flex gap-3 justify-center">
+                <Button variant="outline" onClick={() => navigate('/sell')} className="gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Go Back
+                </Button>
+                <Button onClick={() => window.location.reload()} className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -435,5 +486,11 @@ const EditListing = () => {
     </div>
   );
 };
+
+const EditListing = () => (
+  <ListingErrorBoundary fallbackPath="/sell">
+    <EditListingContent />
+  </ListingErrorBoundary>
+);
 
 export default EditListing;
