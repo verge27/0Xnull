@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { toast } from 'sonner';
-import { Plus, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Bitcoin, Coins, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Bitcoin, Coins, RefreshCw, ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react';
 
 interface Market {
   id: string;
@@ -44,21 +44,52 @@ interface OracleAsset {
   symbol: string;
   name: string;
   icon: React.ReactNode;
+  category: 'major' | 'privacy' | 'l1' | 'meme' | 'defi';
   price?: number;
   change24h?: number;
   loading?: boolean;
 }
 
-const PLATFORM_FEE = 0.02;
+// Platform fees
+const PLATFORM_FEE = 0.02; // 2% platform fee
+const ORACLE_FEE = 0.004; // 0.4% oracle feed fee
+const ORACLE_FEE_WALLET = '42wxZ5mEQniV4RVo4JvgJjM3xcqtKTgqSYWFftE14ad8Yp4eVHVLmp5AXdBLG965NsgsfM4tBP8AaS8ejFbPfZjANsbFEud';
 
 const ORACLE_ASSETS: OracleAsset[] = [
-  { symbol: 'BTC', name: 'Bitcoin', icon: <Bitcoin className="w-5 h-5 text-orange-500" /> },
-  { symbol: 'ETH', name: 'Ethereum', icon: <Coins className="w-5 h-5 text-blue-400" /> },
-  { symbol: 'XMR', name: 'Monero', icon: <Coins className="w-5 h-5 text-orange-400" /> },
-  { symbol: 'SOL', name: 'Solana', icon: <Coins className="w-5 h-5 text-purple-400" /> },
-  { symbol: 'DOGE', name: 'Dogecoin', icon: <Coins className="w-5 h-5 text-yellow-500" /> },
-  { symbol: 'LTC', name: 'Litecoin', icon: <Coins className="w-5 h-5 text-gray-400" /> },
+  // Major
+  { symbol: 'BTC', name: 'Bitcoin', category: 'major', icon: <Bitcoin className="w-5 h-5 text-orange-500" /> },
+  { symbol: 'ETH', name: 'Ethereum', category: 'major', icon: <Coins className="w-5 h-5 text-blue-400" /> },
+  { symbol: 'SOL', name: 'Solana', category: 'major', icon: <Coins className="w-5 h-5 text-purple-400" /> },
+  { symbol: 'LTC', name: 'Litecoin', category: 'major', icon: <Coins className="w-5 h-5 text-gray-400" /> },
+  // Privacy
+  { symbol: 'XMR', name: 'Monero', category: 'privacy', icon: <Coins className="w-5 h-5 text-orange-400" /> },
+  { symbol: 'DASH', name: 'Dash', category: 'privacy', icon: <Coins className="w-5 h-5 text-blue-500" /> },
+  { symbol: 'ZEC', name: 'Zcash', category: 'privacy', icon: <Coins className="w-5 h-5 text-yellow-400" /> },
+  { symbol: 'ARRR', name: 'Pirate Chain', category: 'privacy', icon: <Coins className="w-5 h-5 text-amber-600" /> },
+  // L1s
+  { symbol: 'ADA', name: 'Cardano', category: 'l1', icon: <Coins className="w-5 h-5 text-blue-600" /> },
+  { symbol: 'AVAX', name: 'Avalanche', category: 'l1', icon: <Coins className="w-5 h-5 text-red-500" /> },
+  { symbol: 'DOT', name: 'Polkadot', category: 'l1', icon: <Coins className="w-5 h-5 text-pink-500" /> },
+  { symbol: 'ATOM', name: 'Cosmos', category: 'l1', icon: <Coins className="w-5 h-5 text-purple-500" /> },
+  { symbol: 'NEAR', name: 'NEAR', category: 'l1', icon: <Coins className="w-5 h-5 text-emerald-400" /> },
+  // Memes
+  { symbol: 'DOGE', name: 'Dogecoin', category: 'meme', icon: <Coins className="w-5 h-5 text-yellow-500" /> },
+  { symbol: 'SHIB', name: 'Shiba Inu', category: 'meme', icon: <Coins className="w-5 h-5 text-orange-500" /> },
+  { symbol: 'PEPE', name: 'Pepe', category: 'meme', icon: <Coins className="w-5 h-5 text-green-500" /> },
+  { symbol: 'BONK', name: 'Bonk', category: 'meme', icon: <Coins className="w-5 h-5 text-amber-500" /> },
+  // DeFi
+  { symbol: 'LINK', name: 'Chainlink', category: 'defi', icon: <Coins className="w-5 h-5 text-blue-400" /> },
+  { symbol: 'UNI', name: 'Uniswap', category: 'defi', icon: <Coins className="w-5 h-5 text-pink-400" /> },
+  { symbol: 'AAVE', name: 'Aave', category: 'defi', icon: <Coins className="w-5 h-5 text-purple-300" /> },
 ];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  major: 'Major',
+  privacy: 'Privacy',
+  l1: 'Layer 1',
+  meme: 'Meme',
+  defi: 'DeFi',
+};
 
 export default function Predictions() {
   const navigate = useNavigate();
@@ -74,6 +105,8 @@ export default function Predictions() {
   const [betDialogOpen, setBetDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [requestOracleOpen, setRequestOracleOpen] = useState(false);
+  const [requestedAsset, setRequestedAsset] = useState('');
   
   // Oracle prices state
   const [oraclePrices, setOraclePrices] = useState<Record<string, { price: number; change24h: number }>>({});
@@ -390,7 +423,7 @@ export default function Predictions() {
           </div>
           
           {!sidebarCollapsed && (
-            <div className="p-3">
+            <div className="p-3 overflow-y-auto max-h-[calc(100vh-8rem)]">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-muted-foreground">Live Prices</span>
                 <Button
@@ -404,103 +437,138 @@ export default function Predictions() {
                 </Button>
               </div>
               
-              <div className="space-y-2">
-                {ORACLE_ASSETS.map((asset) => {
-                  const priceData = oraclePrices[asset.symbol];
-                  const isSelected = selectedOracleAsset === asset.symbol;
-                  
-                  return (
-                    <div key={asset.symbol}>
-                      <button
-                        onClick={() => setSelectedOracleAsset(isSelected ? null : asset.symbol)}
-                        className={`w-full p-3 rounded-lg border transition-all text-left ${
-                          isSelected 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-border hover:border-primary/50 bg-background'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {asset.icon}
-                            <div>
-                              <p className="font-medium text-sm">{asset.symbol}</p>
-                              <p className="text-xs text-muted-foreground">{asset.name}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            {pricesLoading ? (
-                              <div className="h-4 w-16 bg-muted animate-pulse rounded" />
-                            ) : priceData ? (
-                              <>
-                                <p className="font-mono text-sm">${priceData.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
-                                <p className={`text-xs ${priceData.change24h >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                  {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(2)}%
-                                </p>
-                              </>
-                            ) : (
-                              <p className="text-xs text-muted-foreground">--</p>
+              {/* Oracle fee info */}
+              <div className="mb-4 p-2 bg-muted/30 rounded-lg border border-border">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">0.4% oracle fee</span> from pot goes to oracle hosting
+                </p>
+              </div>
+              
+              {/* Grouped by category */}
+              {(['major', 'privacy', 'l1', 'meme', 'defi'] as const).map((category) => {
+                const categoryAssets = ORACLE_ASSETS.filter(a => a.category === category);
+                if (categoryAssets.length === 0) return null;
+                
+                return (
+                  <div key={category} className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                      {CATEGORY_LABELS[category]}
+                    </p>
+                    <div className="space-y-1">
+                      {categoryAssets.map((asset) => {
+                        const priceData = oraclePrices[asset.symbol];
+                        const isSelected = selectedOracleAsset === asset.symbol;
+                        
+                        return (
+                          <div key={asset.symbol}>
+                            <button
+                              onClick={() => setSelectedOracleAsset(isSelected ? null : asset.symbol)}
+                              className={`w-full p-2 rounded-lg border transition-all text-left ${
+                                isSelected 
+                                  ? 'border-primary bg-primary/10' 
+                                  : 'border-transparent hover:border-border hover:bg-muted/30'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {asset.icon}
+                                  <div>
+                                    <p className="font-medium text-sm">{asset.symbol}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  {pricesLoading ? (
+                                    <div className="h-4 w-14 bg-muted animate-pulse rounded" />
+                                  ) : priceData ? (
+                                    <>
+                                      <p className="font-mono text-xs">${priceData.price < 1 ? priceData.price.toFixed(6) : priceData.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                                      <p className={`text-xs ${priceData.change24h >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                        {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(1)}%
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground">--</p>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                            
+                            {/* Expanded create form */}
+                            {isSelected && (user || pkUser) && (
+                              <div className="mt-1 p-3 bg-muted/50 rounded-lg border border-border space-y-3">
+                                <p className="text-xs font-medium">Create {asset.symbol} Market</p>
+                                
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant={comparison === 'above' ? 'default' : 'outline'}
+                                    size="sm"
+                                    className="flex-1 text-xs h-7"
+                                    onClick={() => setComparison('above')}
+                                  >
+                                    Above
+                                  </Button>
+                                  <Button
+                                    variant={comparison === 'below' ? 'default' : 'outline'}
+                                    size="sm"
+                                    className="flex-1 text-xs h-7"
+                                    onClick={() => setComparison('below')}
+                                  >
+                                    Below
+                                  </Button>
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs">Target Price ($)</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder={priceData?.price.toString() || '0'}
+                                    value={targetPrice}
+                                    onChange={(e) => setTargetPrice(e.target.value)}
+                                    className="h-7 text-sm"
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs">Resolution Date</Label>
+                                  <Input
+                                    type="datetime-local"
+                                    value={newResolutionDate}
+                                    onChange={(e) => setNewResolutionDate(e.target.value)}
+                                    className="h-7 text-sm"
+                                  />
+                                </div>
+                                
+                                <Button
+                                  size="sm"
+                                  className="w-full h-7"
+                                  onClick={() => handleCreateOracleMarket(asset)}
+                                >
+                                  Create Market
+                                </Button>
+                              </div>
                             )}
                           </div>
-                        </div>
-                      </button>
-                      
-                      {/* Expanded create form */}
-                      {isSelected && (user || pkUser) && (
-                        <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border space-y-3">
-                          <p className="text-xs font-medium">Create Oracle Market</p>
-                          
-                          <div className="flex gap-2">
-                            <Button
-                              variant={comparison === 'above' ? 'default' : 'outline'}
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => setComparison('above')}
-                            >
-                              Above
-                            </Button>
-                            <Button
-                              variant={comparison === 'below' ? 'default' : 'outline'}
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => setComparison('below')}
-                            >
-                              Below
-                            </Button>
-                          </div>
-                          
-                          <div>
-                            <Label className="text-xs">Target Price ($)</Label>
-                            <Input
-                              type="number"
-                              placeholder={priceData?.price.toString() || '0'}
-                              value={targetPrice}
-                              onChange={(e) => setTargetPrice(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label className="text-xs">Resolution Date</Label>
-                            <Input
-                              type="datetime-local"
-                              value={newResolutionDate}
-                              onChange={(e) => setNewResolutionDate(e.target.value)}
-                              className="h-8 text-sm"
-                            />
-                          </div>
-                          
-                          <Button
-                            size="sm"
-                            className="w-full"
-                            onClick={() => handleCreateOracleMarket(asset)}
-                          >
-                            Create Market
-                          </Button>
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
+              
+              {/* Request Oracle Feed */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <button
+                  onClick={() => setRequestOracleOpen(true)}
+                  className="w-full p-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/30 transition-all text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <MessageSquarePlus className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium text-sm">Request Oracle</p>
+                      <p className="text-xs text-muted-foreground">Need a different asset?</p>
+                    </div>
+                  </div>
+                </button>
               </div>
               
               {!user && !pkUser && (
@@ -512,12 +580,16 @@ export default function Predictions() {
           )}
           
           {sidebarCollapsed && (
-            <div className="p-2 space-y-2">
+            <div className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-8rem)]">
               {ORACLE_ASSETS.map((asset) => (
                 <div
                   key={asset.symbol}
                   className="p-2 rounded-lg hover:bg-muted/50 cursor-pointer flex justify-center"
                   title={`${asset.name}: $${oraclePrices[asset.symbol]?.price?.toLocaleString() || 'Loading...'}`}
+                  onClick={() => {
+                    setSidebarCollapsed(false);
+                    setSelectedOracleAsset(asset.symbol);
+                  }}
                 >
                   {asset.icon}
                 </div>
@@ -812,6 +884,55 @@ export default function Predictions() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Oracle Dialog */}
+      <Dialog open={requestOracleOpen} onOpenChange={setRequestOracleOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Oracle Feed</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              Need a price feed for a different asset? Let us know and we'll add it.
+            </p>
+            
+            <div>
+              <Label htmlFor="requested-asset">Asset Symbol or Name</Label>
+              <Input
+                id="requested-asset"
+                placeholder="e.g., TON, SUI, APT..."
+                value={requestedAsset}
+                onChange={(e) => setRequestedAsset(e.target.value)}
+              />
+            </div>
+            
+            <div className="bg-muted/50 rounded-lg p-3 text-xs space-y-2">
+              <p className="font-medium">Oracle Fee Structure</p>
+              <p className="text-muted-foreground">
+                0.4% of the pot goes to oracle hosting at:
+              </p>
+              <code className="block text-[10px] break-all bg-background p-2 rounded border">
+                {ORACLE_FEE_WALLET}
+              </code>
+            </div>
+            
+            <Button 
+              className="w-full"
+              onClick={() => {
+                if (requestedAsset.trim()) {
+                  toast.success(`Oracle request submitted for ${requestedAsset.toUpperCase()}`);
+                  setRequestedAsset('');
+                  setRequestOracleOpen(false);
+                } else {
+                  toast.error('Please enter an asset name');
+                }
+              }}
+            >
+              Submit Request
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       
