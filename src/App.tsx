@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
+import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
+import { NetworkStatusBanner } from "./components/NetworkStatusBanner";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import ListingDetail from "./pages/ListingDetail";
@@ -42,15 +44,17 @@ import Verify from "./pages/Verify";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <PrivateKeyAuthProvider>
-            <TokenProvider>
-            <Routes>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <NetworkStatusBanner />
+        <BrowserRouter>
+          <AuthProvider>
+            <PrivateKeyAuthProvider>
+              <TokenProvider>
+                <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/browse" element={<Browse />} />
             <Route path="/listing/:id" element={<ListingDetail />} />
@@ -83,15 +87,16 @@ const App = () => (
             <Route path="/therapy" element={<Therapy />} />
             <Route path="/kokoro" element={<Kokoro />} />
             <Route path="/verify" element={<Verify />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-            </TokenProvider>
-          </PrivateKeyAuthProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </TokenProvider>
+            </PrivateKeyAuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;
