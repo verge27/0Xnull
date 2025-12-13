@@ -156,29 +156,29 @@ export default function Predictions() {
 
   const fetchOraclePrices = async () => {
     setPricesLoading(true);
-    const prices: Record<string, { price: number; change24h: number }> = {};
-    
-    await Promise.all(
-      ORACLE_ASSETS.map(async (asset) => {
-        try {
-          const response = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coinglass-oracle?action=price&symbol=${asset.symbol}`
-          );
-          const data = await response.json();
-          if (data.price) {
-            prices[asset.symbol] = {
-              price: data.price,
-              change24h: data.priceChange24h || 0,
-            };
-          }
-        } catch (error) {
-          console.error(`Failed to fetch ${asset.symbol} price:`, error);
+
+    try {
+      const symbols = ORACLE_ASSETS.map((a) => a.symbol).join(',');
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coinglass-oracle?action=prices&symbols=${symbols}`
+      );
+
+      if (!response.ok) {
+        console.error('Failed to fetch oracle prices:', await response.text());
+        setOraclePrices({});
+      } else {
+        const data = await response.json();
+        if (data.error === 'RATE_LIMIT') {
+          console.warn('Oracle rate limited, keeping previous prices');
+        } else if (data.prices) {
+          setOraclePrices(data.prices as Record<string, { price: number; change24h: number }>);
         }
-      })
-    );
-    
-    setOraclePrices(prices);
-    setPricesLoading(false);
+      }
+    } catch (error) {
+      console.error('Failed to fetch oracle prices:', error);
+    } finally {
+      setPricesLoading(false);
+    }
   };
 
   const fetchMarkets = async () => {
