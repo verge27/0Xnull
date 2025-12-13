@@ -145,7 +145,10 @@ export default function Predictions() {
   const [newCriteria, setNewCriteria] = useState('');
   const [selectedOracleAsset, setSelectedOracleAsset] = useState<string | null>(null);
   const [targetPrice, setTargetPrice] = useState('');
-  const [comparison, setComparison] = useState<'above' | 'below'>('above');
+  const [targetPriceMax, setTargetPriceMax] = useState('');
+  const [marketType, setMarketType] = useState<'above' | 'below' | 'between' | 'custom'>('above');
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [customCriteria, setCustomCriteria] = useState('');
   
   // Bet form
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
@@ -237,6 +240,38 @@ export default function Predictions() {
   };
 
   const handleCreateOracleMarket = async (asset: OracleAsset) => {
+    if (marketType === 'custom') {
+      if (!customQuestion.trim()) {
+        toast.error('Question is required for custom markets');
+        return;
+      }
+      if (!newResolutionDate) {
+        toast.error('Resolution date is required');
+        return;
+      }
+      
+      const marketData = {
+        question: customQuestion.trim(),
+        description: `Custom ${asset.symbol} market`,
+        resolution_date: newResolutionDate,
+        resolution_criteria: customCriteria.trim() || 'Manually resolved by market creator.',
+        creator_id: user?.id || null,
+        creator_pk_id: pkUser?.id || null,
+      };
+      
+      const { error } = await supabase.from('prediction_markets').insert(marketData);
+      
+      if (error) {
+        toast.error('Failed to create market');
+        console.error(error);
+      } else {
+        toast.success('Custom market created!');
+        resetOracleForm();
+        fetchMarkets();
+      }
+      return;
+    }
+    
     if (!targetPrice || !newResolutionDate) {
       toast.error('Target price and resolution date are required');
       return;
@@ -248,9 +283,34 @@ export default function Predictions() {
       return;
     }
     
-    const question = `Will ${asset.name} (${asset.symbol}) be ${comparison} $${priceNum.toLocaleString()} on ${new Date(newResolutionDate).toLocaleDateString()}?`;
-    const description = `Oracle-resolved market using CoinGecko price data. Target: $${priceNum.toLocaleString()} | Comparison: ${comparison}`;
-    const criteria = `Auto-resolved by CoinGecko oracle at resolution date. Current price: $${oraclePrices[asset.symbol]?.price?.toLocaleString() || 'Loading...'}`;
+    if (marketType === 'between') {
+      const priceMax = parseFloat(targetPriceMax);
+      if (isNaN(priceMax) || priceMax <= priceNum) {
+        toast.error('Max price must be greater than min price');
+        return;
+      }
+    }
+    
+    const resolutionDate = new Date(newResolutionDate);
+    const dateStr = resolutionDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const timeStr = resolutionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+    
+    let question: string;
+    let criteria: string;
+    
+    if (marketType === 'above') {
+      question = `Will ${asset.name} (${asset.symbol}) be above $${priceNum.toLocaleString()} on ${dateStr}?`;
+      criteria = `Resolves YES if ${asset.symbol} price is ≥ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+    } else if (marketType === 'below') {
+      question = `Will ${asset.name} (${asset.symbol}) be below $${priceNum.toLocaleString()} on ${dateStr}?`;
+      criteria = `Resolves YES if ${asset.symbol} price is ≤ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+    } else {
+      const priceMax = parseFloat(targetPriceMax);
+      question = `Will ${asset.name} (${asset.symbol}) be between $${priceNum.toLocaleString()} and $${priceMax.toLocaleString()} on ${dateStr}?`;
+      criteria = `Resolves YES if ${asset.symbol} price is between $${priceNum.toLocaleString()} and $${priceMax.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+    }
+    
+    const description = `Oracle-resolved market using CoinGecko price data. Auto-resolvable at resolution time.`;
     
     const marketData = {
       question,
@@ -268,12 +328,19 @@ export default function Predictions() {
       console.error(error);
     } else {
       toast.success('Oracle market created!');
-      setSelectedOracleAsset(null);
-      setTargetPrice('');
-      setNewResolutionDate('');
-      setComparison('above');
+      resetOracleForm();
       fetchMarkets();
     }
+  };
+  
+  const resetOracleForm = () => {
+    setSelectedOracleAsset(null);
+    setTargetPrice('');
+    setTargetPriceMax('');
+    setNewResolutionDate('');
+    setMarketType('above');
+    setCustomQuestion('');
+    setCustomCriteria('');
   };
 
   const handleCreateMarket = async () => {
@@ -524,45 +591,107 @@ export default function Predictions() {
                               <div className="mt-1 p-3 bg-muted/50 rounded-lg border border-border space-y-3">
                                 <p className="text-xs font-medium">Create {asset.symbol} Market</p>
                                 
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant={comparison === 'above' ? 'default' : 'outline'}
-                                    size="sm"
-                                    className="flex-1 text-xs h-7"
-                                    onClick={() => setComparison('above')}
-                                  >
-                                    Above
-                                  </Button>
-                                  <Button
-                                    variant={comparison === 'below' ? 'default' : 'outline'}
-                                    size="sm"
-                                    className="flex-1 text-xs h-7"
-                                    onClick={() => setComparison('below')}
-                                  >
-                                    Below
-                                  </Button>
+                                {/* Market Type Dropdown */}
+                                <div>
+                                  <Label className="text-xs">Market Type</Label>
+                                  <Select value={marketType} onValueChange={(v) => setMarketType(v as typeof marketType)}>
+                                    <SelectTrigger className="h-8 text-sm">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="above">Price Above</SelectItem>
+                                      <SelectItem value="below">Price Below</SelectItem>
+                                      <SelectItem value="between">Price Between</SelectItem>
+                                      <SelectItem value="custom">Custom (write your own)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                                 
-                                <div>
-                                  <Label className="text-xs">Target Price ($)</Label>
-                                  <Input
-                                    type="number"
-                                    placeholder={priceData?.price.toString() || '0'}
-                                    value={targetPrice}
-                                    onChange={(e) => setTargetPrice(e.target.value)}
-                                    className="h-7 text-sm"
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <Label className="text-xs">Resolution Date</Label>
-                                  <Input
-                                    type="datetime-local"
-                                    value={newResolutionDate}
-                                    onChange={(e) => setNewResolutionDate(e.target.value)}
-                                    className="h-7 text-sm"
-                                  />
-                                </div>
+                                {marketType !== 'custom' ? (
+                                  <>
+                                    <div>
+                                      <Label className="text-xs">{marketType === 'between' ? 'Min Price ($)' : 'Target Price ($)'}</Label>
+                                      <Input
+                                        type="number"
+                                        placeholder={priceData?.price.toString() || '0'}
+                                        value={targetPrice}
+                                        onChange={(e) => setTargetPrice(e.target.value)}
+                                        className="h-7 text-sm"
+                                      />
+                                    </div>
+                                    
+                                    {marketType === 'between' && (
+                                      <div>
+                                        <Label className="text-xs">Max Price ($)</Label>
+                                        <Input
+                                          type="number"
+                                          placeholder={(priceData?.price ? priceData.price * 1.1 : 0).toFixed(2)}
+                                          value={targetPriceMax}
+                                          onChange={(e) => setTargetPriceMax(e.target.value)}
+                                          className="h-7 text-sm"
+                                        />
+                                      </div>
+                                    )}
+                                    
+                                    <div>
+                                      <Label className="text-xs">Resolution Date</Label>
+                                      <Input
+                                        type="datetime-local"
+                                        value={newResolutionDate}
+                                        onChange={(e) => setNewResolutionDate(e.target.value)}
+                                        className="h-7 text-sm"
+                                      />
+                                    </div>
+                                    
+                                    {/* Auto-generated criteria preview */}
+                                    {targetPrice && newResolutionDate && (
+                                      <div className="p-2 bg-background/50 rounded text-xs text-muted-foreground border border-border/50">
+                                        <p className="font-medium text-foreground mb-1">Auto-generated criteria:</p>
+                                        {marketType === 'above' && (
+                                          <p>Resolves YES if {asset.symbol} ≥ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
+                                        )}
+                                        {marketType === 'below' && (
+                                          <p>Resolves YES if {asset.symbol} ≤ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
+                                        )}
+                                        {marketType === 'between' && targetPriceMax && (
+                                          <p>Resolves YES if {asset.symbol} between ${parseFloat(targetPrice).toLocaleString()} and ${parseFloat(targetPriceMax).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
+                                        )}
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <div>
+                                      <Label className="text-xs">Question *</Label>
+                                      <Input
+                                        placeholder={`Will ${asset.symbol}...?`}
+                                        value={customQuestion}
+                                        onChange={(e) => setCustomQuestion(e.target.value)}
+                                        className="h-7 text-sm"
+                                      />
+                                    </div>
+                                    
+                                    <div>
+                                      <Label className="text-xs">Resolution Criteria</Label>
+                                      <Textarea
+                                        placeholder="How will this market be resolved?"
+                                        value={customCriteria}
+                                        onChange={(e) => setCustomCriteria(e.target.value)}
+                                        className="text-sm min-h-[60px]"
+                                      />
+                                    </div>
+                                    
+                                    <div>
+                                      <Label className="text-xs">Resolution Date</Label>
+                                      <Input
+                                        type="datetime-local"
+                                        value={newResolutionDate}
+                                        onChange={(e) => setNewResolutionDate(e.target.value)}
+                                        className="h-7 text-sm"
+                                      />
+                                    </div>
+                                  </>
+                                )}
                                 
                                 <Button
                                   size="sm"
