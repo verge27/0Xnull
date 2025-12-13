@@ -1,4 +1,4 @@
-import { Lock, Circle, ExternalLink, Clock } from 'lucide-react';
+import { Lock, Circle, ExternalLink, Code, KeyRound, Server, Shield, AlertTriangle, Check, X } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,6 +55,128 @@ const Philosophy = () => {
               Privacy infrastructure built on cypherpunk principles and crypto-anarchist ideals
             </p>
           </div>
+
+          {/* Why JavaScript Section */}
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Code className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Why We Use JavaScript</h2>
+                <p className="text-sm text-muted-foreground">JS is the encryption runtime. The server is dumb storage.</p>
+              </div>
+            </div>
+
+            <Card className="border-primary/20 mb-6">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-semibold">What JavaScript Enables</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <KeyRound className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">Client-side PGP key generation</span>
+                      <p className="text-muted-foreground text-sm">Your keys never touch our server</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">Client-side encryption of messages and shipping addresses</span>
+                      <p className="text-muted-foreground text-sm">Encryption happens in your browser before data leaves your device</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Code className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">OpenPGP.js running entirely in your browser</span>
+                      <p className="text-muted-foreground text-sm">Battle-tested cryptographic library executing locally</p>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-destructive/20 bg-destructive/5 mb-6">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                  <h3 className="text-lg font-semibold">Without JavaScript, You Either...</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <X className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">Trust the server to generate keys</span>
+                      <p className="text-muted-foreground text-sm">The server knows your keys — complete trust required</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <X className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">Trust the server to encrypt</span>
+                      <p className="text-muted-foreground text-sm">The server sees your plaintext — zero privacy guarantee</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <X className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-medium">Manually PGP encrypt everything offline</span>
+                      <p className="text-muted-foreground text-sm">Let's be honest — no one does this</p>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <Card className="border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Check className="w-5 h-5 text-primary" />
+                    <h4 className="font-semibold">With Client-Side JS</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Keys generated in your browser</li>
+                    <li>• Encryption happens locally</li>
+                    <li>• Server sees only ciphertext</li>
+                    <li>• Zero-knowledge by design</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card className="border-destructive/20 bg-destructive/5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <X className="w-5 h-5 text-destructive" />
+                    <h4 className="font-semibold">Server-Side Encryption</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Server generates your keys</li>
+                    <li>• Server encrypts your data</li>
+                    <li>• Server sees everything</li>
+                    <li>• Trust required</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4 text-muted-foreground">
+              <p>
+                The "no JS" criticism sounds principled until you realise it usually means moving the encryption server-side — where you have to trust the operator.
+              </p>
+              <p>
+                With client-side JS, our server only ever sees <span className="text-foreground font-medium">encrypted blobs</span>. We couldn't read your messages even if we wanted to.
+              </p>
+              <p className="text-sm italic border-t border-border pt-4 mt-4">
+                "I won't be able to please everyone."
+              </p>
+            </div>
+          </section>
+
+          <Separator className="my-12" />
 
           {/* Cypherpunk Section */}
           <section className="mb-16">
