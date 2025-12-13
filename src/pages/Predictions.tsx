@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { toast } from 'sonner';
-import { Plus, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Bitcoin, Coins, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Market {
   id: string;
@@ -40,7 +40,25 @@ interface Position {
   created_at: string;
 }
 
+interface OracleAsset {
+  symbol: string;
+  name: string;
+  icon: React.ReactNode;
+  price?: number;
+  change24h?: number;
+  loading?: boolean;
+}
+
 const PLATFORM_FEE = 0.02;
+
+const ORACLE_ASSETS: OracleAsset[] = [
+  { symbol: 'BTC', name: 'Bitcoin', icon: <Bitcoin className="w-5 h-5 text-orange-500" /> },
+  { symbol: 'ETH', name: 'Ethereum', icon: <Coins className="w-5 h-5 text-blue-400" /> },
+  { symbol: 'XMR', name: 'Monero', icon: <Coins className="w-5 h-5 text-orange-400" /> },
+  { symbol: 'SOL', name: 'Solana', icon: <Coins className="w-5 h-5 text-purple-400" /> },
+  { symbol: 'DOGE', name: 'Dogecoin', icon: <Coins className="w-5 h-5 text-yellow-500" /> },
+  { symbol: 'LTC', name: 'Litecoin', icon: <Coins className="w-5 h-5 text-gray-400" /> },
+];
 
 export default function Predictions() {
   const navigate = useNavigate();
@@ -55,12 +73,20 @@ export default function Predictions() {
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [betDialogOpen, setBetDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Oracle prices state
+  const [oraclePrices, setOraclePrices] = useState<Record<string, { price: number; change24h: number }>>({});
+  const [pricesLoading, setPricesLoading] = useState(true);
   
   // Form states
   const [newQuestion, setNewQuestion] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newResolutionDate, setNewResolutionDate] = useState('');
   const [newCriteria, setNewCriteria] = useState('');
+  const [selectedOracleAsset, setSelectedOracleAsset] = useState<string | null>(null);
+  const [targetPrice, setTargetPrice] = useState('');
+  const [comparison, setComparison] = useState<'above' | 'below'>('above');
   
   // Bet form
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
@@ -69,6 +95,7 @@ export default function Predictions() {
 
   useEffect(() => {
     fetchMarkets();
+    fetchOraclePrices();
     if (user || pkUser) {
       fetchUserPositions();
     }
@@ -85,10 +112,41 @@ export default function Predictions() {
       })
       .subscribe();
     
+    // Refresh prices every 30 seconds
+    const priceInterval = setInterval(fetchOraclePrices, 30000);
+    
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(priceInterval);
     };
   }, [user, pkUser]);
+
+  const fetchOraclePrices = async () => {
+    setPricesLoading(true);
+    const prices: Record<string, { price: number; change24h: number }> = {};
+    
+    await Promise.all(
+      ORACLE_ASSETS.map(async (asset) => {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coinglass-oracle?action=price&symbol=${asset.symbol}`
+          );
+          const data = await response.json();
+          if (data.price) {
+            prices[asset.symbol] = {
+              price: data.price,
+              change24h: data.priceChange24h || 0,
+            };
+          }
+        } catch (error) {
+          console.error(`Failed to fetch ${asset.symbol} price:`, error);
+        }
+      })
+    );
+    
+    setOraclePrices(prices);
+    setPricesLoading(false);
+  };
 
   const fetchMarkets = async () => {
     const { data, error } = await supabase
@@ -116,6 +174,46 @@ export default function Predictions() {
     const { data, error } = await query;
     if (!error && data) {
       setUserPositions(data);
+    }
+  };
+
+  const handleCreateOracleMarket = async (asset: OracleAsset) => {
+    if (!targetPrice || !newResolutionDate) {
+      toast.error('Target price and resolution date are required');
+      return;
+    }
+    
+    const priceNum = parseFloat(targetPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      toast.error('Invalid target price');
+      return;
+    }
+    
+    const question = `Will ${asset.name} (${asset.symbol}) be ${comparison} $${priceNum.toLocaleString()} on ${new Date(newResolutionDate).toLocaleDateString()}?`;
+    const description = `Oracle-resolved market using CoinGecko price data. Target: $${priceNum.toLocaleString()} | Comparison: ${comparison}`;
+    const criteria = `Auto-resolved by CoinGecko oracle at resolution date. Current price: $${oraclePrices[asset.symbol]?.price?.toLocaleString() || 'Loading...'}`;
+    
+    const marketData = {
+      question,
+      description,
+      resolution_date: newResolutionDate,
+      resolution_criteria: criteria,
+      creator_id: user?.id || null,
+      creator_pk_id: pkUser?.id || null,
+    };
+    
+    const { error } = await supabase.from('prediction_markets').insert(marketData);
+    
+    if (error) {
+      toast.error('Failed to create oracle market');
+      console.error(error);
+    } else {
+      toast.success('Oracle market created!');
+      setSelectedOracleAsset(null);
+      setTargetPrice('');
+      setNewResolutionDate('');
+      setComparison('above');
+      fetchMarkets();
     }
   };
 
@@ -271,215 +369,369 @@ export default function Predictions() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Prediction Markets</h1>
-            <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
+      <div className="flex">
+        {/* Oracle Sidebar */}
+        <aside className={`${sidebarCollapsed ? 'w-14' : 'w-72'} border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] transition-all duration-300 flex-shrink-0`}>
+          <div className="p-3 border-b border-border flex items-center justify-between">
+            {!sidebarCollapsed && (
+              <h2 className="font-semibold text-sm flex items-center gap-2">
+                <Coins className="w-4 h-4" />
+                Oracle Markets
+              </h2>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </Button>
           </div>
           
-          {(user || pkUser) && (
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Market
+          {!sidebarCollapsed && (
+            <div className="p-3">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground">Live Prices</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={fetchOraclePrices}
+                  disabled={pricesLoading}
+                >
+                  <RefreshCw className={`w-3 h-3 ${pricesLoading ? 'animate-spin' : ''}`} />
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create Prediction Market</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <div>
-                    <Label htmlFor="question">Question *</Label>
-                    <Input
-                      id="question"
-                      placeholder="BTC above $100K on Jan 1 2026?"
-                      value={newQuestion}
-                      onChange={(e) => setNewQuestion(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Additional context and rules..."
-                      value={newDescription}
-                      onChange={(e) => setNewDescription(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="resolution-date">Resolution Date</Label>
-                    <Input
-                      id="resolution-date"
-                      type="datetime-local"
-                      value={newResolutionDate}
-                      onChange={(e) => setNewResolutionDate(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="criteria">Resolution Criteria</Label>
-                    <Textarea
-                      id="criteria"
-                      placeholder="Based on CoinGecko price at midnight UTC"
-                      value={newCriteria}
-                      onChange={(e) => setNewCriteria(e.target.value)}
-                    />
-                  </div>
-                  <Button onClick={handleCreateMarket} className="w-full">
-                    Create Market
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-
-        {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
-        ) : markets.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <p className="text-muted-foreground">No markets yet. Be the first to create one!</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {markets.map((market) => {
-              const odds = getOdds(market);
-              const positions = getUserPositionForMarket(market.id);
-              const totalPool = market.total_yes_pool + market.total_no_pool;
+              </div>
               
-              return (
-                <Card key={market.id} className="hover:border-primary/50 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">{market.question}</CardTitle>
-                        {market.description && (
-                          <CardDescription className="mt-2">{market.description}</CardDescription>
-                        )}
-                      </div>
-                      {getStatusBadge(market.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Odds bar */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-emerald-500 font-medium flex items-center gap-1">
-                            <TrendingUp className="w-4 h-4" /> YES {odds.yes}%
-                          </span>
-                          <span className="text-red-500 font-medium flex items-center gap-1">
-                            NO {odds.no}% <TrendingDown className="w-4 h-4" />
-                          </span>
+              <div className="space-y-2">
+                {ORACLE_ASSETS.map((asset) => {
+                  const priceData = oraclePrices[asset.symbol];
+                  const isSelected = selectedOracleAsset === asset.symbol;
+                  
+                  return (
+                    <div key={asset.symbol}>
+                      <button
+                        onClick={() => setSelectedOracleAsset(isSelected ? null : asset.symbol)}
+                        className={`w-full p-3 rounded-lg border transition-all text-left ${
+                          isSelected 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50 bg-background'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {asset.icon}
+                            <div>
+                              <p className="font-medium text-sm">{asset.symbol}</p>
+                              <p className="text-xs text-muted-foreground">{asset.name}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {pricesLoading ? (
+                              <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                            ) : priceData ? (
+                              <>
+                                <p className="font-mono text-sm">${priceData.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                                <p className={`text-xs ${priceData.change24h >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                  {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(2)}%
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">--</p>
+                            )}
+                          </div>
                         </div>
-                        <div className="h-3 bg-muted rounded-full overflow-hidden flex">
-                          <div 
-                            className="bg-emerald-500 transition-all duration-300"
-                            style={{ width: `${odds.yes}%` }}
-                          />
-                          <div 
-                            className="bg-red-500 transition-all duration-300"
-                            style={{ width: `${odds.no}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{market.total_yes_pool.toFixed(4)} XMR</span>
-                          <span>Pool: {totalPool.toFixed(4)} XMR</span>
-                          <span>{market.total_no_pool.toFixed(4)} XMR</span>
-                        </div>
-                      </div>
-
-                      {/* User positions */}
-                      {positions.length > 0 && (
-                        <div className="bg-muted/50 rounded-lg p-3">
-                          <p className="text-sm font-medium mb-2">Your Positions</p>
-                          {positions.map((pos) => {
-                            const potentialPayout = calculatePotentialPayout(
-                              market,
-                              pos.side as 'yes' | 'no',
-                              0 // Already in pool
-                            );
-                            return (
-                              <div key={pos.id} className="flex justify-between text-sm">
-                                <span className={pos.side === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
-                                  {pos.amount.toFixed(4)} XMR on {pos.side.toUpperCase()}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  Potential: ~{((pos.amount / (pos.side === 'yes' ? market.total_yes_pool : market.total_no_pool)) * (totalPool * (1 - PLATFORM_FEE))).toFixed(4)} XMR
-                                </span>
-                              </div>
-                            );
-                          })}
+                      </button>
+                      
+                      {/* Expanded create form */}
+                      {isSelected && (user || pkUser) && (
+                        <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border space-y-3">
+                          <p className="text-xs font-medium">Create Oracle Market</p>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              variant={comparison === 'above' ? 'default' : 'outline'}
+                              size="sm"
+                              className="flex-1 text-xs"
+                              onClick={() => setComparison('above')}
+                            >
+                              Above
+                            </Button>
+                            <Button
+                              variant={comparison === 'below' ? 'default' : 'outline'}
+                              size="sm"
+                              className="flex-1 text-xs"
+                              onClick={() => setComparison('below')}
+                            >
+                              Below
+                            </Button>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-xs">Target Price ($)</Label>
+                            <Input
+                              type="number"
+                              placeholder={priceData?.price.toString() || '0'}
+                              value={targetPrice}
+                              onChange={(e) => setTargetPrice(e.target.value)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-xs">Resolution Date</Label>
+                            <Input
+                              type="datetime-local"
+                              value={newResolutionDate}
+                              onChange={(e) => setNewResolutionDate(e.target.value)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          
+                          <Button
+                            size="sm"
+                            className="w-full"
+                            onClick={() => handleCreateOracleMarket(asset)}
+                          >
+                            Create Market
+                          </Button>
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {!user && !pkUser && (
+                <p className="text-xs text-muted-foreground text-center mt-4 px-2">
+                  Login to create oracle markets
+                </p>
+              )}
+            </div>
+          )}
+          
+          {sidebarCollapsed && (
+            <div className="p-2 space-y-2">
+              {ORACLE_ASSETS.map((asset) => (
+                <div
+                  key={asset.symbol}
+                  className="p-2 rounded-lg hover:bg-muted/50 cursor-pointer flex justify-center"
+                  title={`${asset.name}: $${oraclePrices[asset.symbol]?.price?.toLocaleString() || 'Loading...'}`}
+                >
+                  {asset.icon}
+                </div>
+              ))}
+            </div>
+          )}
+        </aside>
 
-                      {/* Meta info */}
-                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                        {market.resolution_date && (
-                          <span>Resolves: {new Date(market.resolution_date).toLocaleDateString()}</span>
-                        )}
-                        {market.resolution_criteria && (
-                          <span>Criteria: {market.resolution_criteria}</span>
-                        )}
-                        <span>Created: {new Date(market.created_at).toLocaleDateString()}</span>
-                      </div>
+        {/* Main Content */}
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold">Prediction Markets</h1>
+              <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
+            </div>
+            
+            {(user || pkUser) && (
+              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Custom Market
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create Custom Market</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <Label htmlFor="question">Question *</Label>
+                      <Input
+                        id="question"
+                        placeholder="Will X happen by Y date?"
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Additional context and rules..."
+                        value={newDescription}
+                        onChange={(e) => setNewDescription(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="resolution-date">Resolution Date</Label>
+                      <Input
+                        id="resolution-date"
+                        type="datetime-local"
+                        value={newResolutionDate}
+                        onChange={(e) => setNewResolutionDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="criteria">Resolution Criteria</Label>
+                      <Textarea
+                        id="criteria"
+                        placeholder="How will this be resolved?"
+                        value={newCriteria}
+                        onChange={(e) => setNewCriteria(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={handleCreateMarket} className="w-full">
+                      Create Market
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
 
-                      {/* Actions */}
-                      {market.status === 'open' && (
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                            onClick={() => {
-                              setSelectedMarket(market);
-                              setBetSide('yes');
-                              setBetDialogOpen(true);
-                            }}
-                          >
-                            <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            className="flex-1"
-                            onClick={() => {
-                              setSelectedMarket(market);
-                              setBetSide('no');
-                              setBetDialogOpen(true);
-                            }}
-                          >
-                            <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
-                          </Button>
-                          {canResolve(market) && (
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedMarket(market);
-                                setResolveDialogOpen(true);
-                              }}
-                            >
-                              Resolve
-                            </Button>
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
+          ) : markets.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <p className="text-muted-foreground">No markets yet. Create one using the sidebar oracle assets!</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {markets.map((market) => {
+                const odds = getOdds(market);
+                const positions = getUserPositionForMarket(market.id);
+                const totalPool = market.total_yes_pool + market.total_no_pool;
+                
+                return (
+                  <Card key={market.id} className="hover:border-primary/50 transition-colors">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl">{market.question}</CardTitle>
+                          {market.description && (
+                            <CardDescription className="mt-2">{market.description}</CardDescription>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </main>
+                        {getStatusBadge(market.status)}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Odds bar */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-emerald-500 font-medium flex items-center gap-1">
+                              <TrendingUp className="w-4 h-4" /> YES {odds.yes}%
+                            </span>
+                            <span className="text-red-500 font-medium flex items-center gap-1">
+                              NO {odds.no}% <TrendingDown className="w-4 h-4" />
+                            </span>
+                          </div>
+                          <div className="h-3 bg-muted rounded-full overflow-hidden flex">
+                            <div 
+                              className="bg-emerald-500 transition-all duration-300"
+                              style={{ width: `${odds.yes}%` }}
+                            />
+                            <div 
+                              className="bg-red-500 transition-all duration-300"
+                              style={{ width: `${odds.no}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{market.total_yes_pool.toFixed(4)} XMR</span>
+                            <span>Pool: {totalPool.toFixed(4)} XMR</span>
+                            <span>{market.total_no_pool.toFixed(4)} XMR</span>
+                          </div>
+                        </div>
+
+                        {/* User positions */}
+                        {positions.length > 0 && (
+                          <div className="bg-muted/50 rounded-lg p-3">
+                            <p className="text-sm font-medium mb-2">Your Positions</p>
+                            {positions.map((pos) => {
+                              return (
+                                <div key={pos.id} className="flex justify-between text-sm">
+                                  <span className={pos.side === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
+                                    {pos.amount.toFixed(4)} XMR on {pos.side.toUpperCase()}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    Potential: ~{((pos.amount / (pos.side === 'yes' ? market.total_yes_pool : market.total_no_pool)) * (totalPool * (1 - PLATFORM_FEE))).toFixed(4)} XMR
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Meta info */}
+                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          {market.resolution_date && (
+                            <span>Resolves: {new Date(market.resolution_date).toLocaleDateString()}</span>
+                          )}
+                          {market.resolution_criteria && (
+                            <span>Criteria: {market.resolution_criteria}</span>
+                          )}
+                          <span>Created: {new Date(market.created_at).toLocaleDateString()}</span>
+                        </div>
+
+                        {/* Actions */}
+                        {market.status === 'open' && (
+                          <div className="flex gap-2 pt-2">
+                            <Button
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                              onClick={() => {
+                                setSelectedMarket(market);
+                                setBetSide('yes');
+                                setBetDialogOpen(true);
+                              }}
+                            >
+                              <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              className="flex-1"
+                              onClick={() => {
+                                setSelectedMarket(market);
+                                setBetSide('no');
+                                setBetDialogOpen(true);
+                              }}
+                            >
+                              <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
+                            </Button>
+                            {canResolve(market) && (
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedMarket(market);
+                                  setResolveDialogOpen(true);
+                                }}
+                              >
+                                Resolve
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      </div>
 
       {/* Bet Dialog */}
       <Dialog open={betDialogOpen} onOpenChange={setBetDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Place Bet on {betSide.toUpperCase()}
+              Place Bet: {betSide === 'yes' ? 'YES' : 'NO'}
             </DialogTitle>
           </DialogHeader>
           {selectedMarket && (
@@ -492,15 +744,13 @@ export default function Predictions() {
                   id="bet-amount"
                   type="number"
                   step="0.0001"
-                  min="0.0001"
                   placeholder="0.1"
                   value={betAmount}
                   onChange={(e) => setBetAmount(e.target.value)}
                 />
                 {betAmount && parseFloat(betAmount) > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Potential payout if {betSide.toUpperCase()} wins: ~
-                    {calculatePotentialPayout(selectedMarket, betSide, parseFloat(betAmount)).toFixed(4)} XMR
+                    Potential payout: ~{calculatePotentialPayout(selectedMarket, betSide, parseFloat(betAmount)).toFixed(4)} XMR
                   </p>
                 )}
               </div>
@@ -513,16 +763,6 @@ export default function Predictions() {
                   value={payoutAddress}
                   onChange={(e) => setPayoutAddress(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Where to send your winnings if you win
-                </p>
-              </div>
-              
-              <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                <p>Platform fee: 2%</p>
-                <p className="text-muted-foreground text-xs mt-1">
-                  Winners split the total pot minus the fee
-                </p>
               </div>
               
               <Button 
@@ -530,7 +770,7 @@ export default function Predictions() {
                 className={`w-full ${betSide === 'yes' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
                 variant={betSide === 'no' ? 'destructive' : 'default'}
               >
-                Confirm {betAmount || '0'} XMR on {betSide.toUpperCase()}
+                Confirm {betSide.toUpperCase()} Bet
               </Button>
             </div>
           )}
@@ -545,11 +785,9 @@ export default function Predictions() {
           </DialogHeader>
           {selectedMarket && (
             <div className="space-y-4 mt-4">
-              <p className="font-medium">{selectedMarket.question}</p>
+              <p className="text-sm">{selectedMarket.question}</p>
               {selectedMarket.resolution_criteria && (
-                <p className="text-sm text-muted-foreground">
-                  Criteria: {selectedMarket.resolution_criteria}
-                </p>
+                <p className="text-xs text-muted-foreground">Criteria: {selectedMarket.resolution_criteria}</p>
               )}
               
               <div className="grid grid-cols-3 gap-2">
@@ -572,15 +810,11 @@ export default function Predictions() {
                   Cancel
                 </Button>
               </div>
-              
-              <p className="text-xs text-muted-foreground">
-                This action cannot be undone. Make sure to verify the outcome before resolving.
-              </p>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
+      
       <Footer />
     </div>
   );
