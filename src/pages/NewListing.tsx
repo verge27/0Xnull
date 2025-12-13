@@ -87,15 +87,41 @@ const NewListingContent = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent double submission
+    if (isSubmitting) return;
+
+    setSubmitError(null);
+
+    // Validate all fields before submission
+    const validationErrors: string[] = [];
+
+    if (!formData.title?.trim()) {
+      validationErrors.push('Title is required');
+    }
+    if (!formData.description?.trim()) {
+      validationErrors.push('Description is required');
+    }
     if (convertedPrice === null || convertedPrice <= 0) {
-      toast.error('Please enter a valid price');
+      validationErrors.push('Please enter a valid price');
+    }
+    if (!formData.stock || parseInt(formData.stock) < 1) {
+      validationErrors.push('Stock must be at least 1');
+    }
+    if (!formData.category) {
+      validationErrors.push('Please select a category');
+    }
+
+    if (validationErrors.length > 0) {
+      validationErrors.forEach(err => toast.error(err));
       return;
     }
 
-    // Validate inputs
+    // Validate inputs with schema
     try {
       listingSchema.parse({
         title: formData.title,
@@ -109,19 +135,14 @@ const NewListingContent = () => {
       return;
     }
 
-    if (!formData.stock || parseInt(formData.stock) < 1) {
-      toast.error('Stock must be at least 1');
-      return;
-    }
-
     setIsSubmitting(true);
     console.log('[NewListing] Creating listing...');
 
     try {
       const result = await createListing({
-        title: formData.title,
-        description: formData.description,
-        price_usd: convertedPrice,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        price_usd: convertedPrice!,
         category: formData.category,
         secondary_category: formData.secondaryCategory || null,
         tertiary_category: formData.tertiaryCategory || null,
@@ -132,18 +153,19 @@ const NewListingContent = () => {
         condition: 'new'
       });
 
-      setIsSubmitting(false);
-
       if (result) {
         console.log('[NewListing] Listing created successfully:', result.id);
         toast.success('Listing created successfully!');
         navigate('/sell');
       } else {
         console.error('[NewListing] Failed to create listing - no result returned');
+        setSubmitError('Failed to create listing. Please try again.');
       }
     } catch (err: any) {
       console.error('[NewListing] Error creating listing:', err);
+      setSubmitError(err.message || 'Failed to create listing');
       toast.error(err.message || 'Failed to create listing');
+    } finally {
       setIsSubmitting(false);
     }
   };

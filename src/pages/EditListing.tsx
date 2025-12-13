@@ -157,8 +157,15 @@ const EditListingContent = () => {
     return <Navigate to="/sell" replace />;
   }
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isSubmitting) return;
+
+    setSubmitError(null);
 
     if (convertedPrice === null || convertedPrice <= 0) {
       toast.error('Please enter a valid price');
@@ -186,24 +193,30 @@ const EditListingContent = () => {
 
     setIsSubmitting(true);
 
-    const success = await updateListing(id!, {
-      title: formData.title,
-      description: formData.description,
-      price_usd: convertedPrice,
-      category: formData.category,
-      secondary_category: formData.secondaryCategory || null,
-      tertiary_category: formData.tertiaryCategory || null,
-      images: images,
-      stock: parseInt(formData.stock),
-      shipping_price_usd: convertedShipping ?? 0,
-      shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
-    });
+    try {
+      const success = await updateListing(id!, {
+        title: formData.title,
+        description: formData.description,
+        price_usd: convertedPrice,
+        category: formData.category,
+        secondary_category: formData.secondaryCategory || null,
+        tertiary_category: formData.tertiaryCategory || null,
+        images: images,
+        stock: parseInt(formData.stock),
+        shipping_price_usd: convertedShipping ?? 0,
+        shipping_countries: shippingCountries.length > 0 ? shippingCountries : null,
+      });
 
-    setIsSubmitting(false);
-
-    if (success) {
-      toast.success('Listing updated successfully!');
-      navigate('/sell');
+      if (success) {
+        toast.success('Listing updated successfully!');
+        navigate('/sell');
+      }
+    } catch (err: any) {
+      console.error('[EditListing] Submit error:', err);
+      setSubmitError(err.message || 'Failed to update listing');
+      toast.error('Failed to update listing');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
