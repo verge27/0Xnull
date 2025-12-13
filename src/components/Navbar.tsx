@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2 } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -127,6 +127,10 @@ export const Navbar = () => {
                     <Sparkles className="w-5 h-5 text-primary" />
                     <span>Voice Clone</span>
                   </Link>
+                  <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span>Predictions</span>
+                  </Link>
                   <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <AlertTriangle className="w-5 h-5 text-primary" />
                     <span>Safety</span>
@@ -176,7 +180,14 @@ export const Navbar = () => {
             <Link to="/voice">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <Sparkles className="w-4 h-4" />
-                <span className="hidden md:inline">Voice Clone</span>
+                <span className="hidden md:inline">Voice</span>
+              </Button>
+            </Link>
+
+            <Link to="/predictions">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden md:inline">Predict</span>
               </Button>
             </Link>
 

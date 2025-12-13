@@ -277,6 +277,117 @@ export type Database = {
         }
         Relationships: []
       }
+      market_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          market_id: string
+          position_id: string
+          txid: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          market_id: string
+          position_id: string
+          txid?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          position_id?: string
+          txid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_payouts_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_payouts_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "market_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_positions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          market_id: string
+          payout_address: string
+          side: string
+          user_id: string | null
+          user_pk_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          market_id: string
+          payout_address: string
+          side: string
+          user_id?: string | null
+          user_pk_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          payout_address?: string
+          side?: string
+          user_id?: string | null
+          user_pk_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_positions_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_positions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_positions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_positions_user_pk_id_fkey"
+            columns: ["user_pk_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_positions_user_pk_id_fkey"
+            columns: ["user_pk_id"]
+            isOneToOne: false
+            referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -438,6 +549,83 @@ export type Database = {
           {
             foreignKeyName: "orders_seller_pk_user_id_fkey"
             columns: ["seller_pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_markets: {
+        Row: {
+          created_at: string
+          creator_id: string | null
+          creator_pk_id: string | null
+          description: string | null
+          id: string
+          question: string
+          resolution_criteria: string | null
+          resolution_date: string | null
+          resolved_at: string | null
+          status: string
+          total_no_pool: number
+          total_yes_pool: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id?: string | null
+          creator_pk_id?: string | null
+          description?: string | null
+          id?: string
+          question: string
+          resolution_criteria?: string | null
+          resolution_date?: string | null
+          resolved_at?: string | null
+          status?: string
+          total_no_pool?: number
+          total_yes_pool?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string | null
+          creator_pk_id?: string | null
+          description?: string | null
+          id?: string
+          question?: string
+          resolution_criteria?: string | null
+          resolution_date?: string | null
+          resolved_at?: string | null
+          status?: string
+          total_no_pool?: number
+          total_yes_pool?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_markets_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_markets_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_markets_creator_pk_id_fkey"
+            columns: ["creator_pk_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_markets_creator_pk_id_fkey"
+            columns: ["creator_pk_id"]
             isOneToOne: false
             referencedRelation: "public_private_key_users"
             referencedColumns: ["id"]
