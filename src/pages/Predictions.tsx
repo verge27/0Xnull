@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 
@@ -326,10 +327,13 @@ export default function Predictions() {
               <h1 className="text-3xl font-bold">Prediction Markets</h1>
               <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <CreateMarketDialog onMarketCreated={fetchMarkets} />
+              <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
 
           {loading ? (
