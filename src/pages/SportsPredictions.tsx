@@ -18,14 +18,14 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
 import { TeamLogo } from '@/components/TeamLogo';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, Trophy, Calendar, Users, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, Trophy, Calendar, Users } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const SPORTS = ['nfl', 'premier_league', 'ufc'] as const;
 
 export default function SportsPredictions() {
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
-  const { events, loading: eventsLoading, fetchEvents, createSportsMarket, autoCreateMarketsForNext24Hours, liveScores, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
+  const { events, loading: eventsLoading, fetchEvents, createSportsMarket, liveScores, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function SportsPredictions() {
     event: null,
   });
   const [creating, setCreating] = useState(false);
-  const [autoCreating, setAutoCreating] = useState(false);
+  
 
   useEffect(() => {
     fetchMarkets();
@@ -135,21 +135,6 @@ export default function SportsPredictions() {
     setTeamSelectDialog({ open: false, event: null });
     if (success) {
       fetchMarkets();
-    }
-  };
-
-  const handleAutoCreate = async () => {
-    setAutoCreating(true);
-    const { created, skipped } = await autoCreateMarketsForNext24Hours(markets.map(m => m.market_id));
-    setAutoCreating(false);
-    
-    if (created > 0) {
-      toast.success(`Created ${created} markets for upcoming games`);
-      fetchMarkets();
-    } else if (skipped > 0) {
-      toast.info('All markets for upcoming games already exist');
-    } else {
-      toast.info('No games ending in the next 24 hours');
     }
   };
 
