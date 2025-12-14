@@ -13,6 +13,7 @@ import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
+import { PredictionLeaderboard } from '@/components/PredictionLeaderboard';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -343,11 +344,18 @@ export default function Predictions() {
             </div>
           </div>
 
-          <MyBets 
-            bets={bets} 
-            onStatusUpdate={checkBetStatus} 
-            onPayoutSubmit={submitPayoutAddress}
-          />
+          <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            <div className="lg:col-span-2">
+              <MyBets 
+                bets={bets} 
+                onStatusUpdate={checkBetStatus} 
+                onPayoutSubmit={submitPayoutAddress}
+              />
+            </div>
+            <div>
+              <PredictionLeaderboard userBets={bets} />
+            </div>
+          </div>
 
           {/* Filter/Sort Controls */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
