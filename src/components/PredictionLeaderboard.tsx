@@ -62,8 +62,8 @@ export function PredictionLeaderboard({ userBets }: LeaderboardProps) {
           </TabsList>
           
           <TabsContent value="your-stats" className="space-y-4">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Stats Grid - 2x2 */}
+            <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-emerald-500">{wonBets.length}</p>
                 <p className="text-xs text-muted-foreground">Wins</p>
