@@ -862,6 +862,122 @@ export default function Predictions() {
         onConfirmed={handleBetConfirmed}
       />
       
+      {/* FAQ Section */}
+      <section className="container mx-auto px-4 py-16 border-t border-border/50">
+        <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+        <div className="max-w-3xl mx-auto space-y-4">
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              How does it work?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              Pick a market, choose YES or NO, enter your bet amount in USD. We generate a unique XMR deposit address. Send the exact amount, and you're in.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              What happens when the market resolves?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              Our oracle checks the outcome automatically at the resolution time. For price markets, we pull live data from Binance or CoinGecko. For sports, we use official results via API. Winners get paid directly to their payout address - no claim button, no withdrawal request.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              What's the fee?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              0.4% of the winning pool. That's it.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              What if nobody bets against me?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              You get a full refund. No fee taken. If a market resolves with only one side funded, all bets are returned automatically.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              How long until I get paid?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              Markets resolve within 5 minutes of their expiry time. Payouts are sent immediately after resolution. XMR transactions typically confirm in under 20 minutes.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              Do I need an account?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              No. No signup, no email, no KYC. Just a Monero wallet.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              What currencies do you accept?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              XMR only. Need to swap? Use our Swaps page - powered by Trocador.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              Can I create my own market?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              Yes. Click "Create Market" and set your oracle conditions. Price markets for any asset on Binance or CoinGecko. Sports markets for UFC, Premier League, and NFL coming soon.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              What if the oracle is wrong?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              Price oracles pull from Binance (primary) or CoinGecko (fallback). Sports results come from The Odds API using official league data. If you believe a resolution was incorrect, contact us with evidence.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              Is this legal?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              We don't ask who you are or where you're from. That's your business.
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Collapsible className="border border-border rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 font-medium hover:bg-muted/50 transition-colors">
+              Where's my money held?
+              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4 text-muted-foreground">
+              In a Monero wallet on dedicated infrastructure. No third-party custody. No smart contracts. No wrapped tokens. Just XMR.
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </section>
+      
       <Footer />
     </div>
   );
