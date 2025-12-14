@@ -345,15 +345,20 @@ export default function Predictions() {
   };
 
   return (
-    <div 
-      className="min-h-screen bg-background"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url(${predictionsBackground})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
+    <div className="min-h-screen bg-background relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url(${predictionsBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+      </div>
+      
+      <div className="relative z-10">
       <Navbar />
       
       <div className="flex">
@@ -1013,6 +1018,7 @@ export default function Predictions() {
       </section>
       
       <Footer />
+      </div>
     </div>
   );
 }
