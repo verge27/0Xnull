@@ -63,18 +63,15 @@ export default function SportsPredictions() {
   // Start polling for live scores when we have live events
   useEffect(() => {
     const now = Date.now() / 1000;
-    // Only poll for events that started at least 5 minutes ago and within last 4 hours
-    // This gives time for the game to actually have scores available
-    const liveEventIds = events
-      .filter(e => {
-        const gameStarted = e.commence_timestamp <= now - 300; // Started 5+ minutes ago
-        const withinWindow = e.commence_timestamp > now - 14400; // Within last 4 hours
-        return gameStarted && withinWindow;
-      })
-      .map(e => e.event_id);
+    // Only poll for events that have started and are within a reasonable game duration
+    const liveEvents = events.filter(e => {
+      const gameStarted = e.commence_timestamp <= now;
+      const withinWindow = e.commence_timestamp > now - 14400; // Within last 4 hours
+      return gameStarted && withinWindow;
+    });
     
-    if (liveEventIds.length > 0) {
-      startLiveScorePolling(liveEventIds);
+    if (liveEvents.length > 0) {
+      startLiveScorePolling(liveEvents);
     } else {
       stopLiveScorePolling();
     }

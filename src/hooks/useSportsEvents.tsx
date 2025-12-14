@@ -77,50 +77,96 @@ export function useSportsEvents() {
     }
   }, []);
 
-  const fetchLiveScores = useCallback(async (eventIds: string[]) => {
-    if (eventIds.length === 0) return;
+  // Fetch live scores from ESPN (unofficial API)
+  const fetchLiveScores = useCallback(async (eventsToFetch: SportsEvent[]) => {
+    if (eventsToFetch.length === 0) return;
     
     const scores: LiveScores = {};
     
-    // Fetch scores individually, ignoring any errors (404s are expected for games without scores yet)
-    const results = await Promise.allSettled(
-      eventIds.map(async (eventId) => {
-        const proxyUrl = new URL(SPORTS_API_BASE);
-        proxyUrl.searchParams.set('path', `/api/sports/result/${eventId}`);
+    // Group events by sport for efficient fetching
+    const sportGroups = eventsToFetch.reduce((acc, event) => {
+      const sportKey = event.sport_key;
+      if (!acc[sportKey]) acc[sportKey] = [];
+      acc[sportKey].push(event);
+      return acc;
+    }, {} as Record<string, SportsEvent[]>);
+    
+    // ESPN sport mappings
+    const espnSportMap: Record<string, string> = {
+      'americanfootball_nfl': 'football/nfl',
+      'soccer_epl': 'soccer/eng.1',
+      'mma_mixed_martial_arts': 'mma/ufc',
+    };
+    
+    await Promise.allSettled(
+      Object.entries(sportGroups).map(async ([sportKey, events]) => {
+        const espnSport = espnSportMap[sportKey];
+        if (!espnSport) return;
         
-        const res = await fetch(proxyUrl.toString(), {
-          headers: { 'Content-Type': 'application/json' },
-        });
-        
-        if (!res.ok) {
-          // 404 means no score data yet - this is expected
-          return null;
+        try {
+          const res = await fetch(
+            `https://site.api.espn.com/apis/site/v2/sports/${espnSport}/scoreboard`
+          );
+          
+          if (!res.ok) return;
+          
+          const data = await res.json();
+          const espnEvents = data.events || [];
+          
+          // Match ESPN events to our events by team names
+          for (const event of events) {
+            const matchingEspn = espnEvents.find((e: any) => {
+              const competitors = e.competitions?.[0]?.competitors || [];
+              const teamNames = competitors.map((c: any) => c.team?.displayName?.toLowerCase() || c.athlete?.displayName?.toLowerCase());
+              return teamNames.some((name: string) => 
+                name?.includes(event.home_team.toLowerCase()) || 
+                name?.includes(event.away_team.toLowerCase()) ||
+                event.home_team.toLowerCase().includes(name) ||
+                event.away_team.toLowerCase().includes(name)
+              );
+            });
+            
+            if (matchingEspn) {
+              const competitors = matchingEspn.competitions?.[0]?.competitors || [];
+              const espnScores: { name: string; score: string }[] = competitors.map((c: any) => ({
+                name: c.team?.displayName || c.athlete?.displayName || 'Unknown',
+                score: c.score || '0',
+              }));
+              
+              const status = matchingEspn.status?.type?.state;
+              const completed = status === 'post';
+              
+              if (espnScores.length > 0 && (status === 'in' || completed)) {
+                scores[event.event_id] = {
+                  event_id: event.event_id,
+                  sport: event.sport,
+                  home_team: event.home_team,
+                  away_team: event.away_team,
+                  completed,
+                  scores: espnScores,
+                  winner: completed ? espnScores.reduce((a, b) => 
+                    parseInt(a.score) > parseInt(b.score) ? a : b
+                  ).name : null,
+                };
+              }
+            }
+          }
+        } catch (e) {
+          // Silently ignore ESPN API errors
+          console.log('ESPN API error for', sportKey, e);
         }
-        
-        const score = await res.json() as SportsScore;
-        if (score && score.scores && score.scores.length > 0) {
-          return { eventId, score };
-        }
-        return null;
       })
     );
-    
-    // Process successful results
-    for (const result of results) {
-      if (result.status === 'fulfilled' && result.value) {
-        scores[result.value.eventId] = result.value.score;
-      }
-    }
     
     setLiveScores(prev => ({ ...prev, ...scores }));
   }, []);
 
-  const startLiveScorePolling = useCallback((eventIds: string[]) => {
+  const startLiveScorePolling = useCallback((liveEvents: SportsEvent[]) => {
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
     
-    if (eventIds.length === 0) {
+    if (liveEvents.length === 0) {
       setPollingActive(false);
       return;
     }
@@ -128,11 +174,11 @@ export function useSportsEvents() {
     setPollingActive(true);
     
     // Fetch immediately
-    fetchLiveScores(eventIds);
+    fetchLiveScores(liveEvents);
     
     // Poll every 30 seconds
     pollingIntervalRef.current = setInterval(() => {
-      fetchLiveScores(eventIds);
+      fetchLiveScores(liveEvents);
     }, 30000);
   }, [fetchLiveScores]);
 
