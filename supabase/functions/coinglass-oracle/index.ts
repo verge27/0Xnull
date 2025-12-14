@@ -32,6 +32,7 @@ const COINGECKO_IDS: Record<string, string> = {
   SHIB: "shiba-inu",
   PEPE: "pepe",
   BONK: "bonk",
+  FARTCOIN: "fartcoin",
   // DeFi
   LINK: "chainlink",
   UNI: "uniswap",
