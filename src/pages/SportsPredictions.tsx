@@ -244,15 +244,6 @@ export default function SportsPredictions() {
                 Crypto
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAutoCreate}
-              disabled={autoCreating || eventsLoading}
-            >
-              <Zap className={`w-4 h-4 mr-2 ${autoCreating ? 'animate-pulse' : ''}`} />
-              {autoCreating ? 'Creating...' : 'Auto-Create 24h'}
-            </Button>
             <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
