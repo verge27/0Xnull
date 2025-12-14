@@ -257,4 +257,10 @@ export const api = {
       body: JSON.stringify(request),
     });
   },
+
+  async deleteMarket(marketId: string): Promise<{ success: boolean }> {
+    return proxyRequest<{ success: boolean }>(`/api/predictions/markets/${marketId}`, {
+      method: 'DELETE',
+    });
+  },
 };
