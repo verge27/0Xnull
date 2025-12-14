@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import sportsBackground from '@/assets/sports-background.jpg';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useSportsEvents, getSportLabel, getSportEmoji, type SportsEvent } from '@/hooks/useSportsEvents';
@@ -210,8 +211,22 @@ export default function SportsPredictions() {
   const resolvedMarkets = markets.filter(m => m.resolved === 1);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url(${sportsBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+      </div>
+      
+      <div className="relative z-10">
+        <Navbar />
       
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
@@ -681,7 +696,8 @@ export default function SportsPredictions() {
         />
       )}
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }
