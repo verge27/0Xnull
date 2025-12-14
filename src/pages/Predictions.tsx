@@ -344,18 +344,12 @@ export default function Predictions() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6 mb-6">
-            <div className="lg:col-span-2">
-              <MyBets 
-                bets={bets} 
-                onStatusUpdate={checkBetStatus} 
-                onPayoutSubmit={submitPayoutAddress}
-              />
-            </div>
-            <div>
-              <PredictionLeaderboard userBets={bets} />
-            </div>
-          </div>
+          <MyBets 
+            bets={bets} 
+            onStatusUpdate={checkBetStatus} 
+            onPayoutSubmit={submitPayoutAddress}
+          />
+
 
           {/* Filter/Sort Controls */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -436,7 +430,8 @@ export default function Predictions() {
             }
             
             return (
-            <>
+            <div className="grid lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-3">
               {/* Active Markets */}
               {sortedMarkets.length > 0 && (
                 <div className="space-y-4 mb-8">
@@ -632,7 +627,15 @@ export default function Predictions() {
                   </CardContent>
                 </Card>
               )}
-            </>
+              </div>
+              
+              {/* Leaderboard Sidebar */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-4">
+                  <PredictionLeaderboard userBets={bets} />
+                </div>
+              </div>
+            </div>
           );
           })()}
         </main>
