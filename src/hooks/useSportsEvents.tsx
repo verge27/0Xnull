@@ -82,18 +82,35 @@ export function useSportsEvents() {
     
     const scores: LiveScores = {};
     
-    await Promise.all(
+    // Fetch scores individually, ignoring any errors (404s are expected for games without scores yet)
+    const results = await Promise.allSettled(
       eventIds.map(async (eventId) => {
-        try {
-          const score = await sportsRequest<SportsScore>(`/result/${eventId}`);
-          if (score && score.scores && score.scores.length > 0) {
-            scores[eventId] = score;
-          }
-        } catch (e) {
-          // Silently ignore - game might not have scores yet
+        const proxyUrl = new URL(SPORTS_API_BASE);
+        proxyUrl.searchParams.set('path', `/api/sports/result/${eventId}`);
+        
+        const res = await fetch(proxyUrl.toString(), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!res.ok) {
+          // 404 means no score data yet - this is expected
+          return null;
         }
+        
+        const score = await res.json() as SportsScore;
+        if (score && score.scores && score.scores.length > 0) {
+          return { eventId, score };
+        }
+        return null;
       })
     );
+    
+    // Process successful results
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value) {
+        scores[result.value.eventId] = result.value.score;
+      }
+    }
     
     setLiveScores(prev => ({ ...prev, ...scores }));
   }, []);
