@@ -106,6 +106,7 @@ export function SportsEventsPanel({ onMarketsCreated, existingMarketIds }: Sport
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
             Sports Events
+            <span className="text-xs font-normal text-muted-foreground">(Times in UTC)</span>
           </CardTitle>
           <div className="flex gap-2">
             <Button
