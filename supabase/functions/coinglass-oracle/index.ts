@@ -32,8 +32,50 @@ const BINANCE_SYMBOLS: Record<string, string> = {
   AAVE: "AAVEUSDT",
 };
 
-// Fetch single price from Binance
-async function fetchBinancePrice(symbol: string): Promise<{ price: number; change24h: number } | null> {
+// Coins NOT on Binance (need CoinGecko fallback)
+const COINGECKO_IDS: Record<string, string> = {
+  XMR: "monero",
+  ARRR: "pirate-chain",
+  FARTCOIN: "fartcoin",
+};
+
+// Fetch price from CoinGecko for coins not on Binance
+async function fetchCoinGeckoPrice(symbol: string): Promise<{ price: number; change24h: number } | null> {
+  const coinId = COINGECKO_IDS[symbol];
+  if (!coinId) return null;
+  
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`
+    );
+    
+    if (!response.ok) {
+      console.warn(`CoinGecko API error for ${coinId}: ${response.status}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    const coinData = data[coinId];
+    
+    if (!coinData) return null;
+    
+    return {
+      price: coinData.usd,
+      change24h: coinData.usd_24h_change || 0,
+    };
+  } catch (error) {
+    console.error(`Error fetching CoinGecko price for ${symbol}:`, error);
+    return null;
+  }
+}
+
+// Fetch single price - tries Binance first, then CoinGecko for unsupported coins
+async function fetchPrice(symbol: string): Promise<{ price: number; change24h: number } | null> {
+  // Check if this coin needs CoinGecko (not on Binance)
+  if (COINGECKO_IDS[symbol]) {
+    return fetchCoinGeckoPrice(symbol);
+  }
+  
   const binanceSymbol = BINANCE_SYMBOLS[symbol] || `${symbol}USDT`;
   
   try {
@@ -44,7 +86,8 @@ async function fetchBinancePrice(symbol: string): Promise<{ price: number; chang
     
     if (!priceResponse.ok) {
       console.warn(`Binance price API error for ${binanceSymbol}: ${priceResponse.status}`);
-      return null;
+      // Try CoinGecko as fallback
+      return fetchCoinGeckoPrice(symbol);
     }
     
     const priceData = await priceResponse.json();
@@ -68,43 +111,54 @@ async function fetchBinancePrice(symbol: string): Promise<{ price: number; chang
   }
 }
 
-// Fetch multiple prices from Binance
-async function fetchBinancePrices(symbols: string[]): Promise<Record<string, { price: number; change24h: number }>> {
+// Fetch multiple prices - Binance for most, CoinGecko for unsupported
+async function fetchPrices(symbols: string[]): Promise<Record<string, { price: number; change24h: number }>> {
   const results: Record<string, { price: number; change24h: number }> = {};
   
-  // Binance has a batch endpoint for 24hr ticker
-  try {
-    const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
-    if (!response.ok) {
-      console.warn(`Binance batch API error: ${response.status}`);
-      return results;
-    }
-    
-    const allTickers = await response.json() as Array<{
-      symbol: string;
-      lastPrice: string;
-      priceChangePercent: string;
-    }>;
-    
-    // Create a map for quick lookup
-    const tickerMap = new Map<string, { price: number; change24h: number }>();
-    for (const ticker of allTickers) {
-      tickerMap.set(ticker.symbol, {
-        price: parseFloat(ticker.lastPrice),
-        change24h: parseFloat(ticker.priceChangePercent),
-      });
-    }
-    
-    // Map requested symbols to results
-    for (const symbol of symbols) {
-      const binanceSymbol = BINANCE_SYMBOLS[symbol] || `${symbol}USDT`;
-      const data = tickerMap.get(binanceSymbol);
-      if (data) {
-        results[symbol] = data;
+  // Separate symbols that need CoinGecko
+  const coinGeckoSymbols = symbols.filter(s => COINGECKO_IDS[s]);
+  const binanceSymbols = symbols.filter(s => !COINGECKO_IDS[s]);
+  
+  // Fetch from Binance batch endpoint
+  if (binanceSymbols.length > 0) {
+    try {
+      const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+      if (response.ok) {
+        const allTickers = await response.json() as Array<{
+          symbol: string;
+          lastPrice: string;
+          priceChangePercent: string;
+        }>;
+        
+        // Create a map for quick lookup
+        const tickerMap = new Map<string, { price: number; change24h: number }>();
+        for (const ticker of allTickers) {
+          tickerMap.set(ticker.symbol, {
+            price: parseFloat(ticker.lastPrice),
+            change24h: parseFloat(ticker.priceChangePercent),
+          });
+        }
+        
+        // Map requested symbols to results
+        for (const symbol of binanceSymbols) {
+          const binanceSymbol = BINANCE_SYMBOLS[symbol] || `${symbol}USDT`;
+          const data = tickerMap.get(binanceSymbol);
+          if (data) {
+            results[symbol] = data;
+          }
+        }
       }
+    } catch (error) {
+      console.error("Error fetching Binance batch prices:", error);
     }
-  } catch (error) {
-    console.error("Error fetching Binance batch prices:", error);
+  }
+  
+  // Fetch CoinGecko coins individually (they have rate limits on batch)
+  for (const symbol of coinGeckoSymbols) {
+    const data = await fetchCoinGeckoPrice(symbol);
+    if (data) {
+      results[symbol] = data;
+    }
   }
   
   return results;
@@ -129,7 +183,7 @@ serve(async (req) => {
         .map((s: string) => s.trim().toUpperCase())
         .filter((s: string) => Boolean(s));
 
-      const prices = await fetchBinancePrices(symbols);
+      const prices = await fetchPrices(symbols);
 
       return new Response(
         JSON.stringify({ prices, source: "api" }),
@@ -139,7 +193,7 @@ serve(async (req) => {
 
     // Single-asset price endpoint
     if (action === "price") {
-      const data = await fetchBinancePrice(symbol);
+      const data = await fetchPrice(symbol);
 
       if (!data) {
         console.warn("No data from Binance for", symbol);
@@ -169,10 +223,10 @@ serve(async (req) => {
         throw new Error("Missing required fields: marketId, targetPrice, comparison");
       }
 
-      const data = await fetchBinancePrice(symbol);
+      const data = await fetchPrice(symbol);
 
       if (!data) {
-        throw new Error("Could not fetch current price from Binance");
+        throw new Error("Could not fetch current price");
       }
 
       const currentPrice = data.price;
@@ -297,11 +351,11 @@ serve(async (req) => {
             }
           }
 
-          // Fetch current price from Binance
-          const priceData = await fetchBinancePrice(ticker);
+          // Fetch current price
+          const priceData = await fetchPrice(ticker);
 
           if (!priceData) {
-            console.warn(`No Binance price data for ${ticker}`);
+            console.warn(`No price data for ${ticker}`);
             continue;
           }
 
