@@ -317,6 +317,13 @@ export type Database = {
             referencedRelation: "market_positions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "market_payouts_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "public_market_positions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       market_positions: {
@@ -895,6 +902,38 @@ export type Database = {
       }
     }
     Views: {
+      public_market_positions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          id: string | null
+          market_id: string | null
+          side: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string | null
+          market_id?: string | null
+          side?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string | null
+          market_id?: string | null
+          side?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_positions_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_private_key_users: {
         Row: {
           created_at: string | null
