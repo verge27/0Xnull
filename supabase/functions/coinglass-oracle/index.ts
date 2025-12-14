@@ -9,62 +9,105 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-// CoinGecko ID mapping (ticker -> coingecko id)
-const COINGECKO_IDS: Record<string, string> = {
-  // Major
-  BTC: "bitcoin",
-  ETH: "ethereum",
-  SOL: "solana",
-  LTC: "litecoin",
-  // Privacy
-  XMR: "monero",
-  DASH: "dash",
-  ZEC: "zcash",
-  ARRR: "pirate-chain",
-  // L1s
-  ADA: "cardano",
-  AVAX: "avalanche-2",
-  DOT: "polkadot",
-  ATOM: "cosmos",
-  NEAR: "near",
-  // Memes
-  DOGE: "dogecoin",
-  SHIB: "shiba-inu",
-  PEPE: "pepe",
-  BONK: "bonk",
-  FARTCOIN: "fartcoin",
-  // DeFi
-  LINK: "chainlink",
-  UNI: "uniswap",
-  AAVE: "aave",
+// Binance symbol mapping (ticker -> Binance trading pair)
+const BINANCE_SYMBOLS: Record<string, string> = {
+  BTC: "BTCUSDT",
+  ETH: "ETHUSDT",
+  SOL: "SOLUSDT",
+  LTC: "LTCUSDT",
+  XMR: "XMRUSDT",
+  DASH: "DASHUSDT",
+  ZEC: "ZECUSDT",
+  ADA: "ADAUSDT",
+  AVAX: "AVAXUSDT",
+  DOT: "DOTUSDT",
+  ATOM: "ATOMUSDT",
+  NEAR: "NEARUSDT",
+  DOGE: "DOGEUSDT",
+  SHIB: "SHIBUSDT",
+  PEPE: "PEPEUSDT",
+  BONK: "BONKUSDT",
+  LINK: "LINKUSDT",
+  UNI: "UNIUSDT",
+  AAVE: "AAVEUSDT",
 };
 
-async function fetchCoinGeckoPrices(coinIds: string[]) {
-  const uniqueIds = Array.from(new Set(coinIds));
-  if (uniqueIds.length === 0) {
-    return { data: {} as Record<string, any>, rateLimited: false };
+// Fetch single price from Binance
+async function fetchBinancePrice(symbol: string): Promise<{ price: number; change24h: number } | null> {
+  const binanceSymbol = BINANCE_SYMBOLS[symbol] || `${symbol}USDT`;
+  
+  try {
+    // Get current price
+    const priceResponse = await fetch(
+      `https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`
+    );
+    
+    if (!priceResponse.ok) {
+      console.warn(`Binance price API error for ${binanceSymbol}: ${priceResponse.status}`);
+      return null;
+    }
+    
+    const priceData = await priceResponse.json();
+    const price = parseFloat(priceData.price);
+    
+    // Get 24h change
+    const changeResponse = await fetch(
+      `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol}`
+    );
+    
+    let change24h = 0;
+    if (changeResponse.ok) {
+      const changeData = await changeResponse.json();
+      change24h = parseFloat(changeData.priceChangePercent) || 0;
+    }
+    
+    return { price, change24h };
+  } catch (error) {
+    console.error(`Error fetching Binance price for ${symbol}:`, error);
+    return null;
   }
+}
 
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
-    uniqueIds.join(","),
-  )}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
-
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
-
-  if (response.status === 429) {
-    const body = await response.text();
-    console.warn("CoinGecko rate limit hit:", body);
-    return { data: {} as Record<string, any>, rateLimited: true };
+// Fetch multiple prices from Binance
+async function fetchBinancePrices(symbols: string[]): Promise<Record<string, { price: number; change24h: number }>> {
+  const results: Record<string, { price: number; change24h: number }> = {};
+  
+  // Binance has a batch endpoint for 24hr ticker
+  try {
+    const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+    if (!response.ok) {
+      console.warn(`Binance batch API error: ${response.status}`);
+      return results;
+    }
+    
+    const allTickers = await response.json() as Array<{
+      symbol: string;
+      lastPrice: string;
+      priceChangePercent: string;
+    }>;
+    
+    // Create a map for quick lookup
+    const tickerMap = new Map<string, { price: number; change24h: number }>();
+    for (const ticker of allTickers) {
+      tickerMap.set(ticker.symbol, {
+        price: parseFloat(ticker.lastPrice),
+        change24h: parseFloat(ticker.priceChangePercent),
+      });
+    }
+    
+    // Map requested symbols to results
+    for (const symbol of symbols) {
+      const binanceSymbol = BINANCE_SYMBOLS[symbol] || `${symbol}USDT`;
+      const data = tickerMap.get(binanceSymbol);
+      if (data) {
+        results[symbol] = data;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching Binance batch prices:", error);
   }
-
-  if (!response.ok) {
-    const text = await response.text();
-    console.error("CoinGecko API error:", text);
-    throw new Error(`CoinGecko API error: ${response.status}`);
-  }
-
-  const data = (await response.json()) as Record<string, any>;
-  return { data, rateLimited: false };
+  
+  return results;
 }
 
 serve(async (req) => {
@@ -80,63 +123,28 @@ serve(async (req) => {
     // Batch price endpoint: /?action=prices&symbols=BTC,ETH,XMR
     if (action === "prices") {
       const symbolsParam = url.searchParams.get("symbols");
-      const symbolsRaw = symbolsParam ?? Object.keys(COINGECKO_IDS).join(",");
+      const symbolsRaw = symbolsParam ?? Object.keys(BINANCE_SYMBOLS).join(",");
       const symbols = symbolsRaw
         .split(",")
         .map((s: string) => s.trim().toUpperCase())
         .filter((s: string) => Boolean(s));
 
-      const ids = symbols
-        .map((s: string) => COINGECKO_IDS[s])
-        .filter((id: string | undefined): id is string => Boolean(id));
-
-      const { data, rateLimited } = await fetchCoinGeckoPrices(ids);
-
-      if (rateLimited) {
-        return new Response(
-          JSON.stringify({ error: "RATE_LIMIT", prices: {} }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const prices: Record<string, { price: number; change24h: number }> = {};
-
-      for (const sym of symbols) {
-        const id = COINGECKO_IDS[sym];
-        if (!id) continue;
-        const coinData = data[id];
-        if (!coinData || typeof coinData.usd !== "number") continue;
-
-        prices[sym] = {
-          price: coinData.usd,
-          change24h: typeof coinData.usd_24h_change === "number" ? coinData.usd_24h_change : 0,
-        };
-      }
+      const prices = await fetchBinancePrices(symbols);
 
       return new Response(
-        JSON.stringify({ prices }),
+        JSON.stringify({ prices, source: "binance" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Single-asset price endpoint (kept for direct calls)
+    // Single-asset price endpoint
     if (action === "price") {
-      const coinId = COINGECKO_IDS[symbol] || symbol.toLowerCase();
-      const { data, rateLimited } = await fetchCoinGeckoPrices([coinId]);
+      const data = await fetchBinancePrice(symbol);
 
-      if (rateLimited) {
-        // Soft-fail: return empty price instead of 500
+      if (!data) {
+        console.warn("No data from Binance for", symbol);
         return new Response(
-          JSON.stringify({ symbol, price: null, error: "RATE_LIMIT" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const coinData = data[coinId];
-      if (!coinData || typeof coinData.usd !== "number") {
-        console.warn("No data from CoinGecko for", symbol, "(id:", coinId, ")");
-        return new Response(
-          JSON.stringify({ symbol, price: null, error: "NO_DATA" }),
+          JSON.stringify({ symbol, price: null, error: "NO_DATA", source: "binance" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -144,16 +152,16 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           symbol,
-          price: coinData.usd,
-          priceChange24h: coinData.usd_24h_change,
-          volume24h: coinData.usd_24h_vol,
+          price: data.price,
+          priceChange24h: data.change24h,
           timestamp: Date.now(),
+          source: "binance",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-// Auto-resolve a prediction market based on price
+    // Auto-resolve a prediction market based on price
     if (action === "resolve-market") {
       const { marketId, targetPrice, comparison } = await req.json();
 
@@ -161,19 +169,13 @@ serve(async (req) => {
         throw new Error("Missing required fields: marketId, targetPrice, comparison");
       }
 
-      const coinId = COINGECKO_IDS[symbol] || symbol.toLowerCase();
-      const { data, rateLimited } = await fetchCoinGeckoPrices([coinId]);
+      const data = await fetchBinancePrice(symbol);
 
-      if (rateLimited) {
-        throw new Error("Oracle rate limited, try again later");
+      if (!data) {
+        throw new Error("Could not fetch current price from Binance");
       }
 
-      const coinData = data[coinId];
-      const currentPrice = coinData?.usd;
-
-      if (!currentPrice) {
-        throw new Error("Could not fetch current price");
-      }
+      const currentPrice = data.price;
 
       console.log(
         `Current ${symbol} price: $${currentPrice}, Target: $${targetPrice}, Comparison: ${comparison}`,
@@ -217,6 +219,7 @@ serve(async (req) => {
           targetPrice,
           comparison,
           timestamp: Date.now(),
+          source: "binance",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -241,7 +244,7 @@ serve(async (req) => {
       if (!pendingMarkets || pendingMarkets.length === 0) {
         console.log("No markets pending resolution");
         return new Response(
-          JSON.stringify({ resolved: 0, message: "No markets pending resolution" }),
+          JSON.stringify({ resolved: 0, message: "No markets pending resolution", source: "binance" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -253,7 +256,6 @@ serve(async (req) => {
       for (const market of pendingMarkets) {
         try {
           // Parse the question to extract asset and price range
-          // Format: "Will Bitcoin (BTC) be between $88,000 and $89,000 on 14 Dec 2025?"
           const question = market.question || "";
           
           // Extract ticker from parentheses
@@ -285,7 +287,6 @@ serve(async (req) => {
             comparison = "below";
             targetLow = prices[0];
           } else {
-            // Default to "between" if two prices, "above" otherwise
             if (prices.length >= 2) {
               comparison = "between";
               targetLow = Math.min(...prices);
@@ -296,20 +297,15 @@ serve(async (req) => {
             }
           }
 
-          // Fetch current price
-          const coinId = COINGECKO_IDS[ticker] || ticker.toLowerCase();
-          const { data: priceData, rateLimited } = await fetchCoinGeckoPrices([coinId]);
+          // Fetch current price from Binance
+          const priceData = await fetchBinancePrice(ticker);
 
-          if (rateLimited) {
-            console.warn(`Rate limited while resolving market ${market.id}`);
+          if (!priceData) {
+            console.warn(`No Binance price data for ${ticker}`);
             continue;
           }
 
-          const currentPrice = priceData[coinId]?.usd;
-          if (!currentPrice) {
-            console.warn(`No price data for ${ticker}`);
-            continue;
-          }
+          const currentPrice = priceData.price;
 
           // Determine outcome
           let outcome: "yes" | "no";
@@ -348,7 +344,7 @@ serve(async (req) => {
       console.log(`Resolved ${results.length} markets`);
 
       return new Response(
-        JSON.stringify({ resolved: results.length, results }),
+        JSON.stringify({ resolved: results.length, results, source: "binance" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
