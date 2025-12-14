@@ -14,10 +14,12 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { PredictionLeaderboard } from '@/components/PredictionLeaderboard';
+import { SportsEventsPanel } from '@/components/SportsEventsPanel';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -466,12 +468,14 @@ export default function Predictions() {
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
               <Select value={filterAsset} onValueChange={setFilterAsset}>
-                <SelectTrigger className="w-[140px] h-9">
-                  <SelectValue placeholder="All Assets" />
+                <SelectTrigger className="w-[150px] h-9">
+                  <SelectValue placeholder="All Markets" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Assets</SelectItem>
-                  {Array.from(new Set(markets.map(m => m.oracle_asset))).map(asset => (
+                  <SelectItem value="all">All Markets</SelectItem>
+                  <SelectItem value="price">💹 Crypto Price</SelectItem>
+                  <SelectItem value="sports">🏆 Sports</SelectItem>
+                  {Array.from(new Set(markets.filter(m => m.oracle_type === 'price').map(m => m.oracle_asset))).map(asset => (
                     <SelectItem key={asset} value={asset}>{asset}</SelectItem>
                   ))}
                 </SelectContent>
@@ -508,7 +512,11 @@ export default function Predictions() {
             
             // Filter and sort active markets
             let filteredMarkets = activeMarkets;
-            if (filterAsset !== 'all') {
+            if (filterAsset === 'price') {
+              filteredMarkets = filteredMarkets.filter(m => m.oracle_type === 'price');
+            } else if (filterAsset === 'sports') {
+              filteredMarkets = filteredMarkets.filter(m => m.oracle_type === 'sports');
+            } else if (filterAsset !== 'all') {
               filteredMarkets = filteredMarkets.filter(m => m.oracle_asset === filterAsset);
             }
             
@@ -524,7 +532,11 @@ export default function Predictions() {
             
             // Filter resolved markets too
             let filteredResolved = resolvedMarkets;
-            if (filterAsset !== 'all') {
+            if (filterAsset === 'price') {
+              filteredResolved = filteredResolved.filter(m => m.oracle_type === 'price');
+            } else if (filterAsset === 'sports') {
+              filteredResolved = filteredResolved.filter(m => m.oracle_type === 'sports');
+            } else if (filterAsset !== 'all') {
               filteredResolved = filteredResolved.filter(m => m.oracle_asset === filterAsset);
             }
             const sortedResolved = [...filteredResolved].sort((a, b) => b.resolution_time - a.resolution_time);
@@ -560,6 +572,11 @@ export default function Predictions() {
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {market.oracle_type === 'sports' && (
+                                    <Badge variant="outline" className="text-xs">🏆 Sports</Badge>
+                                  )}
+                                </div>
                                 <CardTitle className="text-xl">{market.title}</CardTitle>
                                 {market.description && (
                                   <CardDescription className="mt-2">{market.description}</CardDescription>
@@ -630,7 +647,9 @@ export default function Predictions() {
                                   }
                                   return <span>Resolves: {formatResolutionDate(market.resolution_time)}</span>;
                                 })()}
-                                {market.oracle_asset && (
+                                {market.oracle_type === 'sports' ? (
+                                  <span>🏆 Sports Oracle</span>
+                                ) : market.oracle_asset && (
                                   <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
                                 )}
                               </div>
@@ -726,7 +745,9 @@ export default function Predictions() {
                                 
                                 <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                                   <span>Resolved: {formatResolutionDate(market.resolution_time)}</span>
-                                  {market.oracle_asset && (
+                                  {market.oracle_type === 'sports' ? (
+                                    <span>🏆 Sports Oracle</span>
+                                  ) : market.oracle_asset && (
                                     <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
                                   )}
                                 </div>
@@ -752,6 +773,10 @@ export default function Predictions() {
               {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="sticky top-4 space-y-4">
+                  <SportsEventsPanel 
+                    onMarketsCreated={fetchMarkets}
+                    existingMarketIds={markets.map(m => m.market_id)}
+                  />
                   <MyBets 
                     bets={bets} 
                     onStatusUpdate={checkBetStatus} 
