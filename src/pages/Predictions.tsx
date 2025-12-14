@@ -426,30 +426,15 @@ export default function Predictions() {
     return null;
   };
 
-  // Auto-resolve a market using the oracle
-  const handleAutoResolve = async (market: Market) => {
+  // Auto-resolve a market using the oracle (silent, no toast for background processing)
+  const autoResolveMarket = async (market: Market): Promise<boolean> => {
     const parsed = parseOracleMarketCriteria(market);
     if (!parsed) {
-      toast.error('Cannot auto-resolve: market criteria not recognized');
-      return;
+      console.log('Cannot auto-resolve: market criteria not recognized', market.id);
+      return false;
     }
 
-    toast.loading('Fetching price from oracle...');
-
     try {
-      const response = await supabase.functions.invoke('coinglass-oracle', {
-        body: JSON.stringify({
-          marketId: market.id,
-          targetPrice: parsed.targetPrice,
-          comparison: parsed.comparison,
-        }),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // Parse the response - need to handle URL params approach
       const oracleUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coinglass-oracle?action=resolve-market&symbol=${parsed.asset}`;
       
       const oracleResponse = await fetch(oracleUrl, {
@@ -468,20 +453,59 @@ export default function Predictions() {
       const result = await oracleResponse.json();
       
       if (result.error) {
-        toast.dismiss();
-        toast.error(`Oracle error: ${result.error}`);
-        return;
+        console.error('Oracle error for market', market.id, result.error);
+        return false;
       }
 
-      toast.dismiss();
-      toast.success(`Market resolved as ${result.outcome?.toUpperCase()} at $${result.currentPrice?.toLocaleString()}`);
-      fetchMarkets();
+      console.log(`Market ${market.id} resolved as ${result.outcome} at $${result.currentPrice}`);
+      return true;
     } catch (error) {
-      toast.dismiss();
-      toast.error('Failed to auto-resolve market');
-      console.error(error);
+      console.error('Failed to auto-resolve market', market.id, error);
+      return false;
     }
   };
+
+  // Check and resolve all overdue markets automatically
+  const checkAndResolveOverdueMarkets = async () => {
+    const overdueMarkets = markets.filter(m => 
+      m.status === 'open' && 
+      isPastResolutionDate(m) && 
+      parseOracleMarketCriteria(m) !== null
+    );
+
+    if (overdueMarkets.length === 0) return;
+
+    console.log(`Found ${overdueMarkets.length} overdue markets to resolve`);
+    
+    let resolved = 0;
+    for (const market of overdueMarkets) {
+      const success = await autoResolveMarket(market);
+      if (success) resolved++;
+    }
+
+    if (resolved > 0) {
+      toast.success(`Auto-resolved ${resolved} market${resolved > 1 ? 's' : ''}`);
+      fetchMarkets();
+    }
+  };
+
+  // Auto-resolve overdue markets on load and periodically
+  useEffect(() => {
+    if (!loading && markets.length > 0) {
+      checkAndResolveOverdueMarkets();
+    }
+  }, [loading, markets.length]);
+
+  // Check every 30 seconds for overdue markets
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (markets.length > 0) {
+        checkAndResolveOverdueMarkets();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [markets]);
 
   const getStatusBadge = (market: Market) => {
     const status = market.status;
@@ -507,13 +531,6 @@ export default function Predictions() {
     }
   };
 
-  
-  // Check if market can be auto-resolved (is an oracle market)
-  const canAutoResolve = (market: Market) => {
-    if (market.status !== 'open') return false;
-    if (!isPastResolutionDate(market)) return false;
-    return parseOracleMarketCriteria(market) !== null;
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -861,15 +878,6 @@ export default function Predictions() {
                             >
                               <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
                             </Button>
-                            {canAutoResolve(market) && (
-                              <Button
-                                variant="secondary"
-                                className="bg-amber-600 hover:bg-amber-700 text-white"
-                                onClick={() => handleAutoResolve(market)}
-                              >
-                                <RefreshCw className="w-4 h-4 mr-2" /> Auto-Resolve
-                              </Button>
-                            )}
                           </div>
                         )}
                       </div>
