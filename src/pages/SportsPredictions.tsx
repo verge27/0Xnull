@@ -24,7 +24,7 @@ const SPORTS = ['nfl', 'premier_league', 'ufc'] as const;
 
 export default function SportsPredictions() {
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
-  const { events, loading: eventsLoading, fetchEvents, createSportsMarket, autoCreateMarketsForNext24Hours } = useSportsEvents();
+  const { events, loading: eventsLoading, fetchEvents, createSportsMarket, autoCreateMarketsForNext24Hours, liveScores, startLiveScorePolling, stopLiveScorePolling, pollingActive } = useSportsEvents();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,8 +54,25 @@ export default function SportsPredictions() {
       fetchMarkets();
     }, 30000);
     
-    return () => clearInterval(interval);
-  }, [fetchEvents]);
+    return () => {
+      clearInterval(interval);
+      stopLiveScorePolling();
+    };
+  }, [fetchEvents, stopLiveScorePolling]);
+
+  // Start polling for live scores when we have live events
+  useEffect(() => {
+    const now = Date.now() / 1000;
+    const liveEventIds = events
+      .filter(e => e.commence_timestamp <= now && e.commence_timestamp > now - 14400) // Started within last 4 hours
+      .map(e => e.event_id);
+    
+    if (liveEventIds.length > 0) {
+      startLiveScorePolling(liveEventIds);
+    } else {
+      stopLiveScorePolling();
+    }
+  }, [events, startLiveScorePolling, stopLiveScorePolling]);
 
   const fetchMarkets = async () => {
     try {
@@ -274,7 +291,13 @@ export default function SportsPredictions() {
                                     {getSportLabel(event.sport)}
                                   </Badge>
                                   {isLive && (
-                                    <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
+                                    <Badge className="bg-red-600 text-xs animate-pulse flex items-center gap-1">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                      </span>
+                                      LIVE
+                                    </Badge>
                                   )}
                                   {marketStatus === 'both' && (
                                     <Badge variant="secondary" className="text-xs">Active</Badge>
@@ -285,7 +308,17 @@ export default function SportsPredictions() {
                               <div className="flex items-center gap-2 font-medium text-sm mb-1">
                                 <TeamLogo teamName={event.away_team} sport={event.sport} size="sm" />
                                 <span>{event.away_team}</span>
+                                {liveScores[event.event_id] && (
+                                  <span className="font-bold text-primary">
+                                    {liveScores[event.event_id].scores.find(s => s.name === event.away_team)?.score || '0'}
+                                  </span>
+                                )}
                                 <span className="text-muted-foreground">@</span>
+                                {liveScores[event.event_id] && (
+                                  <span className="font-bold text-primary">
+                                    {liveScores[event.event_id].scores.find(s => s.name === event.home_team)?.score || '0'}
+                                  </span>
+                                )}
                                 <TeamLogo teamName={event.home_team} sport={event.sport} size="sm" />
                                 <span>{event.home_team}</span>
                               </div>
