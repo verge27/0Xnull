@@ -132,7 +132,7 @@ serve(async (req) => {
       const prices = await fetchBinancePrices(symbols);
 
       return new Response(
-        JSON.stringify({ prices, source: "binance" }),
+        JSON.stringify({ prices, source: "api" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -144,7 +144,7 @@ serve(async (req) => {
       if (!data) {
         console.warn("No data from Binance for", symbol);
         return new Response(
-          JSON.stringify({ symbol, price: null, error: "NO_DATA", source: "binance" }),
+          JSON.stringify({ symbol, price: null, error: "NO_DATA", source: "api" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -155,7 +155,7 @@ serve(async (req) => {
           price: data.price,
           priceChange24h: data.change24h,
           timestamp: Date.now(),
-          source: "binance",
+          source: "api",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -219,7 +219,7 @@ serve(async (req) => {
           targetPrice,
           comparison,
           timestamp: Date.now(),
-          source: "binance",
+          source: "api",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -244,7 +244,7 @@ serve(async (req) => {
       if (!pendingMarkets || pendingMarkets.length === 0) {
         console.log("No markets pending resolution");
         return new Response(
-          JSON.stringify({ resolved: 0, message: "No markets pending resolution", source: "binance" }),
+          JSON.stringify({ resolved: 0, message: "No markets pending resolution", source: "api" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -344,7 +344,7 @@ serve(async (req) => {
       console.log(`Resolved ${results.length} markets`);
 
       return new Response(
-        JSON.stringify({ resolved: results.length, results, source: "binance" }),
+        JSON.stringify({ resolved: results.length, results, source: "api" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
