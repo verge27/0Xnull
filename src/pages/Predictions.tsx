@@ -1068,7 +1068,7 @@ export default function Predictions() {
                                   setResolveDialogOpen(true);
                                 }}
                               >
-                                Resolve
+                                {parseOracleMarketCriteria(market) ? 'Resolve (Oracle)' : 'Resolve'}
                               </Button>
                             )}
                           </div>
@@ -1142,31 +1142,88 @@ export default function Predictions() {
           </DialogHeader>
           {selectedMarket && (
             <div className="space-y-4 mt-4">
-              <p className="text-sm">{selectedMarket.question}</p>
+              <p className="text-sm font-medium">{selectedMarket.question}</p>
               {selectedMarket.resolution_criteria && (
                 <p className="text-xs text-muted-foreground">Criteria: {selectedMarket.resolution_criteria}</p>
               )}
               
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => handleResolveMarket('yes')}
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" /> YES
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleResolveMarket('no')}
-                >
-                  <XCircle className="w-4 h-4 mr-2" /> NO
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleResolveMarket('cancelled')}
-                >
-                  Cancel
-                </Button>
-              </div>
+              {/* Show auto-resolve option for oracle markets */}
+              {parseOracleMarketCriteria(selectedMarket) ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <p className="text-sm text-amber-400">
+                      This is an oracle price market. Click below to fetch the current price and resolve automatically.
+                    </p>
+                  </div>
+                  <Button
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={() => {
+                      setResolveDialogOpen(false);
+                      handleAutoResolve(selectedMarket);
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" /> Auto-Resolve via Oracle
+                  </Button>
+                  
+                  {isAdmin && (
+                    <>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">Admin Override</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => handleResolveMarket('yes')}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" /> YES
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleResolveMarket('no')}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" /> NO
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleResolveMarket('cancelled')}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                /* Manual resolution for non-oracle markets */
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => handleResolveMarket('yes')}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" /> YES
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleResolveMarket('no')}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" /> NO
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleResolveMarket('cancelled')}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
