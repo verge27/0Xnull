@@ -151,15 +151,17 @@ export default function Predictions() {
       const resolutionTime = Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000);
       const resolutionDate = new Date(resolutionTime * 1000);
       const dateStr = resolutionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const dateId = resolutionDate.toISOString().split('T')[0].replace(/-/g, '');
 
       // Create new markets for each asset with price data
       const assetsToCreate = ORACLE_ASSETS.filter(a => oraclePrices[a.symbol]);
       let created = 0;
+      let skipped = 0;
       
       for (const asset of assetsToCreate) {
         const currentPrice = oraclePrices[asset.symbol].price;
         const targetPrice = getPriceTarget(asset.symbol, currentPrice);
-        const marketId = `${asset.symbol.toLowerCase()}_above_${String(targetPrice).replace('.', '_')}_weekly`;
+        const marketId = `${asset.symbol.toLowerCase()}_${dateId}_${String(targetPrice).replace('.', '_')}`;
         
         try {
           await api.createMarket({
@@ -173,12 +175,21 @@ export default function Predictions() {
             resolution_time: resolutionTime,
           });
           created++;
-        } catch (e) {
-          console.error(`Failed to create market for ${asset.symbol}:`, e);
+        } catch (e: unknown) {
+          const errorMsg = e instanceof Error ? e.message : '';
+          if (errorMsg.includes('already exists')) {
+            skipped++;
+          } else {
+            console.error(`Failed to create market for ${asset.symbol}:`, e);
+          }
         }
       }
 
-      toast.success(`Created ${created} new markets!`);
+      if (created > 0) {
+        toast.success(`Created ${created} new markets${skipped > 0 ? `, ${skipped} already existed` : ''}`);
+      } else if (skipped > 0) {
+        toast.info(`All ${skipped} markets already exist`);
+      }
       await fetchMarkets();
     } catch (error) {
       toast.error('Failed to create markets');
