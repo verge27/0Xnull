@@ -14,7 +14,8 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -104,6 +105,10 @@ export default function Predictions() {
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmountUsd, setBetAmountUsd] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
+  
+  // Filter/sort state
+  const [filterAsset, setFilterAsset] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'resolution' | 'pool' | 'newest'>('resolution');
 
   useEffect(() => {
     fetchMarkets();
@@ -343,6 +348,38 @@ export default function Predictions() {
             onPayoutSubmit={submitPayoutAddress}
           />
 
+          {/* Filter/Sort Controls */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select value={filterAsset} onValueChange={setFilterAsset}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue placeholder="All Assets" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assets</SelectItem>
+                  {Array.from(new Set(markets.map(m => m.oracle_asset))).map(asset => (
+                    <SelectItem key={asset} value={asset}>{asset}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+              <Select value={sortBy} onValueChange={(v: 'resolution' | 'pool' | 'newest') => setSortBy(v)}>
+                <SelectTrigger className="w-[160px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="resolution">Resolution Date</SelectItem>
+                  <SelectItem value="pool">Pool Size</SelectItem>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {loading ? (
             <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
           ) : markets.length === 0 ? (
@@ -351,9 +388,36 @@ export default function Predictions() {
                 <p className="text-muted-foreground">No markets available yet.</p>
               </CardContent>
             </Card>
-          ) : (
+          ) : (() => {
+            // Filter and sort markets
+            let filteredMarkets = markets;
+            if (filterAsset !== 'all') {
+              filteredMarkets = filteredMarkets.filter(m => m.oracle_asset === filterAsset);
+            }
+            
+            const sortedMarkets = [...filteredMarkets].sort((a, b) => {
+              if (sortBy === 'resolution') {
+                return a.resolution_time - b.resolution_time;
+              } else if (sortBy === 'pool') {
+                return (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr);
+              } else {
+                return b.created_at - a.created_at;
+              }
+            });
+            
+            if (sortedMarkets.length === 0) {
+              return (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <p className="text-muted-foreground">No markets match your filters.</p>
+                  </CardContent>
+                </Card>
+              );
+            }
+            
+            return (
             <div className="grid gap-4">
-              {markets.map((market) => {
+              {sortedMarkets.map((market) => {
                 const odds = getOdds(market);
                 const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
                 const pendingBets = getBetsForMarket(market.market_id);
@@ -460,7 +524,8 @@ export default function Predictions() {
                 );
               })}
             </div>
-          )}
+          );
+          })()}
         </main>
       </div>
 
