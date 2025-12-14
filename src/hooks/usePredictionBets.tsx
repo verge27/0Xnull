@@ -15,7 +15,7 @@ export interface PredictionBet {
   xmr_price: number;
   deposit_address: string;
   payout_address?: string;
-  status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid_out';
+  status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid';
   created_at: string;
   expires_at: string;
 }

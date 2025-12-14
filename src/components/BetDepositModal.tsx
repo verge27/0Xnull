@@ -8,6 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Check, Loader2, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PlaceBetResponse, BetStatusResponse } from '@/hooks/usePredictionBets';
+import { api } from '@/services/api';
 
 interface BetDepositModalProps {
   open: boolean;
@@ -25,9 +26,11 @@ export function BetDepositModal({
   onConfirmed,
 }: BetDepositModalProps) {
   const [copied, setCopied] = useState<'address' | 'amount' | null>(null);
-  const [status, setStatus] = useState<'awaiting_deposit' | 'confirmed' | string>('awaiting_deposit');
+  const [status, setStatus] = useState<string>('awaiting_deposit');
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [polling, setPolling] = useState(false);
+  const [payoutAddress, setPayoutAddress] = useState('');
+  const [submittingPayout, setSubmittingPayout] = useState(false);
 
   // Calculate time left
   useEffect(() => {
@@ -146,14 +149,62 @@ export function BetDepositModal({
           </div>
 
           {status === 'confirmed' ? (
-            <div className="text-center py-6">
-              <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-              <p className="text-lg font-medium">Your bet has been placed!</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Your position has been recorded. Good luck!
-              </p>
-              <Button className="mt-6 w-full" onClick={() => onOpenChange(false)}>
-                Close
+            <div className="text-center py-6 space-y-4">
+              <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto" />
+              <div>
+                <p className="text-lg font-medium">Deposit Confirmed!</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Enter your XMR payout address to receive winnings.
+                </p>
+              </div>
+              
+              <div className="text-left">
+                <Label htmlFor="payout-address" className="text-sm">Payout Address</Label>
+                <Input
+                  id="payout-address"
+                  placeholder="4... or 8..."
+                  value={payoutAddress}
+                  onChange={(e) => setPayoutAddress(e.target.value)}
+                  className="mt-1 font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Must start with 4 or 8 (Monero address)
+                </p>
+              </div>
+              
+              <Button 
+                className="w-full" 
+                onClick={async () => {
+                  if (!payoutAddress || (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
+                    toast.error('Invalid Monero address');
+                    return;
+                  }
+                  if (payoutAddress.length < 95) {
+                    toast.error('Address too short');
+                    return;
+                  }
+                  
+                  setSubmittingPayout(true);
+                  try {
+                    await api.submitPredictionPayoutAddress(betData.bet_id, payoutAddress);
+                    toast.success('Payout address saved!');
+                    onOpenChange(false);
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to save');
+                  } finally {
+                    setSubmittingPayout(false);
+                  }
+                }}
+                disabled={submittingPayout || !payoutAddress}
+              >
+                {submittingPayout ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Payout Address'
+                )}
               </Button>
             </div>
           ) : (
