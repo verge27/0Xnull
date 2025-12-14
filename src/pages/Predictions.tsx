@@ -344,13 +344,6 @@ export default function Predictions() {
             </div>
           </div>
 
-          <MyBets 
-            bets={bets} 
-            onStatusUpdate={checkBetStatus} 
-            onPayoutSubmit={submitPayoutAddress}
-          />
-
-
           {/* Filter/Sort Controls */}
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-2">
@@ -629,9 +622,14 @@ export default function Predictions() {
               )}
               </div>
               
-              {/* Leaderboard Sidebar */}
+              {/* Sidebar */}
               <div className="lg:col-span-1">
-                <div className="sticky top-4">
+                <div className="sticky top-4 space-y-4">
+                  <MyBets 
+                    bets={bets} 
+                    onStatusUpdate={checkBetStatus} 
+                    onPayoutSubmit={submitPayoutAddress}
+                  />
                   <PredictionLeaderboard userBets={bets} />
                 </div>
               </div>
