@@ -20,6 +20,10 @@ export interface SportsScore {
   completed: boolean;
   scores: { name: string; score: string }[];
   winner: string | null;
+  // Live game status
+  clock?: string;
+  period?: string;
+  statusDetail?: string;
 }
 
 export interface LiveScores {
@@ -136,6 +140,11 @@ export function useSportsEvents() {
               const status = matchingEspn.status?.type?.state;
               const completed = status === 'post';
               
+              // Extract clock/period info
+              const clock = matchingEspn.status?.displayClock;
+              const period = matchingEspn.status?.period;
+              const statusDetail = matchingEspn.status?.type?.shortDetail;
+              
               if (espnScores.length > 0 && (status === 'in' || completed)) {
                 scores[event.event_id] = {
                   event_id: event.event_id,
@@ -147,6 +156,9 @@ export function useSportsEvents() {
                   winner: completed ? espnScores.reduce((a, b) => 
                     parseInt(a.score) > parseInt(b.score) ? a : b
                   ).name : null,
+                  clock: clock || undefined,
+                  period: period ? `${period}` : undefined,
+                  statusDetail: statusDetail || undefined,
                 };
               }
             }

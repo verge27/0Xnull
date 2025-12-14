@@ -302,6 +302,11 @@ export default function SportsPredictions() {
                                       LIVE
                                     </Badge>
                                   )}
+                                  {liveScores[event.event_id]?.statusDetail && !liveScores[event.event_id]?.completed && (
+                                    <Badge variant="outline" className="text-xs font-mono">
+                                      {liveScores[event.event_id].statusDetail}
+                                    </Badge>
+                                  )}
                                   {marketStatus === 'both' && (
                                     <Badge variant="secondary" className="text-xs">Active</Badge>
                                   )}
