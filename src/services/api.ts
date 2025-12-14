@@ -137,6 +137,18 @@ export interface PredictionMarket {
   created_at: number;
 }
 
+export interface CreateMarketRequest {
+  market_id: string;
+  title: string;
+  description?: string;
+  oracle_type: string;
+  oracle_asset: string;
+  oracle_condition: string;
+  oracle_value: number;
+  oracle_value_2?: number;
+  resolution_time: number;
+}
+
 export const api = {
   async createToken(): Promise<string> {
     const data = await proxyRequest<{ token: string }>('/api/token/create', { method: 'POST' });
@@ -237,5 +249,12 @@ export const api = {
 
   async getPredictionMarket(marketId: string): Promise<PredictionMarket & { bets: unknown[] }> {
     return proxyRequest<PredictionMarket & { bets: unknown[] }>(`/api/predictions/markets/${marketId}`);
+  },
+
+  async createMarket(request: CreateMarketRequest): Promise<{ market_id: string; status: string }> {
+    return proxyRequest<{ market_id: string; status: string }>('/api/predictions/markets', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
   },
 };
