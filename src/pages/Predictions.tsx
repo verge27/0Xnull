@@ -250,10 +250,12 @@ export default function Predictions() {
         return;
       }
       
+      const customResolutionDate = newResolutionDate ? new Date(newResolutionDate).toISOString() : null;
+      
       const marketData = {
         question: customQuestion.trim(),
         description: `Custom ${asset.symbol} market`,
-        resolution_date: newResolutionDate,
+        resolution_date: customResolutionDate,
         resolution_criteria: customCriteria.trim() || 'Manually resolved by market creator.',
         creator_id: user?.id || null,
         creator_pk_id: pkUser?.id || null,
@@ -291,9 +293,22 @@ export default function Predictions() {
       }
     }
     
+    // Parse the datetime-local value and format properly
     const resolutionDate = new Date(newResolutionDate);
-    const dateStr = resolutionDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    const timeStr = resolutionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+    
+    // Format date for display in question (e.g., "Dec 25, 2025")
+    const dateStr = resolutionDate.toLocaleDateString('en-GB', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
+    // Format time for criteria (e.g., "10:30 AM UTC")
+    const hours = resolutionDate.getHours();
+    const minutes = resolutionDate.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm} UTC`;
     
     let question: string;
     let criteria: string;
@@ -315,7 +330,7 @@ export default function Predictions() {
     const marketData = {
       question,
       description,
-      resolution_date: newResolutionDate,
+      resolution_date: resolutionDate.toISOString(),
       resolution_criteria: criteria,
       creator_id: user?.id || null,
       creator_pk_id: pkUser?.id || null,
@@ -349,10 +364,12 @@ export default function Predictions() {
       return;
     }
     
+    const parsedResolutionDate = newResolutionDate ? new Date(newResolutionDate).toISOString() : null;
+    
     const marketData = {
       question: newQuestion.trim(),
       description: newDescription.trim() || null,
-      resolution_date: newResolutionDate || null,
+      resolution_date: parsedResolutionDate,
       resolution_criteria: newCriteria.trim() || null,
       creator_id: user?.id || null,
       creator_pk_id: pkUser?.id || null,
