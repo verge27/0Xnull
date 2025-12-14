@@ -467,7 +467,104 @@ export default function Predictions() {
     return userPositions.filter(p => p.market_id === marketId);
   };
 
-  const getStatusBadge = (status: string) => {
+  // Check if a market is past its resolution date
+  const isPastResolutionDate = (market: Market) => {
+    if (!market.resolution_date) return false;
+    return new Date(market.resolution_date) < new Date();
+  };
+
+  // Parse oracle market criteria to extract asset, target, and comparison type
+  const parseOracleMarketCriteria = (market: Market): { asset: string; targetPrice: number; comparison: 'above' | 'below' } | null => {
+    if (!market.resolution_criteria) return null;
+    
+    // Match patterns like "Resolves YES if BTC price is ≥ $89,000" or "Resolves YES if BTC price is ≤ $89,000"
+    const aboveMatch = market.resolution_criteria.match(/if (\w+) price is (?:≥|>=|above|greater than) \$?([\d,]+)/i);
+    const belowMatch = market.resolution_criteria.match(/if (\w+) price is (?:≤|<=|below|less than) \$?([\d,]+)/i);
+    
+    if (aboveMatch) {
+      return {
+        asset: aboveMatch[1].toUpperCase(),
+        targetPrice: parseFloat(aboveMatch[2].replace(/,/g, '')),
+        comparison: 'above',
+      };
+    }
+    
+    if (belowMatch) {
+      return {
+        asset: belowMatch[1].toUpperCase(),
+        targetPrice: parseFloat(belowMatch[2].replace(/,/g, '')),
+        comparison: 'below',
+      };
+    }
+    
+    return null;
+  };
+
+  // Auto-resolve a market using the oracle
+  const handleAutoResolve = async (market: Market) => {
+    const parsed = parseOracleMarketCriteria(market);
+    if (!parsed) {
+      toast.error('Cannot auto-resolve: market criteria not recognized');
+      return;
+    }
+
+    toast.loading('Fetching price from oracle...');
+
+    try {
+      const response = await supabase.functions.invoke('coinglass-oracle', {
+        body: JSON.stringify({
+          marketId: market.id,
+          targetPrice: parsed.targetPrice,
+          comparison: parsed.comparison,
+        }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Parse the response - need to handle URL params approach
+      const oracleUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coinglass-oracle?action=resolve-market&symbol=${parsed.asset}`;
+      
+      const oracleResponse = await fetch(oracleUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          marketId: market.id,
+          targetPrice: parsed.targetPrice,
+          comparison: parsed.comparison,
+        }),
+      });
+
+      const result = await oracleResponse.json();
+      
+      if (result.error) {
+        toast.dismiss();
+        toast.error(`Oracle error: ${result.error}`);
+        return;
+      }
+
+      toast.dismiss();
+      toast.success(`Market resolved as ${result.outcome?.toUpperCase()} at $${result.currentPrice?.toLocaleString()}`);
+      fetchMarkets();
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Failed to auto-resolve market');
+      console.error(error);
+    }
+  };
+
+  const getStatusBadge = (market: Market) => {
+    const status = market.status;
+    const isPending = status === 'open' && isPastResolutionDate(market);
+    
+    if (isPending) {
+      return <Badge className="bg-amber-600 animate-pulse"><AlertCircle className="w-3 h-3 mr-1" /> Pending Resolution</Badge>;
+    }
+    
     switch (status) {
       case 'open':
         return <Badge className="bg-green-600"><Clock className="w-3 h-3 mr-1" /> Open</Badge>;
@@ -489,6 +586,13 @@ export default function Predictions() {
     if (user && market.creator_id === user.id) return true;
     if (pkUser && market.creator_pk_id === pkUser.id) return true;
     return false;
+  };
+  
+  // Check if market can be auto-resolved (is an oracle market)
+  const canAutoResolve = (market: Market) => {
+    if (market.status !== 'open') return false;
+    if (!isPastResolutionDate(market)) return false;
+    return parseOracleMarketCriteria(market) !== null;
   };
 
   return (
@@ -844,7 +948,7 @@ export default function Predictions() {
                             <CardDescription className="mt-2">{market.description}</CardDescription>
                           )}
                         </div>
-                        {getStatusBadge(market.status)}
+                        {getStatusBadge(market)}
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -930,7 +1034,16 @@ export default function Predictions() {
                             >
                               <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
                             </Button>
-                            {canResolve(market) && (
+                            {canAutoResolve(market) && (
+                              <Button
+                                variant="secondary"
+                                className="bg-amber-600 hover:bg-amber-700 text-white"
+                                onClick={() => handleAutoResolve(market)}
+                              >
+                                <RefreshCw className="w-4 h-4 mr-2" /> Auto-Resolve
+                              </Button>
+                            )}
+                            {canResolve(market) && !canAutoResolve(market) && (
                               <Button
                                 variant="outline"
                                 onClick={() => {
