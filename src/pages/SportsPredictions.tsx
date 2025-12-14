@@ -293,7 +293,11 @@ export default function SportsPredictions() {
                                   <Badge variant="outline" className="text-xs">
                                     {getSportLabel(event.sport)}
                                   </Badge>
-                                  {isLive && (
+                                  {liveScores[event.event_id]?.completed ? (
+                                    <Badge className="bg-muted text-muted-foreground text-xs">
+                                      FINAL
+                                    </Badge>
+                                  ) : isLive && (
                                     <Badge className="bg-red-600 text-xs animate-pulse flex items-center gap-1">
                                       <span className="relative flex h-2 w-2">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -317,14 +321,20 @@ export default function SportsPredictions() {
                                 <TeamLogo teamName={event.away_team} sport={event.sport} size="sm" />
                                 <span>{event.away_team}</span>
                                 {liveScores[event.event_id] && (
-                                  <span className="font-bold text-primary">
-                                    {liveScores[event.event_id].scores.find(s => s.name === event.away_team)?.score || '0'}
+                                  <span className={`font-bold ${liveScores[event.event_id].completed ? 'text-muted-foreground' : 'text-primary'}`}>
+                                    {liveScores[event.event_id].scores.find(s => 
+                                      s.name.toLowerCase().includes(event.away_team.toLowerCase()) || 
+                                      event.away_team.toLowerCase().includes(s.name.toLowerCase())
+                                    )?.score || '0'}
                                   </span>
                                 )}
                                 <span className="text-muted-foreground">@</span>
                                 {liveScores[event.event_id] && (
-                                  <span className="font-bold text-primary">
-                                    {liveScores[event.event_id].scores.find(s => s.name === event.home_team)?.score || '0'}
+                                  <span className={`font-bold ${liveScores[event.event_id].completed ? 'text-muted-foreground' : 'text-primary'}`}>
+                                    {liveScores[event.event_id].scores.find(s => 
+                                      s.name.toLowerCase().includes(event.home_team.toLowerCase()) || 
+                                      event.home_team.toLowerCase().includes(s.name.toLowerCase())
+                                    )?.score || '0'}
                                   </span>
                                 )}
                                 <TeamLogo teamName={event.home_team} sport={event.sport} size="sm" />
