@@ -16,6 +16,7 @@ import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -389,8 +390,12 @@ export default function Predictions() {
               </CardContent>
             </Card>
           ) : (() => {
-            // Filter and sort markets
-            let filteredMarkets = markets;
+            // Separate active and resolved markets
+            const activeMarkets = markets.filter(m => m.resolved === 0);
+            const resolvedMarkets = markets.filter(m => m.resolved === 1);
+            
+            // Filter and sort active markets
+            let filteredMarkets = activeMarkets;
             if (filterAsset !== 'all') {
               filteredMarkets = filteredMarkets.filter(m => m.oracle_asset === filterAsset);
             }
@@ -405,7 +410,14 @@ export default function Predictions() {
               }
             });
             
-            if (sortedMarkets.length === 0) {
+            // Filter resolved markets too
+            let filteredResolved = resolvedMarkets;
+            if (filterAsset !== 'all') {
+              filteredResolved = filteredResolved.filter(m => m.oracle_asset === filterAsset);
+            }
+            const sortedResolved = [...filteredResolved].sort((a, b) => b.resolution_time - a.resolution_time);
+            
+            if (sortedMarkets.length === 0 && sortedResolved.length === 0) {
               return (
                 <Card className="text-center py-12">
                   <CardContent>
@@ -416,114 +428,203 @@ export default function Predictions() {
             }
             
             return (
-            <div className="grid gap-4">
-              {sortedMarkets.map((market) => {
-                const odds = getOdds(market);
-                const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
-                const pendingBets = getBetsForMarket(market.market_id);
-                
-                return (
-                  <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-xl">{market.title}</CardTitle>
-                          {market.description && (
-                            <CardDescription className="mt-2">{market.description}</CardDescription>
-                          )}
-                        </div>
-                        {getStatusBadge(market)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {/* Odds bar */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-emerald-500 font-medium flex items-center gap-1">
-                              <TrendingUp className="w-4 h-4" /> YES {odds.yes}%
-                            </span>
-                            <span className="text-red-500 font-medium flex items-center gap-1">
-                              NO {odds.no}% <TrendingDown className="w-4 h-4" />
-                            </span>
-                          </div>
-                          <div className="h-3 bg-muted rounded-full overflow-hidden flex">
-                            <div 
-                              className="bg-emerald-500 transition-all duration-300"
-                              style={{ width: `${odds.yes}%` }}
-                            />
-                            <div 
-                              className="bg-red-500 transition-all duration-300"
-                              style={{ width: `${odds.no}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>{market.yes_pool_xmr.toFixed(4)} XMR</span>
-                            <span>Pool: {totalPool.toFixed(4)} XMR</span>
-                            <span>{market.no_pool_xmr.toFixed(4)} XMR</span>
-                          </div>
-                        </div>
+            <>
+              {/* Active Markets */}
+              {sortedMarkets.length > 0 && (
+                <div className="space-y-4 mb-8">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Active Markets ({sortedMarkets.length})
+                  </h2>
+                  <div className="grid gap-4">
+                    {sortedMarkets.map((market) => {
+                      const odds = getOdds(market);
+                      const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                      const pendingBets = getBetsForMarket(market.market_id);
+                      
+                      return (
+                        <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <CardTitle className="text-xl">{market.title}</CardTitle>
+                                {market.description && (
+                                  <CardDescription className="mt-2">{market.description}</CardDescription>
+                                )}
+                              </div>
+                              {getStatusBadge(market)}
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {/* Odds bar */}
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-emerald-500 font-medium flex items-center gap-1">
+                                    <TrendingUp className="w-4 h-4" /> YES {odds.yes}%
+                                  </span>
+                                  <span className="text-red-500 font-medium flex items-center gap-1">
+                                    NO {odds.no}% <TrendingDown className="w-4 h-4" />
+                                  </span>
+                                </div>
+                                <div className="h-3 bg-muted rounded-full overflow-hidden flex">
+                                  <div 
+                                    className="bg-emerald-500 transition-all duration-300"
+                                    style={{ width: `${odds.yes}%` }}
+                                  />
+                                  <div 
+                                    className="bg-red-500 transition-all duration-300"
+                                    style={{ width: `${odds.no}%` }}
+                                  />
+                                </div>
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                  <span>{market.yes_pool_xmr.toFixed(4)} XMR</span>
+                                  <span>Pool: {totalPool.toFixed(4)} XMR</span>
+                                  <span>{market.no_pool_xmr.toFixed(4)} XMR</span>
+                                </div>
+                              </div>
+                              
+                              {/* Local pending bets */}
+                              {pendingBets.length > 0 && (
+                                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-amber-500" />
+                                    Your Pending Bets
+                                  </p>
+                                  {pendingBets.map((bet) => (
+                                    <div key={bet.bet_id} className="flex justify-between text-sm">
+                                      <span className={bet.side === 'YES' ? 'text-emerald-500' : 'text-red-500'}>
+                                        ${bet.amount_usd.toFixed(2)} ({bet.amount_xmr.toFixed(4)} XMR) on {bet.side}
+                                      </span>
+                                      <Badge variant="outline" className="text-amber-500 border-amber-500">
+                                        {bet.status === 'awaiting_deposit' ? 'Awaiting Deposit' : bet.status}
+                                      </Badge>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Meta info */}
+                              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                <span>Resolves: {formatResolutionDate(market.resolution_time)}</span>
+                                {market.oracle_asset && (
+                                  <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
+                                )}
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-2 pt-2">
+                                <Button
+                                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                  onClick={() => {
+                                    setSelectedMarket(market);
+                                    setBetSide('yes');
+                                    setBetDialogOpen(true);
+                                  }}
+                                >
+                                  <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  className="flex-1"
+                                  onClick={() => {
+                                    setSelectedMarket(market);
+                                    setBetSide('no');
+                                    setBetDialogOpen(true);
+                                  }}
+                                >
+                                  <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* Resolved Markets */}
+              {sortedResolved.length > 0 && (
+                <Collapsible defaultOpen={false}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between mb-4 hover:bg-muted/50">
+                      <span className="flex items-center gap-2 text-lg font-semibold">
+                        <CheckCircle className="w-5 h-5" />
+                        Resolved Markets ({sortedResolved.length})
+                      </span>
+                      <ChevronRight className="w-5 h-5 transition-transform group-data-[state=open]:rotate-90" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="grid gap-4">
+                      {sortedResolved.map((market) => {
+                        const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
                         
-                        {/* Local pending bets */}
-                        {pendingBets.length > 0 && (
-                          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-                            <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-amber-500" />
-                              Your Pending Bets
-                            </p>
-                            {pendingBets.map((bet) => (
-                              <div key={bet.bet_id} className="flex justify-between text-sm">
-                                <span className={bet.side === 'YES' ? 'text-emerald-500' : 'text-red-500'}>
-                                  ${bet.amount_usd.toFixed(2)} ({bet.amount_xmr.toFixed(4)} XMR) on {bet.side}
-                                </span>
-                                <Badge variant="outline" className="text-amber-500 border-amber-500">
-                                  {bet.status === 'awaiting_deposit' ? 'Awaiting Deposit' : bet.status}
+                        return (
+                          <Card key={market.market_id} className="opacity-75">
+                            <CardHeader>
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <CardTitle className="text-lg">{market.title}</CardTitle>
+                                  {market.description && (
+                                    <CardDescription className="mt-1 text-sm">{market.description}</CardDescription>
+                                  )}
+                                </div>
+                                <Badge 
+                                  className={market.outcome === 'YES' 
+                                    ? 'bg-emerald-500/20 text-emerald-400' 
+                                    : 'bg-red-500/20 text-red-400'
+                                  }
+                                >
+                                  {market.outcome === 'YES' ? (
+                                    <><CheckCircle className="w-3 h-3 mr-1" /> YES Won</>
+                                  ) : (
+                                    <><XCircle className="w-3 h-3 mr-1" /> NO Won</>
+                                  )}
                                 </Badge>
                               </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Meta info */}
-                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>Resolves: {formatResolutionDate(market.resolution_time)}</span>
-                          {market.oracle_asset && (
-                            <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        {!market.resolved && (
-                          <div className="flex gap-2 pt-2">
-                            <Button
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                              onClick={() => {
-                                setSelectedMarket(market);
-                                setBetSide('yes');
-                                setBetDialogOpen(true);
-                              }}
-                            >
-                              <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              className="flex-1"
-                              onClick={() => {
-                                setSelectedMarket(market);
-                                setBetSide('no');
-                                setBetDialogOpen(true);
-                              }}
-                            >
-                              <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3">
+                                {/* Final pool distribution */}
+                                <div className="flex justify-between text-sm">
+                                  <span className={market.outcome === 'YES' ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
+                                    YES: {market.yes_pool_xmr.toFixed(4)} XMR
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    Total: {totalPool.toFixed(4)} XMR
+                                  </span>
+                                  <span className={market.outcome === 'NO' ? 'text-red-500 font-medium' : 'text-muted-foreground'}>
+                                    NO: {market.no_pool_xmr.toFixed(4)} XMR
+                                  </span>
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                  <span>Resolved: {formatResolutionDate(market.resolution_time)}</span>
+                                  {market.oracle_asset && (
+                                    <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+              
+              {sortedMarkets.length === 0 && sortedResolved.length === 0 && (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <p className="text-muted-foreground">No active markets available.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           );
           })()}
         </main>
