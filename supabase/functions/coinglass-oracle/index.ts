@@ -153,7 +153,7 @@ serve(async (req) => {
       );
     }
 
-    // Auto-resolve a prediction market based on price
+// Auto-resolve a prediction market based on price
     if (action === "resolve-market") {
       const { marketId, targetPrice, comparison } = await req.json();
 
@@ -218,6 +218,137 @@ serve(async (req) => {
           comparison,
           timestamp: Date.now(),
         }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Auto-check and resolve all pending markets past their resolution_date
+    if (action === "check-and-resolve") {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+      // Fetch all open markets past resolution date
+      const { data: pendingMarkets, error: fetchError } = await supabase
+        .from("prediction_markets")
+        .select("*")
+        .eq("status", "open")
+        .lte("resolution_date", new Date().toISOString());
+
+      if (fetchError) {
+        console.error("Failed to fetch pending markets:", fetchError);
+        throw new Error("Failed to fetch pending markets");
+      }
+
+      if (!pendingMarkets || pendingMarkets.length === 0) {
+        console.log("No markets pending resolution");
+        return new Response(
+          JSON.stringify({ resolved: 0, message: "No markets pending resolution" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      console.log(`Found ${pendingMarkets.length} markets to resolve`);
+
+      const results: Array<{ id: string; outcome: string; price: number }> = [];
+
+      for (const market of pendingMarkets) {
+        try {
+          // Parse the question to extract asset and price range
+          // Format: "Will Bitcoin (BTC) be between $88,000 and $89,000 on 14 Dec 2025?"
+          const question = market.question || "";
+          
+          // Extract ticker from parentheses
+          const tickerMatch = question.match(/\(([A-Z]+)\)/);
+          const ticker = tickerMatch ? tickerMatch[1] : "BTC";
+          
+          // Extract price values
+          const priceMatches = question.match(/\$([0-9,]+)/g);
+          if (!priceMatches || priceMatches.length < 1) {
+            console.warn(`Could not parse prices from: ${question}`);
+            continue;
+          }
+
+          const prices = priceMatches.map((p: string) => parseFloat(p.replace(/[$,]/g, "")));
+          
+          // Determine comparison type
+          let comparison: "above" | "below" | "between";
+          let targetLow: number;
+          let targetHigh: number | undefined;
+
+          if (question.toLowerCase().includes("between") && prices.length >= 2) {
+            comparison = "between";
+            targetLow = Math.min(...prices);
+            targetHigh = Math.max(...prices);
+          } else if (question.toLowerCase().includes("above")) {
+            comparison = "above";
+            targetLow = prices[0];
+          } else if (question.toLowerCase().includes("below")) {
+            comparison = "below";
+            targetLow = prices[0];
+          } else {
+            // Default to "between" if two prices, "above" otherwise
+            if (prices.length >= 2) {
+              comparison = "between";
+              targetLow = Math.min(...prices);
+              targetHigh = Math.max(...prices);
+            } else {
+              comparison = "above";
+              targetLow = prices[0];
+            }
+          }
+
+          // Fetch current price
+          const coinId = COINGECKO_IDS[ticker] || ticker.toLowerCase();
+          const { data: priceData, rateLimited } = await fetchCoinGeckoPrices([coinId]);
+
+          if (rateLimited) {
+            console.warn(`Rate limited while resolving market ${market.id}`);
+            continue;
+          }
+
+          const currentPrice = priceData[coinId]?.usd;
+          if (!currentPrice) {
+            console.warn(`No price data for ${ticker}`);
+            continue;
+          }
+
+          // Determine outcome
+          let outcome: "yes" | "no";
+          if (comparison === "between" && targetHigh !== undefined) {
+            outcome = currentPrice >= targetLow && currentPrice <= targetHigh ? "yes" : "no";
+          } else if (comparison === "above") {
+            outcome = currentPrice > targetLow ? "yes" : "no";
+          } else {
+            outcome = currentPrice < targetLow ? "yes" : "no";
+          }
+
+          console.log(
+            `Resolving ${market.id}: ${ticker} @ $${currentPrice}, target: ${comparison} $${targetLow}${targetHigh ? `-$${targetHigh}` : ""} = ${outcome}`,
+          );
+
+          // Update market
+          const { error: updateError } = await supabase
+            .from("prediction_markets")
+            .update({
+              status: `resolved_${outcome}`,
+              resolved_at: new Date().toISOString(),
+            })
+            .eq("id", market.id);
+
+          if (updateError) {
+            console.error(`Failed to resolve market ${market.id}:`, updateError);
+            continue;
+          }
+
+          results.push({ id: market.id, outcome, price: currentPrice });
+        } catch (err) {
+          console.error(`Error resolving market ${market.id}:`, err);
+        }
+      }
+
+      console.log(`Resolved ${results.length} markets`);
+
+      return new Response(
+        JSON.stringify({ resolved: results.length, results }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
