@@ -231,9 +231,9 @@ export function useSportsEvents() {
         title: `Will ${selectedTeam} win?`,
         description: `${sportLabel}: ${event.away_team} @ ${event.home_team}`,
         oracle_type: 'sports',
-        oracle_asset: event.event_id, // Using oracle_asset to store event_id
-        oracle_condition: 'winner',
-        oracle_value: 0, // Not used for sports, team stored in title
+        oracle_asset: event.event_id,
+        oracle_condition: selectedTeam, // Team name for resolution
+        oracle_value: 0,
         resolution_time: resolutionTime,
       });
       
