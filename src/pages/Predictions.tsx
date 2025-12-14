@@ -3,19 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { toast } from 'sonner';
-import { Plus, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -121,15 +121,14 @@ export default function Predictions() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { privateKeyUser: pkUser, isAuthenticated: isPkAuthenticated } = usePrivateKeyAuth();
-  const { isAdmin } = useIsAdmin();
+  
   
   const [markets, setMarkets] = useState<Market[]>([]);
   const [userPositions, setUserPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
-  const [createOpen, setCreateOpen] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [betDialogOpen, setBetDialogOpen] = useState(false);
-  const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [requestOracleOpen, setRequestOracleOpen] = useState(false);
   const [requestedAsset, setRequestedAsset] = useState('');
@@ -138,17 +137,12 @@ export default function Predictions() {
   const [oraclePrices, setOraclePrices] = useState<Record<string, { price: number; change24h: number }>>({});
   const [pricesLoading, setPricesLoading] = useState(true);
   
-  // Form states
-  const [newQuestion, setNewQuestion] = useState('');
-  const [newDescription, setNewDescription] = useState('');
+  // Form states for oracle market creation
   const [newResolutionDate, setNewResolutionDate] = useState('');
-  const [newCriteria, setNewCriteria] = useState('');
   const [selectedOracleAsset, setSelectedOracleAsset] = useState<string | null>(null);
   const [targetPrice, setTargetPrice] = useState('');
   const [targetPriceMax, setTargetPriceMax] = useState('');
-  const [marketType, setMarketType] = useState<'above' | 'below' | 'between' | 'custom'>('above');
-  const [customQuestion, setCustomQuestion] = useState('');
-  const [customCriteria, setCustomCriteria] = useState('');
+  const [marketType, setMarketType] = useState<'above' | 'below' | 'between'>('above');
   
   // Bet form
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
@@ -240,40 +234,6 @@ export default function Predictions() {
   };
 
   const handleCreateOracleMarket = async (asset: OracleAsset) => {
-    if (marketType === 'custom') {
-      if (!customQuestion.trim()) {
-        toast.error('Question is required for custom markets');
-        return;
-      }
-      if (!newResolutionDate) {
-        toast.error('Resolution date is required');
-        return;
-      }
-      
-      const customResolutionDate = newResolutionDate ? new Date(newResolutionDate).toISOString() : null;
-      
-      const marketData = {
-        question: customQuestion.trim(),
-        description: `Custom ${asset.symbol} market`,
-        resolution_date: customResolutionDate,
-        resolution_criteria: customCriteria.trim() || 'Manually resolved by market creator.',
-        creator_id: user?.id || null,
-        creator_pk_id: pkUser?.id || null,
-      };
-      
-      const { error } = await supabase.from('prediction_markets').insert(marketData);
-      
-      if (error) {
-        toast.error('Failed to create market');
-        console.error(error);
-      } else {
-        toast.success('Custom market created!');
-        resetOracleForm();
-        fetchMarkets();
-      }
-      return;
-    }
-    
     if (!targetPrice || !newResolutionDate) {
       toast.error('Target price and resolution date are required');
       return;
@@ -354,42 +314,8 @@ export default function Predictions() {
     setTargetPriceMax('');
     setNewResolutionDate('');
     setMarketType('above');
-    setCustomQuestion('');
-    setCustomCriteria('');
   };
 
-  const handleCreateMarket = async () => {
-    if (!newQuestion.trim()) {
-      toast.error('Question is required');
-      return;
-    }
-    
-    const parsedResolutionDate = newResolutionDate ? new Date(newResolutionDate).toISOString() : null;
-    
-    const marketData = {
-      question: newQuestion.trim(),
-      description: newDescription.trim() || null,
-      resolution_date: parsedResolutionDate,
-      resolution_criteria: newCriteria.trim() || null,
-      creator_id: user?.id || null,
-      creator_pk_id: pkUser?.id || null,
-    };
-    
-    const { error } = await supabase.from('prediction_markets').insert(marketData);
-    
-    if (error) {
-      toast.error('Failed to create market');
-      console.error(error);
-    } else {
-      toast.success('Market created!');
-      setCreateOpen(false);
-      setNewQuestion('');
-      setNewDescription('');
-      setNewResolutionDate('');
-      setNewCriteria('');
-      fetchMarkets();
-    }
-  };
 
   const handlePlaceBet = async () => {
     if (!selectedMarket) return;
@@ -441,25 +367,6 @@ export default function Predictions() {
     setPayoutAddress('');
     fetchMarkets();
     fetchUserPositions();
-  };
-
-  const handleResolveMarket = async (outcome: 'yes' | 'no' | 'cancelled') => {
-    if (!selectedMarket) return;
-    
-    const status = outcome === 'cancelled' ? 'cancelled' : `resolved_${outcome}`;
-    
-    const { error } = await supabase
-      .from('prediction_markets')
-      .update({ status, resolved_at: new Date().toISOString() })
-      .eq('id', selectedMarket.id);
-    
-    if (error) {
-      toast.error('Failed to resolve market');
-    } else {
-      toast.success(`Market resolved: ${outcome.toUpperCase()}`);
-      setResolveDialogOpen(false);
-      fetchMarkets();
-    }
   };
 
   const getOdds = (market: Market) => {
@@ -598,12 +505,6 @@ export default function Predictions() {
     }
   };
 
-  const canResolve = (market: Market) => {
-    if (isAdmin) return true;
-    if (user && market.creator_id === user.id) return true;
-    if (pkUser && market.creator_pk_id === pkUser.id) return true;
-    return false;
-  };
   
   // Check if market can be auto-resolved (is an oracle market)
   const canAutoResolve = (market: Market) => {
@@ -723,95 +624,58 @@ export default function Predictions() {
                                       <SelectItem value="above">Price Above</SelectItem>
                                       <SelectItem value="below">Price Below</SelectItem>
                                       <SelectItem value="between">Price Between</SelectItem>
-                                      <SelectItem value="custom">Custom (write your own)</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                                 
-                                {marketType !== 'custom' ? (
-                                  <>
-                                    <div>
-                                      <Label className="text-xs">{marketType === 'between' ? 'Min Price ($)' : 'Target Price ($)'}</Label>
-                                      <Input
-                                        type="number"
-                                        placeholder={priceData?.price.toString() || '0'}
-                                        value={targetPrice}
-                                        onChange={(e) => setTargetPrice(e.target.value)}
-                                        className="h-7 text-sm"
-                                      />
-                                    </div>
-                                    
-                                    {marketType === 'between' && (
-                                      <div>
-                                        <Label className="text-xs">Max Price ($)</Label>
-                                        <Input
-                                          type="number"
-                                          placeholder={(priceData?.price ? priceData.price * 1.1 : 0).toFixed(2)}
-                                          value={targetPriceMax}
-                                          onChange={(e) => setTargetPriceMax(e.target.value)}
-                                          className="h-7 text-sm"
-                                        />
-                                      </div>
+                                <div>
+                                  <Label className="text-xs">{marketType === 'between' ? 'Min Price ($)' : 'Target Price ($)'}</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder={priceData?.price.toString() || '0'}
+                                    value={targetPrice}
+                                    onChange={(e) => setTargetPrice(e.target.value)}
+                                    className="h-7 text-sm"
+                                  />
+                                </div>
+                                
+                                {marketType === 'between' && (
+                                  <div>
+                                    <Label className="text-xs">Max Price ($)</Label>
+                                    <Input
+                                      type="number"
+                                      placeholder={(priceData?.price ? priceData.price * 1.1 : 0).toFixed(2)}
+                                      value={targetPriceMax}
+                                      onChange={(e) => setTargetPriceMax(e.target.value)}
+                                      className="h-7 text-sm"
+                                    />
+                                  </div>
+                                )}
+                                
+                                <div>
+                                  <Label className="text-xs">Resolution Date</Label>
+                                  <Input
+                                    type="datetime-local"
+                                    value={newResolutionDate}
+                                    onChange={(e) => setNewResolutionDate(e.target.value)}
+                                    className="h-7 text-sm"
+                                  />
+                                </div>
+                                
+                                {/* Auto-generated criteria preview */}
+                                {targetPrice && newResolutionDate && (
+                                  <div className="p-2 bg-background/50 rounded text-xs text-muted-foreground border border-border/50">
+                                    <p className="font-medium text-foreground mb-1">Auto-generated criteria:</p>
+                                    {marketType === 'above' && (
+                                      <p>Resolves YES if {asset.symbol} ≥ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
                                     )}
-                                    
-                                    <div>
-                                      <Label className="text-xs">Resolution Date</Label>
-                                      <Input
-                                        type="datetime-local"
-                                        value={newResolutionDate}
-                                        onChange={(e) => setNewResolutionDate(e.target.value)}
-                                        className="h-7 text-sm"
-                                      />
-                                    </div>
-                                    
-                                    {/* Auto-generated criteria preview */}
-                                    {targetPrice && newResolutionDate && (
-                                      <div className="p-2 bg-background/50 rounded text-xs text-muted-foreground border border-border/50">
-                                        <p className="font-medium text-foreground mb-1">Auto-generated criteria:</p>
-                                        {marketType === 'above' && (
-                                          <p>Resolves YES if {asset.symbol} ≥ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
-                                        )}
-                                        {marketType === 'below' && (
-                                          <p>Resolves YES if {asset.symbol} ≤ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
-                                        )}
-                                        {marketType === 'between' && targetPriceMax && (
-                                          <p>Resolves YES if {asset.symbol} between ${parseFloat(targetPrice).toLocaleString()} and ${parseFloat(targetPriceMax).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
-                                        )}
-                                      </div>
+                                    {marketType === 'below' && (
+                                      <p>Resolves YES if {asset.symbol} ≤ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
                                     )}
-                                  </>
-                                ) : (
-                                  <>
-                                    <div>
-                                      <Label className="text-xs">Question *</Label>
-                                      <Input
-                                        placeholder={`Will ${asset.symbol}...?`}
-                                        value={customQuestion}
-                                        onChange={(e) => setCustomQuestion(e.target.value)}
-                                        className="h-7 text-sm"
-                                      />
-                                    </div>
-                                    
-                                    <div>
-                                      <Label className="text-xs">Resolution Criteria</Label>
-                                      <Textarea
-                                        placeholder="How will this market be resolved?"
-                                        value={customCriteria}
-                                        onChange={(e) => setCustomCriteria(e.target.value)}
-                                        className="text-sm min-h-[60px]"
-                                      />
-                                    </div>
-                                    
-                                    <div>
-                                      <Label className="text-xs">Resolution Date</Label>
-                                      <Input
-                                        type="datetime-local"
-                                        value={newResolutionDate}
-                                        onChange={(e) => setNewResolutionDate(e.target.value)}
-                                        className="h-7 text-sm"
-                                      />
-                                    </div>
-                                  </>
+                                    {marketType === 'between' && targetPriceMax && (
+                                      <p>Resolves YES if {asset.symbol} between ${parseFloat(targetPrice).toLocaleString()} and ${parseFloat(targetPriceMax).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
+                                    )}
+                                  </div>
                                 )}
                                 
                                 <Button
@@ -882,62 +746,6 @@ export default function Predictions() {
               <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
             </div>
             
-            {(user || pkUser) && (
-              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Custom Market
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create Custom Market</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    <div>
-                      <Label htmlFor="question">Question *</Label>
-                      <Input
-                        id="question"
-                        placeholder="Will X happen by Y date?"
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Additional context and rules..."
-                        value={newDescription}
-                        onChange={(e) => setNewDescription(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="resolution-date">Resolution Date</Label>
-                      <Input
-                        id="resolution-date"
-                        type="datetime-local"
-                        value={newResolutionDate}
-                        onChange={(e) => setNewResolutionDate(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="criteria">Resolution Criteria</Label>
-                      <Textarea
-                        id="criteria"
-                        placeholder="How will this be resolved?"
-                        value={newCriteria}
-                        onChange={(e) => setNewCriteria(e.target.value)}
-                      />
-                    </div>
-                    <Button onClick={handleCreateMarket} className="w-full">
-                      Create Market
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
           </div>
 
           {loading ? (
@@ -1060,17 +868,6 @@ export default function Predictions() {
                                 <RefreshCw className="w-4 h-4 mr-2" /> Auto-Resolve
                               </Button>
                             )}
-                            {canResolve(market) && !canAutoResolve(market) && (
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedMarket(market);
-                                  setResolveDialogOpen(true);
-                                }}
-                              >
-                                {parseOracleMarketCriteria(market) ? 'Resolve (Oracle)' : 'Resolve'}
-                              </Button>
-                            )}
                           </div>
                         )}
                       </div>
@@ -1134,102 +931,6 @@ export default function Predictions() {
         </DialogContent>
       </Dialog>
 
-      {/* Resolve Dialog */}
-      <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Resolve Market</DialogTitle>
-          </DialogHeader>
-          {selectedMarket && (
-            <div className="space-y-4 mt-4">
-              <p className="text-sm font-medium">{selectedMarket.question}</p>
-              {selectedMarket.resolution_criteria && (
-                <p className="text-xs text-muted-foreground">Criteria: {selectedMarket.resolution_criteria}</p>
-              )}
-              
-              {/* Show auto-resolve option for oracle markets */}
-              {parseOracleMarketCriteria(selectedMarket) ? (
-                <div className="space-y-3">
-                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                    <p className="text-sm text-amber-400">
-                      This is an oracle price market. Click below to fetch the current price and resolve automatically.
-                    </p>
-                  </div>
-                  <Button
-                    className="w-full bg-amber-600 hover:bg-amber-700"
-                    onClick={() => {
-                      setResolveDialogOpen(false);
-                      handleAutoResolve(selectedMarket);
-                    }}
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" /> Auto-Resolve via Oracle
-                  </Button>
-                  
-                  {isAdmin && (
-                    <>
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t border-border" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-background px-2 text-muted-foreground">Admin Override</span>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => handleResolveMarket('yes')}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" /> YES
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleResolveMarket('no')}
-                        >
-                          <XCircle className="w-4 h-4 mr-1" /> NO
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleResolveMarket('cancelled')}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                /* Manual resolution for non-oracle markets */
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => handleResolveMarket('yes')}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" /> YES
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleResolveMarket('no')}
-                  >
-                    <XCircle className="w-4 h-4 mr-2" /> NO
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleResolveMarket('cancelled')}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Request Oracle Dialog */}
       <Dialog open={requestOracleOpen} onOpenChange={setRequestOracleOpen}>
         <DialogContent>
           <DialogHeader>
