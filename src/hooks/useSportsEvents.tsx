@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 
@@ -20,6 +20,10 @@ export interface SportsScore {
   completed: boolean;
   scores: { name: string; score: string }[];
   winner: string | null;
+}
+
+export interface LiveScores {
+  [eventId: string]: SportsScore;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -44,6 +48,9 @@ export function useSportsEvents() {
   const [events, setEvents] = useState<SportsEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [liveScores, setLiveScores] = useState<LiveScores>({});
+  const [pollingActive, setPollingActive] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchEvents = useCallback(async (sport?: string) => {
     setLoading(true);
@@ -68,6 +75,65 @@ export function useSportsEvents() {
       console.error('Failed to get event result:', e);
       return null;
     }
+  }, []);
+
+  const fetchLiveScores = useCallback(async (eventIds: string[]) => {
+    if (eventIds.length === 0) return;
+    
+    const scores: LiveScores = {};
+    
+    await Promise.all(
+      eventIds.map(async (eventId) => {
+        try {
+          const score = await sportsRequest<SportsScore>(`/result/${eventId}`);
+          if (score && score.scores && score.scores.length > 0) {
+            scores[eventId] = score;
+          }
+        } catch (e) {
+          // Silently ignore - game might not have scores yet
+        }
+      })
+    );
+    
+    setLiveScores(prev => ({ ...prev, ...scores }));
+  }, []);
+
+  const startLiveScorePolling = useCallback((eventIds: string[]) => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    
+    if (eventIds.length === 0) {
+      setPollingActive(false);
+      return;
+    }
+    
+    setPollingActive(true);
+    
+    // Fetch immediately
+    fetchLiveScores(eventIds);
+    
+    // Poll every 30 seconds
+    pollingIntervalRef.current = setInterval(() => {
+      fetchLiveScores(eventIds);
+    }, 30000);
+  }, [fetchLiveScores]);
+
+  const stopLiveScorePolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    setPollingActive(false);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
   }, []);
 
   const createSportsMarket = useCallback(async (
@@ -155,8 +221,13 @@ export function useSportsEvents() {
     events,
     loading,
     error,
+    liveScores,
+    pollingActive,
     fetchEvents,
     getEventResult,
+    fetchLiveScores,
+    startLiveScorePolling,
+    stopLiveScorePolling,
     createSportsMarket,
     autoCreateMarketsForNext24Hours,
   };
