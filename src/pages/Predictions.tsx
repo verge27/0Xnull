@@ -111,6 +111,89 @@ export default function Predictions() {
   // Filter/sort state
   const [filterAsset, setFilterAsset] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'resolution' | 'pool' | 'newest'>('resolution');
+  const [resettingMarkets, setResettingMarkets] = useState(false);
+
+  // Consensus price targets (credible weekly targets based on current prices)
+  const getPriceTarget = (symbol: string, currentPrice: number): number => {
+    // Set targets ~10-15% above current price for bullish markets
+    const targets: Record<string, number> = {
+      'BTC': 95000,
+      'ETH': 3500,
+      'SOL': 150,
+      'LTC': 90,
+      'XMR': 450,
+      'DASH': 50,
+      'ZEC': 475,
+      'ARRR': 0.35,
+      'DOGE': 0.15,
+      'SHIB': 0.00001,
+      'PEPE': 0.000005,
+      'BONK': 0.00001,
+      'FARTCOIN': 0.40,
+      'ADA': 0.45,
+      'AVAX': 15,
+      'DOT': 2.25,
+      'ATOM': 2.50,
+      'NEAR': 1.85,
+      'LINK': 15,
+      'UNI': 6,
+      'AAVE': 220,
+    };
+    return targets[symbol] || Math.round(currentPrice * 1.1 * 100) / 100;
+  };
+
+  const resetMarketsWithNewPrices = async () => {
+    if (!window.confirm('This will delete all existing markets and create new ones. Continue?')) return;
+    
+    setResettingMarkets(true);
+    try {
+      // Delete existing markets
+      for (const market of markets) {
+        try {
+          await api.deleteMarket(market.market_id);
+        } catch (e) {
+          console.log(`Could not delete ${market.market_id}:`, e);
+        }
+      }
+
+      // Calculate resolution time (1 week from now)
+      const resolutionTime = Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000);
+      const resolutionDate = new Date(resolutionTime * 1000);
+      const dateStr = resolutionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      // Create new markets for each asset with price data
+      const assetsToCreate = ORACLE_ASSETS.filter(a => oraclePrices[a.symbol]);
+      
+      for (const asset of assetsToCreate) {
+        const currentPrice = oraclePrices[asset.symbol].price;
+        const targetPrice = getPriceTarget(asset.symbol, currentPrice);
+        const marketId = `${asset.symbol.toLowerCase()}_above_${String(targetPrice).replace('.', '_')}_weekly`;
+        
+        try {
+          await api.createMarket({
+            market_id: marketId,
+            title: `Will ${asset.symbol} be above $${targetPrice < 0.01 ? targetPrice.toFixed(6) : targetPrice.toLocaleString()} on ${dateStr}?`,
+            description: `Resolves YES if CoinGecko ${asset.symbol}/USD price is above $${targetPrice < 0.01 ? targetPrice.toFixed(6) : targetPrice.toLocaleString()} at 00:00 UTC on ${dateStr}`,
+            oracle_type: 'price',
+            oracle_asset: asset.symbol,
+            oracle_condition: 'above',
+            oracle_value: targetPrice,
+            resolution_time: resolutionTime,
+          });
+        } catch (e) {
+          console.error(`Failed to create market for ${asset.symbol}:`, e);
+        }
+      }
+
+      toast.success('Markets reset successfully!');
+      await fetchMarkets();
+    } catch (error) {
+      toast.error('Failed to reset markets');
+      console.error(error);
+    } finally {
+      setResettingMarkets(false);
+    }
+  };
 
   useEffect(() => {
     fetchMarkets();
@@ -336,6 +419,14 @@ export default function Predictions() {
               <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={resetMarketsWithNewPrices} 
+                disabled={resettingMarkets || Object.keys(oraclePrices).length === 0}
+              >
+                {resettingMarkets ? 'Resetting...' : 'Reset Markets'}
+              </Button>
               <CreateMarketDialog onMarketCreated={fetchMarkets} />
               <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
