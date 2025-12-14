@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.coinglass-oracle]
 verify_jwt = false
+
+[functions.auto-create-sports-markets]
+verify_jwt = false
