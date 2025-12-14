@@ -15,6 +15,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
+import { TeamLogo } from '@/components/TeamLogo';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, Trophy, Calendar, Users, Zap } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -281,8 +282,12 @@ export default function SportsPredictions() {
                                 </div>
                               </div>
                               
-                              <div className="font-medium text-sm mb-1">
-                                {event.away_team} <span className="text-muted-foreground">@</span> {event.home_team}
+                              <div className="flex items-center gap-2 font-medium text-sm mb-1">
+                                <TeamLogo teamName={event.away_team} sport={event.sport} size="sm" />
+                                <span>{event.away_team}</span>
+                                <span className="text-muted-foreground">@</span>
+                                <TeamLogo teamName={event.home_team} sport={event.sport} size="sm" />
+                                <span>{event.home_team}</span>
                               </div>
                               
                               <div className="flex items-center justify-between">
@@ -521,7 +526,7 @@ export default function SportsPredictions() {
                     m.market_id === `sports_${teamSelectDialog.event!.event_id}_${teamSelectDialog.event!.home_team.toLowerCase().replace(/\s+/g, '_')}`
                   )}
                 >
-                  <span className="mr-3">🏠</span>
+                  <TeamLogo teamName={teamSelectDialog.event.home_team} sport={teamSelectDialog.event.sport} size="lg" className="mr-3" />
                   {teamSelectDialog.event.home_team}
                   {markets.some(m => 
                     m.market_id === `sports_${teamSelectDialog.event!.event_id}_${teamSelectDialog.event!.home_team.toLowerCase().replace(/\s+/g, '_')}`
@@ -536,7 +541,7 @@ export default function SportsPredictions() {
                     m.market_id === `sports_${teamSelectDialog.event!.event_id}_${teamSelectDialog.event!.away_team.toLowerCase().replace(/\s+/g, '_')}`
                   )}
                 >
-                  <span className="mr-3">✈️</span>
+                  <TeamLogo teamName={teamSelectDialog.event.away_team} sport={teamSelectDialog.event.sport} size="lg" className="mr-3" />
                   {teamSelectDialog.event.away_team}
                   {markets.some(m => 
                     m.market_id === `sports_${teamSelectDialog.event!.event_id}_${teamSelectDialog.event!.away_team.toLowerCase().replace(/\s+/g, '_')}`
