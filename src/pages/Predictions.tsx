@@ -352,12 +352,10 @@ export default function Predictions() {
         style={{
           backgroundImage: `url(${predictionsBackground})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: 'top',
           backgroundAttachment: 'fixed',
         }}
-      >
-        <div className="absolute inset-0 bg-black/70" />
-      </div>
+      />
       
       <div className="relative z-10">
       <Navbar />
