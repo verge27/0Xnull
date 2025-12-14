@@ -42,6 +42,8 @@ import Kokoro from "./pages/Kokoro";
 import Verify from "./pages/Verify";
 import Support from "./pages/Support";
 import Predictions from "./pages/Predictions";
+import CryptoPredictions from "./pages/CryptoPredictions";
+import SportsPredictions from "./pages/SportsPredictions";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +92,8 @@ const App = () => (
             <Route path="/kokoro" element={<Kokoro />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/support" element={<Support />} />
-            <Route path="/predictions" element={<Predictions />} />
+            <Route path="/predictions" element={<CryptoPredictions />} />
+            <Route path="/sports-predictions" element={<SportsPredictions />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
