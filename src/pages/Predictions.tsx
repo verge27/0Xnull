@@ -150,6 +150,9 @@ export default function Predictions() {
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmount, setBetAmount] = useState('');
   const [payoutAddress, setPayoutAddress] = useState('');
+  
+  // Auto-resolve countdown
+  const [nextCheckIn, setNextCheckIn] = useState(30);
 
   useEffect(() => {
     fetchMarkets();
@@ -498,14 +501,26 @@ export default function Predictions() {
 
   // Check every 30 seconds for overdue markets
   useEffect(() => {
+    setNextCheckIn(30);
+    
     const interval = setInterval(() => {
       if (markets.length > 0) {
         checkAndResolveOverdueMarkets();
+        setNextCheckIn(30);
       }
     }, 30000);
 
     return () => clearInterval(interval);
   }, [markets]);
+
+  // Countdown timer for next check
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setNextCheckIn(prev => prev > 0 ? prev - 1 : 30);
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, []);
 
   const getStatusBadge = (market: Market) => {
     const status = market.status;
@@ -764,7 +779,10 @@ export default function Predictions() {
               <h1 className="text-3xl font-bold">Prediction Markets</h1>
               <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
             </div>
-            
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+              <RefreshCw className="w-3 h-3" />
+              <span>Oracle check in {nextCheckIn}s</span>
+            </div>
           </div>
 
           {loading ? (
