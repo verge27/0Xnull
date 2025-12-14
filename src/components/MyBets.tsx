@@ -21,6 +21,40 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
   const [pollingBets, setPollingBets] = useState<Set<string>>(new Set());
   const [payoutInputs, setPayoutInputs] = useState<Record<string, string>>({});
   const [submittingPayout, setSubmittingPayout] = useState<string | null>(null);
+  const [previousStatuses, setPreviousStatuses] = useState<Record<string, string>>({});
+
+  // Track status changes and show notifications
+  useEffect(() => {
+    bets.forEach(bet => {
+      const prevStatus = previousStatuses[bet.bet_id];
+      if (prevStatus && prevStatus !== bet.status) {
+        if (bet.status === 'confirmed') {
+          toast.success(`Deposit confirmed! Your ${bet.side} bet of $${bet.amount_usd} is now active.`, {
+            duration: 8000,
+          });
+        } else if (bet.status === 'won') {
+          toast.success(`You won! Your ${bet.side} bet on ${bet.market_id} was successful!`, {
+            duration: 10000,
+          });
+        } else if (bet.status === 'lost') {
+          toast.error(`Your ${bet.side} bet on ${bet.market_id} did not win.`, {
+            duration: 8000,
+          });
+        } else if (bet.status === 'paid') {
+          toast.success(`Payout sent for your winning bet!`, {
+            duration: 8000,
+          });
+        }
+      }
+    });
+    
+    // Update previous statuses
+    const newStatuses: Record<string, string> = {};
+    bets.forEach(bet => {
+      newStatuses[bet.bet_id] = bet.status;
+    });
+    setPreviousStatuses(newStatuses);
+  }, [bets]);
 
   // Poll for status updates on awaiting_deposit bets
   useEffect(() => {
