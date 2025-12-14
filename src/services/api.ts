@@ -86,6 +86,49 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise
   return data;
 }
 
+// Prediction market types
+export interface PredictionBetRequest {
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_usd: number;
+}
+
+export interface PredictionBetResponse {
+  bet_id: string;
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_usd: number;
+  amount_xmr: number;
+  xmr_price: number;
+  deposit_address: string;
+  expires_at: string;
+  status: string;
+}
+
+export interface PredictionBetStatus {
+  bet_id: string;
+  status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid_out';
+  amount_xmr: number;
+  tx_hash?: string;
+  confirmed_at?: string;
+  payout_amount?: number;
+}
+
+export interface PredictionMarket {
+  market_id: string;
+  title: string;
+  description?: string;
+  oracle_type: string;
+  oracle_asset?: string;
+  oracle_condition?: string;
+  oracle_value?: number;
+  resolution_time: number;
+  resolved: boolean;
+  outcome?: 'YES' | 'NO';
+  yes_pool_xmr: number;
+  no_pool_xmr: number;
+}
+
 export const api = {
   async createToken(): Promise<string> {
     const data = await proxyRequest<{ token: string }>('/api/token/create', { method: 'POST' });
@@ -159,5 +202,32 @@ export const api = {
       throw new Error(data.detail || data.error || 'Clone failed');
     }
     return data;
+  },
+
+  // Prediction market APIs
+  async placePredictionBet(request: PredictionBetRequest): Promise<PredictionBetResponse> {
+    return proxyRequest<PredictionBetResponse>('/api/predictions/bet', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+
+  async getPredictionBetStatus(betId: string): Promise<PredictionBetStatus> {
+    return proxyRequest<PredictionBetStatus>(`/api/predictions/bet/${betId}/status`);
+  },
+
+  async submitPredictionPayoutAddress(betId: string, payoutAddress: string): Promise<{ success: boolean }> {
+    return proxyRequest<{ success: boolean }>(`/api/predictions/bet/${betId}/payout-address`, {
+      method: 'POST',
+      body: JSON.stringify({ payout_address: payoutAddress }),
+    });
+  },
+
+  async getPredictionMarkets(): Promise<{ markets: PredictionMarket[] }> {
+    return proxyRequest<{ markets: PredictionMarket[] }>('/api/predictions/markets');
+  },
+
+  async getPredictionMarket(marketId: string): Promise<PredictionMarket> {
+    return proxyRequest<PredictionMarket>(`/api/predictions/markets/${marketId}`);
   },
 };

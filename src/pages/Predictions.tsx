@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
+import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
+import { api } from '@/services/api';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,8 +16,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { BetDepositModal } from '@/components/BetDepositModal';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, MessageSquarePlus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, MessageSquarePlus, Wallet } from 'lucide-react';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -123,6 +126,7 @@ export default function Predictions() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { privateKeyUser: pkUser, isAuthenticated: isPkAuthenticated } = usePrivateKeyAuth();
+  const { bets: localBets, storeBet, checkBetStatus, getBetsForMarket } = usePredictionBets();
   
   
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -130,6 +134,10 @@ export default function Predictions() {
   const [loading, setLoading] = useState(true);
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [betDialogOpen, setBetDialogOpen] = useState(false);
+  
+  // Deposit modal state
+  const [depositModalOpen, setDepositModalOpen] = useState(false);
+  const [currentBetData, setCurrentBetData] = useState<PlaceBetResponse | null>(null);
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [requestOracleOpen, setRequestOracleOpen] = useState(false);
@@ -148,8 +156,8 @@ export default function Predictions() {
   
   // Bet form
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
-  const [betAmount, setBetAmount] = useState('');
-  const [payoutAddress, setPayoutAddress] = useState('');
+  const [betAmountUsd, setBetAmountUsd] = useState('');
+  const [placingBet, setPlacingBet] = useState(false);
   
   // Auto-resolve countdown
   const [nextCheckIn, setNextCheckIn] = useState(30);
@@ -325,51 +333,47 @@ export default function Predictions() {
   const handlePlaceBet = async () => {
     if (!selectedMarket) return;
     
-    const amount = parseFloat(betAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error('Enter a valid amount');
+    const amountUsd = parseFloat(betAmountUsd);
+    if (isNaN(amountUsd) || amountUsd <= 0) {
+      toast.error('Enter a valid USD amount');
       return;
     }
     
-    if (!payoutAddress.trim()) {
-      toast.error('Payout address is required');
+    if (amountUsd < 1) {
+      toast.error('Minimum bet is $1');
       return;
     }
     
-    const positionData = {
-      market_id: selectedMarket.id,
-      side: betSide,
-      amount,
-      payout_address: payoutAddress.trim(),
-      user_id: user?.id || null,
-      user_pk_id: pkUser?.id || null,
-    };
+    setPlacingBet(true);
     
-    const { error: posError } = await supabase.from('market_positions').insert(positionData);
-    
-    if (posError) {
-      toast.error('Failed to place bet');
-      console.error(posError);
-      return;
+    try {
+      // Call the 0xNull API to create a bet
+      const response = await api.placePredictionBet({
+        market_id: selectedMarket.id,
+        side: betSide.toUpperCase() as 'YES' | 'NO',
+        amount_usd: amountUsd,
+      });
+      
+      // Store bet locally
+      storeBet(response);
+      
+      // Show deposit modal
+      setCurrentBetData(response);
+      setBetDialogOpen(false);
+      setDepositModalOpen(true);
+      setBetAmountUsd('');
+      
+      toast.success('Bet created! Send XMR to confirm.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to place bet';
+      toast.error(message);
+    } finally {
+      setPlacingBet(false);
     }
-    
-    // Update pool
-    const poolField = betSide === 'yes' ? 'total_yes_pool' : 'total_no_pool';
-    const currentPool = betSide === 'yes' ? selectedMarket.total_yes_pool : selectedMarket.total_no_pool;
-    
-    const { error: updateError } = await supabase
-      .from('prediction_markets')
-      .update({ [poolField]: currentPool + amount })
-      .eq('id', selectedMarket.id);
-    
-    if (updateError) {
-      console.error('Failed to update pool:', updateError);
-    }
-    
-    toast.success(`Placed ${amount} XMR on ${betSide.toUpperCase()}`);
-    setBetDialogOpen(false);
-    setBetAmount('');
-    setPayoutAddress('');
+  };
+  
+  const handleBetConfirmed = () => {
+    // Refresh markets to update pool totals
     fetchMarkets();
     fetchUserPositions();
   };
@@ -842,10 +846,10 @@ export default function Predictions() {
                           </div>
                         </div>
 
-                        {/* User positions */}
+                        {/* User positions (database) */}
                         {positions.length > 0 && (
                           <div className="bg-muted/50 rounded-lg p-3">
-                            <p className="text-sm font-medium mb-2">Your Positions</p>
+                            <p className="text-sm font-medium mb-2">Your Confirmed Positions</p>
                             {positions.map((pos) => {
                               return (
                                 <div key={pos.id} className="flex justify-between text-sm">
@@ -858,6 +862,26 @@ export default function Predictions() {
                                 </div>
                               );
                             })}
+                          </div>
+                        )}
+                        
+                        {/* Local bets (pending confirmation) */}
+                        {getBetsForMarket(market.id).length > 0 && (
+                          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                            <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-amber-500" />
+                              Pending Bets
+                            </p>
+                            {getBetsForMarket(market.id).map((bet) => (
+                              <div key={bet.bet_id} className="flex justify-between text-sm">
+                                <span className={bet.side === 'YES' ? 'text-emerald-500' : 'text-red-500'}>
+                                  ${bet.amount_usd.toFixed(2)} ({bet.amount_xmr.toFixed(4)} XMR) on {bet.side}
+                                </span>
+                                <Badge variant="outline" className="text-amber-500 border-amber-500">
+                                  {bet.status === 'awaiting_deposit' ? 'Awaiting Deposit' : bet.status}
+                                </Badge>
+                              </div>
+                            ))}
                           </div>
                         )}
 
@@ -912,52 +936,97 @@ export default function Predictions() {
       <Dialog open={betDialogOpen} onOpenChange={setBetDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Place Bet: {betSide === 'yes' ? 'YES' : 'NO'}
+            <DialogTitle className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" />
+              Place Bet: <Badge className={betSide === 'yes' ? 'bg-emerald-600' : 'bg-red-600'}>{betSide.toUpperCase()}</Badge>
             </DialogTitle>
           </DialogHeader>
           {selectedMarket && (
             <div className="space-y-4 mt-4">
               <p className="text-sm text-muted-foreground">{selectedMarket.question}</p>
               
-              <div>
-                <Label htmlFor="bet-amount">Amount (XMR)</Label>
-                <Input
-                  id="bet-amount"
-                  type="number"
-                  step="0.0001"
-                  placeholder="0.1"
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(e.target.value)}
-                />
-                {betAmount && parseFloat(betAmount) > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Potential payout: ~{calculatePotentialPayout(selectedMarket, betSide, parseFloat(betAmount)).toFixed(4)} XMR
-                  </p>
-                )}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span>Current Odds</span>
+                  <span>
+                    <span className="text-emerald-500">YES {getOdds(selectedMarket).yes}%</span>
+                    {' / '}
+                    <span className="text-red-500">NO {getOdds(selectedMarket).no}%</span>
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>Total Pool</span>
+                  <span>{(selectedMarket.total_yes_pool + selectedMarket.total_no_pool).toFixed(4)} XMR</span>
+                </div>
               </div>
               
               <div>
-                <Label htmlFor="payout-address">XMR Payout Address</Label>
-                <Input
-                  id="payout-address"
-                  placeholder="4..."
-                  value={payoutAddress}
-                  onChange={(e) => setPayoutAddress(e.target.value)}
-                />
+                <Label htmlFor="bet-amount">Bet Amount (USD)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="bet-amount"
+                    type="number"
+                    step="1"
+                    min="1"
+                    placeholder="50"
+                    value={betAmountUsd}
+                    onChange={(e) => setBetAmountUsd(e.target.value)}
+                    className="pl-7"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Minimum: $1 USD. You'll pay in XMR at current rate.
+                </p>
               </div>
+              
+              {betAmountUsd && parseFloat(betAmountUsd) > 0 && oraclePrices['XMR'] && (
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/30">
+                  <div className="flex justify-between text-sm">
+                    <span>≈ XMR Amount</span>
+                    <span className="font-mono font-bold">
+                      {(parseFloat(betAmountUsd) / oraclePrices['XMR'].price).toFixed(6)} XMR
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>XMR Price</span>
+                    <span>${oraclePrices['XMR'].price.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
               
               <Button 
                 onClick={handlePlaceBet} 
                 className={`w-full ${betSide === 'yes' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
                 variant={betSide === 'no' ? 'destructive' : 'default'}
+                disabled={placingBet || !betAmountUsd || parseFloat(betAmountUsd) < 1}
               >
-                Confirm {betSide.toUpperCase()} Bet
+                {placingBet ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Bet...
+                  </>
+                ) : (
+                  `Get Deposit Address for ${betSide.toUpperCase()}`
+                )}
               </Button>
+              
+              <p className="text-xs text-center text-muted-foreground">
+                After clicking, you'll receive a XMR address to send payment.
+              </p>
             </div>
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Deposit Modal */}
+      <BetDepositModal
+        open={depositModalOpen}
+        onOpenChange={setDepositModalOpen}
+        betData={currentBetData}
+        onCheckStatus={checkBetStatus}
+        onConfirmed={handleBetConfirmed}
+      />
 
       <Dialog open={requestOracleOpen} onOpenChange={setRequestOracleOpen}>
         <DialogContent>
