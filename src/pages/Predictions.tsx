@@ -12,6 +12,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
+import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 
@@ -82,7 +83,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function Predictions() {
-  const { bets: localBets, storeBet, checkBetStatus, getBetsForMarket } = usePredictionBets();
+  const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -335,6 +336,12 @@ export default function Predictions() {
               </Button>
             </div>
           </div>
+
+          <MyBets 
+            bets={bets} 
+            onStatusUpdate={checkBetStatus} 
+            onPayoutSubmit={submitPayoutAddress}
+          />
 
           {loading ? (
             <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
