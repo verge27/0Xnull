@@ -288,17 +288,17 @@ export default function Predictions() {
     
     if (marketType === 'above') {
       question = `Will ${asset.name} (${asset.symbol}) be above $${priceNum.toLocaleString()} on ${dateStr}?`;
-      criteria = `Resolves YES if ${asset.symbol} price is ≥ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+      criteria = `Resolves YES if ${asset.symbol} price is ≥ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} UTC. Resolves NO otherwise.`;
     } else if (marketType === 'below') {
       question = `Will ${asset.name} (${asset.symbol}) be below $${priceNum.toLocaleString()} on ${dateStr}?`;
-      criteria = `Resolves YES if ${asset.symbol} price is ≤ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+      criteria = `Resolves YES if ${asset.symbol} price is ≤ $${priceNum.toLocaleString()} at ${dateStr} ${timeStr} UTC. Resolves NO otherwise.`;
     } else {
       const priceMax = parseFloat(targetPriceMax);
       question = `Will ${asset.name} (${asset.symbol}) be between $${priceNum.toLocaleString()} and $${priceMax.toLocaleString()} on ${dateStr}?`;
-      criteria = `Resolves YES if ${asset.symbol} price is between $${priceNum.toLocaleString()} and $${priceMax.toLocaleString()} at ${dateStr} ${timeStr} per CoinGecko API. Resolves NO otherwise.`;
+      criteria = `Resolves YES if ${asset.symbol} price is between $${priceNum.toLocaleString()} and $${priceMax.toLocaleString()} at ${dateStr} ${timeStr} UTC. Resolves NO otherwise.`;
     }
     
-    const description = `Oracle-resolved market using CoinGecko price data. Auto-resolvable at resolution time.`;
+    const description = `Oracle-resolved market using real-time price data. Auto-resolvable at resolution time.`;
     
     const marketData = {
       question,
@@ -705,10 +705,10 @@ export default function Predictions() {
                                   <div className="p-2 bg-background/50 rounded text-xs text-muted-foreground border border-border/50">
                                     <p className="font-medium text-foreground mb-1">Auto-generated criteria:</p>
                                     {marketType === 'above' && (
-                                      <p>Resolves YES if {asset.symbol} ≥ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
+                                      <p>Resolves YES if {asset.symbol} ≥ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
                                     )}
                                     {marketType === 'below' && (
-                                      <p>Resolves YES if {asset.symbol} ≤ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC per CoinGecko.</p>
+                                      <p>Resolves YES if {asset.symbol} ≤ ${parseFloat(targetPrice).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
                                     )}
                                     {marketType === 'between' && targetPriceMax && (
                                       <p>Resolves YES if {asset.symbol} between ${parseFloat(targetPrice).toLocaleString()} and ${parseFloat(targetPriceMax).toLocaleString()} at {new Date(newResolutionDate).toLocaleDateString()} UTC.</p>
