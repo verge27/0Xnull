@@ -353,9 +353,10 @@ export default function Predictions() {
           backgroundImage: `url(${predictionsBackground})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
         }}
       >
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-black/70" />
       </div>
       
       <div className="relative z-10">
