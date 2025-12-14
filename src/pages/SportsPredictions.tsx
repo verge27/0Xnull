@@ -318,27 +318,39 @@ export default function SportsPredictions() {
                               </div>
                               
                               <div className="flex items-center gap-2 font-medium text-sm mb-1">
-                                <TeamLogo teamName={event.away_team} sport={event.sport} size="sm" />
-                                <span>{event.away_team}</span>
-                                {liveScores[event.event_id] && (
-                                  <span className={`font-bold ${liveScores[event.event_id].completed ? 'text-muted-foreground' : 'text-primary'}`}>
-                                    {liveScores[event.event_id].scores.find(s => 
-                                      s.name.toLowerCase().includes(event.away_team.toLowerCase()) || 
-                                      event.away_team.toLowerCase().includes(s.name.toLowerCase())
-                                    )?.score || '0'}
-                                  </span>
-                                )}
-                                <span className="text-muted-foreground">@</span>
-                                {liveScores[event.event_id] && (
-                                  <span className={`font-bold ${liveScores[event.event_id].completed ? 'text-muted-foreground' : 'text-primary'}`}>
-                                    {liveScores[event.event_id].scores.find(s => 
-                                      s.name.toLowerCase().includes(event.home_team.toLowerCase()) || 
-                                      event.home_team.toLowerCase().includes(s.name.toLowerCase())
-                                    )?.score || '0'}
-                                  </span>
-                                )}
-                                <TeamLogo teamName={event.home_team} sport={event.sport} size="sm" />
-                                <span>{event.home_team}</span>
+                                {(() => {
+                                  const score = liveScores[event.event_id];
+                                  const awayScore = score?.scores.find(s => 
+                                    s.name.toLowerCase().includes(event.away_team.toLowerCase()) || 
+                                    event.away_team.toLowerCase().includes(s.name.toLowerCase())
+                                  )?.score || '0';
+                                  const homeScore = score?.scores.find(s => 
+                                    s.name.toLowerCase().includes(event.home_team.toLowerCase()) || 
+                                    event.home_team.toLowerCase().includes(s.name.toLowerCase())
+                                  )?.score || '0';
+                                  const awayWon = score?.completed && parseInt(awayScore) > parseInt(homeScore);
+                                  const homeWon = score?.completed && parseInt(homeScore) > parseInt(awayScore);
+                                  
+                                  return (
+                                    <>
+                                      <TeamLogo teamName={event.away_team} sport={event.sport} size="sm" />
+                                      <span className={awayWon ? 'text-emerald-500 font-semibold' : ''}>{event.away_team}</span>
+                                      {score && (
+                                        <span className={`font-bold ${awayWon ? 'text-emerald-500' : score.completed ? 'text-muted-foreground' : 'text-primary'}`}>
+                                          {awayScore}
+                                        </span>
+                                      )}
+                                      <span className="text-muted-foreground">@</span>
+                                      {score && (
+                                        <span className={`font-bold ${homeWon ? 'text-emerald-500' : score.completed ? 'text-muted-foreground' : 'text-primary'}`}>
+                                          {homeScore}
+                                        </span>
+                                      )}
+                                      <TeamLogo teamName={event.home_team} sport={event.sport} size="sm" />
+                                      <span className={homeWon ? 'text-emerald-500 font-semibold' : ''}>{event.home_team}</span>
+                                    </>
+                                  );
+                                })()}
                               </div>
                               
                               <div className="flex items-center justify-between">
