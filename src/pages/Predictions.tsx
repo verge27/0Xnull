@@ -143,19 +143,10 @@ export default function Predictions() {
   };
 
   const resetMarketsWithNewPrices = async () => {
-    if (!window.confirm('This will delete all existing markets and create new ones. Continue?')) return;
+    if (!window.confirm('This will create new weekly markets for all assets. Continue?')) return;
     
     setResettingMarkets(true);
     try {
-      // Delete existing markets
-      for (const market of markets) {
-        try {
-          await api.deleteMarket(market.market_id);
-        } catch (e) {
-          console.log(`Could not delete ${market.market_id}:`, e);
-        }
-      }
-
       // Calculate resolution time (1 week from now)
       const resolutionTime = Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000);
       const resolutionDate = new Date(resolutionTime * 1000);
@@ -163,6 +154,7 @@ export default function Predictions() {
 
       // Create new markets for each asset with price data
       const assetsToCreate = ORACLE_ASSETS.filter(a => oraclePrices[a.symbol]);
+      let created = 0;
       
       for (const asset of assetsToCreate) {
         const currentPrice = oraclePrices[asset.symbol].price;
@@ -180,15 +172,16 @@ export default function Predictions() {
             oracle_value: targetPrice,
             resolution_time: resolutionTime,
           });
+          created++;
         } catch (e) {
           console.error(`Failed to create market for ${asset.symbol}:`, e);
         }
       }
 
-      toast.success('Markets reset successfully!');
+      toast.success(`Created ${created} new markets!`);
       await fetchMarkets();
     } catch (error) {
-      toast.error('Failed to reset markets');
+      toast.error('Failed to create markets');
       console.error(error);
     } finally {
       setResettingMarkets(false);
@@ -420,12 +413,12 @@ export default function Predictions() {
             </div>
             <div className="flex items-center gap-2">
               <Button 
-                variant="destructive" 
+                variant="secondary" 
                 size="sm" 
                 onClick={resetMarketsWithNewPrices} 
                 disabled={resettingMarkets || Object.keys(oraclePrices).length === 0}
               >
-                {resettingMarkets ? 'Resetting...' : 'Reset Markets'}
+                {resettingMarkets ? 'Creating...' : 'Create Weekly Markets'}
               </Button>
               <CreateMarketDialog onMarketCreated={fetchMarkets} />
               <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
