@@ -43,6 +43,7 @@ import linkLogo from '@/assets/crypto/link.png';
 import uniLogo from '@/assets/crypto/uni.png';
 import aaveLogo from '@/assets/crypto/aave.png';
 import fartcoinLogo from '@/assets/crypto/fartcoin.png';
+import predictionsBackground from '@/assets/predictions-background.jpg';
 
 interface OracleAsset {
   symbol: string;
@@ -344,7 +345,15 @@ export default function Predictions() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url(${predictionsBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Navbar />
       
       <div className="flex">
