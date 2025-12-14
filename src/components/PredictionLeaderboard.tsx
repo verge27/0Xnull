@@ -119,18 +119,16 @@ export function PredictionLeaderboard({ userBets }: LeaderboardProps) {
             {mockLeaderboard.map((entry) => (
               <div 
                 key={entry.rank}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
+                className={`p-3 rounded-lg border ${
                   entry.rank <= 3 ? 'bg-muted/50' : 'bg-background'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {getRankIcon(entry.rank)}
-                  <div>
-                    <p className="font-mono text-sm">{entry.address}</p>
-                    <p className="text-xs text-muted-foreground">{entry.wins} wins</p>
-                  </div>
+                  <p className="font-mono text-sm flex-1">{entry.address}</p>
                 </div>
-                <div className="text-right">
+                <div className="flex items-center justify-between mt-2 pl-8">
+                  <p className="text-xs text-muted-foreground">{entry.wins} wins</p>
                   <p className="font-mono font-semibold text-emerald-500">
                     {entry.totalWon.toFixed(4)} XMR
                   </p>
