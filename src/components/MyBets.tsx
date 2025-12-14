@@ -114,20 +114,25 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
     toast.success('Copied to clipboard');
   };
 
-  const getStatusBadge = (status: PredictionBet['status']) => {
-    switch (status) {
+  const getStatusBadge = (bet: PredictionBet) => {
+    switch (bet.status) {
       case 'awaiting_deposit':
         return <Badge variant="outline" className="gap-1"><Clock className="w-3 h-3" />Awaiting Deposit</Badge>;
       case 'confirmed':
         return <Badge className="bg-blue-500/20 text-blue-400 gap-1"><CheckCircle className="w-3 h-3" />Confirmed</Badge>;
       case 'won':
-        return <Badge className="bg-green-500/20 text-green-400 gap-1"><CheckCircle className="w-3 h-3" />Won</Badge>;
+        return <Badge className="bg-emerald-500/20 text-emerald-400 gap-1"><CheckCircle className="w-3 h-3" />Won!</Badge>;
       case 'lost':
         return <Badge className="bg-red-500/20 text-red-400 gap-1"><XCircle className="w-3 h-3" />Lost</Badge>;
       case 'paid':
-        return <Badge className="bg-primary/20 text-primary gap-1"><Wallet className="w-3 h-3" />Paid</Badge>;
+        return (
+          <Badge className="bg-primary/20 text-primary gap-1">
+            <Wallet className="w-3 h-3" />
+            Paid {bet.payout_xmr ? `${bet.payout_xmr.toFixed(4)} XMR` : ''}
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{bet.status}</Badge>;
     }
   };
 
@@ -164,13 +169,13 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
                   key={bet.bet_id}
                   className="p-4 rounded-lg border border-border bg-card/50 space-y-3"
                 >
-                  <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant={bet.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
                           {bet.side}
                         </Badge>
-                        {getStatusBadge(bet.status)}
+                        {getStatusBadge(bet)}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         Market: {bet.market_id}
@@ -240,7 +245,28 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
                     </div>
                   )}
 
-                  {bet.payout_address && (
+                  {bet.status === 'paid' && bet.payout_tx_hash && (
+                    <div className="text-xs text-muted-foreground pt-2 border-t border-border space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-emerald-500 font-medium">
+                          Won {bet.payout_xmr?.toFixed(4) || '?'} XMR
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2"
+                          onClick={() => copyToClipboard(bet.payout_tx_hash!)}
+                        >
+                          <Copy className="w-3 h-3 mr-1" /> TX
+                        </Button>
+                      </div>
+                      <code className="text-xs opacity-60">
+                        {bet.payout_tx_hash.slice(0, 12)}...{bet.payout_tx_hash.slice(-8)}
+                      </code>
+                    </div>
+                  )}
+
+                  {bet.payout_address && bet.status !== 'paid' && (
                     <div className="text-xs text-muted-foreground pt-2 border-t border-border">
                       Payout: {bet.payout_address.slice(0, 12)}...{bet.payout_address.slice(-6)}
                     </div>

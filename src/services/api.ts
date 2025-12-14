@@ -114,6 +114,8 @@ export interface PredictionBetStatus {
   xmr_address: string;
   address_index: number;
   payout_address: string | null;
+  payout_xmr?: number;
+  payout_tx_hash?: string;
   status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid';
   tx_hash: string | null;
   created_at: number;

@@ -291,6 +291,8 @@ export default function Predictions() {
   };
 
   const getStatusBadge = (market: PredictionMarket) => {
+    const now = Date.now() / 1000;
+    
     if (market.resolved) {
       if (market.outcome === 'YES') {
         return <Badge className="bg-emerald-600"><CheckCircle className="w-3 h-3 mr-1" /> Resolved YES</Badge>;
@@ -298,7 +300,35 @@ export default function Predictions() {
         return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> Resolved NO</Badge>;
       }
     }
+    
+    // Past resolution time but not yet resolved
+    if (market.resolution_time <= now) {
+      return <Badge className="bg-amber-600 animate-pulse"><RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Resolving...</Badge>;
+    }
+    
     return <Badge className="bg-green-600"><Clock className="w-3 h-3 mr-1" /> Open</Badge>;
+  };
+
+  const getResolutionCountdown = (resolutionTime: number) => {
+    const now = Date.now() / 1000;
+    const diff = resolutionTime - now;
+    
+    if (diff <= 0) return null;
+    
+    const hours = Math.floor(diff / 3600);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 7) return null; // Only show countdown for <7 days
+    
+    if (days > 0) {
+      return `${days}d ${hours % 24}h`;
+    }
+    if (hours > 0) {
+      const mins = Math.floor((diff % 3600) / 60);
+      return `${hours}h ${mins}m`;
+    }
+    const mins = Math.floor(diff / 60);
+    return `${mins}m`;
   };
 
   const formatResolutionDate = (timestamp: number) => {
@@ -588,8 +618,18 @@ export default function Predictions() {
                               )}
 
                               {/* Meta info */}
-                              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                                <span>Resolves: {formatResolutionDate(market.resolution_time)}</span>
+                              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground items-center">
+                                {(() => {
+                                  const countdown = getResolutionCountdown(market.resolution_time);
+                                  if (countdown) {
+                                    return (
+                                      <span className="text-amber-500 font-medium flex items-center gap-1">
+                                        <Clock className="w-3 h-3" /> Resolves in {countdown}
+                                      </span>
+                                    );
+                                  }
+                                  return <span>Resolves: {formatResolutionDate(market.resolution_time)}</span>;
+                                })()}
                                 {market.oracle_asset && (
                                   <span>Oracle: {market.oracle_asset} {market.oracle_condition} ${market.oracle_value?.toLocaleString()}</span>
                                 )}
