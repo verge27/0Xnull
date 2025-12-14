@@ -54,6 +54,7 @@ export function useSportsEvents() {
   const [error, setError] = useState<string | null>(null);
   const [liveScores, setLiveScores] = useState<LiveScores>({});
   const [pollingActive, setPollingActive] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchEvents = useCallback(async (sport?: string) => {
@@ -171,6 +172,7 @@ export function useSportsEvents() {
     );
     
     setLiveScores(prev => ({ ...prev, ...scores }));
+    setLastUpdated(new Date());
   }, []);
 
   const startLiveScorePolling = useCallback((liveEvents: SportsEvent[]) => {
@@ -298,6 +300,7 @@ export function useSportsEvents() {
     error,
     liveScores,
     pollingActive,
+    lastUpdated,
     fetchEvents,
     getEventResult,
     fetchLiveScores,
