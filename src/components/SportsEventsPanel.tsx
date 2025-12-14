@@ -64,15 +64,17 @@ export function SportsEventsPanel({ onMarketsCreated, existingMarketIds }: Sport
   };
 
   const formatGameTime = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString('en-US', {
+    const date = new Date(timestamp * 1000);
+    const formatted = date.toLocaleString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'America/New_York',
-      timeZoneName: 'short',
+      hour12: false,
+      timeZone: 'UTC',
     });
+    return `${formatted} UTC`;
   };
 
   const getEventMarketStatus = (event: SportsEvent) => {
