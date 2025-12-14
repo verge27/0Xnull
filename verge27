@@ -138,6 +138,25 @@ Listings come from four sources, displayed in this order:
 - `rate` (numeric)
 - `updated_at` (timestamptz)
 
+## Prediction Markets API
+
+### Delete Market
+`DELETE /markets/{market_id}`
+
+**Response:**
+```json
+{
+  "market_id": "xmr_500_jan26_v2",
+  "status": "deleted"
+}
+```
+
+**Errors:**
+| Code | Detail |
+|------|--------|
+| 404 | Market not found |
+| 400 | Cannot delete market with active bets |
+
 ## Edge Functions
 
 ### update-xmr-price
