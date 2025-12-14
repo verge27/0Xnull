@@ -423,14 +423,6 @@ export default function Predictions() {
               <p className="text-muted-foreground mt-1">Bet on outcomes with XMR</p>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={resetMarketsWithNewPrices} 
-                disabled={resettingMarkets || Object.keys(oraclePrices).length === 0}
-              >
-                {resettingMarkets ? 'Creating...' : 'Create Weekly Markets'}
-              </Button>
               <CreateMarketDialog onMarketCreated={fetchMarkets} />
               <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
