@@ -107,26 +107,34 @@ export interface PredictionBetResponse {
 
 export interface PredictionBetStatus {
   bet_id: string;
-  status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid_out';
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_usd: number;
   amount_xmr: number;
-  tx_hash?: string;
-  confirmed_at?: string;
-  payout_amount?: number;
+  xmr_address: string;
+  address_index: number;
+  payout_address: string | null;
+  status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid';
+  tx_hash: string | null;
+  created_at: number;
+  confirmed_at: number | null;
+  resolved_at: number | null;
 }
 
 export interface PredictionMarket {
   market_id: string;
   title: string;
-  description?: string;
+  description: string;
   oracle_type: string;
-  oracle_asset?: string;
-  oracle_condition?: string;
-  oracle_value?: number;
+  oracle_asset: string;
+  oracle_condition: string;
+  oracle_value: number;
   resolution_time: number;
-  resolved: boolean;
-  outcome?: 'YES' | 'NO';
+  resolved: number;
+  outcome: 'YES' | 'NO' | null;
   yes_pool_xmr: number;
   no_pool_xmr: number;
+  created_at: number;
 }
 
 export const api = {
@@ -204,7 +212,7 @@ export const api = {
     return data;
   },
 
-  // Prediction market APIs
+  // Prediction market APIs - Use proxy for CORS
   async placePredictionBet(request: PredictionBetRequest): Promise<PredictionBetResponse> {
     return proxyRequest<PredictionBetResponse>('/api/predictions/bet', {
       method: 'POST',
@@ -227,7 +235,7 @@ export const api = {
     return proxyRequest<{ markets: PredictionMarket[] }>('/api/predictions/markets');
   },
 
-  async getPredictionMarket(marketId: string): Promise<PredictionMarket> {
-    return proxyRequest<PredictionMarket>(`/api/predictions/markets/${marketId}`);
+  async getPredictionMarket(marketId: string): Promise<PredictionMarket & { bets: unknown[] }> {
+    return proxyRequest<PredictionMarket & { bets: unknown[] }>(`/api/predictions/markets/${marketId}`);
   },
 };
