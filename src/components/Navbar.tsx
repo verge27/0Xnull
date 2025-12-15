@@ -175,12 +175,6 @@ export const Navbar = () => {
               </Button>
             </Link>
 
-            <Link to="/vps">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">VPS</span>
-              </Button>
-            </Link>
-
             <Link to="/phone">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">eSIM</span>
@@ -190,13 +184,6 @@ export const Navbar = () => {
             <Link to="/ai">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">AI</span>
-              </Button>
-            </Link>
-
-            <Link to="/voice">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden md:inline">Voice</span>
               </Button>
             </Link>
 
@@ -222,6 +209,19 @@ export const Navbar = () => {
             <Link to="/cricket-predictions">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">Cricket</span>
+              </Button>
+            </Link>
+
+            <Link to="/vps">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">VPS</span>
+              </Button>
+            </Link>
+
+            <Link to="/voice">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden md:inline">Voice</span>
               </Button>
             </Link>
 
