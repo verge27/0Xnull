@@ -1,0 +1,110 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Twitch game IDs
+const GAME_IDS: Record<string, string> = {
+  csgo: '32399',
+  cs2: '32399',
+  lol: '21779',
+  dota2: '29595',
+  valorant: '516575',
+  rl: '30921',
+  ow: '488552', // Overwatch 2
+  cod: '512710', // Call of Duty: Warzone
+  r6siege: '460630',
+};
+
+// In-memory cache (5 minute TTL)
+const cache: Map<string, { data: any; timestamp: number }> = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const url = new URL(req.url);
+    const game = url.searchParams.get('game') || 'lol';
+    
+    const gameId = GAME_IDS[game.toLowerCase()] || GAME_IDS.lol;
+    const cacheKey = `stream_${gameId}`;
+    
+    // Check cache
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      console.log(`Cache hit for game: ${game}`);
+      return new Response(JSON.stringify(cached.data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const clientId = Deno.env.get('TWITCH_CLIENT_ID');
+    const oauthToken = Deno.env.get('TWITCH_OAUTH_TOKEN');
+
+    if (!clientId || !oauthToken) {
+      console.error('Missing Twitch credentials');
+      return new Response(JSON.stringify({ error: 'Twitch credentials not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Fetch top stream for the game
+    const twitchUrl = `https://api.twitch.tv/helix/streams?game_id=${gameId}&first=1&type=live`;
+    console.log(`Fetching Twitch streams for game_id: ${gameId}`);
+    
+    const response = await fetch(twitchUrl, {
+      headers: {
+        'Client-ID': clientId,
+        'Authorization': `Bearer ${oauthToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Twitch API error: ${response.status} - ${errorText}`);
+      return new Response(JSON.stringify({ error: 'Twitch API error', details: errorText }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const data = await response.json();
+    console.log(`Twitch response: ${JSON.stringify(data)}`);
+    
+    let result;
+    if (data.data && data.data.length > 0) {
+      const stream = data.data[0];
+      result = {
+        channel: stream.user_login,
+        channelName: stream.user_name,
+        title: stream.title,
+        viewerCount: stream.viewer_count,
+        gameName: stream.game_name,
+        thumbnailUrl: stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248'),
+      };
+    } else {
+      result = { channel: null };
+    }
+
+    // Cache the result
+    cache.set(cacheKey, { data: result, timestamp: Date.now() });
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error in twitch-top-stream:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

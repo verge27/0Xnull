@@ -16,6 +16,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
+import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -392,10 +393,16 @@ export default function EsportsPredictions() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-4 gap-6">
             {/* Upcoming Events */}
             <div className="lg:col-span-1">
-              <Card className="animate-neon-glow-cyan border-cyan-500/30">
+              <div className="space-y-4">
+                {/* Twitch Stream - Mobile/Tablet only (shown above on smaller screens) */}
+                <div className="lg:hidden">
+                  <TwitchStreamEmbed selectedGame={selectedGame} />
+                </div>
+                
+                <Card className="animate-neon-glow-cyan border-cyan-500/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
@@ -520,6 +527,7 @@ export default function EsportsPredictions() {
                   </Tabs>
                 </CardContent>
               </Card>
+              </div>
             </div>
 
             {/* Markets */}
@@ -671,6 +679,13 @@ export default function EsportsPredictions() {
                   />
                 </div>
               )}
+            </div>
+
+            {/* Twitch Stream - Desktop only */}
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="sticky top-4">
+                <TwitchStreamEmbed selectedGame={selectedGame} />
+              </div>
             </div>
           </div>
         </main>

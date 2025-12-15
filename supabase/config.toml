@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.auto-create-sports-markets]
 verify_jwt = false
+
+[functions.twitch-top-stream]
+verify_jwt = false
