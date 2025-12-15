@@ -175,18 +175,6 @@ export const Navbar = () => {
               </Button>
             </Link>
 
-            <Link to="/phone">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">eSIM</span>
-              </Button>
-            </Link>
-
-            <Link to="/ai">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">AI</span>
-              </Button>
-            </Link>
-
             <Link to="/predictions">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <TrendingUp className="w-4 h-4" />
@@ -200,15 +188,33 @@ export const Navbar = () => {
               </Button>
             </Link>
 
+            <Link to="/cricket-predictions">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">Cricket</span>
+              </Button>
+            </Link>
+
             <Link to="/esports-predictions">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">Esports</span>
               </Button>
             </Link>
 
-            <Link to="/cricket-predictions">
+            <Link to="/starcraft">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Cricket</span>
+                <span className="hidden md:inline">SC2</span>
+              </Button>
+            </Link>
+
+            <Link to="/ai">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">AI</span>
+              </Button>
+            </Link>
+
+            <Link to="/phone">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">eSIM</span>
               </Button>
             </Link>
 
@@ -222,12 +228,6 @@ export const Navbar = () => {
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <Sparkles className="w-4 h-4" />
                 <span className="hidden md:inline">Voice</span>
-              </Button>
-            </Link>
-
-            <Link to="/starcraft">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">SC2</span>
               </Button>
             </Link>
 
