@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse, type BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api, type PredictionMarket } from '@/services/api';
+import starcraftBackground from '@/assets/starcraft-background.jpg';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -264,13 +265,12 @@ export default function StarcraftPredictions() {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Background with SC2 theme */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-blue-950/20 via-background to-purple-950/20" />
-      <div className="fixed inset-0 z-0 opacity-10">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full blur-[100px]" />
-        <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-500 rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-500 rounded-full blur-[150px]" />
-      </div>
+      {/* Background */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${starcraftBackground})` }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/70 via-background/60 to-background/90" />
       
       <div className="relative z-10">
         <Navbar />
