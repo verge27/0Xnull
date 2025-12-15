@@ -1,3 +1,4 @@
+// Crypto Predictions - Tabbed layout
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
