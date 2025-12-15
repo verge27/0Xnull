@@ -237,10 +237,18 @@ export default function CricketPredictions() {
           </div>
 
           {/* Need XMR Banner */}
-          <div className="mb-6 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+          <div className="mb-3 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">Need XMR to place bets?</p>
             <Link to="/swaps" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Get XMR <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* Tor Banner */}
+          <div className="mb-6 p-3 rounded-lg bg-muted/50 border border-border flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Worried about your browsing being watched?</p>
+            <Link to="/tor-guide" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Use Tor <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
