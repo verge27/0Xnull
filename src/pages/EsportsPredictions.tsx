@@ -196,6 +196,29 @@ export default function EsportsPredictions() {
     return 'none';
   };
 
+  const getGameColors = (game: string) => {
+    switch (game) {
+      case 'lol':
+        return { border: 'border-yellow-500/30', bg: 'from-yellow-950/30', accent: 'text-yellow-400', glow: 'hover:shadow-[0_0_15px_hsl(45_100%_50%/0.2)]' };
+      case 'csgo':
+        return { border: 'border-orange-500/30', bg: 'from-orange-950/30', accent: 'text-orange-400', glow: 'hover:shadow-[0_0_15px_hsl(25_100%_50%/0.2)]' };
+      case 'valorant':
+        return { border: 'border-red-500/30', bg: 'from-red-950/30', accent: 'text-red-400', glow: 'hover:shadow-[0_0_15px_hsl(0_100%_50%/0.2)]' };
+      case 'dota2':
+        return { border: 'border-red-600/30', bg: 'from-red-900/30', accent: 'text-red-500', glow: 'hover:shadow-[0_0_15px_hsl(0_70%_45%/0.2)]' };
+      case 'ow':
+        return { border: 'border-orange-400/30', bg: 'from-orange-900/30', accent: 'text-orange-300', glow: 'hover:shadow-[0_0_15px_hsl(35_100%_60%/0.2)]' };
+      case 'rl':
+        return { border: 'border-blue-500/30', bg: 'from-blue-950/30', accent: 'text-blue-400', glow: 'hover:shadow-[0_0_15px_hsl(210_100%_50%/0.2)]' };
+      case 'cod':
+        return { border: 'border-green-500/30', bg: 'from-green-950/30', accent: 'text-green-400', glow: 'hover:shadow-[0_0_15px_hsl(120_100%_40%/0.2)]' };
+      case 'r6siege':
+        return { border: 'border-amber-500/30', bg: 'from-amber-950/30', accent: 'text-amber-400', glow: 'hover:shadow-[0_0_15px_hsl(40_100%_50%/0.2)]' };
+      default:
+        return { border: 'border-cyan-500/30', bg: 'from-cyan-950/30', accent: 'text-cyan-400', glow: 'hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]' };
+    }
+  };
+
   const filteredEvents = selectedGame === 'all' 
     ? events 
     : events.filter(e => e.game === selectedGame);
@@ -275,11 +298,12 @@ export default function EsportsPredictions() {
                         }
                       };
                       const gameState = getGameState();
+                      const colors = getGameColors(event.game);
                       
                       return (
                         <div
                           key={event.id}
-                          className="p-4 rounded-lg border-2 border-red-500/40 bg-gradient-to-br from-red-950/30 to-background relative overflow-hidden"
+                          className={`p-4 rounded-lg border-2 ${colors.border} bg-gradient-to-br ${colors.bg} to-background relative overflow-hidden`}
                         >
                           {/* Animated live indicator */}
                           <div className="absolute top-2 right-2">
@@ -293,7 +317,7 @@ export default function EsportsPredictions() {
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-xl">{getGameIcon(event.game)}</span>
                             <div>
-                              <Badge variant="outline" className="text-xs border-red-500/50">
+                              <Badge variant="outline" className={`text-xs ${colors.border}`}>
                                 {getGameLabel(event.game)}
                               </Badge>
                               <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[180px]">{event.tournament}</p>
@@ -313,8 +337,8 @@ export default function EsportsPredictions() {
                               <span className="font-medium text-sm truncate max-w-[80px]">{event.team_a}</span>
                             </div>
                             
-                            <div className="px-3 py-1 bg-red-600/20 rounded-lg border border-red-500/30">
-                              <span className="text-lg font-bold text-red-400">{gameState.detail}</span>
+                            <div className={`px-3 py-1 bg-background/50 rounded-lg border ${colors.border}`}>
+                              <span className={`text-lg font-bold ${colors.accent}`}>{gameState.detail}</span>
                             </div>
                             
                             <div className="flex items-center gap-2 flex-1 justify-end">
@@ -399,16 +423,17 @@ export default function EsportsPredictions() {
                           {filteredEvents.map(event => {
                             const marketStatus = getEventMarketStatus(event);
                             const isLive = event.status === 'live';
+                            const colors = getGameColors(event.game);
                             
                             return (
                               <div
                                 key={event.id}
-                                className="p-3 rounded-lg border border-cyan-500/20 hover:border-cyan-400/50 transition-all hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]"
+                                className={`p-3 rounded-lg border ${colors.border} hover:border-opacity-70 transition-all ${colors.glow}`}
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
                                     <span title={getGameLabel(event.game)}>{getGameIcon(event.game)}</span>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className={`text-xs ${colors.border} ${colors.accent}`}>
                                       {getGameLabel(event.game)}
                                     </Badge>
                                     {isLive && (
@@ -446,7 +471,7 @@ export default function EsportsPredictions() {
                                       {formatGameTime(event.start_timestamp)}
                                     </span>
                                     {!isLive && getCountdown(event.start_timestamp) && (
-                                      <span className="text-xs text-cyan-400 font-medium">
+                                      <span className={`text-xs font-medium ${colors.accent}`}>
                                         {getCountdown(event.start_timestamp)}
                                       </span>
                                     )}
