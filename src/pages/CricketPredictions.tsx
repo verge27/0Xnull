@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useCricketEvents, CRICKET_MATCH_TYPES, getMatchTypeLabel, getMatchTypeIcon, formatCricketScore, type CricketMatch } from '@/hooks/useCricketEvents';
 import { api, type PredictionMarket } from '@/services/api';
+import cricketBackground from '@/assets/cricket-background.jpg';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -192,7 +193,11 @@ export default function CricketPredictions() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Background */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-emerald-950/20 via-background to-orange-950/20" />
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${cricketBackground})` }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/70 to-background/95" />
       
       <div className="relative z-10">
         <Navbar />
