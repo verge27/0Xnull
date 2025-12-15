@@ -16,7 +16,7 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight } from 'lucide-react';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -253,12 +253,6 @@ export default function CryptoPredictions() {
             <p className="text-muted-foreground mt-1">Bet on price movements with XMR</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/sports-predictions">
-              <Button variant="outline" size="sm">
-                <Trophy className="w-4 h-4 mr-2" />
-                Sports
-              </Button>
-            </Link>
             <CreateMarketDialog onMarketCreated={fetchMarkets} />
             <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
