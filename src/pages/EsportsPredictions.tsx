@@ -283,6 +283,13 @@ export default function EsportsPredictions() {
             </Link>
           </div>
 
+          {/* Twitch Stream - Full width at top */}
+          <div className="mb-6">
+            <div className="max-w-4xl mx-auto">
+              <TwitchStreamEmbed selectedGame={selectedGame} />
+            </div>
+          </div>
+
           {liveEvents.length > 0 && (
             <div className="mb-6">
               <Card className="border-red-500/30 bg-gradient-to-r from-red-950/20 via-background to-red-950/20">
@@ -393,14 +400,10 @@ export default function EsportsPredictions() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-4 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             {/* Upcoming Events */}
             <div className="lg:col-span-1">
               <div className="space-y-4">
-                {/* Twitch Stream - Mobile/Tablet only (shown above on smaller screens) */}
-                <div className="lg:hidden">
-                  <TwitchStreamEmbed selectedGame={selectedGame} />
-                </div>
                 
                 <Card className="animate-neon-glow-cyan border-cyan-500/30">
                 <CardHeader className="pb-2">
@@ -681,12 +684,6 @@ export default function EsportsPredictions() {
               )}
             </div>
 
-            {/* Twitch Stream - Desktop only */}
-            <div className="hidden lg:block lg:col-span-1">
-              <div className="sticky top-4">
-                <TwitchStreamEmbed selectedGame={selectedGame} />
-              </div>
-            </div>
           </div>
         </main>
 
