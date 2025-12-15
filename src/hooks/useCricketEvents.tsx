@@ -24,10 +24,14 @@ export interface CricketResult {
   match_ended: boolean;
 }
 
-const CRICKET_API_BASE = 'https://api.0xnull.io/api/cricket';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const CRICKET_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
 
 async function cricketRequest<T>(path: string): Promise<T> {
-  const res = await fetch(`${CRICKET_API_BASE}${path}`, {
+  const proxyUrl = new URL(CRICKET_API_BASE);
+  proxyUrl.searchParams.set('path', `/api/cricket${path}`);
+  
+  const res = await fetch(proxyUrl.toString(), {
     headers: { 'Content-Type': 'application/json' },
   });
   
