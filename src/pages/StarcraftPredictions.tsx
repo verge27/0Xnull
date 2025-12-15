@@ -19,7 +19,7 @@ import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap } from 'lucide-react';
 import { Radio } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+
 
 interface SC2Event {
   event_id: string;
@@ -193,27 +193,37 @@ export default function StarcraftPredictions() {
   const handleCreateMarket = async (event: SC2Event, player: string) => {
     setCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('0xnull-proxy', {
-        body: {
-          path: '/api/predictions/markets',
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/predictions/markets')}`,
+        {
           method: 'POST',
-          body: {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             title: `Will ${player} win?`,
             description: `StarCraft II: ${event.team_a} vs ${event.team_b} - ${event.tournament}`,
             oracle_type: 'esports',
             oracle_asset: event.event_id,
             oracle_condition: player,
             resolution_time: event.scheduled_at || Math.floor(Date.now() / 1000) + 86400,
-          }
+          }),
         }
-      });
+      );
       
-      if (error) throw error;
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create market');
+      }
+      
       toast.success(`Market created for ${player}!`);
       fetchMarkets();
     } catch (error) {
       console.error('Error creating market:', error);
-      toast.error('Failed to create market');
+      toast.error(error instanceof Error ? error.message : 'Failed to create market');
     } finally {
       setCreating(false);
       setTeamSelectDialog({ open: false, event: null });
