@@ -31,27 +31,16 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
     setError(null);
     
     try {
+      const gameParam = game === 'all' ? 'lol' : game;
       const { data, error: fnError } = await supabase.functions.invoke('twitch-top-stream', {
-        body: null,
-        method: 'GET',
+        body: { game: gameParam },
       });
 
-      // Use query params via URL construction
-      const url = new URL(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/twitch-top-stream`);
-      url.searchParams.set('game', game === 'all' ? 'lol' : game);
-      
-      const response = await fetch(url.toString(), {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch stream');
+      if (fnError) {
+        throw fnError;
       }
       
-      const streamData: StreamInfo = await response.json();
-      setStreamInfo(streamData);
+      setStreamInfo(data as StreamInfo);
     } catch (err) {
       console.error('Error fetching Twitch stream:', err);
       setError('Could not load stream');
