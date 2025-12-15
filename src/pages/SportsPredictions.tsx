@@ -252,6 +252,113 @@ export default function SportsPredictions() {
           </Link>
         </div>
 
+        {/* Active Markets - Full Width */}
+        {!loading && activeMarkets.length > 0 && (
+          <div className="mb-6 space-y-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Active Markets ({activeMarkets.length})
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {activeMarkets.map((market) => {
+                const odds = getOdds(market);
+                const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                const pendingBets = getBetsForMarket(market.market_id);
+                
+                return (
+                  <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">🏆 Sports</Badge>
+                          </div>
+                          <CardTitle className="text-lg">{market.title}</CardTitle>
+                          {market.description && (
+                            <CardDescription className="mt-1 text-sm">{market.description}</CardDescription>
+                          )}
+                        </div>
+                        {getStatusBadge(market)}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Odds bar */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-emerald-500 font-medium">YES {odds.yes}%</span>
+                            <span className="text-red-500 font-medium">NO {odds.no}%</span>
+                          </div>
+                          <div className="h-3 bg-muted rounded-full overflow-hidden flex">
+                            <div 
+                              className="bg-emerald-500 transition-all duration-300"
+                              style={{ width: `${odds.yes}%` }}
+                            />
+                            <div 
+                              className="bg-red-500 transition-all duration-300"
+                              style={{ width: `${odds.no}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{market.yes_pool_xmr.toFixed(4)} XMR</span>
+                            <span>Pool: {totalPool.toFixed(4)} XMR</span>
+                            <span>{market.no_pool_xmr.toFixed(4)} XMR</span>
+                          </div>
+                        </div>
+                        
+                        {/* Pending bets */}
+                        {pendingBets.length > 0 && (
+                          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                            <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-amber-500" />
+                              Your Pending Bets
+                            </p>
+                            {pendingBets.map((bet) => (
+                              <div key={bet.bet_id} className="flex justify-between text-sm">
+                                <span className={bet.side === 'YES' ? 'text-emerald-500' : 'text-red-500'}>
+                                  ${bet.amount_usd.toFixed(2)} on {bet.side}
+                                </span>
+                                <Badge variant="outline" className="text-amber-500 border-amber-500">
+                                  {bet.status === 'awaiting_deposit' ? 'Awaiting Deposit' : bet.status}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => {
+                              setSelectedMarket(market);
+                              setBetSide('yes');
+                              setBetDialogOpen(true);
+                            }}
+                          >
+                            <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className="flex-1"
+                            onClick={() => {
+                              setSelectedMarket(market);
+                              setBetSide('no');
+                              setBetDialogOpen(true);
+                            }}
+                          >
+                            <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Upcoming Events */}
           <div className="lg:col-span-1">
@@ -397,7 +504,7 @@ export default function SportsPredictions() {
             </Card>
           </div>
 
-          {/* Markets */}
+          {/* Resolved Markets & My Bets */}
           <div className="lg:col-span-2">
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
@@ -406,118 +513,11 @@ export default function SportsPredictions() {
                 <CardContent>
                   <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">No sports markets yet.</p>
-                  <p className="text-sm text-muted-foreground">Select an event from the left panel or click "Auto-Create 24h" to create markets.</p>
+                  <p className="text-sm text-muted-foreground">Select an event from the left panel to create markets.</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-6">
-                {/* Active Markets */}
-                {activeMarkets.length > 0 && (
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                      <Clock className="w-5 h-5" />
-                      Active Markets ({activeMarkets.length})
-                    </h2>
-                    <div className="grid gap-4">
-                      {activeMarkets.map((market) => {
-                        const odds = getOdds(market);
-                        const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
-                        const pendingBets = getBetsForMarket(market.market_id);
-                        
-                        return (
-                          <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
-                            <CardHeader className="pb-2">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Badge variant="outline" className="text-xs">🏆 Sports</Badge>
-                                  </div>
-                                  <CardTitle className="text-lg">{market.title}</CardTitle>
-                                  {market.description && (
-                                    <CardDescription className="mt-1 text-sm">{market.description}</CardDescription>
-                                  )}
-                                </div>
-                                {getStatusBadge(market)}
-                              </div>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="space-y-4">
-                                {/* Odds bar */}
-                                <div className="space-y-2">
-                                  <div className="flex justify-between text-sm">
-                                    <span className="text-emerald-500 font-medium">YES {odds.yes}%</span>
-                                    <span className="text-red-500 font-medium">NO {odds.no}%</span>
-                                  </div>
-                                  <div className="h-3 bg-muted rounded-full overflow-hidden flex">
-                                    <div 
-                                      className="bg-emerald-500 transition-all duration-300"
-                                      style={{ width: `${odds.yes}%` }}
-                                    />
-                                    <div 
-                                      className="bg-red-500 transition-all duration-300"
-                                      style={{ width: `${odds.no}%` }}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>{market.yes_pool_xmr.toFixed(4)} XMR</span>
-                                    <span>Pool: {totalPool.toFixed(4)} XMR</span>
-                                    <span>{market.no_pool_xmr.toFixed(4)} XMR</span>
-                                  </div>
-                                </div>
-                                
-                                {/* Pending bets */}
-                                {pendingBets.length > 0 && (
-                                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-                                    <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                                      <Clock className="w-4 h-4 text-amber-500" />
-                                      Your Pending Bets
-                                    </p>
-                                    {pendingBets.map((bet) => (
-                                      <div key={bet.bet_id} className="flex justify-between text-sm">
-                                        <span className={bet.side === 'YES' ? 'text-emerald-500' : 'text-red-500'}>
-                                          ${bet.amount_usd.toFixed(2)} on {bet.side}
-                                        </span>
-                                        <Badge variant="outline" className="text-amber-500 border-amber-500">
-                                          {bet.status === 'awaiting_deposit' ? 'Awaiting Deposit' : bet.status}
-                                        </Badge>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {/* Actions */}
-                                <div className="flex gap-2 pt-2">
-                                  <Button
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                                    onClick={() => {
-                                      setSelectedMarket(market);
-                                      setBetSide('yes');
-                                      setBetDialogOpen(true);
-                                    }}
-                                  >
-                                    <TrendingUp className="w-4 h-4 mr-2" /> Buy YES
-                                  </Button>
-                                  <Button
-                                    variant="destructive"
-                                    className="flex-1"
-                                    onClick={() => {
-                                      setSelectedMarket(market);
-                                      setBetSide('no');
-                                      setBetDialogOpen(true);
-                                    }}
-                                  >
-                                    <TrendingDown className="w-4 h-4 mr-2" /> Buy NO
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                
                 {/* Resolved Markets */}
                 {resolvedMarkets.length > 0 && (
                   <Collapsible defaultOpen={false}>
