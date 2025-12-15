@@ -45,7 +45,7 @@ import Predictions from "./pages/Predictions";
 import CryptoPredictions from "./pages/CryptoPredictions";
 import SportsPredictions from "./pages/SportsPredictions";
 import EsportsPredictions from "./pages/EsportsPredictions";
-
+import CricketPredictions from "./pages/CricketPredictions";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -96,6 +96,7 @@ const App = () => (
             <Route path="/predictions" element={<CryptoPredictions />} />
             <Route path="/sports-predictions" element={<SportsPredictions />} />
             <Route path="/esports-predictions" element={<EsportsPredictions />} />
+            <Route path="/cricket-predictions" element={<CricketPredictions />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
