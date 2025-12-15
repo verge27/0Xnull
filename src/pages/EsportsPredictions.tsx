@@ -17,7 +17,7 @@ import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Radio } from 'lucide-react';
 
@@ -266,7 +266,14 @@ export default function EsportsPredictions() {
             </div>
           </div>
 
-          {/* Live Matches Section */}
+          {/* Need XMR Banner */}
+          <div className="mb-6 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Need XMR to place bets?</p>
+            <Link to="/swaps" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Get XMR <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
           {liveEvents.length > 0 && (
             <div className="mb-6">
               <Card className="border-red-500/30 bg-gradient-to-r from-red-950/20 via-background to-red-950/20">

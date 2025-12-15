@@ -16,7 +16,7 @@ import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { PredictionLeaderboard } from '@/components/PredictionLeaderboard';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronLeft, ChevronRight, Wallet, Filter, ArrowUpDown, Trophy, ArrowRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -400,7 +400,14 @@ export default function CryptoPredictions() {
             </div>
           </div>
 
-          {/* Filter/Sort Controls */}
+          {/* Need XMR Banner */}
+          <div className="mb-6 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Need XMR to place bets?</p>
+            <Link to="/swaps" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Get XMR <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />

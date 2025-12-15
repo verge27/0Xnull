@@ -18,7 +18,7 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
 import { TeamLogo } from '@/components/TeamLogo';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, Trophy, Calendar, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, Trophy, Calendar, Users, ArrowRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const SPORTS = ['nfl', 'premier_league', 'ufc'] as const;
@@ -234,6 +234,14 @@ export default function SportsPredictions() {
               Refresh
             </Button>
           </div>
+        </div>
+
+        {/* Need XMR Banner */}
+        <div className="mb-6 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Need XMR to place bets?</p>
+          <Link to="/swaps" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            Get XMR <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
