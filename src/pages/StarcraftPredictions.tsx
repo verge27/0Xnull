@@ -97,10 +97,17 @@ export default function StarcraftPredictions() {
   const fetchEvents = async () => {
     setEventsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('0xnull-proxy', {
-        body: { path: '/api/esports/events?game=starcraft-2' }
-      });
-      if (!error && data?.events) {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/events?game=starcraft-2')}`,
+        {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          }
+        }
+      );
+      const data = await response.json();
+      if (data?.events) {
         setEvents(data.events);
       }
     } catch (error) {
@@ -112,10 +119,17 @@ export default function StarcraftPredictions() {
 
   const fetchLiveEvents = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('0xnull-proxy', {
-        body: { path: '/api/esports/live?game=starcraft-2' }
-      });
-      if (!error && data?.events) {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/live?game=starcraft-2')}`,
+        {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          }
+        }
+      );
+      const data = await response.json();
+      if (data?.events) {
         setLiveEvents(data.events);
       }
     } catch (error) {
@@ -125,10 +139,17 @@ export default function StarcraftPredictions() {
 
   const fetchResults = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('0xnull-proxy', {
-        body: { path: '/api/esports/results?game=starcraft-2' }
-      });
-      if (!error && data?.results) {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/results?game=starcraft-2')}`,
+        {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          }
+        }
+      );
+      const data = await response.json();
+      if (data?.results) {
         setResults(data.results);
       }
     } catch (error) {
