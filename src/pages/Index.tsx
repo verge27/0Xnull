@@ -175,7 +175,7 @@ const Index = () => {
               Ready to Start Trading?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join the privacy-focused marketplace today. No registration required to browse.
+              Access the permissionless economy today. No registration required to browse.
             </p>
             <Link to="/browse">
               <Button size="lg" className="gap-2">
