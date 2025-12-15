@@ -19,32 +19,16 @@ interface TwitchStreamEmbedProps {
 }
 
 export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
-  // Build parent domains dynamically based on current hostname
-  const getParentDomains = useCallback(() => {
-    const currentHost = window.location.hostname;
-    const parents = new Set([
-      '0xnull.io',
-      'www.0xnull.io',
-      'localhost',
-    ]);
-    
-    // Add current hostname - this is the most important one for the preview
-    if (currentHost) {
-      parents.add(currentHost);
-    }
-    
-    return Array.from(parents).map(p => `parent=${p}`).join('&');
-  }, []);
-
-  const [parentParams, setParentParams] = useState('');
-  
-  useEffect(() => {
-    setParentParams(getParentDomains());
-  }, [getParentDomains]);
+  const [hostname, setHostname] = useState<string | null>(null);
   const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Capture hostname on mount
+  useEffect(() => {
+    setHostname(window.location.hostname);
+  }, []);
 
   const fetchTopStream = useCallback(async (game: string) => {
     setLoading(true);
@@ -147,7 +131,7 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
       </CardHeader>
       
       <CardContent className="p-0">
-        {loading ? (
+        {loading || !hostname ? (
           <div className="aspect-video bg-muted/50 flex items-center justify-center">
             <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
@@ -160,7 +144,7 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
         ) : (
           <div className="aspect-video">
             <iframe
-              src={`https://player.twitch.tv/?channel=${streamInfo.channel}&${parentParams}&muted=true`}
+              src={`https://player.twitch.tv/?channel=${streamInfo.channel}&parent=0xnull.io&parent=www.0xnull.io&parent=localhost&parent=${hostname}&muted=true`}
               height="100%"
               width="100%"
               allowFullScreen
