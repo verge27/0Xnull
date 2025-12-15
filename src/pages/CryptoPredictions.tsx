@@ -103,6 +103,7 @@ export default function CryptoPredictions() {
   const [placingBet, setPlacingBet] = useState(false);
   
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [marketAssetFilter, setMarketAssetFilter] = useState<string>('all');
 
   useEffect(() => {
     fetchMarkets();
@@ -225,7 +226,6 @@ export default function CryptoPredictions() {
     : ORACLE_ASSETS.filter(a => a.category === selectedCategory);
 
   const activeMarkets = markets.filter(m => m.resolved === 0);
-  const resolvedMarkets = markets.filter(m => m.resolved === 1);
 
   return (
     <div className="min-h-screen bg-background">
@@ -272,10 +272,9 @@ export default function CryptoPredictions() {
         </div>
 
         <Tabs defaultValue="prices" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-4">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="prices">Prices</TabsTrigger>
             <TabsTrigger value="markets">Markets</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
             <TabsTrigger value="my-bets">My Bets</TabsTrigger>
           </TabsList>
 
@@ -357,10 +356,24 @@ export default function CryptoPredictions() {
 
           {/* Markets Tab */}
           <TabsContent value="markets" className="space-y-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Active Markets ({activeMarkets.length})
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Active Markets ({marketAssetFilter === 'all' ? activeMarkets.length : activeMarkets.filter(m => m.oracle_asset === marketAssetFilter).length})
+              </h2>
+            </div>
+            
+            <Tabs value={marketAssetFilter} onValueChange={setMarketAssetFilter}>
+              <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                <TabsTrigger value="all">All</TabsTrigger>
+                {ORACLE_ASSETS.filter(a => activeMarkets.some(m => m.oracle_asset === a.symbol)).map(asset => (
+                  <TabsTrigger key={asset.symbol} value={asset.symbol} className="flex items-center gap-1">
+                    {asset.icon}
+                    {asset.symbol}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
             
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
@@ -374,7 +387,7 @@ export default function CryptoPredictions() {
               </Card>
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
-                {activeMarkets.map((market) => {
+                {(marketAssetFilter === 'all' ? activeMarkets : activeMarkets.filter(m => m.oracle_asset === marketAssetFilter)).map((market) => {
                   const odds = getOdds(market);
                   const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
                   const pendingBets = getBetsForMarket(market.market_id);
@@ -442,72 +455,6 @@ export default function CryptoPredictions() {
                             </Button>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Results Tab */}
-          <TabsContent value="results" className="space-y-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <CheckCircle className="w-5 h-5" />
-              Resolved Markets ({resolvedMarkets.length})
-            </h2>
-            
-            {resolvedMarkets.length === 0 ? (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No resolved markets yet.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {resolvedMarkets.map((market) => {
-                  const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
-                  
-                  return (
-                    <Card key={market.market_id} className="opacity-75">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{market.title}</CardTitle>
-                            {market.description && (
-                              <CardDescription className="mt-1 text-sm">{market.description}</CardDescription>
-                            )}
-                          </div>
-                          <Badge 
-                            className={market.outcome === 'YES' 
-                              ? 'bg-emerald-500/20 text-emerald-400' 
-                              : 'bg-red-500/20 text-red-400'
-                            }
-                          >
-                            {market.outcome === 'YES' ? (
-                              <><CheckCircle className="w-3 h-3 mr-1" /> YES Won</>
-                            ) : (
-                              <><XCircle className="w-3 h-3 mr-1" /> NO Won</>
-                            )}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between text-sm">
-                          <span className={market.outcome === 'YES' ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
-                            YES: {market.yes_pool_xmr.toFixed(4)} XMR
-                          </span>
-                          <span className="text-muted-foreground">
-                            Total: {totalPool.toFixed(4)} XMR
-                          </span>
-                          <span className={market.outcome === 'NO' ? 'text-red-500 font-medium' : 'text-muted-foreground'}>
-                            NO: {market.no_pool_xmr.toFixed(4)} XMR
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Resolved: {formatResolutionDate(market.resolution_time)}
-                        </p>
                       </CardContent>
                     </Card>
                   );
