@@ -29,8 +29,15 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const game = url.searchParams.get('game') || 'lol';
+    // Support both GET query params and POST body
+    let game = 'lol';
+    if (req.method === 'POST') {
+      const body = await req.json().catch(() => ({}));
+      game = body.game || 'lol';
+    } else {
+      const url = new URL(req.url);
+      game = url.searchParams.get('game') || 'lol';
+    }
     
     const gameId = GAME_IDS[game.toLowerCase()] || GAME_IDS.lol;
     const cacheKey = `stream_${gameId}`;
