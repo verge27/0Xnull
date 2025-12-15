@@ -72,7 +72,7 @@ const Index = () => {
               <span className="text-gradient">Anonymously</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              The privacy-first marketplace powered by cryptocurrency. Trade physical goods, digital products, and services without compromising your identity.
+              Private infrastructure for the permissionless economy. Trade physical goods, digital products, and services without compromising your identity.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/browse">
