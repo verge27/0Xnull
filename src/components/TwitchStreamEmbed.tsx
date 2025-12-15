@@ -18,32 +18,29 @@ interface TwitchStreamEmbedProps {
   selectedGame: string;
 }
 
-// Build parent domains dynamically based on current hostname
-const getParentDomains = () => {
-  const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
-  const parents = new Set([
-    '0xnull.io',
-    'www.0xnull.io',
-    'localhost',
-    'lovable.app',
-    'lovableproject.com',
-  ]);
-  
-  // Add current hostname and any subdomain variations
-  if (currentHost) {
-    parents.add(currentHost);
-    // Also add the base domain if it's a subdomain
-    const parts = currentHost.split('.');
-    if (parts.length > 2) {
-      parents.add(parts.slice(-2).join('.'));
-    }
-  }
-  
-  return Array.from(parents).map(p => `parent=${p}`).join('&');
-};
-
 export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
-  const parentParams = getParentDomains();
+  // Build parent domains dynamically based on current hostname
+  const getParentDomains = useCallback(() => {
+    const currentHost = window.location.hostname;
+    const parents = new Set([
+      '0xnull.io',
+      'www.0xnull.io',
+      'localhost',
+    ]);
+    
+    // Add current hostname - this is the most important one for the preview
+    if (currentHost) {
+      parents.add(currentHost);
+    }
+    
+    return Array.from(parents).map(p => `parent=${p}`).join('&');
+  }, []);
+
+  const [parentParams, setParentParams] = useState('');
+  
+  useEffect(() => {
+    setParentParams(getParentDomains());
+  }, [getParentDomains]);
   const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
