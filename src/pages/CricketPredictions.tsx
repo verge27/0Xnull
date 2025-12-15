@@ -23,7 +23,7 @@ import { Radio } from 'lucide-react';
 
 export default function CricketPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
-  const { matches, liveMatches, loading: matchesLoading, fetchMatches, fetchLiveMatches, createCricketMarket } = useCricketEvents();
+  const { matches, liveMatches, upcomingMatches, loading: matchesLoading, fetchMatches, createCricketMarket } = useCricketEvents();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,15 +47,14 @@ export default function CricketPredictions() {
   useEffect(() => {
     fetchMarkets();
     fetchMatches();
-    fetchLiveMatches();
     
     const interval = setInterval(() => {
       fetchMarkets();
-      fetchLiveMatches();
+      fetchMatches();
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [fetchMatches, fetchLiveMatches]);
+  }, [fetchMatches]);
 
   const fetchMarkets = async () => {
     try {
