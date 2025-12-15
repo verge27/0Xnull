@@ -4,47 +4,30 @@ import { toast } from 'sonner';
 
 export interface CricketMatch {
   event_id: string;
+  sport: string;
+  sport_key: string;
   name: string;
-  match_type: string;
-  status: string;
-  venue: string;
-  date: string;
-  datetime_gmt: string;
   team_a: string;
   team_b: string;
-  team_a_image: string;
-  team_b_image: string;
-  score: CricketScore[];
+  commence_time: string;
+  commence_timestamp: number;
   match_started: boolean;
   match_ended: boolean;
-  is_upcoming?: boolean;
-}
-
-export interface CricketScore {
-  r: number;  // runs
-  w: number;  // wickets
-  o: number;  // overs
-  inning: string;
 }
 
 export interface CricketResult {
   event_id: string;
   name: string;
-  status: string;
   team_a: string;
   team_b: string;
   winner?: string;
   match_ended: boolean;
 }
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const CRICKET_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const CRICKET_API_BASE = 'https://api.0xnull.io/api/cricket';
 
 async function cricketRequest<T>(path: string): Promise<T> {
-  const proxyUrl = new URL(CRICKET_API_BASE);
-  proxyUrl.searchParams.set('path', `/api/cricket${path}`);
-  
-  const res = await fetch(proxyUrl.toString(), {
+  const res = await fetch(`${CRICKET_API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
   });
   
@@ -56,10 +39,9 @@ async function cricketRequest<T>(path: string): Promise<T> {
 }
 
 export const CRICKET_MATCH_TYPES = [
-  { key: 't20', name: 'T20', icon: '🏏' },
-  { key: 'odi', name: 'ODI', icon: '🏟️' },
-  { key: 'test', name: 'Test', icon: '🎯' },
-  { key: 'ipl', name: 'IPL', icon: '🇮🇳' },
+  { key: 'big_bash', name: 'Big Bash', icon: '🏏' },
+  { key: 't20', name: 'T20 Int\'l', icon: '🌍' },
+  { key: 'test', name: 'Test', icon: '🏆' },
 ] as const;
 
 export function useCricketEvents() {
@@ -67,11 +49,11 @@ export function useCricketEvents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMatches = useCallback(async (matchType?: string) => {
+  const fetchMatches = useCallback(async (sport?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const path = matchType ? `/matches?match_type=${matchType}` : '/matches';
+      const path = sport ? `/matches?sport=${sport}` : '/matches';
       const data = await cricketRequest<{ matches: CricketMatch[] } | CricketMatch[]>(path);
       const matchList = Array.isArray(data) ? data : (data.matches || []);
       setMatches(matchList);
@@ -84,10 +66,30 @@ export function useCricketEvents() {
     }
   }, []);
 
+  const fetchLiveMatches = useCallback(async () => {
+    try {
+      const data = await cricketRequest<{ matches: CricketMatch[] } | CricketMatch[]>('/live');
+      return Array.isArray(data) ? data : (data.matches || []);
+    } catch (e) {
+      console.error('Failed to fetch live matches:', e);
+      return [];
+    }
+  }, []);
+
+  const fetchUpcomingMatches = useCallback(async () => {
+    try {
+      const data = await cricketRequest<{ matches: CricketMatch[] } | CricketMatch[]>('/upcoming');
+      return Array.isArray(data) ? data : (data.matches || []);
+    } catch (e) {
+      console.error('Failed to fetch upcoming matches:', e);
+      return [];
+    }
+  }, []);
+
   // Derived states from matches
-  const liveMatches = matches.filter(m => m.match_started && !m.match_ended && !m.is_upcoming);
-  const upcomingMatches = matches.filter(m => m.is_upcoming);
-  const completedMatches = matches.filter(m => m.match_ended && !m.is_upcoming);
+  const liveMatches = matches.filter(m => m.match_started && !m.match_ended);
+  const upcomingMatches = matches.filter(m => !m.match_started && !m.match_ended);
+  const completedMatches = matches.filter(m => m.match_ended);
 
   const getMatchResult = useCallback(async (eventId: string): Promise<CricketResult | null> => {
     try {
@@ -106,16 +108,16 @@ export function useCricketEvents() {
       const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
       const marketId = `cricket_${match.event_id}_${teamSlug}`;
       
-      // Resolution time = match datetime + 12 hours (for match to complete, especially tests)
-      const matchDate = new Date(match.datetime_gmt);
+      // Resolution time = match commence time + 12 hours (for match to complete)
+      const matchDate = new Date(match.commence_time);
       const resolutionTime = Math.floor(matchDate.getTime() / 1000) + 43200;
       
-      const matchTypeLabel = getMatchTypeLabel(match.match_type);
+      const sportLabel = getSportLabel(match.sport);
       
       await api.createMarket({
         market_id: marketId,
         title: `Will ${selectedTeam} win?`,
-        description: `${matchTypeLabel}: ${match.team_a} vs ${match.team_b} at ${match.venue}`,
+        description: `${sportLabel}: ${match.team_a} vs ${match.team_b}`,
         oracle_type: 'cricket',
         oracle_asset: match.event_id,
         oracle_condition: selectedTeam,
@@ -144,23 +146,23 @@ export function useCricketEvents() {
     loading,
     error,
     fetchMatches,
+    fetchLiveMatches,
+    fetchUpcomingMatches,
     getMatchResult,
     createCricketMarket,
   };
 }
 
-export function getMatchTypeLabel(matchType: string): string {
-  const found = CRICKET_MATCH_TYPES.find(t => t.key === matchType);
-  return found?.name || matchType.toUpperCase();
+export function getSportLabel(sport: string): string {
+  const found = CRICKET_MATCH_TYPES.find(t => t.key === sport);
+  return found?.name || sport.replace(/_/g, ' ').toUpperCase();
 }
 
-export function getMatchTypeIcon(matchType: string): string {
-  const found = CRICKET_MATCH_TYPES.find(t => t.key === matchType);
+export function getSportIcon(sport: string): string {
+  const found = CRICKET_MATCH_TYPES.find(t => t.key === sport);
   return found?.icon || '🏏';
 }
 
-export function formatCricketScore(score: CricketScore[]): string {
-  if (!score || score.length === 0) return '';
-  
-  return score.map(s => `${s.r}/${s.w} (${s.o})`).join(' vs ');
-}
+// Keep old function names for backward compatibility
+export const getMatchTypeLabel = getSportLabel;
+export const getMatchTypeIcon = getSportIcon;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
-import { useCricketEvents, CRICKET_MATCH_TYPES, getMatchTypeLabel, getMatchTypeIcon, formatCricketScore, type CricketMatch } from '@/hooks/useCricketEvents';
+import { useCricketEvents, CRICKET_MATCH_TYPES, getSportLabel, getSportIcon, type CricketMatch } from '@/hooks/useCricketEvents';
 import { api, type PredictionMarket } from '@/services/api';
 import cricketBackground from '@/assets/cricket-background.jpg';
 
@@ -142,8 +142,8 @@ export default function CricketPredictions() {
     return <Badge className="bg-green-600"><Clock className="w-3 h-3 mr-1" /> Open</Badge>;
   };
 
-  const formatMatchTime = (datetimeGmt: string) => {
-    const date = new Date(datetimeGmt);
+  const formatMatchTime = (commenceTime: string) => {
+    const date = new Date(commenceTime);
     if (isNaN(date.getTime())) return 'TBD';
     return date.toLocaleString('en-GB', {
       weekday: 'short',
@@ -167,16 +167,14 @@ export default function CricketPredictions() {
     return 'none';
   };
 
-  const getMatchTypeColors = (matchType: string) => {
-    switch (matchType) {
-      case 't20':
+  const getSportColors = (sport: string) => {
+    switch (sport) {
+      case 'big_bash':
         return { border: 'border-orange-500/30', bg: 'from-orange-950/30', accent: 'text-orange-400', glow: 'hover:shadow-[0_0_15px_hsl(25_100%_50%/0.2)]' };
-      case 'odi':
+      case 't20':
         return { border: 'border-blue-500/30', bg: 'from-blue-950/30', accent: 'text-blue-400', glow: 'hover:shadow-[0_0_15px_hsl(210_100%_50%/0.2)]' };
       case 'test':
         return { border: 'border-red-500/30', bg: 'from-red-950/30', accent: 'text-red-400', glow: 'hover:shadow-[0_0_15px_hsl(0_100%_50%/0.2)]' };
-      case 'ipl':
-        return { border: 'border-purple-500/30', bg: 'from-purple-950/30', accent: 'text-purple-400', glow: 'hover:shadow-[0_0_15px_hsl(270_100%_50%/0.2)]' };
       default:
         return { border: 'border-emerald-500/30', bg: 'from-emerald-950/30', accent: 'text-emerald-400', glow: 'hover:shadow-[0_0_15px_hsl(150_100%_50%/0.2)]' };
     }
@@ -184,7 +182,7 @@ export default function CricketPredictions() {
 
   const filteredMatches = selectedMatchType === 'all'
     ? matches 
-    : matches.filter(m => m.match_type === selectedMatchType);
+    : matches.filter(m => m.sport === selectedMatchType);
 
   const activeMarkets = markets.filter(m => m.resolved === 0);
   const resolvedMarkets = markets.filter(m => m.resolved === 1);
@@ -208,7 +206,7 @@ export default function CricketPredictions() {
                 <span className="text-4xl">🏏</span>
                 Cricket Predictions
               </h1>
-              <p className="text-muted-foreground mt-1">Bet on T20, ODI, Test & IPL matches with XMR</p>
+              <p className="text-muted-foreground mt-1">Bet on Big Bash, T20 & Test matches with XMR</p>
             </div>
             <div className="flex items-center gap-2">
               <Link to="/predictions">
@@ -266,7 +264,7 @@ export default function CricketPredictions() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {liveMatches.map(match => {
                       const marketStatus = getMatchMarketStatus(match);
-                      const colors = getMatchTypeColors(match.match_type);
+                      const colors = getSportColors(match.sport);
                       
                       return (
                         <div
@@ -281,27 +279,20 @@ export default function CricketPredictions() {
                             </span>
                           </div>
                           
-                          {/* Match Type & Venue */}
+                          {/* Sport Type */}
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xl">{getMatchTypeIcon(match.match_type)}</span>
-                            <div>
-                              <Badge variant="outline" className={`text-xs ${colors.border}`}>
-                                {getMatchTypeLabel(match.match_type)}
-                              </Badge>
-                              <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[180px]">{match.venue}</p>
-                            </div>
+                            <span className="text-xl">{getSportIcon(match.sport)}</span>
+                            <Badge variant="outline" className={`text-xs ${colors.border}`}>
+                              {getSportLabel(match.sport)}
+                            </Badge>
                           </div>
                           
                           {/* Teams */}
                           <div className="flex items-center justify-between gap-2 mb-3">
                             <div className="flex items-center gap-2 flex-1">
-                              {match.team_a_image ? (
-                                <img src={match.team_a_image} alt={match.team_a} className="w-8 h-8 object-contain rounded" />
-                              ) : (
-                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
-                                  {match.team_a.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
+                              <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                {match.team_a.substring(0, 2).toUpperCase()}
+                              </div>
                               <span className="font-medium text-sm truncate max-w-[80px]">{match.team_a}</span>
                             </div>
                             
@@ -311,28 +302,15 @@ export default function CricketPredictions() {
                             
                             <div className="flex items-center gap-2 flex-1 justify-end">
                               <span className="font-medium text-sm truncate max-w-[80px]">{match.team_b}</span>
-                              {match.team_b_image ? (
-                                <img src={match.team_b_image} alt={match.team_b} className="w-8 h-8 object-contain rounded" />
-                              ) : (
-                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
-                                  {match.team_b.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
+                              <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                {match.team_b.substring(0, 2).toUpperCase()}
+                              </div>
                             </div>
                           </div>
                           
-                          {/* Score */}
-                          {match.score && match.score.length > 0 && (
-                            <div className="text-center mb-3">
-                              <p className={`text-sm font-mono ${colors.accent}`}>{formatCricketScore(match.score)}</p>
-                            </div>
-                          )}
-                          
                           {/* Status */}
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground truncate max-w-[150px]">
-                              {match.status}
-                            </span>
+                            <span className="text-muted-foreground">Live</span>
                             {marketStatus !== 'both' && (
                               <Button
                                 size="sm"
@@ -388,7 +366,7 @@ export default function CricketPredictions() {
                         <div className="space-y-3 max-h-[500px] overflow-y-auto">
                           {filteredMatches.filter(m => !m.match_ended).map(match => {
                             const marketStatus = getMatchMarketStatus(match);
-                            const colors = getMatchTypeColors(match.match_type);
+                            const colors = getSportColors(match.sport);
                             
                             return (
                               <div
@@ -397,9 +375,9 @@ export default function CricketPredictions() {
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
-                                    <span>{getMatchTypeIcon(match.match_type)}</span>
+                                    <span>{getSportIcon(match.sport)}</span>
                                     <Badge variant="outline" className="text-xs">
-                                      {getMatchTypeLabel(match.match_type)}
+                                      {getSportLabel(match.sport)}
                                     </Badge>
                                     {match.match_started && !match.match_ended && (
                                       <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
@@ -411,30 +389,20 @@ export default function CricketPredictions() {
                                 </div>
                                 
                                 <div className="flex items-center gap-2 mb-2">
-                                  {match.team_a_image ? (
-                                    <img src={match.team_a_image} alt={match.team_a} className="w-6 h-6 object-contain rounded" />
-                                  ) : (
-                                    <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                      {match.team_a.substring(0, 2).toUpperCase()}
-                                    </div>
-                                  )}
+                                  <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
+                                    {match.team_a.substring(0, 2).toUpperCase()}
+                                  </div>
                                   <span className="font-medium text-sm">{match.team_a}</span>
                                   <span className="text-muted-foreground">vs</span>
                                   <span className="font-medium text-sm">{match.team_b}</span>
-                                  {match.team_b_image ? (
-                                    <img src={match.team_b_image} alt={match.team_b} className="w-6 h-6 object-contain rounded" />
-                                  ) : (
-                                    <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                      {match.team_b.substring(0, 2).toUpperCase()}
-                                    </div>
-                                  )}
+                                  <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
+                                    {match.team_b.substring(0, 2).toUpperCase()}
+                                  </div>
                                 </div>
-                                
-                                <p className="text-xs text-muted-foreground mb-2 truncate">{match.venue}</p>
                                 
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-muted-foreground">
-                                    {formatMatchTime(match.datetime_gmt)}
+                                    {formatMatchTime(match.commence_time)}
                                   </span>
                                   
                                   {marketStatus !== 'both' && !match.match_started && (
@@ -641,9 +609,9 @@ export default function CricketPredictions() {
                   disabled={creating || markets.some(m => m.market_id === `cricket_${teamSelectDialog.match!.event_id}_${teamSelectDialog.match!.team_a.toLowerCase().replace(/\s+/g, '_')}`)}
                   onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.team_a)}
                 >
-                  {teamSelectDialog.match.team_a_image && (
-                    <img src={teamSelectDialog.match.team_a_image} alt={teamSelectDialog.match.team_a} className="w-8 h-8 object-contain" />
-                  )}
+                  <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                    {teamSelectDialog.match.team_a.substring(0, 2).toUpperCase()}
+                  </div>
                   <span className="text-sm font-medium">{teamSelectDialog.match.team_a}</span>
                 </Button>
                 
@@ -653,9 +621,9 @@ export default function CricketPredictions() {
                   disabled={creating || markets.some(m => m.market_id === `cricket_${teamSelectDialog.match!.event_id}_${teamSelectDialog.match!.team_b.toLowerCase().replace(/\s+/g, '_')}`)}
                   onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.team_b)}
                 >
-                  {teamSelectDialog.match.team_b_image && (
-                    <img src={teamSelectDialog.match.team_b_image} alt={teamSelectDialog.match.team_b} className="w-8 h-8 object-contain" />
-                  )}
+                  <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                    {teamSelectDialog.match.team_b.substring(0, 2).toUpperCase()}
+                  </div>
                   <span className="text-sm font-medium">{teamSelectDialog.match.team_b}</span>
                 </Button>
               </div>
