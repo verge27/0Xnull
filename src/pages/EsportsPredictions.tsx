@@ -161,6 +161,29 @@ export default function EsportsPredictions() {
     }) + ' UTC';
   };
 
+  const getCountdown = (timestamp: number) => {
+    if (!timestamp || isNaN(timestamp) || timestamp <= 0) {
+      return null;
+    }
+    const now = Date.now();
+    const eventTime = timestamp * 1000;
+    const diff = eventTime - now;
+    
+    if (diff <= 0) return null;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `Starts in ${days}d ${hours % 24}h`;
+    }
+    if (hours > 0) {
+      return `Starts in ${hours}h ${minutes}m`;
+    }
+    return `Starts in ${minutes}m`;
+  };
+
   const getEventMarketStatus = (event: EsportsEvent) => {
     const teamASlug = event.team_a.toLowerCase().replace(/\s+/g, '_');
     const teamBSlug = event.team_b.toLowerCase().replace(/\s+/g, '_');
@@ -307,9 +330,16 @@ export default function EsportsPredictions() {
                                 <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
                                 
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatGameTime(event.start_timestamp)}
-                                  </span>
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatGameTime(event.start_timestamp)}
+                                    </span>
+                                    {!isLive && getCountdown(event.start_timestamp) && (
+                                      <span className="text-xs text-cyan-400 font-medium">
+                                        {getCountdown(event.start_timestamp)}
+                                      </span>
+                                    )}
+                                  </div>
                                   
                                   {marketStatus !== 'both' && !isLive && (
                                     <Button
