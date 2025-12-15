@@ -143,7 +143,14 @@ export default function EsportsPredictions() {
   };
 
   const formatGameTime = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString('en-GB', {
+    if (!timestamp || isNaN(timestamp) || timestamp <= 0) {
+      return 'TBD';
+    }
+    const date = new Date(timestamp * 1000);
+    if (isNaN(date.getTime())) {
+      return 'TBD';
+    }
+    return date.toLocaleString('en-GB', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
