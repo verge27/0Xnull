@@ -193,6 +193,20 @@ export default function StarcraftPredictions() {
   const handleCreateMarket = async (event: SC2Event, player: string) => {
     setCreating(true);
     try {
+      // Generate market_id from event_id and player name
+      const playerSlug = player.toLowerCase().replace(/\s+/g, '_');
+      const marketId = `esports_${event.event_id}_${playerSlug}`;
+      
+      // Convert scheduled_at to Unix timestamp if it's a string
+      let resolutionTime: number;
+      if (typeof event.scheduled_at === 'string') {
+        resolutionTime = Math.floor(new Date(event.scheduled_at).getTime() / 1000);
+      } else if (typeof event.scheduled_at === 'number') {
+        resolutionTime = event.scheduled_at;
+      } else {
+        resolutionTime = Math.floor(Date.now() / 1000) + 86400; // Default: 24 hours from now
+      }
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/predictions/markets')}`,
         {
@@ -203,12 +217,13 @@ export default function StarcraftPredictions() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            market_id: marketId,
             title: `Will ${player} win?`,
             description: `StarCraft II: ${event.team_a} vs ${event.team_b} - ${event.tournament}`,
             oracle_type: 'esports',
             oracle_asset: event.event_id,
             oracle_condition: player,
-            resolution_time: event.scheduled_at || Math.floor(Date.now() / 1000) + 86400,
+            resolution_time: resolutionTime,
           }),
         }
       );
@@ -216,7 +231,7 @@ export default function StarcraftPredictions() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create market');
+        throw new Error(data.error || data.detail?.[0]?.msg || 'Failed to create market');
       }
       
       toast.success(`Market created for ${player}!`);
