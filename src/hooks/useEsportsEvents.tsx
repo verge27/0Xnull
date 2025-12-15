@@ -3,16 +3,18 @@ import { api } from '@/services/api';
 import { toast } from 'sonner';
 
 export interface EsportsEvent {
-  id: string;
+  id?: string;
+  event_id?: string;
   game: string;
   team_a: string;
   team_b: string;
-  team_a_image: string;
-  team_b_image: string;
+  team_a_image?: string;
+  team_b_image?: string;
   tournament: string;
-  start_time: string;
-  start_timestamp: number;
-  status: 'upcoming' | 'live' | 'completed';
+  start_time?: string;
+  start_timestamp?: number;
+  scheduled_at?: string | number;
+  status?: 'upcoming' | 'live' | 'completed' | 'not_started' | 'running';
 }
 
 export interface EsportsResult {
@@ -104,11 +106,28 @@ export function useEsportsEvents() {
     selectedTeam: string
   ): Promise<boolean> => {
     try {
-      const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
-      const marketId = `esports_${event.id}_${teamSlug}`;
+      const eventId = event.event_id || event.id;
+      if (!eventId) {
+        throw new Error('Event ID is required');
+      }
       
-      // Resolution time = start time + 4 hours (for match to complete)
-      const resolutionTime = event.start_timestamp + 14400;
+      const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
+      const marketId = `esports_${eventId}_${teamSlug}`;
+      
+      // Get resolution time from various possible timestamp formats
+      let resolutionTime: number;
+      if (typeof event.start_timestamp === 'number' && event.start_timestamp > 0) {
+        resolutionTime = event.start_timestamp + 14400; // +4 hours
+      } else if (typeof event.scheduled_at === 'number' && event.scheduled_at > 0) {
+        resolutionTime = event.scheduled_at + 14400;
+      } else if (typeof event.scheduled_at === 'string') {
+        resolutionTime = Math.floor(new Date(event.scheduled_at).getTime() / 1000) + 14400;
+      } else if (typeof event.start_time === 'string') {
+        resolutionTime = Math.floor(new Date(event.start_time).getTime() / 1000) + 14400;
+      } else {
+        // Default: 24 hours from now
+        resolutionTime = Math.floor(Date.now() / 1000) + 86400;
+      }
       
       const gameName = getGameLabel(event.game);
       
@@ -117,7 +136,7 @@ export function useEsportsEvents() {
         title: `Will ${selectedTeam} win?`,
         description: `${gameName}: ${event.team_a} vs ${event.team_b} - ${event.tournament}`,
         oracle_type: 'esports',
-        oracle_asset: event.id,
+        oracle_asset: eventId,
         oracle_condition: selectedTeam,
         oracle_value: 0,
         resolution_time: resolutionTime,
