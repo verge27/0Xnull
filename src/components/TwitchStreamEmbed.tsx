@@ -18,9 +18,32 @@ interface TwitchStreamEmbedProps {
   selectedGame: string;
 }
 
-const PARENT_DOMAIN = '0xnull.io';
+// Build parent domains dynamically based on current hostname
+const getParentDomains = () => {
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+  const parents = new Set([
+    '0xnull.io',
+    'www.0xnull.io',
+    'localhost',
+    'lovable.app',
+    'lovableproject.com',
+  ]);
+  
+  // Add current hostname and any subdomain variations
+  if (currentHost) {
+    parents.add(currentHost);
+    // Also add the base domain if it's a subdomain
+    const parts = currentHost.split('.');
+    if (parts.length > 2) {
+      parents.add(parts.slice(-2).join('.'));
+    }
+  }
+  
+  return Array.from(parents).map(p => `parent=${p}`).join('&');
+};
 
 export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
+  const parentParams = getParentDomains();
   const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
@@ -140,7 +163,7 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
         ) : (
           <div className="aspect-video">
             <iframe
-              src={`https://player.twitch.tv/?channel=${streamInfo.channel}&parent=${PARENT_DOMAIN}&parent=lovable.app&parent=lovableproject.com&muted=true`}
+              src={`https://player.twitch.tv/?channel=${streamInfo.channel}&${parentParams}&muted=true`}
               height="100%"
               width="100%"
               allowFullScreen
