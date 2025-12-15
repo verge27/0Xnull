@@ -218,44 +218,6 @@ export default function EsportsPredictions() {
         return { border: 'border-cyan-500/30', bg: 'from-cyan-950/30', accent: 'text-cyan-400', glow: 'hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]' };
     }
   };
-
-  // Generate consistent team stats based on team name hash
-  const getTeamStats = (teamName: string, game: string) => {
-    // Create a simple hash from the team name for consistent random-looking values
-    let hash = 0;
-    for (let i = 0; i < teamName.length; i++) {
-      hash = ((hash << 5) - hash) + teamName.charCodeAt(i);
-      hash = hash & hash;
-    }
-    const absHash = Math.abs(hash);
-    
-    const winRate = 40 + (absHash % 45); // 40-85%
-    const recentWins = (absHash % 5) + 2; // 2-6 wins
-    const recentLosses = 5 - recentWins + (absHash % 2);
-    
-    return {
-      winRate,
-      recentForm: `${recentWins}W-${recentLosses}L`,
-      streak: (absHash % 3) > 0 ? `${(absHash % 4) + 1}W` : `${(absHash % 3) + 1}L`,
-    };
-  };
-
-  const getHeadToHead = (teamA: string, teamB: string) => {
-    // Generate consistent h2h based on both team names
-    let hash = 0;
-    const combined = teamA + teamB;
-    for (let i = 0; i < combined.length; i++) {
-      hash = ((hash << 5) - hash) + combined.charCodeAt(i);
-      hash = hash & hash;
-    }
-    const absHash = Math.abs(hash);
-    
-    const teamAWins = absHash % 5;
-    const teamBWins = (absHash >> 4) % 5;
-    
-    return { teamAWins, teamBWins };
-  };
-
   const filteredEvents = selectedGame === 'all'
     ? events 
     : events.filter(e => e.game === selectedGame);
@@ -488,67 +450,25 @@ export default function EsportsPredictions() {
                                   </div>
                                 </div>
                                 
-                                {/* Team matchup with stats */}
-                                {(() => {
-                                  const statsA = getTeamStats(event.team_a, event.game);
-                                  const statsB = getTeamStats(event.team_b, event.game);
-                                  const h2h = getHeadToHead(event.team_a, event.team_b);
-                                  
-                                  return (
-                                    <div className="space-y-2 mb-2">
-                                      {/* Team A */}
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          {event.team_a_image ? (
-                                            <img src={event.team_a_image} alt={event.team_a} className="w-5 h-5 object-contain" />
-                                          ) : (
-                                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                              {event.team_a.substring(0, 2).toUpperCase()}
-                                            </div>
-                                          )}
-                                          <span className="font-medium text-sm truncate max-w-[100px]">{event.team_a}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs">
-                                          <span className={`${statsA.winRate >= 50 ? 'text-emerald-400' : 'text-muted-foreground'}`}>
-                                            {statsA.winRate}% WR
-                                          </span>
-                                          <span className="text-muted-foreground">{statsA.recentForm}</span>
-                                        </div>
-                                      </div>
-                                      
-                                      {/* H2H indicator */}
-                                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                        <span className={h2h.teamAWins > h2h.teamBWins ? colors.accent : ''}>
-                                          {h2h.teamAWins}
-                                        </span>
-                                        <span className="text-[10px]">H2H</span>
-                                        <span className={h2h.teamBWins > h2h.teamAWins ? colors.accent : ''}>
-                                          {h2h.teamBWins}
-                                        </span>
-                                      </div>
-                                      
-                                      {/* Team B */}
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          {event.team_b_image ? (
-                                            <img src={event.team_b_image} alt={event.team_b} className="w-5 h-5 object-contain" />
-                                          ) : (
-                                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                              {event.team_b.substring(0, 2).toUpperCase()}
-                                            </div>
-                                          )}
-                                          <span className="font-medium text-sm truncate max-w-[100px]">{event.team_b}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs">
-                                          <span className={`${statsB.winRate >= 50 ? 'text-emerald-400' : 'text-muted-foreground'}`}>
-                                            {statsB.winRate}% WR
-                                          </span>
-                                          <span className="text-muted-foreground">{statsB.recentForm}</span>
-                                        </div>
-                                      </div>
+                                <div className="flex items-center gap-2 font-medium text-sm mb-1">
+                                  {event.team_a_image ? (
+                                    <img src={event.team_a_image} alt={event.team_a} className="w-5 h-5 object-contain" />
+                                  ) : (
+                                    <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
+                                      {event.team_a.substring(0, 2).toUpperCase()}
                                     </div>
-                                  );
-                                })()}
+                                  )}
+                                  <span className="truncate max-w-[80px]">{event.team_a}</span>
+                                  <span className="text-muted-foreground">vs</span>
+                                  <span className="truncate max-w-[80px]">{event.team_b}</span>
+                                  {event.team_b_image ? (
+                                    <img src={event.team_b_image} alt={event.team_b} className="w-5 h-5 object-contain" />
+                                  ) : (
+                                    <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
+                                      {event.team_b.substring(0, 2).toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
                                 
                                 <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
                                 
