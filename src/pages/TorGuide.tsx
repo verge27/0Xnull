@@ -78,18 +78,15 @@ const TorGuide = () => {
           </CardContent>
         </Card>
 
-        {/* For Users in Restricted Countries */}
+        {/* If Tor Doesn't Work */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              For Users in Restricted Countries
+              If Tor Doesn't Work Where You Live
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-muted-foreground">
-              If Tor is blocked in your country (China, Iran, Russia, etc.):
-            </p>
             
             <div className="space-y-4">
               <h4 className="font-semibold flex items-center gap-2">
