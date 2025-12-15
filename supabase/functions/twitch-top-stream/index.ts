@@ -16,6 +16,8 @@ const GAME_IDS: Record<string, string> = {
   ow: '488552', // Overwatch 2
   cod: '512710', // Call of Duty: Warzone
   r6siege: '460630',
+  sc2: '490422', // StarCraft II
+  starcraft: '490422',
 };
 
 // In-memory cache (5 minute TTL)

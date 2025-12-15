@@ -25,6 +25,7 @@ const GAME_FILTERS = [
   { key: 'csgo', label: 'CS2', icon: '🔫' },
   { key: 'dota2', label: 'Dota 2', icon: '🛡️' },
   { key: 'valorant', label: 'Valorant', icon: '🎯' },
+  { key: 'sc2', label: 'StarCraft II', icon: '🌌' },
 ];
 
 export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmbedProps) {
