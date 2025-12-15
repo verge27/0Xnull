@@ -92,6 +92,12 @@ const Index = () => {
                   Predictions
                 </Button>
               </Link>
+              <Link to="/esports-predictions">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
+                  <TrendingUp className="w-5 h-5" />
+                  Esports
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
