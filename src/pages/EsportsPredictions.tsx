@@ -216,7 +216,7 @@ export default function EsportsPredictions() {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Upcoming Events */}
             <div className="lg:col-span-1">
-              <Card>
+              <Card className="animate-neon-glow-cyan border-cyan-500/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
@@ -262,7 +262,7 @@ export default function EsportsPredictions() {
                             return (
                               <div
                                 key={event.id}
-                                className="p-3 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                                className="p-3 rounded-lg border border-cyan-500/20 hover:border-cyan-400/50 transition-all hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]"
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
@@ -354,7 +354,7 @@ export default function EsportsPredictions() {
                           const marketBets = getBetsForMarket(market.market_id);
                           
                           return (
-                            <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                            <Card key={market.market_id} className="hover:border-primary/50 transition-colors animate-neon-glow-magenta border-fuchsia-500/30">
                               <CardHeader className="pb-2">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">

@@ -80,10 +80,37 @@ export default {
             height: "0",
           },
         },
+        "neon-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 5px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.2), inset 0 0 10px hsl(var(--primary) / 0.05)",
+          },
+          "50%": {
+            boxShadow: "0 0 10px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3), inset 0 0 15px hsl(var(--primary) / 0.1)",
+          },
+        },
+        "neon-glow-cyan": {
+          "0%, 100%": {
+            boxShadow: "0 0 5px hsl(180 100% 50% / 0.3), 0 0 20px hsl(180 100% 50% / 0.2)",
+          },
+          "50%": {
+            boxShadow: "0 0 10px hsl(180 100% 50% / 0.5), 0 0 30px hsl(180 100% 50% / 0.3)",
+          },
+        },
+        "neon-glow-magenta": {
+          "0%, 100%": {
+            boxShadow: "0 0 5px hsl(300 100% 50% / 0.3), 0 0 20px hsl(300 100% 50% / 0.2)",
+          },
+          "50%": {
+            boxShadow: "0 0 10px hsl(300 100% 50% / 0.5), 0 0 30px hsl(300 100% 50% / 0.3)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "neon-pulse": "neon-pulse 3s ease-in-out infinite",
+        "neon-glow-cyan": "neon-glow-cyan 2.5s ease-in-out infinite",
+        "neon-glow-magenta": "neon-glow-magenta 2.5s ease-in-out infinite",
       },
     },
   },
