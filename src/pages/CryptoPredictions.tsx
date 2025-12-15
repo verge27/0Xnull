@@ -40,6 +40,7 @@ import linkLogo from '@/assets/crypto/link.png';
 import uniLogo from '@/assets/crypto/uni.png';
 import aaveLogo from '@/assets/crypto/aave.png';
 import fartcoinLogo from '@/assets/crypto/fartcoin.png';
+import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.jpg';
 
 interface OracleAsset {
   symbol: string;
@@ -228,7 +229,18 @@ export default function CryptoPredictions() {
   const activeMarkets = markets.filter(m => m.resolved === 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 opacity-20"
+        style={{
+          backgroundImage: `url(${cryptoPredictionsBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      <div className="relative z-10">
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
@@ -571,6 +583,7 @@ export default function CryptoPredictions() {
       />
       
       <Footer />
+      </div>
     </div>
   );
 }
