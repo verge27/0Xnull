@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
+import esportsBackground from '@/assets/esports-background.jpg';
 import { useEsportsEvents, ESPORTS_GAMES, getGameLabel, getGameIcon, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
 
@@ -174,7 +175,11 @@ export default function EsportsPredictions() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Background */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-violet-950/30 via-background to-fuchsia-950/20" />
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${esportsBackground})` }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/70 to-background/95" />
       
       <div className="relative z-10">
         <Navbar />
