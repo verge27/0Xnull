@@ -331,256 +331,251 @@ export default function CricketPredictions() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Upcoming Matches */}
-            <div className="lg:col-span-1">
-              <Card className="border-emerald-500/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Upcoming Matches
-                    <span className="text-xs font-normal text-muted-foreground">(Times in UTC)</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Tabs value={selectedMatchType} onValueChange={(v) => {
-                    setSelectedMatchType(v);
-                    if (v === 'all') fetchMatches();
-                    else fetchMatches(v);
-                  }}>
-                    <TabsList className="mb-4 w-full">
-                      <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
-                      {CRICKET_MATCH_TYPES.map(type => (
-                        <TabsTrigger key={type.key} value={type.key} className="flex-1">
-                          {type.icon}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+          <Tabs defaultValue="upcoming" className="space-y-6">
+            <TabsList className="grid w-full max-w-md grid-cols-4">
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="markets">Markets</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
+              <TabsTrigger value="my-bets">My Bets</TabsTrigger>
+            </TabsList>
 
-                    <TabsContent value={selectedMatchType} className="mt-0">
-                      {matchesLoading ? (
-                        <div className="text-center py-8 text-muted-foreground">Loading matches...</div>
-                      ) : filteredMatches.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">No upcoming matches</div>
-                      ) : (
-                        <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                          {filteredMatches.filter(m => !m.match_ended).map(match => {
-                            const marketStatus = getMatchMarketStatus(match);
-                            const colors = getSportColors(match.sport);
-                            
-                            return (
-                              <div
-                                key={match.event_id}
-                                className={`p-3 rounded-lg border ${colors.border} hover:border-primary/50 transition-colors ${colors.glow}`}
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <span>{getSportIcon(match.sport)}</span>
-                                    <Badge variant="outline" className="text-xs">
-                                      {getSportLabel(match.sport)}
-                                    </Badge>
-                                    {match.match_started && !match.match_ended && (
-                                      <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
-                                    )}
-                                    {marketStatus === 'both' && (
-                                      <Badge variant="secondary" className="text-xs">Active</Badge>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                    {match.team_a.substring(0, 2).toUpperCase()}
-                                  </div>
-                                  <span className="font-medium text-sm">{match.team_a}</span>
-                                  <span className="text-muted-foreground">vs</span>
-                                  <span className="font-medium text-sm">{match.team_b}</span>
-                                  <div className="w-6 h-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                    {match.team_b.substring(0, 2).toUpperCase()}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatMatchTime(match.commence_time)}
-                                  </span>
-                                  
-                                  {marketStatus !== 'both' && !match.match_started && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-7 text-xs"
-                                      onClick={() => setTeamSelectDialog({ open: true, match })}
-                                    >
-                                      <Users className="w-3 h-3 mr-1" />
-                                      Create
-                                    </Button>
-                                  )}
-                                </div>
+            {/* Upcoming Tab */}
+            <TabsContent value="upcoming" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Upcoming Matches
+                </h2>
+              </div>
+              
+              <Tabs value={selectedMatchType} onValueChange={(v) => {
+                setSelectedMatchType(v);
+                if (v === 'all') fetchMatches();
+                else fetchMatches(v);
+              }}>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  {CRICKET_MATCH_TYPES.map(type => (
+                    <TabsTrigger key={type.key} value={type.key}>
+                      {type.icon} {type.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              {matchesLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading matches...</div>
+              ) : filteredMatches.filter(m => !m.match_ended).length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No upcoming matches</div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredMatches.filter(m => !m.match_ended).map(match => {
+                    const marketStatus = getMatchMarketStatus(match);
+                    const colors = getSportColors(match.sport);
+                    
+                    return (
+                      <Card key={match.event_id} className={`hover:border-primary/50 transition-colors ${colors.border}`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{getSportIcon(match.sport)}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {getSportLabel(match.sport)}
+                              </Badge>
+                              {match.match_started && !match.match_ended && (
+                                <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
+                              )}
+                            </div>
+                            {marketStatus === 'both' && (
+                              <Badge variant="secondary" className="text-xs">Active</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2 flex-1">
+                              <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                {match.team_a.substring(0, 2).toUpperCase()}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            </div>
+                              <span className="font-medium text-sm truncate">{match.team_a}</span>
+                            </div>
+                            <span className="text-muted-foreground font-bold">VS</span>
+                            <div className="flex items-center gap-2 flex-1 justify-end">
+                              <span className="font-medium text-sm truncate">{match.team_b}</span>
+                              <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                {match.team_b.substring(0, 2).toUpperCase()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              {formatMatchTime(match.commence_time)}
+                            </span>
+                            {marketStatus !== 'both' && !match.match_started && (
+                              <Button
+                                size="sm"
+                                onClick={() => setTeamSelectDialog({ open: true, match })}
+                              >
+                                Bet Now
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
 
-            {/* Markets */}
-            <div className="lg:col-span-2">
+            {/* Markets Tab */}
+            <TabsContent value="markets" className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Active Markets ({activeMarkets.length})
+              </h2>
+              
               {loading ? (
                 <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
-              ) : activeMarkets.length === 0 && resolvedMarkets.length === 0 ? (
+              ) : activeMarkets.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
                     <span className="text-6xl mb-4 block">🏏</span>
-                    <p className="text-muted-foreground mb-4">No cricket markets yet.</p>
-                    <p className="text-sm text-muted-foreground">Select a match from the left panel to create markets.</p>
+                    <p className="text-muted-foreground mb-4">No active markets yet.</p>
+                    <p className="text-sm text-muted-foreground">Go to Upcoming tab to create markets.</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-6">
-                  {/* Active Markets */}
-                  {activeMarkets.length > 0 && (
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-green-500" />
-                        Active Markets ({activeMarkets.length})
-                      </h2>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        {activeMarkets.map(market => {
-                          const odds = getOdds(market);
-                          const marketBets = getBetsForMarket(market.market_id);
+                <div className="grid md:grid-cols-2 gap-4">
+                  {activeMarkets.map(market => {
+                    const odds = getOdds(market);
+                    const marketBets = getBetsForMarket(market.market_id);
+                    
+                    return (
+                      <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base">{market.title}</CardTitle>
+                            {getStatusBadge(market)}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{market.description}</p>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex gap-2 mb-4">
+                            <div className="flex-1 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
+                              <div className="text-2xl font-bold text-emerald-400">{odds.yes}%</div>
+                              <div className="text-xs text-muted-foreground">YES</div>
+                            </div>
+                            <div className="flex-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
+                              <div className="text-2xl font-bold text-red-400">{odds.no}%</div>
+                              <div className="text-xs text-muted-foreground">NO</div>
+                            </div>
+                          </div>
                           
-                          return (
-                            <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
-                              <CardHeader className="pb-2">
-                                <div className="flex items-center justify-between">
-                                  <CardTitle className="text-base">{market.title}</CardTitle>
-                                  {getStatusBadge(market)}
+                          {marketBets.length > 0 && (
+                            <div className="mb-4 p-2 rounded bg-secondary/50 text-xs">
+                              <p className="font-medium mb-1">Your bets:</p>
+                              {marketBets.map(bet => (
+                                <div key={bet.bet_id} className="flex justify-between">
+                                  <span>{bet.side} - ${bet.amount_usd}</span>
+                                  <Badge variant="outline" className="text-[10px]">{bet.status}</Badge>
                                 </div>
-                                <p className="text-xs text-muted-foreground">{market.description}</p>
-                              </CardHeader>
-                              <CardContent>
-                                {/* Odds Display */}
-                                <div className="flex gap-2 mb-4">
-                                  <div className="flex-1 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
-                                    <div className="text-2xl font-bold text-emerald-400">{odds.yes}%</div>
-                                    <div className="text-xs text-muted-foreground">YES</div>
-                                    <div className="text-xs text-muted-foreground mt-1">{market.yes_pool_xmr.toFixed(4)} XMR</div>
-                                  </div>
-                                  <div className="flex-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
-                                    <div className="text-2xl font-bold text-red-400">{odds.no}%</div>
-                                    <div className="text-xs text-muted-foreground">NO</div>
-                                    <div className="text-xs text-muted-foreground mt-1">{market.no_pool_xmr.toFixed(4)} XMR</div>
-                                  </div>
-                                </div>
-                                
-                                {/* User's Bets */}
-                                {marketBets.length > 0 && (
-                                  <div className="mb-4 p-2 rounded bg-secondary/50 text-xs">
-                                    <p className="font-medium mb-1">Your bets:</p>
-                                    {marketBets.map(bet => (
-                                      <div key={bet.bet_id} className="flex justify-between">
-                                        <span>{bet.side} - ${bet.amount_usd}</span>
-                                        <Badge variant="outline" className="text-[10px]">{bet.status}</Badge>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                                
-                                {/* Bet Buttons */}
-                                {!market.resolved && market.resolution_time > Date.now() / 1000 && (
-                                  <div className="flex gap-2">
-                                    <Button
-                                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                                      onClick={() => {
-                                        setSelectedMarket(market);
-                                        setBetSide('yes');
-                                        setBetDialogOpen(true);
-                                      }}
-                                    >
-                                      <TrendingUp className="w-4 h-4 mr-2" />
-                                      Bet YES
-                                    </Button>
-                                    <Button
-                                      className="flex-1 bg-red-600 hover:bg-red-700"
-                                      onClick={() => {
-                                        setSelectedMarket(market);
-                                        setBetSide('no');
-                                        setBetDialogOpen(true);
-                                      }}
-                                    >
-                                      <TrendingDown className="w-4 h-4 mr-2" />
-                                      Bet NO
-                                    </Button>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Resolved Markets */}
-                  {resolvedMarkets.length > 0 && (
-                    <Collapsible>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between mb-4">
-                          <span className="flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5 text-muted-foreground" />
-                            Resolved Markets ({resolvedMarkets.length})
-                          </span>
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                          {resolvedMarkets.map(market => {
-                            const odds = getOdds(market);
-                            
-                            return (
-                              <Card key={market.market_id} className="opacity-75">
-                                <CardHeader className="pb-2">
-                                  <div className="flex items-center justify-between">
-                                    <CardTitle className="text-base">{market.title}</CardTitle>
-                                    {getStatusBadge(market)}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground">{market.description}</p>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="flex gap-2">
-                                    <div className={`flex-1 p-3 rounded-lg text-center ${market.outcome === 'YES' ? 'bg-emerald-500/20 border border-emerald-500' : 'bg-secondary/50'}`}>
-                                      <div className="text-xl font-bold">{odds.yes}%</div>
-                                      <div className="text-xs text-muted-foreground">YES</div>
-                                    </div>
-                                    <div className={`flex-1 p-3 rounded-lg text-center ${market.outcome === 'NO' ? 'bg-red-500/20 border border-red-500' : 'bg-secondary/50'}`}>
-                                      <div className="text-xl font-bold">{odds.no}%</div>
-                                      <div className="text-xs text-muted-foreground">NO</div>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  )}
-
-                  {/* My Bets */}
-                  <MyBets 
-                    bets={bets}
-                    onStatusUpdate={checkBetStatus}
-                    onPayoutSubmit={submitPayoutAddress}
-                  />
+                              ))}
+                            </div>
+                          )}
+                          
+                          {!market.resolved && market.resolution_time > Date.now() / 1000 && (
+                            <div className="flex gap-2">
+                              <Button
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                onClick={() => {
+                                  setSelectedMarket(market);
+                                  setBetSide('yes');
+                                  setBetDialogOpen(true);
+                                }}
+                              >
+                                <TrendingUp className="w-4 h-4 mr-2" />
+                                Bet YES
+                              </Button>
+                              <Button
+                                className="flex-1 bg-red-600 hover:bg-red-700"
+                                onClick={() => {
+                                  setSelectedMarket(market);
+                                  setBetSide('no');
+                                  setBetDialogOpen(true);
+                                }}
+                              >
+                                <TrendingDown className="w-4 h-4 mr-2" />
+                                Bet NO
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
-            </div>
-          </div>
+            </TabsContent>
+
+            {/* Results Tab */}
+            <TabsContent value="results" className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Resolved Markets ({resolvedMarkets.length})
+              </h2>
+              
+              {resolvedMarkets.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No resolved markets yet.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resolvedMarkets.map(market => {
+                    const odds = getOdds(market);
+                    
+                    return (
+                      <Card key={market.market_id} className="opacity-75">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base">{market.title}</CardTitle>
+                            {getStatusBadge(market)}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex gap-2">
+                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'YES' ? 'bg-emerald-600/30' : 'bg-muted'}`}>
+                              <div className="text-lg font-bold">{odds.yes}%</div>
+                              <div className="text-xs text-muted-foreground">YES</div>
+                            </div>
+                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'NO' ? 'bg-red-600/30' : 'bg-muted'}`}>
+                              <div className="text-lg font-bold">{odds.no}%</div>
+                              <div className="text-xs text-muted-foreground">NO</div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* My Bets Tab */}
+            <TabsContent value="my-bets">
+              <MyBets 
+                bets={bets}
+                onStatusUpdate={checkBetStatus}
+                onPayoutSubmit={submitPayoutAddress}
+              />
+            </TabsContent>
+          </Tabs>
         </main>
 
         <Footer />

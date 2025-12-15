@@ -481,211 +481,259 @@ export default function EsportsPredictions() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Upcoming Events */}
-            <div className="lg:col-span-1">
-              <div className="space-y-4">
-                
-                <Card className="animate-neon-glow-cyan border-cyan-500/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Upcoming Matches
-                    <span className="text-xs font-normal text-muted-foreground">(Times in UTC)</span>
-                  </CardTitle>
-                  {liveEvents.length > 0 && (
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                      {liveEvents.length} live match{liveEvents.length > 1 ? 'es' : ''}
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <Tabs value={selectedGame} onValueChange={(v) => {
-                    setSelectedGame(v);
-                    if (v === 'all') fetchEvents();
-                    else fetchEvents(v);
-                  }}>
-                    <TabsList className="mb-4 w-full flex-wrap h-auto gap-1">
-                      <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                      {ESPORTS_GAMES.map(game => (
-                        <TabsTrigger key={game.key} value={game.key} className="text-xs" title={game.name}>
-                          {game.icon}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+          <Tabs defaultValue="upcoming" className="space-y-6">
+            <TabsList className="grid w-full max-w-md grid-cols-4">
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="markets">Markets</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
+              <TabsTrigger value="my-bets">My Bets</TabsTrigger>
+            </TabsList>
 
-                    <TabsContent value={selectedGame} className="mt-0">
-                      {eventsLoading ? (
-                        <div className="text-center py-8 text-muted-foreground">Loading events...</div>
-                      ) : filteredEvents.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">No upcoming matches</div>
-                      ) : (
-                        <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                          {filteredEvents.map(event => {
-                            const marketStatus = getEventMarketStatus(event);
-                            const isLive = event.status === 'live';
-                            const colors = getGameColors(event.game);
-                            
-                            return (
-                              <div
-                                key={event.id}
-                                className={`p-3 rounded-lg border ${colors.border} hover:border-opacity-70 transition-all ${colors.glow}`}
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <span title={getGameLabel(event.game)}>{getGameIcon(event.game)}</span>
-                                    <Badge variant="outline" className={`text-xs ${colors.border} ${colors.accent}`}>
-                                      {getGameLabel(event.game)}
-                                    </Badge>
-                                    {isLive && (
-                                      <Badge className="bg-red-600 text-xs animate-pulse flex items-center gap-1">
-                                        <span className="relative flex h-2 w-2">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                        </span>
-                                        LIVE
-                                      </Badge>
-                                    )}
-                                    {marketStatus === 'both' && (
-                                      <Badge variant="secondary" className="text-xs">Active</Badge>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-2 font-medium text-sm mb-1">
-                                  {event.team_a_image ? (
-                                    <img src={event.team_a_image} alt={event.team_a} className="w-5 h-5 object-contain" />
-                                  ) : (
-                                    <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                      {event.team_a.substring(0, 2).toUpperCase()}
-                                    </div>
-                                  )}
-                                  <span className="truncate max-w-[80px]">{event.team_a}</span>
-                                  <span className="text-muted-foreground">vs</span>
-                                  <span className="truncate max-w-[80px]">{event.team_b}</span>
-                                  {event.team_b_image ? (
-                                    <img src={event.team_b_image} alt={event.team_b} className="w-5 h-5 object-contain" />
-                                  ) : (
-                                    <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold">
-                                      {event.team_b.substring(0, 2).toUpperCase()}
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
-                                
-                                <div className="flex items-center justify-between">
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="text-xs text-muted-foreground">
-                                      {formatGameTime(event.start_timestamp)}
-                                    </span>
-                                    {!isLive && getCountdown(event.start_timestamp) && (
-                                      <span className={`text-xs font-medium ${colors.accent}`}>
-                                        {getCountdown(event.start_timestamp)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  
-                                  {marketStatus !== 'both' && !isLive && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-7 text-xs"
-                                      onClick={() => setTeamSelectDialog({ open: true, event })}
-                                    >
-                                      <Users className="w-3 h-3 mr-1" />
-                                      Create
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+            {/* Upcoming Tab */}
+            <TabsContent value="upcoming" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Upcoming Matches
+                </h2>
               </div>
-            </div>
+              
+              <Tabs value={selectedGame} onValueChange={(v) => {
+                setSelectedGame(v);
+                if (v === 'all') fetchEvents();
+                else fetchEvents(v);
+              }}>
+                <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                  <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                  {ESPORTS_GAMES.map(game => (
+                    <TabsTrigger key={game.key} value={game.key} className="text-xs" title={game.name}>
+                      {game.icon}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
 
-            {/* Markets */}
-            <div className="lg:col-span-2">
+              {eventsLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading events...</div>
+              ) : filteredEvents.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No upcoming matches</div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredEvents.map(event => {
+                    const marketStatus = getEventMarketStatus(event);
+                    const isLive = event.status === 'live';
+                    const colors = getGameColors(event.game);
+                    
+                    return (
+                      <Card key={event.id} className={`hover:border-primary/50 transition-colors ${colors.border}`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{getGameIcon(event.game)}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {getGameLabel(event.game)}
+                              </Badge>
+                              {isLive && (
+                                <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
+                              )}
+                            </div>
+                            {marketStatus === 'both' && (
+                              <Badge variant="secondary" className="text-xs">Active</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2 flex-1">
+                              {event.team_a_image ? (
+                                <img src={event.team_a_image} alt={event.team_a} className="w-8 h-8 object-contain" />
+                              ) : (
+                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                  {event.team_a.substring(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                              <span className="font-medium text-sm truncate">{event.team_a}</span>
+                            </div>
+                            <span className="text-muted-foreground font-bold">VS</span>
+                            <div className="flex items-center gap-2 flex-1 justify-end">
+                              <span className="font-medium text-sm truncate">{event.team_b}</span>
+                              {event.team_b_image ? (
+                                <img src={event.team_b_image} alt={event.team_b} className="w-8 h-8 object-contain" />
+                              ) : (
+                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                  {event.team_b.substring(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              {formatGameTime(event.start_timestamp)}
+                            </span>
+                            {marketStatus !== 'both' && !isLive && (
+                              <Button
+                                size="sm"
+                                onClick={() => setTeamSelectDialog({ open: true, event })}
+                              >
+                                Bet Now
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Markets Tab */}
+            <TabsContent value="markets" className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Active Markets ({activeMarkets.length})
+              </h2>
+              
               {loading ? (
                 <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
-              ) : activeMarkets.length === 0 && resolvedMarkets.length === 0 ? (
+              ) : activeMarkets.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
                     <Gamepad2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-4">No esports markets yet.</p>
-                    <p className="text-sm text-muted-foreground">Select a match from the left panel to create markets.</p>
+                    <p className="text-muted-foreground mb-4">No active markets yet.</p>
+                    <p className="text-sm text-muted-foreground">Go to Upcoming tab to create markets.</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-6">
-
-                  {/* Resolved Markets */}
-                  {resolvedMarkets.length > 0 && (
-                    <Collapsible>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between">
-                          <span className="flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5" />
-                            Resolved Markets ({resolvedMarkets.length})
-                          </span>
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="grid md:grid-cols-2 gap-4 mt-4">
-                          {resolvedMarkets.map(market => {
-                            const odds = getOdds(market);
-                            return (
-                              <Card key={market.market_id} className="opacity-75">
-                                <CardHeader className="pb-2">
-                                  <div className="flex items-start justify-between">
-                                    <CardTitle className="text-base">{market.title}</CardTitle>
-                                    {getStatusBadge(market)}
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="flex gap-2">
-                                    <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'YES' ? 'bg-emerald-600/30' : 'bg-muted'}`}>
-                                      <div className="text-lg font-bold">{odds.yes}%</div>
-                                      <div className="text-xs text-muted-foreground">YES</div>
-                                    </div>
-                                    <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'NO' ? 'bg-red-600/30' : 'bg-muted'}`}>
-                                      <div className="text-lg font-bold">{odds.no}%</div>
-                                      <div className="text-xs text-muted-foreground">NO</div>
-                                    </div>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-2">
-                                    Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  )}
-
-                  {/* My Bets */}
-                  <MyBets 
-                    bets={bets} 
-                    onStatusUpdate={checkBetStatus}
-                    onPayoutSubmit={submitPayoutAddress}
-                  />
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeMarkets.map(market => {
+                    const odds = getOdds(market);
+                    const marketBets = getBetsForMarket(market.market_id);
+                    
+                    return (
+                      <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-base">{market.title}</CardTitle>
+                              <p className="text-xs text-muted-foreground mt-1">{market.description}</p>
+                            </div>
+                            {getStatusBadge(market)}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex gap-2 mb-4">
+                            <div className="flex-1 p-2 rounded bg-emerald-600/20 border border-emerald-600/30 text-center">
+                              <div className="text-lg font-bold text-emerald-500">{odds.yes}%</div>
+                              <div className="text-xs text-muted-foreground">YES</div>
+                            </div>
+                            <div className="flex-1 p-2 rounded bg-red-600/20 border border-red-600/30 text-center">
+                              <div className="text-lg font-bold text-red-500">{odds.no}%</div>
+                              <div className="text-xs text-muted-foreground">NO</div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground mb-4 text-center">
+                            Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button 
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                              onClick={() => {
+                                setSelectedMarket(market);
+                                setBetSide('yes');
+                                setBetDialogOpen(true);
+                              }}
+                            >
+                              <TrendingUp className="w-4 h-4 mr-1" />
+                              Bet YES
+                            </Button>
+                            <Button 
+                              className="flex-1 bg-red-600 hover:bg-red-700"
+                              onClick={() => {
+                                setSelectedMarket(market);
+                                setBetSide('no');
+                                setBetDialogOpen(true);
+                              }}
+                            >
+                              <TrendingDown className="w-4 h-4 mr-1" />
+                              Bet NO
+                            </Button>
+                          </div>
+                          
+                          {marketBets.length > 0 && (
+                            <div className="mt-3 pt-3 border-t">
+                              <p className="text-xs text-muted-foreground">You have {marketBets.length} bet(s) on this market</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
-            </div>
+            </TabsContent>
 
-          </div>
+            {/* Results Tab */}
+            <TabsContent value="results" className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Resolved Markets ({resolvedMarkets.length})
+              </h2>
+              
+              {resolvedMarkets.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No resolved markets yet.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resolvedMarkets.map(market => {
+                    const odds = getOdds(market);
+                    return (
+                      <Card key={market.market_id} className="opacity-75">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <CardTitle className="text-base">{market.title}</CardTitle>
+                            {getStatusBadge(market)}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex gap-2">
+                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'YES' ? 'bg-emerald-600/30' : 'bg-muted'}`}>
+                              <div className="text-lg font-bold">{odds.yes}%</div>
+                              <div className="text-xs text-muted-foreground">YES</div>
+                            </div>
+                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'NO' ? 'bg-red-600/30' : 'bg-muted'}`}>
+                              <div className="text-lg font-bold">{odds.no}%</div>
+                              <div className="text-xs text-muted-foreground">NO</div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* My Bets Tab */}
+            <TabsContent value="my-bets">
+              <MyBets 
+                bets={bets} 
+                onStatusUpdate={checkBetStatus}
+                onPayoutSubmit={submitPayoutAddress}
+              />
+            </TabsContent>
+          </Tabs>
         </main>
 
         <Footer />
