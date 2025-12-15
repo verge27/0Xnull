@@ -17,6 +17,7 @@ export interface CricketMatch {
   score: CricketScore[];
   match_started: boolean;
   match_ended: boolean;
+  is_upcoming?: boolean;
 }
 
 export interface CricketScore {
@@ -63,7 +64,6 @@ export const CRICKET_MATCH_TYPES = [
 
 export function useCricketEvents() {
   const [matches, setMatches] = useState<CricketMatch[]>([]);
-  const [liveMatches, setLiveMatches] = useState<CricketMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,8 +72,9 @@ export function useCricketEvents() {
     setError(null);
     try {
       const path = matchType ? `/matches?match_type=${matchType}` : '/matches';
-      const data = await cricketRequest<CricketMatch[]>(path);
-      setMatches(Array.isArray(data) ? data : []);
+      const data = await cricketRequest<{ matches: CricketMatch[] } | CricketMatch[]>(path);
+      const matchList = Array.isArray(data) ? data : (data.matches || []);
+      setMatches(matchList);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
       setError(message);
@@ -83,14 +84,10 @@ export function useCricketEvents() {
     }
   }, []);
 
-  const fetchLiveMatches = useCallback(async () => {
-    try {
-      const data = await cricketRequest<CricketMatch[]>('/live');
-      setLiveMatches(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error('Failed to fetch live matches:', e);
-    }
-  }, []);
+  // Derived states from matches
+  const liveMatches = matches.filter(m => m.match_started && !m.match_ended && !m.is_upcoming);
+  const upcomingMatches = matches.filter(m => m.is_upcoming);
+  const completedMatches = matches.filter(m => m.match_ended && !m.is_upcoming);
 
   const getMatchResult = useCallback(async (eventId: string): Promise<CricketResult | null> => {
     try {
@@ -142,10 +139,11 @@ export function useCricketEvents() {
   return {
     matches,
     liveMatches,
+    upcomingMatches,
+    completedMatches,
     loading,
     error,
     fetchMatches,
-    fetchLiveMatches,
     getMatchResult,
     createCricketMarket,
   };
