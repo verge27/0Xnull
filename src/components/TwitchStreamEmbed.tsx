@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,16 +19,60 @@ interface TwitchStreamEmbedProps {
 }
 
 export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
-  const [hostname, setHostname] = useState<string | null>(null);
+  const [locationInfo, setLocationInfo] = useState<{
+    hostname: string;
+    host: string;
+    origin: string;
+  } | null>(null);
   const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Capture hostname on mount
+  // Capture location info on mount
   useEffect(() => {
-    setHostname(window.location.hostname);
+    setLocationInfo({
+      hostname: window.location.hostname,
+      host: window.location.host,
+      origin: window.location.origin,
+    });
   }, []);
+
+  // Build iframe src with broad parent allowlist
+  const iframeSrc = useMemo(() => {
+    if (!locationInfo || !streamInfo?.channel) return null;
+
+    const parentDomains = [
+      '0xnull.io',
+      'www.0xnull.io',
+      'localhost',
+      'lovable.dev',
+      'lovableproject.com',
+      'lovable.app',
+      locationInfo.hostname,
+      // Also add host in case there's a port
+      locationInfo.host,
+    ];
+
+    // Deduplicate and filter empty values
+    const uniqueParents = [...new Set(parentDomains.filter(Boolean))];
+    const parentParams = uniqueParents.map(p => `parent=${p}`).join('&');
+
+    return `https://player.twitch.tv/?channel=${streamInfo.channel}&${parentParams}&muted=true`;
+  }, [locationInfo, streamInfo?.channel]);
+
+  // Debug logging
+  useEffect(() => {
+    if (locationInfo && streamInfo?.channel && iframeSrc) {
+      console.log('Twitch Debug:', {
+        hostname: locationInfo.hostname,
+        host: locationInfo.host,
+        origin: locationInfo.origin,
+        channel: streamInfo.channel,
+        iframeSrc: iframeSrc
+      });
+    }
+  }, [locationInfo, streamInfo?.channel, iframeSrc]);
 
   const fetchTopStream = useCallback(async (game: string) => {
     setLoading(true);
@@ -131,11 +175,11 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
       </CardHeader>
       
       <CardContent className="p-0">
-        {loading || !hostname ? (
+        {loading || !locationInfo ? (
           <div className="aspect-video bg-muted/50 flex items-center justify-center">
             <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
-        ) : error || !streamInfo?.channel ? (
+        ) : error || !streamInfo?.channel || !iframeSrc ? (
           <div className="aspect-video bg-muted/30 flex items-center justify-center p-4">
             <p className="text-sm text-muted-foreground text-center">
               No live streams right now - check back during match times
@@ -144,10 +188,12 @@ export function TwitchStreamEmbed({ selectedGame }: TwitchStreamEmbedProps) {
         ) : (
           <div className="aspect-video">
             <iframe
-              src={`https://player.twitch.tv/?channel=${streamInfo.channel}&parent=0xnull.io&parent=www.0xnull.io&parent=localhost&parent=${hostname}&muted=true`}
+              src={iframeSrc}
               height="100%"
               width="100%"
               allowFullScreen
+              allow="autoplay; fullscreen; encrypted-media"
+              frameBorder={0}
               className="border-0"
               title={`${streamInfo.channelName || streamInfo.channel} - Twitch Stream`}
             />
