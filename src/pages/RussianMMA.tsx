@@ -58,30 +58,52 @@ const RussianMMA = () => {
             Live Stream
           </h2>
           <Card className="overflow-hidden border-red-900/30 bg-card/50">
-            <div className="aspect-video w-full">
+            <div className="aspect-video w-full relative bg-black/50">
               <iframe
-                src="https://www.youtube.com/embed/live_stream?channel=UCAeCwHL4T91FKoYiFXHy0-g"
+                src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCAeCwHL4T91FKoYiFXHy0-g"
                 width="100%"
                 height="100%"
                 frameBorder="0"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                className="w-full h-full"
+                className="w-full h-full absolute inset-0"
+                loading="lazy"
               />
+              {/* Fallback overlay - shows if iframe fails to load */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-red-950/90 to-black/90 pointer-events-none opacity-0 [iframe:not([src])~&]:opacity-100">
+                <Tv className="h-16 w-16 text-red-500 mb-4" />
+                <p className="text-lg font-semibold mb-2">Video Unavailable</p>
+                <p className="text-sm text-muted-foreground mb-4">Stream may be blocked in your region</p>
+              </div>
+            </div>
+            <div className="p-4 flex flex-wrap gap-3 items-center justify-between bg-muted/30">
+              <p className="text-sm text-muted-foreground">
+                Video not loading? Open directly:
+              </p>
+              <div className="flex gap-2">
+                <a 
+                  href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g/live" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" variant="outline" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
+                    <Youtube className="h-4 w-4" />
+                    Live Stream
+                  </Button>
+                </a>
+                <a 
+                  href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" variant="outline" className="gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Channel
+                  </Button>
+                </a>
+              </div>
             </div>
           </Card>
-          <p className="text-sm text-muted-foreground mt-2">
-            If no live stream is available, check the{' '}
-            <a 
-              href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-red-400 hover:underline"
-            >
-              channel
-            </a>{' '}
-            for recent uploads.
-          </p>
         </section>
 
         {/* Featured Fights Section */}
