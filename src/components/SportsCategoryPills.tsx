@@ -1,7 +1,6 @@
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CATEGORY_META, SPORT_LABELS, SportsCategories } from '@/hooks/useSportsCategories';
+import { CATEGORY_META, SPORT_LABELS, type SportsCategories } from '@/hooks/useSportsCategories';
 
 interface SportsCategoryPillsProps {
   categories: string[];
@@ -12,73 +11,70 @@ interface SportsCategoryPillsProps {
   onSelectSport: (sport: string | null) => void;
 }
 
-export function SportsCategoryPills({ 
-  categories, 
+export function SportsCategoryPills({
+  categories,
   allCategories,
-  selectedCategory, 
+  selectedCategory,
   selectedSport,
   onSelectCategory,
-  onSelectSport 
+  onSelectSport,
 }: SportsCategoryPillsProps) {
   // Order categories with priority for popular ones, exclude 'other'
   // Include 'combat' as fallback if mma/boxing transformation didn't happen
   const orderedCategories = [
     'soccer',
-    'cricket', 
+    'cricket',
     'mma',
     'boxing',
-    'combat', // fallback
+    'combat',
     'basketball',
     'football',
     'hockey',
     'golf',
     'rugby',
-  ].filter(c => categories.includes(c));
+  ].filter((c) => categories.includes(c));
 
-  // Get sports from 'other' category to show on second line
+  // Show sports from "other" as second-row pills (no "Other" category pill)
   const otherSports = allCategories['other'] || [];
 
   return (
     <div className="space-y-2">
-      {/* Main categories row */}
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 pb-2">
+      {/* Main categories row (simple scroller: avoids Radix ScrollArea drag/click conflicts) */}
+      <div className="w-full overflow-x-auto">
+        <div className="flex gap-2 pb-2 min-w-max">
           <Button
             type="button"
             variant={selectedCategory === null && selectedSport === null ? 'default' : 'outline'}
             size="sm"
-            onClick={(e) => { 
-              e.preventDefault();
-              e.stopPropagation();
-              onSelectCategory(null); 
-              onSelectSport(null); 
+            onClick={() => {
+              onSelectCategory(null);
+              onSelectSport(null);
             }}
             className={cn(
-              "rounded-full px-4 cursor-pointer",
-              selectedCategory === null && selectedSport === null && "bg-primary text-primary-foreground"
+              'rounded-full px-4',
+              selectedCategory === null && selectedSport === null && 'bg-primary text-primary-foreground',
             )}
           >
             🔥 All
           </Button>
-          {orderedCategories.map(category => {
+
+          {orderedCategories.map((category) => {
             const meta = CATEGORY_META[category];
             const isSelected = selectedCategory === category;
-            
+
             return (
               <Button
                 key={category}
                 type="button"
                 variant={isSelected ? 'default' : 'outline'}
                 size="sm"
-                onClick={(e) => { 
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onSelectCategory(category); 
-                  onSelectSport(null); 
+                onClick={() => {
+                  onSelectCategory(category);
+                  onSelectSport(null);
                 }}
                 className={cn(
-                  "rounded-full px-4 whitespace-nowrap cursor-pointer",
-                  isSelected && "bg-primary text-primary-foreground"
+                  'rounded-full px-4 whitespace-nowrap',
+                  isSelected && 'bg-primary text-primary-foreground',
                 )}
               >
                 {meta?.emoji} {meta?.label || category}
@@ -86,32 +82,31 @@ export function SportsCategoryPills({
             );
           })}
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
 
       {/* Other sports row */}
       {otherSports.length > 0 && (
-        <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 pb-2">
-            {otherSports.map(sport => {
+        <div className="w-full overflow-x-auto">
+          <div className="flex gap-2 pb-2 min-w-max">
+            {otherSports.map((sport) => {
               const isSelected = selectedSport === sport;
-              const label = SPORT_LABELS[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-              
+              const label =
+                SPORT_LABELS[sport] ||
+                sport.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
               return (
                 <Button
                   key={sport}
                   type="button"
                   variant={isSelected ? 'default' : 'outline'}
                   size="sm"
-                  onClick={(e) => { 
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSelectCategory(null); 
-                    onSelectSport(sport); 
+                  onClick={() => {
+                    onSelectCategory(null);
+                    onSelectSport(sport);
                   }}
                   className={cn(
-                    "rounded-full px-3 text-xs whitespace-nowrap cursor-pointer",
-                    isSelected && "bg-primary text-primary-foreground"
+                    'rounded-full px-3 text-xs whitespace-nowrap',
+                    isSelected && 'bg-primary text-primary-foreground',
                   )}
                 >
                   {label}
@@ -119,8 +114,7 @@ export function SportsCategoryPills({
               );
             })}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
       )}
     </div>
   );
