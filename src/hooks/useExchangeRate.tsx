@@ -1,27 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+const fetchExchangeRate = async (): Promise<number> => {
+  const { data, error } = await supabase
+    .from('exchange_rates')
+    .select('rate')
+    .eq('currency_pair', 'XMR/USD')
+    .maybeSingle();
+
+  if (error || !data) {
+    return 150; // Default fallback
+  }
+  return Number(data.rate);
+};
+
 export const useExchangeRate = () => {
-  const [xmrUsdRate, setXmrUsdRate] = useState<number>(150); // Default fallback
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
+  const { data: xmrUsdRate = 150, isLoading: loading } = useQuery({
+    queryKey: ['exchange_rate', 'XMR/USD'],
+    queryFn: fetchExchangeRate,
+    staleTime: 60000, // Cache for 1 minute
+    gcTime: 300000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+
+  // Subscribe to realtime rate changes
   useEffect(() => {
-    const fetchRate = async () => {
-      const { data, error } = await supabase
-        .from('exchange_rates')
-        .select('rate')
-        .eq('currency_pair', 'XMR/USD')
-        .maybeSingle();
-
-      if (!error && data) {
-        setXmrUsdRate(Number(data.rate));
-      }
-      setLoading(false);
-    };
-
-    fetchRate();
-
-    // Subscribe to rate changes
     const channel = supabase
       .channel('exchange_rates_changes')
       .on(
@@ -34,7 +42,7 @@ export const useExchangeRate = () => {
         },
         (payload) => {
           if (payload.new && 'rate' in payload.new) {
-            setXmrUsdRate(Number(payload.new.rate));
+            queryClient.setQueryData(['exchange_rate', 'XMR/USD'], Number(payload.new.rate));
           }
         }
       )
@@ -43,7 +51,7 @@ export const useExchangeRate = () => {
     return () => {
       channel.unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   const usdToXmr = (usdAmount: number): number => {
     return usdAmount / xmrUsdRate;
