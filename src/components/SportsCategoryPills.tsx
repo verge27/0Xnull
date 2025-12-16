@@ -10,11 +10,12 @@ interface SportsCategoryPillsProps {
 }
 
 export function SportsCategoryPills({ categories, selectedCategory, onSelect }: SportsCategoryPillsProps) {
-  // Order categories with priority for popular ones
+  // Order categories with priority for popular ones, other at the end
   const orderedCategories = [
     'soccer',
     'cricket', 
-    'combat',
+    'mma',
+    'boxing',
     'basketball',
     'football',
     'hockey',
