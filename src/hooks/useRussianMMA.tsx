@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Promotion {
   id: string;
@@ -51,26 +52,31 @@ export interface Event {
   fight_card: Matchup[];
 }
 
-const API_BASE = 'https://api.0xnull.io/api/russian-mma';
+async function proxyFetch(path: string) {
+  const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy`;
+  const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+    }
+  });
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+}
 
 async function fetchPromotions(): Promise<Promotion[]> {
-  const res = await fetch(`${API_BASE}/promotions`);
-  if (!res.ok) throw new Error('Failed to fetch promotions');
-  const data = await res.json();
+  const data = await proxyFetch('/api/russian-mma/promotions');
   return data.promotions || [];
 }
 
 async function fetchFeatured(): Promise<FeaturedFight[]> {
-  const res = await fetch(`${API_BASE}/featured`);
-  if (!res.ok) throw new Error('Failed to fetch featured');
-  const data = await res.json();
+  const data = await proxyFetch('/api/russian-mma/featured');
   return data.featured || [];
 }
 
 async function fetchUpcomingEvents(): Promise<Event[]> {
-  const res = await fetch(`${API_BASE}/events?upcoming_only=true`);
-  if (!res.ok) throw new Error('Failed to fetch events');
-  const data = await res.json();
+  const data = await proxyFetch('/api/russian-mma/events?upcoming_only=true');
   return data.events || [];
 }
 
