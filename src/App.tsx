@@ -50,6 +50,7 @@ import StarcraftPredictions from "./pages/StarcraftPredictions";
 import TorGuide from "./pages/TorGuide";
 import HowBettingWorks from "./pages/HowBettingWorks";
 import RussianMMA from "./pages/RussianMMA";
+import Slap from "./pages/Slap";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="/cricket-predictions" element={<CricketPredictions />} />
             <Route path="/starcraft" element={<StarcraftPredictions />} />
             <Route path="/russian-mma" element={<RussianMMA />} />
+            <Route path="/slap" element={<Slap />} />
             <Route path="/tor-guide" element={<TorGuide />} />
             <Route path="/how-betting-works" element={<HowBettingWorks />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
