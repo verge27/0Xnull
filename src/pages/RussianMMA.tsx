@@ -51,59 +51,50 @@ const RussianMMA = () => {
       </div>
 
       <div className="container pb-16 space-y-12">
-        {/* Video Stream Section */}
+        {/* Watch Section */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Tv className="h-6 w-6 text-red-500" />
-            Live Stream
+            Watch Live
           </h2>
-          <Card className="overflow-hidden border-red-900/30 bg-card/50">
-            <div className="aspect-video w-full relative bg-black/50">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCAeCwHL4T91FKoYiFXHy0-g"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                className="w-full h-full absolute inset-0"
-                loading="lazy"
-              />
-              {/* Fallback overlay - shows if iframe fails to load */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-red-950/90 to-black/90 pointer-events-none opacity-0 [iframe:not([src])~&]:opacity-100">
-                <Tv className="h-16 w-16 text-red-500 mb-4" />
-                <p className="text-lg font-semibold mb-2">Video Unavailable</p>
-                <p className="text-sm text-muted-foreground mb-4">Stream may be blocked in your region</p>
-              </div>
-            </div>
-            <div className="p-4 flex flex-wrap gap-3 items-center justify-between bg-muted/30">
-              <p className="text-sm text-muted-foreground">
-                Video not loading? Open directly:
-              </p>
-              <div className="flex gap-2">
-                <a 
-                  href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g/live" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button size="sm" variant="outline" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
-                    <Youtube className="h-4 w-4" />
-                    Live Stream
+          <a 
+            href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block group"
+          >
+            <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
+              <div className="relative aspect-[21/9] w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
+                {/* Gritty overlay pattern */}
+                <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
+                
+                {/* Red glow effects */}
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
+                
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
+                  <div className="mb-4">
+                    <Youtube className="h-16 w-16 text-red-500 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white">
+                    Watch Top Dog FC Fights
+                  </h3>
+                  <p className="text-lg text-red-400 font-semibold mb-1">
+                    Bare-Knuckle Boxing • POP-MMA • Freak Fights
+                  </p>
+                  <p className="text-muted-foreground mb-6">
+                    1.5M+ Subscribers
+                  </p>
+                  <Button size="lg" className="bg-red-600 hover:bg-red-700 gap-2 group-hover:scale-105 transition-transform">
+                    <Youtube className="h-5 w-5" />
+                    Watch on YouTube
+                    <ExternalLink className="h-4 w-4 ml-1" />
                   </Button>
-                </a>
-                <a 
-                  href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button size="sm" variant="outline" className="gap-2">
-                    <ExternalLink className="h-4 w-4" />
-                    Channel
-                  </Button>
-                </a>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </a>
         </section>
 
         {/* Featured Fights Section */}
