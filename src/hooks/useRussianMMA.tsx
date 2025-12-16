@@ -71,7 +71,14 @@ async function fetchFeatured(): Promise<FeaturedFight[]> {
 
 async function fetchUpcomingEvents(): Promise<Event[]> {
   const data = await proxyFetch('/api/russian-mma/events?upcoming_only=true');
-  return data.events || [];
+  const events = data.events || [];
+  // Dedupe by event_id
+  const seen = new Set<string>();
+  return events.filter((e: Event) => {
+    if (seen.has(e.event_id)) return false;
+    seen.add(e.event_id);
+    return true;
+  });
 }
 
 export function usePromotions() {
