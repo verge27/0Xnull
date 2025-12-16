@@ -21,28 +21,34 @@ const RussianMMA = () => {
   const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div 
+      className="min-h-screen bg-background relative"
+      style={{ 
+        backgroundImage: `url(${russianMmaBackground})`,
+        backgroundAttachment: 'fixed',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Dark overlay for readability */}
+      <div className="fixed inset-0 bg-black/80 pointer-events-none" />
       
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${russianMmaBackground})` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-red-950/40 to-transparent" />
-        <div className="container relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
-              Russian Underground Fighting
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 font-medium">
-              Bare-Knuckle Boxing • POP-MMA • Freak Fights
-            </p>
+      <div className="relative z-10">
+        <Navbar />
+        
+        {/* Hero Section */}
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          <div className="container relative z-10">
+            <div className="max-w-3xl mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
+                Russian Underground Fighting
+              </h1>
+              <p className="text-xl md:text-2xl text-white/90 font-medium">
+                Bare-Knuckle Boxing • POP-MMA • Freak Fights
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* How It Works Banner */}
       <div className="container mb-8">
@@ -215,6 +221,7 @@ const RussianMMA = () => {
       </div>
 
       <Footer />
+      </div>
     </div>
   );
 };
