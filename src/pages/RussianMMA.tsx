@@ -114,59 +114,30 @@ const RussianMMA = () => {
             <Youtube className="h-6 w-6 text-red-500" />
             Recent Highlights
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-red-400">Top Dog FC</h3>
-              <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
-                <iframe 
-                  src="https://www.youtube.com/embed/videoseries?list=UUAeCwHL4T91FKoYiFXHy0-g"
-                  width="100%" 
-                  height="100%"
-                  frameBorder="0" 
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  title="Top Dog FC Videos"
-                  className="w-full h-full"
-                />
-              </div>
-              <a 
-                href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="mt-3 inline-block"
-              >
-                <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
-                  <ExternalLink className="h-3 w-3" />
-                  View Full Channel
-                </Button>
-              </a>
+          <div className="max-w-2xl">
+            <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
+              <iframe 
+                src="https://www.youtube.com/embed/videoseries?list=UUAeCwHL4T91FKoYiFXHy0-g"
+                width="100%" 
+                height="100%"
+                frameBorder="0" 
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title="Top Dog FC Videos"
+                className="w-full h-full"
+              />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-red-400">Hardcore FC</h3>
-              <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
-                <iframe 
-                  src="https://www.youtube.com/embed/videoseries?list=UU5n_ghp5bCyGWNAkJWmc47A"
-                  width="100%" 
-                  height="100%"
-                  frameBorder="0" 
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  title="Hardcore FC Videos"
-                  className="w-full h-full"
-                />
-              </div>
-              <a 
-                href="https://www.youtube.com/channel/UC5n_ghp5bCyGWNAkJWmc47A" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="mt-3 inline-block"
-              >
-                <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
-                  <ExternalLink className="h-3 w-3" />
-                  View Full Channel
-                </Button>
-              </a>
-            </div>
+            <a 
+              href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="mt-3 inline-block"
+            >
+              <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
+                <ExternalLink className="h-3 w-3" />
+                View Full Channel
+              </Button>
+            </a>
           </div>
         </section>
 
