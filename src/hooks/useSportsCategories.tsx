@@ -199,8 +199,19 @@ export function useSportsMatches() {
     setLoading(true);
     setError(null);
     try {
-      const data = await sportsRequest<{ events: SportsMatch[] }>(`/events?category=${category}`);
-      setMatches(data.events || []);
+      // Map mma/boxing to combat for API, then filter client-side
+      const apiCategory = (category === 'mma' || category === 'boxing') ? 'combat' : category;
+      const data = await sportsRequest<{ events: SportsMatch[] }>(`/events?category=${apiCategory}`);
+      let events = data.events || [];
+      
+      // Filter combat sports client-side
+      if (category === 'mma') {
+        events = events.filter(e => e.sport === 'ufc' || e.sport?.includes('mma'));
+      } else if (category === 'boxing') {
+        events = events.filter(e => e.sport === 'boxing' || e.sport?.includes('box'));
+      }
+      
+      setMatches(events);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
       setError(message);
