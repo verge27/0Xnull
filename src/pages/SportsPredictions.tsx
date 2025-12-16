@@ -206,6 +206,7 @@ export default function SportsPredictions() {
   };
 
   const getMatchMarketStatus = (match: SportsMatch) => {
+    if (!match.home_team || !match.away_team) return 'none';
     const homeSlug = match.home_team.toLowerCase().replace(/\s+/g, '_');
     const awaySlug = match.away_team.toLowerCase().replace(/\s+/g, '_');
     const homeExists = markets.some(m => m.market_id === `sports_${match.event_id}_${homeSlug}`);
