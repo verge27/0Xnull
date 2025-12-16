@@ -17,7 +17,7 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy, HelpCircle } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // Crypto logo imports
@@ -283,10 +283,18 @@ export default function Predictions() {
           </div>
 
           {/* Tor Banner */}
-          <div className="mb-6 p-3 rounded-lg bg-muted/50 border border-border flex items-center justify-between">
+          <div className="mb-3 p-3 rounded-lg bg-muted/50 border border-border flex items-center justify-between">
             <p className="text-sm text-muted-foreground">Worried about your browsing being watched?</p>
             <Link to="/tor-guide" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               Use Tor <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* How Betting Works Banner */}
+          <div className="mb-6 p-3 rounded-lg bg-secondary/50 border border-secondary flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">New to parimutuel betting?</p>
+            <Link to="/how-betting-works" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              <HelpCircle className="w-4 h-4" /> Learn How It Works
             </Link>
           </div>
 

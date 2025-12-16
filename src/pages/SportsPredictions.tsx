@@ -22,7 +22,7 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle } from 'lucide-react';
 
 export default function SportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
@@ -288,6 +288,12 @@ export default function SportsPredictions() {
               <p className="text-sm text-muted-foreground">Worried about your browsing being watched?</p>
               <Link to="/tor-guide" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
                 Use Tor <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary/50 border border-secondary flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">New to parimutuel betting?</p>
+              <Link to="/how-betting-works" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                <HelpCircle className="w-4 h-4" /> Learn How It Works
               </Link>
             </div>
           </div>
