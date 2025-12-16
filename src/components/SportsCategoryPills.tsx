@@ -21,11 +21,13 @@ export function SportsCategoryPills({
   onSelectSport 
 }: SportsCategoryPillsProps) {
   // Order categories with priority for popular ones, exclude 'other'
+  // Include 'combat' as fallback if mma/boxing transformation didn't happen
   const orderedCategories = [
     'soccer',
     'cricket', 
     'mma',
     'boxing',
+    'combat', // fallback
     'basketball',
     'football',
     'hockey',
@@ -44,9 +46,14 @@ export function SportsCategoryPills({
           <Button
             variant={selectedCategory === null && selectedSport === null ? 'default' : 'outline'}
             size="sm"
-            onClick={() => { onSelectCategory(null); onSelectSport(null); }}
+            onClick={(e) => { 
+              e.preventDefault();
+              e.stopPropagation();
+              onSelectCategory(null); 
+              onSelectSport(null); 
+            }}
             className={cn(
-              "rounded-full px-4",
+              "rounded-full px-4 cursor-pointer",
               selectedCategory === null && selectedSport === null && "bg-primary text-primary-foreground"
             )}
           >
@@ -61,9 +68,14 @@ export function SportsCategoryPills({
                 key={category}
                 variant={isSelected ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => { onSelectCategory(category); onSelectSport(null); }}
+                onClick={(e) => { 
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSelectCategory(category); 
+                  onSelectSport(null); 
+                }}
                 className={cn(
-                  "rounded-full px-4 whitespace-nowrap",
+                  "rounded-full px-4 whitespace-nowrap cursor-pointer",
                   isSelected && "bg-primary text-primary-foreground"
                 )}
               >
@@ -78,7 +90,7 @@ export function SportsCategoryPills({
       {/* Other sports row */}
       {otherSports.length > 0 && (
         <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2 pb-2">
+        <div className="flex gap-2 pb-2">
             {otherSports.map(sport => {
               const isSelected = selectedSport === sport;
               const label = SPORT_LABELS[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -88,9 +100,14 @@ export function SportsCategoryPills({
                   key={sport}
                   variant={isSelected ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => { onSelectCategory(null); onSelectSport(sport); }}
+                  onClick={(e) => { 
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectCategory(null); 
+                    onSelectSport(sport); 
+                  }}
                   className={cn(
-                    "rounded-full px-3 text-xs whitespace-nowrap",
+                    "rounded-full px-3 text-xs whitespace-nowrap cursor-pointer",
                     isSelected && "bg-primary text-primary-foreground"
                   )}
                 >

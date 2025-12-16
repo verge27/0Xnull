@@ -38,6 +38,7 @@ export const CATEGORY_META: Record<string, { emoji: string; label: string }> = {
   cricket: { emoji: '🏏', label: 'Cricket' },
   mma: { emoji: '🥋', label: 'MMA' },
   boxing: { emoji: '🥊', label: 'Boxing' },
+  combat: { emoji: '🥊', label: 'Combat' }, // fallback
   hockey: { emoji: '🏒', label: 'Hockey' },
   golf: { emoji: '⛳', label: 'Golf' },
   rugby: { emoji: '🏉', label: 'Rugby' },
