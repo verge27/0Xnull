@@ -95,8 +95,8 @@ const RussianMMA = () => {
             </div>
           ) : featured && featured.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-4">
-              {featured.map((fight) => (
-                <FeaturedFightCard key={fight.id} fight={fight} />
+              {featured.map((fight, idx) => (
+                <FeaturedFightCard key={idx} fight={fight} />
               ))}
             </div>
           ) : (
@@ -126,7 +126,7 @@ const RussianMMA = () => {
             ) : events && events.length > 0 ? (
               <div className="space-y-4">
                 {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard key={event.event_id} event={event} />
                 ))}
               </div>
             ) : (
@@ -205,11 +205,11 @@ const FeaturedFightCard = ({ fight }: { fight: FeaturedFight }) => (
   <Card className="border-red-900/30 bg-gradient-to-br from-card to-red-950/20 hover:border-red-700/50 transition-colors">
     <CardHeader className="pb-2">
       <div className="flex items-center justify-between">
-        <CardTitle className="text-lg text-red-400">{fight.event_name}</CardTitle>
-        {fight.stream_info && (
+        <CardTitle className="text-lg text-red-400">{fight.event}</CardTitle>
+        {fight.stream && (
           <Badge variant="outline" className="border-red-700 text-red-400">
             <Tv className="h-3 w-3 mr-1" />
-            {fight.stream_info.type}
+            PPV
           </Badge>
         )}
       </div>
@@ -227,39 +227,41 @@ const FeaturedFightCard = ({ fight }: { fight: FeaturedFight }) => (
       </div>
     </CardHeader>
     <CardContent className="space-y-4">
-      <div className="text-center space-y-2">
-        <div className="font-semibold text-lg">
-          {fight.fighter1.name}
-          {fight.fighter1.record && (
-            <span className="text-muted-foreground font-normal ml-2">({fight.fighter1.record})</span>
+      {fight.main_event && (
+        <div className="text-center space-y-2">
+          <div className="font-semibold text-lg">
+            {fight.main_event.fighter_1.name}
+            {fight.main_event.fighter_1.record && (
+              <span className="text-muted-foreground font-normal ml-2">({fight.main_event.fighter_1.record})</span>
+            )}
+          </div>
+          <div className="text-muted-foreground">vs</div>
+          <div className="font-semibold text-lg">
+            {fight.main_event.fighter_2.name}
+            {fight.main_event.fighter_2.record && (
+              <span className="text-muted-foreground font-normal ml-2">({fight.main_event.fighter_2.record})</span>
+            )}
+          </div>
+          {(fight.main_event.fighter_1.note || fight.main_event.fighter_2.note) && (
+            <div className="text-sm text-muted-foreground space-y-1 mt-2">
+              {fight.main_event.fighter_1.note && <p>🎸 {fight.main_event.fighter_1.note}</p>}
+              {fight.main_event.fighter_2.note && <p>🥊 {fight.main_event.fighter_2.note}</p>}
+            </div>
           )}
-        </div>
-        <div className="text-muted-foreground">vs</div>
-        <div className="font-semibold text-lg">
-          {fight.fighter2.name}
-          {fight.fighter2.record && (
-            <span className="text-muted-foreground font-normal ml-2">({fight.fighter2.record})</span>
-          )}
-        </div>
-      </div>
-      {(fight.fighter1.description || fight.fighter2.description) && (
-        <div className="text-sm text-muted-foreground space-y-1">
-          {fight.fighter1.description && <p>🎸 {fight.fighter1.description}</p>}
-          {fight.fighter2.description && <p>🥊 {fight.fighter2.description}</p>}
         </div>
       )}
-      {fight.stream_info?.url && (
+      {fight.stream && (
         <a 
-          href={fight.stream_info.url} 
+          href={fight.stream.split(' ')[0]} 
           target="_blank" 
           rel="noopener noreferrer"
           className="text-sm text-red-400 hover:underline flex items-center gap-1"
         >
-          📺 Watch: {fight.stream_info.url}
+          📺 Watch: {fight.stream}
         </a>
       )}
       <Button className="w-full bg-red-600 hover:bg-red-700">
-        {fight.market_id ? 'Bet Now' : 'Create Market'}
+        Create Market
       </Button>
     </CardContent>
   </Card>
@@ -270,46 +272,30 @@ const EventCard = ({ event }: { event: Event }) => (
     <CardHeader>
       <div className="flex items-center justify-between">
         <div>
-          <CardTitle>{event.name}</CardTitle>
-          <p className="text-sm text-muted-foreground">{event.promotion}</p>
+          <CardTitle>{event.event_name}</CardTitle>
+          {event.tapology_url && (
+            <a 
+              href={event.tapology_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-red-400"
+            >
+              View on Tapology
+            </a>
+          )}
         </div>
         <div className="text-right text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {event.date}
+            {event.date_raw || event.date}
           </div>
-          {event.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {event.location}
-            </div>
-          )}
         </div>
       </div>
     </CardHeader>
     <CardContent>
-      <div className="space-y-2">
-        {event.fight_card.map((matchup, idx) => (
-          <div 
-            key={idx} 
-            className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex-1">
-              <span className="font-medium">{matchup.fighter1.name}</span>
-              <span className="text-muted-foreground mx-2">vs</span>
-              <span className="font-medium">{matchup.fighter2.name}</span>
-              {matchup.weight_class && (
-                <Badge variant="secondary" className="ml-2 text-xs">
-                  {matchup.weight_class}
-                </Badge>
-              )}
-            </div>
-            <Button size="sm" variant="outline" className="border-red-700 text-red-400 hover:bg-red-950">
-              {matchup.market_id ? 'Bet' : 'Create Market'}
-            </Button>
-          </div>
-        ))}
-      </div>
+      <Button variant="outline" className="w-full border-red-700 text-red-400 hover:bg-red-950">
+        Create Market for Event
+      </Button>
     </CardContent>
   </Card>
 );
@@ -321,32 +307,39 @@ const PromotionCard = ({ promotion }: { promotion: Promotion }) => (
       <p className="text-sm text-red-400">{promotion.type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
-      <p className="text-sm text-muted-foreground">{promotion.description}</p>
-      {promotion.youtube_subscribers && (
-        <p className="text-sm text-muted-foreground">{promotion.youtube_subscribers}</p>
+      {promotion.country && (
+        <p className="text-sm text-muted-foreground">{promotion.country}</p>
       )}
-      <div className="flex gap-2">
-        {promotion.platforms.youtube && (
-          <a href={promotion.platforms.youtube} target="_blank" rel="noopener noreferrer">
+      <div className="flex gap-2 flex-wrap">
+        {promotion.youtube && (
+          <a href={`https://www.youtube.com/channel/${promotion.youtube}`} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="gap-1">
               <Youtube className="h-4 w-4" />
               YouTube
             </Button>
           </a>
         )}
-        {promotion.platforms.telegram && (
-          <a href={promotion.platforms.telegram} target="_blank" rel="noopener noreferrer">
+        {promotion.telegram && (
+          <a href={promotion.telegram} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="gap-1">
               <MessageCircle className="h-4 w-4" />
               Telegram
             </Button>
           </a>
         )}
-        {promotion.platforms.vk && (
-          <a href={promotion.platforms.vk} target="_blank" rel="noopener noreferrer">
+        {promotion.vk && (
+          <a href={promotion.vk} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="gap-1">
               <ExternalLink className="h-4 w-4" />
               VK
+            </Button>
+          </a>
+        )}
+        {promotion.website && (
+          <a href={promotion.website} target="_blank" rel="noopener noreferrer">
+            <Button size="sm" variant="outline" className="gap-1">
+              <ExternalLink className="h-4 w-4" />
+              Website
             </Button>
           </a>
         )}
