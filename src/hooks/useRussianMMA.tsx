@@ -4,52 +4,46 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Promotion {
   id: string;
   name: string;
-  description: string;
+  slug?: string;
   type: string;
-  youtube_subscribers?: string;
-  platforms: {
-    youtube?: string;
-    telegram?: string;
-    vk?: string;
-    website?: string;
-  };
+  country?: string;
+  youtube?: string;
+  website?: string;
+  telegram?: string;
+  vk?: string;
 }
 
 export interface Fighter {
   name: string;
   nickname?: string;
   record?: string;
-  description?: string;
+  note?: string;
 }
 
 export interface FeaturedFight {
-  id: string;
-  event_name: string;
+  event: string;
   date: string;
   location: string;
-  fighter1: Fighter;
-  fighter2: Fighter;
-  stream_info?: {
-    type: string;
-    url: string;
+  stream?: string;
+  main_event?: {
+    fighter_1: Fighter;
+    fighter_2: Fighter;
   };
-  market_id?: string;
 }
 
 export interface Matchup {
-  fighter1: Fighter;
-  fighter2: Fighter;
+  fighter1?: string;
+  fighter2?: string;
   weight_class?: string;
-  market_id?: string;
 }
 
 export interface Event {
-  id: string;
-  name: string;
-  promotion: string;
+  event_id: string;
+  event_name: string;
   date: string;
-  location?: string;
-  fight_card: Matchup[];
+  date_raw?: string;
+  is_upcoming?: boolean;
+  tapology_url?: string;
 }
 
 async function proxyFetch(path: string) {
@@ -72,7 +66,7 @@ async function fetchPromotions(): Promise<Promotion[]> {
 
 async function fetchFeatured(): Promise<FeaturedFight[]> {
   const data = await proxyFetch('/api/russian-mma/featured');
-  return data.featured || [];
+  return data.featured_fights || [];
 }
 
 async function fetchUpcomingEvents(): Promise<Event[]> {
