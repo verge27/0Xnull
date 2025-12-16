@@ -36,7 +36,8 @@ export const CATEGORY_META: Record<string, { emoji: string; label: string }> = {
   basketball: { emoji: '🏀', label: 'Basketball' },
   soccer: { emoji: '⚽', label: 'Soccer' },
   cricket: { emoji: '🏏', label: 'Cricket' },
-  combat: { emoji: '🥊', label: 'Combat' },
+  mma: { emoji: '🥋', label: 'MMA' },
+  boxing: { emoji: '🥊', label: 'Boxing' },
   hockey: { emoji: '🏒', label: 'Hockey' },
   golf: { emoji: '⛳', label: 'Golf' },
   rugby: { emoji: '🏉', label: 'Rugby' },
@@ -134,23 +135,44 @@ export function useSportsCategories() {
     setError(null);
     try {
       const data = await sportsRequest<{ categories: SportsCategories }>('/categories');
-      setCategories(data.categories || {});
+      // Transform combat category into separate mma and boxing
+      const rawCategories = data.categories || {};
+      const transformedCategories: SportsCategories = {};
+      Object.entries(rawCategories).forEach(([key, sports]) => {
+        if (key === 'combat') {
+          // Split combat into mma and boxing
+          const mmaSports = sports.filter(s => s === 'ufc' || s.includes('mma'));
+          const boxingSports = sports.filter(s => s === 'boxing' || s.includes('box'));
+          if (mmaSports.length > 0) transformedCategories['mma'] = mmaSports;
+          if (boxingSports.length > 0) transformedCategories['boxing'] = boxingSports;
+        } else {
+          transformedCategories[key] = sports;
+        }
+      });
+      setCategories(transformedCategories);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch categories';
       setError(message);
       console.error('Failed to fetch categories:', e);
       // Fallback categories if API fails
-      setCategories({
+      // Transform combat into mma and boxing
+      const transformedCategories: SportsCategories = {};
+      const rawCategories: SportsCategories = {
         football: ['nfl', 'ncaaf'],
         basketball: ['nba', 'ncaab', 'euroleague'],
         soccer: ['premier_league', 'la_liga', 'bundesliga', 'serie_a', 'champions_league'],
         cricket: ['big_bash', 't20_international'],
-        combat: ['ufc', 'boxing'],
+        mma: ['ufc'],
+        boxing: ['boxing'],
         hockey: ['nhl'],
         golf: ['masters', 'pga_championship'],
         rugby: ['nrl', 'six_nations'],
         other: ['aussie_rules', 'us_election'],
+      };
+      Object.entries(rawCategories).forEach(([key, value]) => {
+        transformedCategories[key] = value;
       });
+      setCategories(transformedCategories);
     } finally {
       setLoading(false);
     }
