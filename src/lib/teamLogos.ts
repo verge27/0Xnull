@@ -69,7 +69,8 @@ const PREMIER_LEAGUE_IDS: Record<string, string> = {
   'Wolves': '380',
 };
 
-export function getTeamLogo(teamName: string, sport: string): string {
+export function getTeamLogo(teamName: string | null | undefined, sport: string): string {
+  if (!teamName) return '';
   const normalizedName = teamName.trim();
   
   if (sport === 'nfl' || sport === 'americanfootball_nfl') {
