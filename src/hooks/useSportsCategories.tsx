@@ -36,9 +36,7 @@ export const CATEGORY_META: Record<string, { emoji: string; label: string }> = {
   basketball: { emoji: '🏀', label: 'Basketball' },
   soccer: { emoji: '⚽', label: 'Soccer' },
   cricket: { emoji: '🏏', label: 'Cricket' },
-  mma: { emoji: '🥋', label: 'MMA' },
-  boxing: { emoji: '🥊', label: 'Boxing' },
-  combat: { emoji: '🥊', label: 'Combat' }, // fallback
+  combat: { emoji: '🥊', label: 'Combat' },
   hockey: { emoji: '🏒', label: 'Hockey' },
   golf: { emoji: '⛳', label: 'Golf' },
   rugby: { emoji: '🏉', label: 'Rugby' },
@@ -136,44 +134,23 @@ export function useSportsCategories() {
     setError(null);
     try {
       const data = await sportsRequest<{ categories: SportsCategories }>('/categories');
-      // Transform combat category into separate mma and boxing
-      const rawCategories = data.categories || {};
-      const transformedCategories: SportsCategories = {};
-      Object.entries(rawCategories).forEach(([key, sports]) => {
-        if (key === 'combat') {
-          // Split combat into mma and boxing
-          const mmaSports = sports.filter(s => s === 'ufc' || s.includes('mma'));
-          const boxingSports = sports.filter(s => s === 'boxing' || s.includes('box'));
-          if (mmaSports.length > 0) transformedCategories['mma'] = mmaSports;
-          if (boxingSports.length > 0) transformedCategories['boxing'] = boxingSports;
-        } else {
-          transformedCategories[key] = sports;
-        }
-      });
-      setCategories(transformedCategories);
+      setCategories(data.categories || {});
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch categories';
       setError(message);
       console.error('Failed to fetch categories:', e);
       // Fallback categories if API fails
-      // Transform combat into mma and boxing
-      const transformedCategories: SportsCategories = {};
-      const rawCategories: SportsCategories = {
+      setCategories({
         football: ['nfl', 'ncaaf'],
         basketball: ['nba', 'ncaab', 'euroleague'],
         soccer: ['premier_league', 'la_liga', 'bundesliga', 'serie_a', 'champions_league'],
         cricket: ['big_bash', 't20_international'],
-        mma: ['ufc'],
-        boxing: ['boxing'],
+        combat: ['ufc', 'boxing'],
         hockey: ['nhl'],
         golf: ['masters', 'pga_championship'],
         rugby: ['nrl', 'six_nations'],
         other: ['aussie_rules', 'us_election'],
-      };
-      Object.entries(rawCategories).forEach(([key, value]) => {
-        transformedCategories[key] = value;
       });
-      setCategories(transformedCategories);
     } finally {
       setLoading(false);
     }
@@ -200,19 +177,8 @@ export function useSportsMatches() {
     setLoading(true);
     setError(null);
     try {
-      // Map mma/boxing to combat for API, then filter client-side
-      const apiCategory = (category === 'mma' || category === 'boxing') ? 'combat' : category;
-      const data = await sportsRequest<{ events: SportsMatch[] }>(`/events?category=${apiCategory}`);
-      let events = data.events || [];
-      
-      // Filter combat sports client-side
-      if (category === 'mma') {
-        events = events.filter(e => e.sport === 'ufc' || e.sport?.includes('mma'));
-      } else if (category === 'boxing') {
-        events = events.filter(e => e.sport === 'boxing' || e.sport?.includes('box'));
-      }
-      
-      setMatches(events);
+      const data = await sportsRequest<{ events: SportsMatch[] }>(`/events?category=${category}`);
+      setMatches(data.events || []);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
       setError(message);
