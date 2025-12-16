@@ -34,6 +34,7 @@ export interface PastResult {
   date: string;
   result: string;
   note?: string;
+  video_url?: string;
 }
 
 export interface FeaturedData {
