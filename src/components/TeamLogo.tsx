@@ -2,7 +2,7 @@ import { getTeamLogo } from '@/lib/teamLogos';
 import { cn } from '@/lib/utils';
 
 interface TeamLogoProps {
-  teamName: string;
+  teamName: string | null | undefined;
   sport: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -19,7 +19,7 @@ export function TeamLogo({ teamName, sport, size = 'md', className }: TeamLogoPr
   
   if (!logoUrl) {
     // Fallback: first letter of team name
-    const initial = teamName.charAt(0).toUpperCase();
+    const initial = teamName ? teamName.charAt(0).toUpperCase() : '?';
     return (
       <div 
         className={cn(
