@@ -139,6 +139,10 @@ export const Navbar = () => {
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span>Esports Predict</span>
                   </Link>
+                  <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span>Russian MMA</span>
+                  </Link>
                   <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span>StarCraft</span>
@@ -188,6 +192,12 @@ export const Navbar = () => {
             <Link to="/esports-predictions">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">Esports</span>
+              </Button>
+            </Link>
+
+            <Link to="/russian-mma">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">RU MMA</span>
               </Button>
             </Link>
 
