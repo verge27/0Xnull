@@ -174,7 +174,21 @@ const RussianMMA = () => {
                         <p className="font-semibold text-red-400">{result.event}</p>
                         <p className="text-sm text-muted-foreground">{result.date}</p>
                       </div>
-                      <Badge variant="outline" className="border-green-700 text-green-400">Completed</Badge>
+                      <div className="flex items-center gap-2">
+                        {result.video_url && (
+                          <a 
+                            href={result.video_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <Button size="sm" variant="outline" className="gap-1 border-red-700 text-red-400 hover:bg-red-950">
+                              <Youtube className="h-4 w-4" />
+                              Watch
+                            </Button>
+                          </a>
+                        )}
+                        <Badge variant="outline" className="border-green-700 text-green-400">Completed</Badge>
+                      </div>
                     </div>
                     <div className="mt-3 p-3 bg-muted/30 rounded-lg">
                       <p className="text-sm text-foreground">{result.result}</p>
