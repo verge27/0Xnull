@@ -114,47 +114,59 @@ const RussianMMA = () => {
             <Youtube className="h-6 w-6 text-red-500" />
             Recent Highlights
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <HighlightCard
-              title="Top Dog FC 37 - Alex Terrible vs Regbist"
-              channel="Top Dog FC"
-              videoId="QV5G4zU_xJY"
-              views="2.1M"
-            />
-            <HighlightCard
-              title="Hardcore MMA 107 - Best Knockouts"
-              channel="Hardcore FC"
-              videoId="dZUZ35V_Vww"
-              views="890K"
-            />
-            <HighlightCard
-              title="Top Dog FC 36 - Full Event Highlights"
-              channel="Top Dog FC"
-              videoId="kJQP7kiw5Fk"
-              views="1.5M"
-            />
-          </div>
-          <div className="mt-4 flex gap-3">
-            <a 
-              href="https://www.youtube.com/@TopDogFighting" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
-                <Youtube className="h-4 w-4" />
-                Top Dog FC Channel
-              </Button>
-            </a>
-            <a 
-              href="https://www.youtube.com/@HardcoreFC" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
-                <Youtube className="h-4 w-4" />
-                Hardcore FC Channel
-              </Button>
-            </a>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-red-400">Top Dog FC</h3>
+              <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
+                <iframe 
+                  src="https://www.youtube.com/embed/videoseries?list=UUAeCwHL4T91FKoYiFXHy0-g"
+                  width="100%" 
+                  height="100%"
+                  frameBorder="0" 
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  title="Top Dog FC Videos"
+                  className="w-full h-full"
+                />
+              </div>
+              <a 
+                href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="mt-3 inline-block"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
+                  <ExternalLink className="h-3 w-3" />
+                  View Full Channel
+                </Button>
+              </a>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-red-400">Hardcore FC</h3>
+              <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
+                <iframe 
+                  src="https://www.youtube.com/embed/videoseries?list=UU5n_ghp5bCyGWNAkJWmc47A"
+                  width="100%" 
+                  height="100%"
+                  frameBorder="0" 
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  title="Hardcore FC Videos"
+                  className="w-full h-full"
+                />
+              </div>
+              <a 
+                href="https://www.youtube.com/channel/UC5n_ghp5bCyGWNAkJWmc47A" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="mt-3 inline-block"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
+                  <ExternalLink className="h-3 w-3" />
+                  View Full Channel
+                </Button>
+              </a>
+            </div>
           </div>
         </section>
 
@@ -379,47 +391,6 @@ const EventCard = ({ event }: { event: Event }) => (
       </Button>
     </CardContent>
   </Card>
-);
-
-const HighlightCard = ({ 
-  title, 
-  channel, 
-  videoId, 
-  views 
-}: { 
-  title: string; 
-  channel: string; 
-  videoId: string; 
-  views: string; 
-}) => (
-  <a 
-    href={`https://www.youtube.com/watch?v=${videoId}`} 
-    target="_blank" 
-    rel="noopener noreferrer"
-    className="block group"
-  >
-    <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-all overflow-hidden">
-      <div className="relative aspect-video bg-gradient-to-br from-red-950 to-black">
-        <img 
-          src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-          alt={title}
-          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
-          </div>
-        </div>
-      </div>
-      <CardContent className="p-3">
-        <p className="font-medium text-sm line-clamp-2 group-hover:text-red-400 transition-colors">{title}</p>
-        <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-          <span>{channel}</span>
-          <span>{views} views</span>
-        </div>
-      </CardContent>
-    </Card>
-  </a>
 );
 
 const PromotionCard = ({ promotion }: { promotion: Promotion }) => (
