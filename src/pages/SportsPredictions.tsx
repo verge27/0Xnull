@@ -83,6 +83,8 @@ export default function SportsPredictions() {
 
   // Fetch matches when category/league/sport changes
   useEffect(() => {
+    console.debug('[SportsPredictions] filters:', { selectedCategory, selectedLeague, selectedSport });
+
     if (selectedSport) {
       fetchBySport(selectedSport);
       fetchOdds(selectedSport);
@@ -127,12 +129,14 @@ export default function SportsPredictions() {
   };
 
   const handleCategoryChange = (category: string | null) => {
+    console.debug('[SportsPredictions] category click:', category);
     setSelectedCategory(category);
     setSelectedLeague(null);
     setSelectedSport(null);
   };
 
   const handleSportChange = (sport: string | null) => {
+    console.debug('[SportsPredictions] sport click:', sport);
     setSelectedSport(sport);
     setSelectedCategory(null);
     setSelectedLeague(null);

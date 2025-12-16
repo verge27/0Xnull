@@ -44,6 +44,7 @@ export function SportsCategoryPills({
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex gap-2 pb-2">
           <Button
+            type="button"
             variant={selectedCategory === null && selectedSport === null ? 'default' : 'outline'}
             size="sm"
             onClick={(e) => { 
@@ -66,6 +67,7 @@ export function SportsCategoryPills({
             return (
               <Button
                 key={category}
+                type="button"
                 variant={isSelected ? 'default' : 'outline'}
                 size="sm"
                 onClick={(e) => { 
@@ -98,6 +100,7 @@ export function SportsCategoryPills({
               return (
                 <Button
                   key={sport}
+                  type="button"
                   variant={isSelected ? 'default' : 'outline'}
                   size="sm"
                   onClick={(e) => { 
