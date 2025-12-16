@@ -20,15 +20,26 @@ export interface Fighter {
   note?: string;
 }
 
-export interface FeaturedFight {
+export interface UpcomingEvent {
   event: string;
   date: string;
   location: string;
   stream?: string;
-  main_event?: {
-    fighter_1: Fighter;
-    fighter_2: Fighter;
-  };
+  status?: string;
+  ppv_url?: string;
+}
+
+export interface PastResult {
+  event: string;
+  date: string;
+  result: string;
+  note?: string;
+}
+
+export interface FeaturedData {
+  upcoming: UpcomingEvent;
+  past_results: PastResult[];
+  video_sources?: Record<string, string>;
 }
 
 export interface Matchup {
@@ -64,9 +75,13 @@ async function fetchPromotions(): Promise<Promotion[]> {
   return data.promotions || [];
 }
 
-async function fetchFeatured(): Promise<FeaturedFight[]> {
+async function fetchFeatured(): Promise<FeaturedData> {
   const data = await proxyFetch('/api/russian-mma/featured');
-  return data.featured_fights || [];
+  return {
+    upcoming: data.upcoming || { event: '', date: '', location: '' },
+    past_results: data.past_results || [],
+    video_sources: data.video_sources
+  };
 }
 
 async function fetchUpcomingEvents(): Promise<Event[]> {

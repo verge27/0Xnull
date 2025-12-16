@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle } from 'lucide-react';
-import { usePromotions, useUpcomingEvents, Promotion, Event } from '@/hooks/useRussianMMA';
+import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, Event } from '@/hooks/useRussianMMA';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import russianMmaBackground from '@/assets/russian-mma-background.jpg';
@@ -16,6 +16,7 @@ import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 const RussianMMA = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
   const { data: promotions, isLoading: loadingPromotions } = usePromotions();
+  const { data: featured, isLoading: loadingFeatured } = useFeaturedFights();
   const { data: events, isLoading: loadingEvents } = useUpcomingEvents();
   const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
 
@@ -110,54 +111,83 @@ const RussianMMA = () => {
         {/* Next Event Section */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Next Event</h2>
-          <Card className="border-red-900/30 bg-gradient-to-br from-card to-red-950/20">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl text-red-400">Top Dog FC 40</CardTitle>
-                <Badge className="bg-red-600">Coming Soon</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                Card TBA - Check topdogfc.tv for updates
-              </p>
-              <a 
-                href="https://topdogfc.tv/events" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button className="w-full bg-red-600 hover:bg-red-700 gap-2">
-                  <Tv className="h-4 w-4" />
-                  Watch PPV
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </a>
-            </CardContent>
-          </Card>
+          {loadingFeatured ? (
+            <Skeleton className="h-48" />
+          ) : featured?.upcoming?.event ? (
+            <Card className="border-red-900/30 bg-gradient-to-br from-card to-red-950/20">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl text-red-400">{featured.upcoming.event}</CardTitle>
+                  <Badge className="bg-red-600">{featured.upcoming.status || 'Coming Soon'}</Badge>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {featured.upcoming.date}
+                  </span>
+                  {featured.upcoming.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {featured.upcoming.location}
+                    </span>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {featured.upcoming.stream && (
+                  <p className="text-sm text-muted-foreground">{featured.upcoming.stream}</p>
+                )}
+                {featured.upcoming.ppv_url && (
+                  <a 
+                    href={featured.upcoming.ppv_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="w-full bg-red-600 hover:bg-red-700 gap-2">
+                      <Tv className="h-4 w-4" />
+                      Watch on PPV
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-red-900/30 bg-card/50">
+              <CardContent className="py-8 text-center text-muted-foreground">
+                No upcoming events announced. Check back soon!
+              </CardContent>
+            </Card>
+          )}
         </section>
 
         {/* Past Results Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Past Results</h2>
-          <Card className="border-red-900/30 bg-card/50">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-red-400">Top Dog FC 37</p>
-                  <p className="text-sm text-muted-foreground">July 5, 2025 • Moscow, Russia</p>
-                </div>
-                <Badge variant="outline" className="border-green-700 text-green-400">Completed</Badge>
-              </div>
-              <div className="mt-3 p-3 bg-muted/30 rounded-lg">
-                <p className="text-sm">
-                  <span className="font-semibold text-foreground">Main Event:</span>{' '}
-                  <span className="text-green-400">Danila Aleev</span> def. Alex Terrible{' '}
-                  <span className="text-muted-foreground">(Decision)</span>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        {featured?.past_results && featured.past_results.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-bold mb-4">Past Results</h2>
+            <div className="space-y-3">
+              {featured.past_results.map((result, idx) => (
+                <Card key={idx} className="border-red-900/30 bg-card/50">
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-red-400">{result.event}</p>
+                        <p className="text-sm text-muted-foreground">{result.date}</p>
+                      </div>
+                      <Badge variant="outline" className="border-green-700 text-green-400">Completed</Badge>
+                    </div>
+                    <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                      <p className="text-sm text-foreground">{result.result}</p>
+                      {result.note && (
+                        <p className="text-xs text-muted-foreground mt-1">{result.note}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
