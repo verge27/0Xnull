@@ -70,7 +70,7 @@ export default function HowBettingWorks() {
               <div>
                 <h3 className="font-semibold mb-2">3. Resolution</h3>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Oracle checks the result (PandaScore, The Odds API, CoinGecko, etc.)</li>
+                  <li>Oracle checks the result (The Odds API, CoinGecko, etc.)</li>
                   <li>Winning side splits the entire pool</li>
                   <li>0.4% fee is deducted</li>
                 </ul>
