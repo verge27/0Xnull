@@ -43,9 +43,10 @@ export default function SportsPredictions() {
   const [betAmountUsd, setBetAmountUsd] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
   
-  // Category/League filters
+  // Category/League/Sport filters
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
+  const [selectedSport, setSelectedSport] = useState<string | null>(null);
   
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: SportsMatch | null }>({
     open: false,
@@ -80,9 +81,12 @@ export default function SportsPredictions() {
     };
   }, [fetchAll, stopLiveScorePolling]);
 
-  // Fetch matches when category/league changes
+  // Fetch matches when category/league/sport changes
   useEffect(() => {
-    if (selectedLeague) {
+    if (selectedSport) {
+      fetchBySport(selectedSport);
+      fetchOdds(selectedSport);
+    } else if (selectedLeague) {
       fetchBySport(selectedLeague);
       fetchOdds(selectedLeague);
     } else if (selectedCategory) {
@@ -90,7 +94,7 @@ export default function SportsPredictions() {
     } else {
       fetchAll();
     }
-  }, [selectedCategory, selectedLeague, fetchByCategory, fetchBySport, fetchAll, fetchOdds]);
+  }, [selectedCategory, selectedLeague, selectedSport, fetchByCategory, fetchBySport, fetchAll, fetchOdds]);
 
   // Start polling for live scores
   useEffect(() => {
@@ -124,6 +128,13 @@ export default function SportsPredictions() {
 
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
+    setSelectedLeague(null);
+    setSelectedSport(null);
+  };
+
+  const handleSportChange = (sport: string | null) => {
+    setSelectedSport(sport);
+    setSelectedCategory(null);
     setSelectedLeague(null);
   };
 
@@ -297,8 +308,11 @@ export default function SportsPredictions() {
             {!categoriesLoading && (
               <SportsCategoryPills
                 categories={Object.keys(categories)}
+                allCategories={categories}
                 selectedCategory={selectedCategory}
-                onSelect={handleCategoryChange}
+                selectedSport={selectedSport}
+                onSelectCategory={handleCategoryChange}
+                onSelectSport={handleSportChange}
               />
             )}
           </div>
