@@ -11,6 +11,7 @@ import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle 
 import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, FeaturedFight, Event } from '@/hooks/useRussianMMA';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
+import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 
 const RussianMMA = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -24,15 +25,19 @@ const RussianMMA = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-950/40 via-background to-background" />
-        <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-5 bg-cover bg-center" />
+      <section className="relative py-20 md:py-32 overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${russianMmaBackground})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-950/40 to-transparent" />
         <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
               Russian Underground Fighting
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground">
+            <p className="text-xl md:text-2xl text-white/90 font-medium">
               Bare-Knuckle Boxing • POP-MMA • Freak Fights
             </p>
           </div>
