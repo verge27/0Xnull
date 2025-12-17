@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse, type BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api, type PredictionMarket } from '@/services/api';
@@ -47,7 +48,8 @@ interface SC2Result {
 
 export default function StarcraftPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
-  
+  const { xmrUsdRate } = useExchangeRate();
+
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [events, setEvents] = useState<SC2Event[]>([]);
   const [liveEvents, setLiveEvents] = useState<SC2Event[]>([]);
@@ -746,6 +748,47 @@ export default function StarcraftPredictions() {
                 />
                 <p className="text-xs text-muted-foreground">Minimum bet: $1</p>
               </div>
+              
+              {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/30 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>≈ XMR Amount</span>
+                    <span className="font-mono font-bold">
+                      {(parseFloat(betAmountUsd) / xmrUsdRate).toFixed(6)} XMR
+                    </span>
+                  </div>
+                  {(() => {
+                    const betXmr = parseFloat(betAmountUsd) / xmrUsdRate;
+                    const currentYesPool = selectedMarket.yes_pool_xmr;
+                    const currentNoPool = selectedMarket.no_pool_xmr;
+                    const totalPoolAfterBet = currentYesPool + currentNoPool + betXmr;
+                    const yourPoolAfterBet = betSide === 'yes' 
+                      ? currentYesPool + betXmr 
+                      : currentNoPool + betXmr;
+                    const yourShare = betXmr / yourPoolAfterBet;
+                    const potentialPayout = yourShare * totalPoolAfterBet;
+                    const profit = potentialPayout - betXmr;
+                    const multiplier = potentialPayout / betXmr;
+                    
+                    return (
+                      <div className="pt-2 border-t border-primary/20">
+                        <div className="flex justify-between text-sm">
+                          <span className={betSide === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
+                            If {betSide.toUpperCase()} wins
+                          </span>
+                          <span className="font-mono font-bold text-emerald-500">
+                            ~{potentialPayout.toFixed(4)} XMR
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>Potential profit</span>
+                          <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
               
               <Button onClick={handlePlaceBet} disabled={placingBet} className="w-full">
                 {placingBet ? 'Creating Bet...' : 'Place Bet'}

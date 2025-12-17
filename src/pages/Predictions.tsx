@@ -677,17 +677,47 @@ export default function Predictions() {
                 </div>
                 
                 {betAmountUsd && parseFloat(betAmountUsd) > 0 && oraclePrices['XMR'] && (
-                  <div className="p-3 bg-primary/10 rounded-lg border border-primary/30">
+                  <div className="p-3 bg-primary/10 rounded-lg border border-primary/30 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>≈ XMR Amount</span>
                       <span className="font-mono font-bold">
                         {(parseFloat(betAmountUsd) / oraclePrices['XMR'].price).toFixed(6)} XMR
                       </span>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <div className="flex justify-between text-xs text-muted-foreground">
                       <span>XMR Price</span>
                       <span>${oraclePrices['XMR'].price.toFixed(2)}</span>
                     </div>
+                    {(() => {
+                      const betXmr = parseFloat(betAmountUsd) / oraclePrices['XMR'].price;
+                      const currentYesPool = selectedMarket.yes_pool_xmr;
+                      const currentNoPool = selectedMarket.no_pool_xmr;
+                      const totalPoolAfterBet = currentYesPool + currentNoPool + betXmr;
+                      const yourPoolAfterBet = betSide === 'yes' 
+                        ? currentYesPool + betXmr 
+                        : currentNoPool + betXmr;
+                      const yourShare = betXmr / yourPoolAfterBet;
+                      const potentialPayout = yourShare * totalPoolAfterBet;
+                      const profit = potentialPayout - betXmr;
+                      const multiplier = potentialPayout / betXmr;
+                      
+                      return (
+                        <div className="pt-2 border-t border-primary/20">
+                          <div className="flex justify-between text-sm">
+                            <span className={betSide === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
+                              If {betSide.toUpperCase()} wins
+                            </span>
+                            <span className="font-mono font-bold text-emerald-500">
+                              ~{potentialPayout.toFixed(4)} XMR
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                            <span>Potential profit</span>
+                            <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
                 
