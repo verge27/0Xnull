@@ -193,18 +193,9 @@ export default function SportsPredictions() {
     if (market.resolved) {
       if (market.outcome === 'YES') {
         return <Badge className="bg-emerald-600"><CheckCircle className="w-3 h-3 mr-1" /> YES Won</Badge>;
-      } else if (market.outcome === 'NO') {
+      } else {
         return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> NO Won</Badge>;
       }
-    }
-    
-    // Past resolution time + buffer - likely resolved but empty pool
-    if (market.resolution_time + 3600 < now) {
-      const hasPool = market.yes_pool_xmr + market.no_pool_xmr > 0;
-      if (!hasPool) {
-        return <Badge className="bg-muted"><CheckCircle className="w-3 h-3 mr-1" /> Resolved (No Bets)</Badge>;
-      }
-      return <Badge className="bg-amber-600"><CheckCircle className="w-3 h-3 mr-1" /> Resolved</Badge>;
     }
     
     if (market.resolution_time <= now) {
@@ -241,10 +232,8 @@ export default function SportsPredictions() {
     return a.commence_timestamp - b.commence_timestamp;
   });
 
-  const now = Date.now() / 1000;
-  // Consider markets resolved if: explicitly resolved OR past resolution time + 1 hour buffer
-  const activeMarkets = markets.filter(m => m.resolved === 0 && m.resolution_time > now);
-  const resolvedMarkets = markets.filter(m => m.resolved === 1 || (m.resolved === 0 && m.resolution_time + 3600 < now));
+  const activeMarkets = markets.filter(m => m.resolved === 0);
+  const resolvedMarkets = markets.filter(m => m.resolved === 1);
 
   return (
     <div className="min-h-screen bg-background relative">
