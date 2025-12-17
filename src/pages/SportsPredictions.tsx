@@ -11,10 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
@@ -24,7 +22,7 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, Play, ExternalLink } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface VideoHighlight {
@@ -71,11 +69,6 @@ export default function SportsPredictions() {
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<{ embed: string; title: string; matchUrl?: string } | null>(null);
-  const [autoOpenOnBlock, setAutoOpenOnBlock] = useState(() => {
-    const saved = localStorage.getItem('autoOpenHighlights');
-    return saved === 'true';
-  });
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -344,7 +337,7 @@ export default function SportsPredictions() {
             <Card className="bg-card/80 backdrop-blur-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Play className="w-5 h-5 text-primary" />
+                  <Tv className="w-5 h-5 text-primary" />
                   Latest Match Highlights
                 </CardTitle>
               </CardHeader>
@@ -360,12 +353,11 @@ export default function SportsPredictions() {
                         key={idx} 
                         className="group cursor-pointer"
                         onClick={() => {
-                          const embed = highlight.videos?.[0]?.embed;
-                          if (!embed) {
-                            toast.error('No video embed available for this match');
-                            return;
+                          if (highlight.matchviewUrl) {
+                            window.open(highlight.matchviewUrl, '_blank');
+                          } else {
+                            toast.error('No video URL available for this match');
                           }
-                          setSelectedVideo({ embed, title: highlight.title, matchUrl: highlight.matchviewUrl });
                         }}
                       >
                         <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
@@ -375,7 +367,7 @@ export default function SportsPredictions() {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="w-10 h-10 text-white" />
+                            <ExternalLink className="w-8 h-8 text-white" />
                           </div>
                           <Badge className="absolute bottom-2 left-2 bg-black/70 text-xs">
                             {highlight.competition}
@@ -390,88 +382,6 @@ export default function SportsPredictions() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Video Player Dialog */}
-          <Dialog
-            open={!!selectedVideo}
-            onOpenChange={() => {
-              setSelectedVideo(null);
-            }}
-          >
-            <DialogContent className="max-w-4xl overflow-hidden">
-              <DialogHeader>
-                <DialogTitle className="line-clamp-1">{selectedVideo?.title}</DialogTitle>
-                <DialogDescription className="sr-only">Watch the selected match highlight video</DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      id="auto-open"
-                      checked={autoOpenOnBlock}
-                      onCheckedChange={(checked) => {
-                        setAutoOpenOnBlock(checked);
-                        localStorage.setItem('autoOpenHighlights', String(checked));
-                      }}
-                    />
-                    <Label htmlFor="auto-open" className="text-xs text-muted-foreground cursor-pointer">
-                      Auto-open in new tab if blocked
-                    </Label>
-                  </div>
-                  {selectedVideo?.matchUrl && (
-                    <a
-                      href={selectedVideo.matchUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex"
-                    >
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Open on Scorebat
-                      </Button>
-                    </a>
-                  )}
-                </div>
-
-                {selectedVideo && (() => {
-                  // Extract iframe src from embed HTML
-                  const srcMatch = selectedVideo.embed.match(/src=["']([^"']+)["']/);
-                  const iframeSrc = srcMatch ? srcMatch[1] : null;
-
-                  const handleIframeError = () => {
-                    if (autoOpenOnBlock && selectedVideo.matchUrl) {
-                      window.open(selectedVideo.matchUrl, '_blank');
-                      setSelectedVideo(null);
-                      toast.info('Opened highlight in new tab');
-                    }
-                  };
-
-                  if (iframeSrc) {
-                    return (
-                      <AspectRatio ratio={16 / 9}>
-                        <iframe
-                          src={iframeSrc}
-                          className="h-full w-full border-0"
-                          allowFullScreen
-                          allow="autoplay; fullscreen"
-                          onError={handleIframeError}
-                        />
-                      </AspectRatio>
-                    );
-                  }
-
-                  // Fallback to dangerouslySetInnerHTML if no src found
-                  return (
-                    <div
-                      className="w-full aspect-video"
-                      dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
-                    />
-                  );
-                })()}
-              </div>
-            </DialogContent>
-          </Dialog>
 
           {/* Category Pills */}
           <div className="mb-6">
