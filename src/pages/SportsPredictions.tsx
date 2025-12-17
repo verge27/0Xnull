@@ -22,7 +22,7 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv } from 'lucide-react';
 
 export default function SportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
@@ -296,6 +296,27 @@ export default function SportsPredictions() {
                 <HelpCircle className="w-4 h-4" /> Learn How It Works
               </Link>
             </div>
+          </div>
+
+          {/* Scorebat Live Scores */}
+          <div className="mb-6">
+            <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Tv className="w-5 h-5 text-primary" />
+                  Live Football Scores
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <iframe
+                  src="https://www.scorebat.com/embed/livescore/"
+                  width="100%"
+                  height="600"
+                  allowFullScreen={true}
+                  className="border-0"
+                />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Category Pills */}
