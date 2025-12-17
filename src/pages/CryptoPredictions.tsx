@@ -44,10 +44,10 @@ import fartcoinLogo from '@/assets/crypto/fartcoin.png';
 import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.jpg';
 
 const TRADING_PAIRS = [
-  { symbol: 'BTC/USDT', url: 'https://aggr.trade/BTCUSDT' },
-  { symbol: 'ETH/USDT', url: 'https://aggr.trade/ETHUSDT' },
-  { symbol: 'XMR/USDT', url: 'https://aggr.trade/XMRUSDT' },
-  { symbol: 'SOL/USDT', url: 'https://aggr.trade/SOLUSDT' },
+  { symbol: 'BTC/USDT', tvSymbol: 'BINANCE:BTCUSDT' },
+  { symbol: 'ETH/USDT', tvSymbol: 'BINANCE:ETHUSDT' },
+  { symbol: 'XMR/USDT', tvSymbol: 'BINANCE:XMRUSDT' },
+  { symbol: 'SOL/USDT', tvSymbol: 'BINANCE:SOLUSDT' },
 ];
 
 interface OracleAsset {
@@ -308,13 +308,13 @@ export default function CryptoPredictions() {
                     <Activity className="w-5 h-5 text-primary" />
                     <CardTitle className="text-lg">Live Markets</CardTitle>
                     <a
-                      href="https://aggr.trade"
+                      href="https://www.tradingview.com/chart/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-primary transition-colors"
                       onClick={(e) => e.stopPropagation()}
-                      aria-label="Open aggr.trade in a new tab"
-                      title="Open aggr.trade"
+                      aria-label="Open TradingView"
+                      title="Open TradingView"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
@@ -340,33 +340,22 @@ export default function CryptoPredictions() {
                   ))}
                 </div>
 
-                <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
+                <div className="rounded-lg overflow-hidden border border-border" style={{ height: '500px' }}>
                   <iframe
-                    src={selectedPair.url}
+                    key={selectedPair.tvSymbol}
+                    src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${selectedPair.tvSymbol}&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&showpopupbutton=1&locale=en&utm_source=&utm_medium=widget_new&utm_campaign=chart`}
                     width="100%"
-                    height="500"
+                    height="100%"
                     frameBorder="0"
-                    style={{ borderRadius: '8px' }}
-                    allow="fullscreen"
+                    allowTransparency
+                    scrolling="no"
                     allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                    title={`${selectedPair.symbol} live trading feed`}
+                    title={`${selectedPair.symbol} TradingView Chart`}
                   />
                 </div>
 
-                <p className="mt-2 text-xs text-muted-foreground">
-                  If the feed appears blank, aggr.trade may block embedding in some browsers. 
-                  <a
-                    href={selectedPair.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-1 text-primary hover:underline"
-                  >
-                    Open {selectedPair.symbol} on aggr.trade
-                  </a>
-                  .
+                <p className="mt-2 text-xs text-muted-foreground text-center">
+                  Powered by TradingView
                 </p>
               </CardContent>
             </CollapsibleContent>
