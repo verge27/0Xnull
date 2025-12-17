@@ -69,7 +69,8 @@ export default function SportsPredictions() {
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<{ src: string; title: string } | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{ src: string; title: string; matchUrl?: string } | null>(null);
+  const [videoLoadError, setVideoLoadError] = useState(false);
 
   const extractScorebatEmbedSrc = (embedHtml: string): string | null => {
     // Scorebat returns an <iframe src='...'> inside HTML. We extract src and render our own iframe.
@@ -371,7 +372,8 @@ export default function SportsPredictions() {
                             toast.error('Unable to load this video');
                             return;
                           }
-                          setSelectedVideo({ src, title: highlight.title });
+                          setVideoLoadError(false);
+                          setSelectedVideo({ src, title: highlight.title, matchUrl: highlight.matchviewUrl });
                         }}
                       >
                         <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
@@ -398,24 +400,60 @@ export default function SportsPredictions() {
           </div>
 
           {/* Video Player Dialog */}
-          <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
-            <DialogContent className="max-w-4xl p-0 overflow-hidden">
-              <DialogHeader className="p-4 pb-0">
+          <Dialog
+            open={!!selectedVideo}
+            onOpenChange={() => {
+              setSelectedVideo(null);
+              setVideoLoadError(false);
+            }}
+          >
+            <DialogContent className="max-w-4xl overflow-hidden">
+              <DialogHeader>
                 <DialogTitle className="line-clamp-1">{selectedVideo?.title}</DialogTitle>
+                <DialogDescription className="sr-only">Watch the selected match highlight video</DialogDescription>
               </DialogHeader>
-              <div className="p-4">
-                {selectedVideo && (
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs text-muted-foreground">
+                    If playback is blocked, open the highlight on Scorebat.
+                  </div>
+                  {selectedVideo?.matchUrl && (
+                    <a
+                      href={selectedVideo.matchUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex"
+                    >
+                      <Button variant="outline" size="sm">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open on Scorebat
+                      </Button>
+                    </a>
+                  )}
+                </div>
+
+                {videoLoadError ? (
+                  <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
+                    This video didn’t load in the embedded player. Use “Open on Scorebat”.
+                  </div>
+                ) : (
                   <div className="aspect-video w-full">
-                    <iframe
-                      src={selectedVideo.src}
-                      title={selectedVideo.title}
-                      width="100%"
-                      height="100%"
-                      allow="autoplay; fullscreen"
-                      allowFullScreen
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full border-0 rounded-lg bg-muted"
-                    />
+                    {selectedVideo && (
+                      <iframe
+                        key={selectedVideo.src}
+                        src={selectedVideo.src}
+                        title={selectedVideo.title}
+                        width="100%"
+                        height="100%"
+                        allow="autoplay; fullscreen"
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full border-0 rounded-lg bg-muted"
+                        onError={() => setVideoLoadError(true)}
+                      />
+                    )}
                   </div>
                 )}
               </div>
