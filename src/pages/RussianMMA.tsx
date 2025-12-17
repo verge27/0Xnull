@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, Event, Matchup } from '@/hooks/useRussianMMA';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import { ResolutionBadge } from '@/components/ResolutionBadge';
+import { CreateFightMarketDialog } from '@/components/CreateFightMarketDialog';
 import { fixName, getCountryFlag, Region, regionLabels, getPromotionRegion } from '@/lib/nameFixes';
 import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 
@@ -408,91 +409,116 @@ const RussianMMA = () => {
 
 const EventCard = ({ event }: { event: Event }) => {
   const [expanded, setExpanded] = useState(false);
+  const [selectedMatchup, setSelectedMatchup] = useState<{ fighter1: string; fighter2: string } | null>(null);
   const matchups = event.matchups || [];
   const displayMatchups = expanded ? matchups : matchups.slice(0, 3);
 
   return (
-    <Card className="border-red-900/30 bg-card/50">
-      <CardHeader>
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{getCountryFlag(event.country)}</span>
-            <CardTitle>{fixName(event.event_name)}</CardTitle>
-            <ResolutionBadge resolution={event.resolution} showLabel={false} />
-          </div>
-          <div className="text-right text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {event.date_raw || event.date}
+    <>
+      <Card className="border-red-900/30 bg-card/50">
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{getCountryFlag(event.country)}</span>
+              <CardTitle>{fixName(event.event_name)}</CardTitle>
+              <ResolutionBadge resolution={event.resolution} showLabel={false} />
+            </div>
+            <div className="text-right text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {event.date_raw || event.date}
+              </div>
             </div>
           </div>
-        </div>
-        {event.promotion_name && (
-          <p className="text-sm text-red-400">{fixName(event.promotion_name)}</p>
-        )}
-        {event.tapology_url && (
-          <a 
-            href={event.tapology_url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm text-muted-foreground hover:text-red-400"
-          >
-            View on Tapology
-          </a>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Matchups */}
-        {matchups.length > 0 && (
-          <div className="space-y-2">
-            {displayMatchups.map((matchup, idx) => {
-              const fighter1 = matchup.fighter_1?.name || matchup.fighter1 || 'TBA';
-              const fighter2 = matchup.fighter_2?.name || matchup.fighter2 || 'TBA';
-              return (
-                <div key={idx} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg text-sm">
-                  <span className="flex-1 text-right pr-2">{fixName(fighter1)}</span>
-                  <span className="text-red-400 font-bold px-2">vs</span>
-                  <span className="flex-1 pl-2">{fixName(fighter2)}</span>
-                </div>
-              );
-            })}
-            {matchups.length > 3 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setExpanded(!expanded)}
-                className="w-full text-muted-foreground hover:text-foreground gap-1"
-              >
-                {expanded ? (
-                  <>
-                    <ChevronUp className="h-4 w-4" />
-                    Show less
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4" />
-                    Show {matchups.length - 3} more matchups
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        )}
-        
-        <div className="flex gap-2 pt-2">
-          <Button variant="outline" className="flex-1 border-red-700 text-red-400 hover:bg-red-950">
-            Create Markets
-          </Button>
+          {event.promotion_name && (
+            <p className="text-sm text-red-400">{fixName(event.promotion_name)}</p>
+          )}
           {event.tapology_url && (
-            <a href={event.tapology_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="icon" className="border-red-700 text-red-400 hover:bg-red-950">
-                <ExternalLink className="h-4 w-4" />
-              </Button>
+            <a 
+              href={event.tapology_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-red-400"
+            >
+              View on Tapology
             </a>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Matchups */}
+          {matchups.length > 0 && (
+            <div className="space-y-2">
+              {displayMatchups.map((matchup, idx) => {
+                const fighter1 = matchup.fighter_1?.name || matchup.fighter1 || 'TBA';
+                const fighter2 = matchup.fighter_2?.name || matchup.fighter2 || 'TBA';
+                return (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg text-sm gap-2">
+                    <div className="flex-1 flex items-center justify-center">
+                      <span className="text-right pr-2">{fixName(fighter1)}</span>
+                      <span className="text-red-400 font-bold px-2">vs</span>
+                      <span className="pl-2">{fixName(fighter2)}</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-red-700 text-red-400 hover:bg-red-950 gap-1 shrink-0"
+                      onClick={() => setSelectedMatchup({ fighter1, fighter2 })}
+                    >
+                      <Plus className="h-3 w-3" />
+                      Market
+                    </Button>
+                  </div>
+                );
+              })}
+              {matchups.length > 3 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setExpanded(!expanded)}
+                  className="w-full text-muted-foreground hover:text-foreground gap-1"
+                >
+                  {expanded ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Show less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Show {matchups.length - 3} more matchups
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
+          
+          <div className="flex gap-2 pt-2">
+            {event.tapology_url && (
+              <a href={event.tapology_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button variant="outline" className="w-full border-red-700 text-red-400 hover:bg-red-950 gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  View Full Card
+                </Button>
+              </a>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedMatchup && (
+        <CreateFightMarketDialog
+          open={!!selectedMatchup}
+          onOpenChange={(open) => !open && setSelectedMatchup(null)}
+          fighter1={selectedMatchup.fighter1}
+          fighter2={selectedMatchup.fighter2}
+          eventName={event.event_name}
+          eventDate={event.date_raw || event.date}
+          resolution={event.resolution}
+          promotionName={event.promotion_name}
+        />
+      )}
+    </>
   );
 };
 
