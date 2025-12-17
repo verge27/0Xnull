@@ -521,12 +521,8 @@ export default function SportsPredictions() {
                             </div>
                             
                             {/* Pool Transparency */}
-                            {(market.pool_address || market.view_key) && (
-                              <PoolTransparency 
-                                poolAddress={market.pool_address}
-                                viewKey={market.view_key}
-                              />
-                            )}
+                            <PoolTransparency marketId={market.market_id} />
+                            
                             
                             {!market.resolved && (
                               <Button 

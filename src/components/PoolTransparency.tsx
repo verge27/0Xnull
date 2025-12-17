@@ -1,23 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Copy, Check, ChevronDown, Shield, Eye } from 'lucide-react';
+import { Copy, Check, ChevronDown, Shield, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { api, type PoolInfo } from '@/services/api';
 
 interface PoolTransparencyProps {
-  poolAddress?: string;
-  viewKey?: string;
+  marketId: string;
   className?: string;
 }
 
-export function PoolTransparency({ poolAddress, viewKey, className }: PoolTransparencyProps) {
+export function PoolTransparency({ marketId, className }: PoolTransparencyProps) {
   const [copied, setCopied] = useState<'address' | 'viewKey' | null>(null);
   const [howToOpen, setHowToOpen] = useState(false);
+  const [poolInfo, setPoolInfo] = useState<PoolInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!poolAddress && !viewKey) return null;
+  const fetchPoolInfo = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getPoolInfo(marketId);
+      setPoolInfo(data);
+    } catch (e) {
+      setError('Failed to load pool info');
+      console.error('Pool info error:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPoolInfo();
+  }, [marketId]);
 
   const copyToClipboard = async (text: string, type: 'address' | 'viewKey') => {
     try {
@@ -30,69 +49,106 @@ export function PoolTransparency({ poolAddress, viewKey, className }: PoolTransp
     }
   };
 
+  if (loading && !poolInfo) {
+    return (
+      <Card className={className}>
+        <CardContent className="py-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading pool info...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error && !poolInfo) {
+    return null;
+  }
+
+  if (!poolInfo) return null;
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Shield className="w-4 h-4 text-emerald-500" />
-          Pool Transparency
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Shield className="w-4 h-4 text-emerald-500" />
+            Pool Transparency
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={fetchPoolInfo}
+            disabled={loading}
+            className="h-7 w-7 p-0"
+          >
+            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Live Balance */}
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
+          <p className="text-xs text-muted-foreground mb-1">Pool Balance</p>
+          <p className="text-lg font-bold font-mono text-emerald-400">
+            {poolInfo.balance_xmr.toFixed(6)} XMR
+          </p>
+          {poolInfo.unlocked_balance_xmr !== poolInfo.balance_xmr && (
+            <p className="text-xs text-muted-foreground">
+              ({poolInfo.unlocked_balance_xmr.toFixed(6)} unlocked)
+            </p>
+          )}
+        </div>
+
         <p className="text-xs text-muted-foreground">
           Verify all deposits independently using a watch-only wallet.
         </p>
 
-        {poolAddress && (
-          <div>
-            <Label className="text-xs text-muted-foreground">Pool Address</Label>
-            <div className="flex items-center gap-2 mt-1">
-              <Input
-                readOnly
-                value={poolAddress}
-                className="font-mono text-xs"
-              />
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => copyToClipboard(poolAddress, 'address')}
-              >
-                {copied === 'address' ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Pool Address</Label>
+          <div className="flex items-center gap-2 mt-1">
+            <Input
+              readOnly
+              value={poolInfo.pool_address}
+              className="font-mono text-xs"
+            />
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => copyToClipboard(poolInfo.pool_address, 'address')}
+            >
+              {copied === 'address' ? (
+                <Check className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </Button>
           </div>
-        )}
+        </div>
 
-        {viewKey && (
-          <div>
-            <Label className="text-xs text-muted-foreground flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              View Key
-            </Label>
-            <div className="flex items-center gap-2 mt-1">
-              <Input
-                readOnly
-                value={viewKey}
-                className="font-mono text-xs"
-              />
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => copyToClipboard(viewKey, 'viewKey')}
-              >
-                {copied === 'viewKey' ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
+        <div>
+          <Label className="text-xs text-muted-foreground flex items-center gap-1">
+            <Eye className="w-3 h-3" />
+            View Key
+          </Label>
+          <div className="flex items-center gap-2 mt-1">
+            <Input
+              readOnly
+              value={poolInfo.view_key}
+              className="font-mono text-xs"
+            />
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => copyToClipboard(poolInfo.view_key, 'viewKey')}
+            >
+              {copied === 'viewKey' ? (
+                <Check className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </Button>
           </div>
-        )}
+        </div>
 
         <Collapsible open={howToOpen} onOpenChange={setHowToOpen}>
           <CollapsibleTrigger asChild>
@@ -109,7 +165,7 @@ export function PoolTransparency({ poolAddress, viewKey, className }: PoolTransp
               <li>You can now see all deposits to this pool</li>
             </ol>
             <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
-              This allows you to independently verify that all bets are recorded on-chain without trusting us.
+              {poolInfo.verify_instructions}
             </p>
           </CollapsibleContent>
         </Collapsible>

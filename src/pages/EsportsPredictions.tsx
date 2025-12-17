@@ -460,13 +460,8 @@ export default function EsportsPredictions() {
                           </div>
                           
                           {/* Pool Transparency */}
-                          {(market.pool_address || market.view_key) && (
-                            <PoolTransparency 
-                              poolAddress={market.pool_address}
-                              viewKey={market.view_key}
-                              className="mb-3"
-                            />
-                          )}
+                          <PoolTransparency marketId={market.market_id} className="mb-3" />
+                          
                           
                           <div className="flex gap-2">
                             <Button 
