@@ -91,46 +91,41 @@ const RussianMMA = () => {
       </div>
 
       <div className="container pb-16 space-y-12">
-        {/* Recent Highlights - Video Embed */}
+        {/* Watch Section - Clickable Card */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Youtube className="h-6 w-6 text-red-500" />
-            Recent Highlights
+            Watch Top Dog FC
           </h2>
-          <div className="max-w-3xl">
-            <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
-              <iframe 
-                src="https://www.youtube.com/embed/videoseries?list=UUAeCwHL4T91FKoYiFXHy0-g"
-                width="100%" 
-                height="100%"
-                frameBorder="0" 
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                title="Top Dog FC Videos"
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Watch Links Section - Smaller */}
-        <section>
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-muted-foreground">
-            <Tv className="h-5 w-5 text-red-500" />
-            Watch Top Dog FC Fights
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            <a 
-              href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm" className="gap-2 border-red-900/50 hover:border-red-600/50">
-                <Youtube className="h-4 w-4 text-red-500" />
-                YouTube
-                <ExternalLink className="h-3 w-3" />
-              </Button>
-            </a>
+          <a 
+            href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block group max-w-2xl"
+          >
+            <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
+              <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
+                <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
+                  <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
+                    <Youtube className="h-12 w-12 text-white" />
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
+                    Top Dog Fighting
+                  </h3>
+                  <p className="text-red-400 font-semibold mb-1">
+                    Bare-Knuckle Boxing • POP-MMA • Freak Fights
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    1.5M+ Subscribers • Click to watch
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </a>
+          <div className="flex flex-wrap gap-3 mt-4">
             <a 
               href="https://t.me/topdogfighting" 
               target="_blank" 
