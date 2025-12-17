@@ -105,8 +105,8 @@ export default function SportsPredictions() {
       const { data, error } = await supabase.functions.invoke('scorebat-videos');
       if (error) throw error;
       
-      // API returns array of video objects
-      const videos = Array.isArray(data) ? data.slice(0, 12) : [];
+      // API returns { response: [...videos...] }
+      const videos = data?.response && Array.isArray(data.response) ? data.response.slice(0, 12) : [];
       setHighlights(videos);
     } catch (error) {
       console.error('Error fetching highlights:', error);
