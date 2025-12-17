@@ -17,8 +17,15 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy, HelpCircle, ExternalLink, ChevronDown, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+const TRADING_PAIRS = [
+  { symbol: 'BTC/USDT', url: 'https://aggr.trade/BTCUSDT' },
+  { symbol: 'ETH/USDT', url: 'https://aggr.trade/ETHUSDT' },
+  { symbol: 'XMR/USDT', url: 'https://aggr.trade/XMRUSDT' },
+  { symbol: 'SOL/USDT', url: 'https://aggr.trade/SOLUSDT' },
+];
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -106,6 +113,8 @@ export default function Predictions() {
   const [placingBet, setPlacingBet] = useState(false);
   
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
+  const [tradingFeedOpen, setTradingFeedOpen] = useState(true);
 
   useEffect(() => {
     fetchMarkets();
@@ -297,6 +306,65 @@ export default function Predictions() {
               <HelpCircle className="w-4 h-4" /> Learn How It Works
             </Link>
           </div>
+
+          {/* Live Trading Feed */}
+          <Collapsible open={tradingFeedOpen} onOpenChange={setTradingFeedOpen} className="mb-6">
+            <Card className="border-primary/20">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-5 h-5 text-primary" />
+                      <CardTitle className="text-lg">Live Markets</CardTitle>
+                      <a 
+                        href="https://aggr.trade" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${tradingFeedOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  {/* Pair Toggle Buttons */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {TRADING_PAIRS.map((pair) => (
+                      <Button
+                        key={pair.symbol}
+                        variant={selectedPair.symbol === pair.symbol ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedPair(pair)}
+                        className={selectedPair.symbol === pair.symbol ? "bg-primary text-primary-foreground" : ""}
+                      >
+                        {pair.symbol}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Trading Feed Iframe */}
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    <iframe 
+                      src={selectedPair.url}
+                      width="100%" 
+                      height="500"
+                      style={{ borderRadius: '8px', border: 'none' }}
+                      allow="fullscreen"
+                      title={`${selectedPair.symbol} Live Trading Feed`}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Live order flow, trades & liquidations powered by aggr.trade
+                  </p>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           <Tabs defaultValue="prices" className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-4">
