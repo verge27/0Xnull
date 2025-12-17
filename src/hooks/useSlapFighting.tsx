@@ -36,6 +36,9 @@ export interface SlapEvent {
   location?: string;
   tapology_url?: string;
   matchups?: SlapMatchup[];
+  is_upcoming?: boolean;
+  promotion?: string;
+  promotion_name?: string;
 }
 
 export interface SlapFeatured {
@@ -89,7 +92,14 @@ async function fetchStrikers(): Promise<Striker[]> {
   return data.strikers || [];
 }
 
-async function fetchEvents(): Promise<SlapEvent[]> {
+async function fetchUpcomingEvents(): Promise<SlapEvent[]> {
+  const data = await proxyFetch('/api/slap/events?upcoming_only=true');
+  const events = data.events || [];
+  // Filter client-side as well in case API doesn't support the param
+  return events.filter((e: SlapEvent) => e.is_upcoming);
+}
+
+async function fetchAllEvents(): Promise<SlapEvent[]> {
   const data = await proxyFetch('/api/slap/events');
   return data.events || [];
 }
@@ -121,7 +131,15 @@ export function useSlapStrikers() {
 export function useSlapEvents() {
   return useQuery({
     queryKey: ['slap-events'],
-    queryFn: fetchEvents,
+    queryFn: fetchUpcomingEvents,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useSlapAllEvents() {
+  return useQuery({
+    queryKey: ['slap-all-events'],
+    queryFn: fetchAllEvents,
     staleTime: 5 * 60 * 1000,
   });
 }
