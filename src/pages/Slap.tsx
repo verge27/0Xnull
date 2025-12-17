@@ -57,57 +57,11 @@ const Slap = () => {
         </div>
 
         <div className="container pb-16 space-y-12">
-          {/* Watch Section */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Tv className="h-6 w-6 text-red-500" />
-              Watch Power Slap
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <a 
-                href="https://youtube.com/powerslap" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block group"
-              >
-                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all h-full">
-                  <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
-                    <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
-                      <Youtube className="h-12 w-12 text-red-500 group-hover:scale-110 transition-transform mb-4" />
-                      <h3 className="text-2xl font-bold mb-2 text-white">Power Slap on YouTube</h3>
-                      <p className="text-muted-foreground">Official Channel</p>
-                    </div>
-                  </div>
-                </Card>
-              </a>
-              <a 
-                href="https://rumble.com/c/powerslap" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block group"
-              >
-                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all h-full">
-                  <div className="relative aspect-video w-full bg-gradient-to-br from-black via-green-950/50 to-black overflow-hidden">
-                    <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
-                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-green-600/20 rounded-full blur-3xl" />
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
-                      <Tv className="h-12 w-12 text-green-500 group-hover:scale-110 transition-transform mb-4" />
-                      <h3 className="text-2xl font-bold mb-2 text-white">Power Slap on Rumble</h3>
-                      <p className="text-muted-foreground">Live Streams</p>
-                    </div>
-                  </div>
-                </Card>
-              </a>
-            </div>
-          </section>
-
-          {/* Video Embed Section */}
+          {/* Recent Highlights - Video Embed */}
           <section>
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
               <Youtube className="h-6 w-6 text-red-500" />
-              Recent Fights
+              Recent Highlights
             </h2>
             <div className="max-w-3xl">
               <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
@@ -122,6 +76,38 @@ const Slap = () => {
                   className="w-full h-full"
                 />
               </div>
+            </div>
+          </section>
+
+          {/* Watch Links Section - Smaller */}
+          <section>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-muted-foreground">
+              <Tv className="h-5 w-5 text-red-500" />
+              Watch Power Slap
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              <a 
+                href="https://youtube.com/powerslap" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-red-900/50 hover:border-red-600/50">
+                  <Youtube className="h-4 w-4 text-red-500" />
+                  YouTube
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
+              <a 
+                href="https://rumble.com/c/powerslap" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-green-900/50 hover:border-green-600/50">
+                  <Tv className="h-4 w-4 text-green-500" />
+                  Rumble
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
             </div>
           </section>
 
