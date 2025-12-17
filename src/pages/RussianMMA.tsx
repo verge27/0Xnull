@@ -91,59 +91,13 @@ const RussianMMA = () => {
       </div>
 
       <div className="container pb-16 space-y-12">
-        {/* Watch Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Tv className="h-6 w-6 text-red-500" />
-            Watch Live
-          </h2>
-          <a 
-            href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block group"
-          >
-            <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
-              <div className="relative aspect-[21/9] w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
-                {/* Gritty overlay pattern */}
-                <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
-                
-                {/* Red glow effects */}
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
-                
-                {/* Content */}
-                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
-                  <div className="mb-4">
-                    <Youtube className="h-16 w-16 text-red-500 group-hover:scale-110 transition-transform" />
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white">
-                    Watch Top Dog FC Fights
-                  </h3>
-                  <p className="text-lg text-red-400 font-semibold mb-1">
-                    Bare-Knuckle Boxing • POP-MMA • Freak Fights
-                  </p>
-                  <p className="text-muted-foreground mb-6">
-                    1.5M+ Subscribers
-                  </p>
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 gap-2 group-hover:scale-105 transition-transform">
-                    <Youtube className="h-5 w-5" />
-                    Watch on YouTube
-                    <ExternalLink className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </a>
-        </section>
-
-        {/* Highlights Section */}
+        {/* Recent Highlights - Video Embed */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
             <Youtube className="h-6 w-6 text-red-500" />
             Recent Highlights
           </h2>
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
               <iframe 
                 src="https://www.youtube.com/embed/videoseries?list=UUAeCwHL4T91FKoYiFXHy0-g"
@@ -156,15 +110,36 @@ const RussianMMA = () => {
                 className="w-full h-full"
               />
             </div>
+          </div>
+        </section>
+
+        {/* Watch Links Section - Smaller */}
+        <section>
+          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-muted-foreground">
+            <Tv className="h-5 w-5 text-red-500" />
+            Watch Top Dog FC Fights
+          </h3>
+          <div className="flex flex-wrap gap-3">
             <a 
               href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="mt-3 inline-block"
             >
-              <Button variant="outline" size="sm" className="gap-2 border-red-700 text-red-400 hover:bg-red-950">
+              <Button variant="outline" size="sm" className="gap-2 border-red-900/50 hover:border-red-600/50">
+                <Youtube className="h-4 w-4 text-red-500" />
+                YouTube
                 <ExternalLink className="h-3 w-3" />
-                View Full Channel
+              </Button>
+            </a>
+            <a 
+              href="https://t.me/topdogfighting" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="gap-2 border-blue-900/50 hover:border-blue-600/50">
+                <MessageCircle className="h-4 w-4 text-blue-500" />
+                Telegram
+                <ExternalLink className="h-3 w-3" />
               </Button>
             </a>
           </div>
