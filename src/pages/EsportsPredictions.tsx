@@ -16,6 +16,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
+import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle } from 'lucide-react';
@@ -457,6 +458,15 @@ export default function EsportsPredictions() {
                           <div className="text-xs text-muted-foreground mb-4 text-center">
                             Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
                           </div>
+                          
+                          {/* Pool Transparency */}
+                          {(market.pool_address || market.view_key) && (
+                            <PoolTransparency 
+                              poolAddress={market.pool_address}
+                              viewKey={market.view_key}
+                              className="mb-3"
+                            />
+                          )}
                           
                           <div className="flex gap-2">
                             <Button 
