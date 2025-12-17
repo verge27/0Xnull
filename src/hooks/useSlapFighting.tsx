@@ -9,6 +9,7 @@ export interface SlapPromotion {
   youtube?: string;
   rumble?: string;
   website?: string;
+  resolution?: 'auto' | 'manual';
 }
 
 export interface Striker {

@@ -11,6 +11,7 @@ export interface Promotion {
   website?: string;
   telegram?: string;
   vk?: string;
+  resolution?: 'auto' | 'manual';
 }
 
 export interface Fighter {
