@@ -63,34 +63,46 @@ const Slap = () => {
               <Youtube className="h-6 w-6 text-red-500" />
               Recent Highlights
             </h2>
-            <a 
-              href="https://yewtu.be/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3"
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block group max-w-2xl"
-            >
-              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
-                <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
-                  <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
-                  <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
-                  <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
-                  <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
-                    <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
-                      <Youtube className="h-12 w-12 text-white" />
+            <div className="max-w-2xl space-y-3">
+              <a 
+                href="https://youtube.com/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3"
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
+                  <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
+                    <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
+                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
+                      <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
+                        <Youtube className="h-12 w-12 text-white" />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
+                        Power Slap Highlights
+                      </h3>
+                      <p className="text-red-400 font-semibold mb-1">
+                        Full Fight Replays • KO Compilations
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        Click to watch playlist
+                      </p>
                     </div>
-                    <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
-                      Power Slap Highlights
-                    </h3>
-                    <p className="text-red-400 font-semibold mb-1">
-                      Full Fight Replays • KO Compilations
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      Click to watch playlist
-                    </p>
                   </div>
-                </div>
-              </Card>
-            </a>
+                </Card>
+              </a>
+              <a 
+                href="https://yewtu.be/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3"
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-purple-900/50 hover:border-purple-600/50">
+                  <ExternalLink className="h-4 w-4 text-purple-400" />
+                  Tor Alternate (Invidious)
+                </Button>
+              </a>
+            </div>
           </section>
 
           {/* Watch Links Section - Smaller */}
@@ -462,12 +474,20 @@ const PromotionCard = ({ promotion }: { promotion: SlapPromotion }) => (
       )}
       <div className="flex gap-2 flex-wrap">
         {promotion.youtube && (
-          <a href={promotion.youtube} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="outline" className="gap-1">
-              <Youtube className="h-4 w-4" />
-              YouTube
-            </Button>
-          </a>
+          <>
+            <a href={promotion.youtube} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1">
+                <Youtube className="h-4 w-4" />
+                YouTube
+              </Button>
+            </a>
+            <a href={promotion.youtube.replace('youtube.com', 'yewtu.be').replace('www.youtube.com', 'yewtu.be')} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1 border-purple-900/50 hover:border-purple-600/50">
+                <ExternalLink className="h-4 w-4 text-purple-400" />
+                Tor Alt
+              </Button>
+            </a>
+          </>
         )}
         {promotion.rumble && (
           <a href={promotion.rumble} target="_blank" rel="noopener noreferrer">
@@ -524,12 +544,20 @@ const PromotionCardStatic = ({
       )}
       <div className="flex gap-2 flex-wrap">
         {youtube && (
-          <a href={youtube} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="outline" className="gap-1">
-              <Youtube className="h-4 w-4" />
-              YouTube
-            </Button>
-          </a>
+          <>
+            <a href={youtube} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1">
+                <Youtube className="h-4 w-4" />
+                YouTube
+              </Button>
+            </a>
+            <a href={youtube.replace('youtube.com', 'yewtu.be').replace('www.youtube.com', 'yewtu.be')} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1 border-purple-900/50 hover:border-purple-600/50">
+                <ExternalLink className="h-4 w-4 text-purple-400" />
+                Tor Alt
+              </Button>
+            </a>
+          </>
         )}
         {rumble && (
           <a href={rumble} target="_blank" rel="noopener noreferrer">

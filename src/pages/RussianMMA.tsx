@@ -97,46 +97,58 @@ const RussianMMA = () => {
             <Youtube className="h-6 w-6 text-red-500" />
             Watch Top Dog FC
           </h2>
-          <a 
-            href="https://yewtu.be/channel/UCAeCwHL4T91FKoYiFXHy0-g"
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block group max-w-2xl"
-          >
-            <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
-              <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
-                <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
-                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
-                  <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
-                    <Youtube className="h-12 w-12 text-white" />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
-                    Top Dog Fighting
-                  </h3>
-                  <p className="text-red-400 font-semibold mb-1">
-                    Bare-Knuckle Boxing • POP-MMA • Freak Fights
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    1.5M+ Subscribers • Click to watch
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </a>
-          <div className="flex flex-wrap gap-3 mt-4">
+          <div className="max-w-2xl space-y-3">
             <a 
-              href="https://t.me/topdogfighting" 
+              href="https://youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g"
               target="_blank" 
               rel="noopener noreferrer"
+              className="block group"
             >
-              <Button variant="outline" size="sm" className="gap-2 border-blue-900/50 hover:border-blue-600/50">
-                <MessageCircle className="h-4 w-4 text-blue-500" />
-                Telegram
-                <ExternalLink className="h-3 w-3" />
-              </Button>
+              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
+                <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
+                  <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
+                  <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
+                  <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
+                  <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
+                    <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
+                      <Youtube className="h-12 w-12 text-white" />
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
+                      Top Dog Fighting
+                    </h3>
+                    <p className="text-red-400 font-semibold mb-1">
+                      Bare-Knuckle Boxing • POP-MMA • Freak Fights
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      1.5M+ Subscribers • Click to watch
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </a>
+            <div className="flex flex-wrap gap-3">
+              <a 
+                href="https://yewtu.be/channel/UCAeCwHL4T91FKoYiFXHy0-g"
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-purple-900/50 hover:border-purple-600/50">
+                  <ExternalLink className="h-4 w-4 text-purple-400" />
+                  Tor Alternate (Invidious)
+                </Button>
+              </a>
+              <a 
+                href="https://t.me/topdogfighting" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-blue-900/50 hover:border-blue-600/50">
+                  <MessageCircle className="h-4 w-4 text-blue-500" />
+                  Telegram
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
+            </div>
           </div>
         </section>
 
@@ -517,12 +529,20 @@ const PromotionCard = ({ promotion }: { promotion: Promotion }) => (
       )}
       <div className="flex gap-2 flex-wrap">
         {promotion.youtube && (
-          <a href={`https://www.youtube.com/channel/${promotion.youtube}`} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="outline" className="gap-1">
-              <Youtube className="h-4 w-4" />
-              YouTube
-            </Button>
-          </a>
+          <>
+            <a href={`https://www.youtube.com/channel/${promotion.youtube}`} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1">
+                <Youtube className="h-4 w-4" />
+                YouTube
+              </Button>
+            </a>
+            <a href={`https://yewtu.be/channel/${promotion.youtube}`} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1 border-purple-900/50 hover:border-purple-600/50">
+                <ExternalLink className="h-4 w-4 text-purple-400" />
+                Tor Alt
+              </Button>
+            </a>
+          </>
         )}
         {promotion.telegram && (
           <a href={promotion.telegram} target="_blank" rel="noopener noreferrer">
@@ -597,12 +617,20 @@ const PromotionCardStatic = ({
       )}
       <div className="flex gap-2 flex-wrap">
         {youtube && (
-          <a href={youtube} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="outline" className="gap-1">
-              <Youtube className="h-4 w-4" />
-              YouTube
-            </Button>
-          </a>
+          <>
+            <a href={youtube} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1">
+                <Youtube className="h-4 w-4" />
+                YouTube
+              </Button>
+            </a>
+            <a href={youtube.replace('youtube.com', 'yewtu.be').replace('www.youtube.com', 'yewtu.be')} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="gap-1 border-purple-900/50 hover:border-purple-600/50">
+                <ExternalLink className="h-4 w-4 text-purple-400" />
+                Tor Alt
+              </Button>
+            </a>
+          </>
         )}
         {telegram && (
           <a href={telegram} target="_blank" rel="noopener noreferrer">
