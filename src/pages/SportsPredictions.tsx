@@ -69,14 +69,7 @@ export default function SportsPredictions() {
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<{ src: string; title: string; matchUrl?: string } | null>(null);
-  const [videoLoadError, setVideoLoadError] = useState(false);
-
-  const extractScorebatEmbedSrc = (embedHtml: string): string | null => {
-    // Scorebat returns an <iframe src='...'> inside HTML. We extract src and render our own iframe.
-    const match = embedHtml.match(/<iframe[^>]*src=['\"]([^'\"]+)['\"]/i);
-    return match?.[1] ?? null;
-  };
+  const [selectedVideo, setSelectedVideo] = useState<{ embed: string; title: string; matchUrl?: string } | null>(null);
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -367,13 +360,7 @@ export default function SportsPredictions() {
                             toast.error('No video embed available for this match');
                             return;
                           }
-                          const src = extractScorebatEmbedSrc(embed);
-                          if (!src) {
-                            toast.error('Unable to load this video');
-                            return;
-                          }
-                          setVideoLoadError(false);
-                          setSelectedVideo({ src, title: highlight.title, matchUrl: highlight.matchviewUrl });
+                          setSelectedVideo({ embed, title: highlight.title, matchUrl: highlight.matchviewUrl });
                         }}
                       >
                         <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
@@ -404,7 +391,6 @@ export default function SportsPredictions() {
             open={!!selectedVideo}
             onOpenChange={() => {
               setSelectedVideo(null);
-              setVideoLoadError(false);
             }}
           >
             <DialogContent className="max-w-4xl overflow-hidden">
@@ -433,28 +419,11 @@ export default function SportsPredictions() {
                   )}
                 </div>
 
-                {videoLoadError ? (
-                  <div className="rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
-                    This video didn’t load in the embedded player. Use “Open on Scorebat”.
-                  </div>
-                ) : (
-                  <div className="aspect-video w-full">
-                    {selectedVideo && (
-                      <iframe
-                        key={selectedVideo.src}
-                        src={selectedVideo.src}
-                        title={selectedVideo.title}
-                        width="100%"
-                        height="100%"
-                        allow="autoplay; fullscreen"
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full border-0 rounded-lg bg-muted"
-                        onError={() => setVideoLoadError(true)}
-                      />
-                    )}
-                  </div>
+                {selectedVideo && (
+                  <div
+                    className="w-full aspect-video"
+                    dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
+                  />
                 )}
               </div>
             </DialogContent>
