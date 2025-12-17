@@ -325,36 +325,54 @@ const Slap = () => {
   );
 };
 
-const StrikerCard = ({ striker }: { striker: Striker }) => (
-  <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
-    <CardContent className="pt-6">
-      <div className="text-center">
-        <p className="text-lg font-bold text-red-400">{striker.nickname || striker.name}</p>
-        {striker.nickname && (
-          <p className="text-sm text-foreground">{striker.name}</p>
-        )}
-        {striker.division && (
-          <p className="text-xs text-muted-foreground mt-1">{striker.division}</p>
-        )}
-        {striker.description && (
-          <p className="text-sm text-muted-foreground mt-2">{striker.description}</p>
-        )}
-      </div>
-    </CardContent>
-  </Card>
-);
+const StrikerCard = ({ striker }: { striker: Striker }) => {
+  const tapologyUrl = `https://www.tapology.com/search?term=${encodeURIComponent(striker.name)}`;
+  
+  return (
+    <a href={tapologyUrl} target="_blank" rel="noopener noreferrer" className="block">
+      <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors group">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-lg font-bold text-red-400 group-hover:text-red-300">{striker.nickname || striker.name}</p>
+            {striker.nickname && (
+              <p className="text-sm text-foreground">{striker.name}</p>
+            )}
+            {striker.division && (
+              <p className="text-xs text-muted-foreground mt-1">{striker.division}</p>
+            )}
+            {striker.description && (
+              <p className="text-sm text-muted-foreground mt-2">{striker.description}</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+              View on Tapology <ExternalLink className="h-3 w-3" />
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </a>
+  );
+};
 
-const StrikerCardStatic = ({ nickname, name, description }: { nickname: string; name: string; description: string }) => (
-  <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
-    <CardContent className="pt-6">
-      <div className="text-center">
-        <p className="text-lg font-bold text-red-400">{nickname}</p>
-        <p className="text-sm text-foreground">{name}</p>
-        <p className="text-sm text-muted-foreground mt-2">{description}</p>
-      </div>
-    </CardContent>
-  </Card>
-);
+const StrikerCardStatic = ({ nickname, name, description }: { nickname: string; name: string; description: string }) => {
+  const tapologyUrl = `https://www.tapology.com/search?term=${encodeURIComponent(name)}`;
+  
+  return (
+    <a href={tapologyUrl} target="_blank" rel="noopener noreferrer" className="block">
+      <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors group">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-lg font-bold text-red-400 group-hover:text-red-300">{nickname}</p>
+            <p className="text-sm text-foreground">{name}</p>
+            <p className="text-sm text-muted-foreground mt-2">{description}</p>
+            <p className="text-xs text-muted-foreground mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+              View on Tapology <ExternalLink className="h-3 w-3" />
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </a>
+  );
+};
 
 const EventCard = ({ event }: { event: SlapEvent }) => {
   const [selectedMatchup, setSelectedMatchup] = useState<{ fighter1: string; fighter2: string } | null>(null);
