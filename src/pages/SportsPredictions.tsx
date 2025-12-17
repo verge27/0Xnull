@@ -22,7 +22,20 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, Play, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface VideoHighlight {
+  title: string;
+  competition: string;
+  matchviewUrl: string;
+  thumbnail: string;
+  date: string;
+  videos: Array<{
+    title: string;
+    embed: string;
+  }>;
+}
 
 export default function SportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
@@ -52,6 +65,11 @@ export default function SportsPredictions() {
     match: null,
   });
   const [creating, setCreating] = useState(false);
+  
+  // Video highlights
+  const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
+  const [highlightsLoading, setHighlightsLoading] = useState(true);
+  const [selectedVideo, setSelectedVideo] = useState<{ embed: string; title: string } | null>(null);
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -69,6 +87,7 @@ export default function SportsPredictions() {
   useEffect(() => {
     fetchMarkets();
     fetchAll();
+    fetchHighlights();
     
     const interval = setInterval(() => {
       fetchMarkets();
@@ -79,6 +98,22 @@ export default function SportsPredictions() {
       stopLiveScorePolling();
     };
   }, [fetchAll, stopLiveScorePolling]);
+
+  const fetchHighlights = async () => {
+    setHighlightsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scorebat-videos');
+      if (error) throw error;
+      
+      // API returns array of video objects
+      const videos = Array.isArray(data) ? data.slice(0, 12) : [];
+      setHighlights(videos);
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+    } finally {
+      setHighlightsLoading(false);
+    }
+  };
 
   // Fetch matches when category/league changes
   useEffect(() => {
@@ -297,6 +332,73 @@ export default function SportsPredictions() {
               </Link>
             </div>
           </div>
+
+          {/* Video Highlights */}
+          <div className="mb-6">
+            <Card className="bg-card/80 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Play className="w-5 h-5 text-primary" />
+                  Latest Match Highlights
+                </CardTitle>
+                <CardDescription>Free legal football highlights from Scorebat</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {highlightsLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading highlights...</div>
+                ) : highlights.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">No highlights available</div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {highlights.map((highlight, idx) => (
+                      <div 
+                        key={idx} 
+                        className="group cursor-pointer"
+                        onClick={() => {
+                          if (highlight.videos && highlight.videos.length > 0) {
+                            setSelectedVideo({ embed: highlight.videos[0].embed, title: highlight.title });
+                          }
+                        }}
+                      >
+                        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                          <img 
+                            src={highlight.thumbnail} 
+                            alt={highlight.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play className="w-10 h-10 text-white" />
+                          </div>
+                          <Badge className="absolute bottom-2 left-2 bg-black/70 text-xs">
+                            {highlight.competition}
+                          </Badge>
+                        </div>
+                        <p className="mt-2 text-sm font-medium line-clamp-2">{highlight.title}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(highlight.date).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Video Player Dialog */}
+          <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+            <DialogContent className="max-w-4xl p-0 overflow-hidden">
+              <DialogHeader className="p-4 pb-0">
+                <DialogTitle className="line-clamp-1">{selectedVideo?.title}</DialogTitle>
+              </DialogHeader>
+              <div className="p-4">
+                {selectedVideo && (
+                  <div 
+                    className="aspect-video w-full"
+                    dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
+                  />
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Scorebat Live Scores */}
           <div className="mb-6">
