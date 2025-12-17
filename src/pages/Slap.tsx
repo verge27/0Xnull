@@ -57,26 +57,40 @@ const Slap = () => {
         </div>
 
         <div className="container pb-16 space-y-12">
-          {/* Recent Highlights - Video Embed */}
+          {/* Recent Highlights - Clickable Card */}
           <section>
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
               <Youtube className="h-6 w-6 text-red-500" />
               Recent Highlights
             </h2>
-            <div className="max-w-3xl">
-              <div className="aspect-video rounded-lg overflow-hidden border border-red-900/30">
-                <iframe 
-                  src="https://www.youtube.com/embed/videoseries?list=UUmN7dud0yMDhG1AWTH7nnGQ"
-                  width="100%" 
-                  height="100%"
-                  frameBorder="0" 
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  title="Power Slap Videos"
-                  className="w-full h-full"
-                />
-              </div>
-            </div>
+            <a 
+              href="https://www.youtube.com/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block group max-w-2xl"
+            >
+              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all">
+                <div className="relative aspect-video w-full bg-gradient-to-br from-black via-red-950/80 to-black overflow-hidden">
+                  <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]" />
+                  <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
+                  <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-red-800/30 rounded-full blur-2xl" />
+                  <div className="relative z-10 h-full flex flex-col items-center justify-center text-center p-8">
+                    <div className="mb-4 bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
+                      <Youtube className="h-12 w-12 text-white" />
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">
+                      Power Slap Highlights
+                    </h3>
+                    <p className="text-red-400 font-semibold mb-1">
+                      Full Fight Replays • KO Compilations
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Click to watch playlist
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </a>
           </section>
 
           {/* Watch Links Section - Smaller */}
