@@ -44,10 +44,10 @@ import fartcoinLogo from '@/assets/crypto/fartcoin.png';
 import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.jpg';
 
 const TRADING_PAIRS = [
-  { symbol: 'BTC/USDT', tvSymbol: 'BINANCE:BTCUSDT' },
-  { symbol: 'ETH/USDT', tvSymbol: 'BINANCE:ETHUSDT' },
+  { symbol: 'BTC/USDT', tvSymbol: 'OKX:BTCUSDT' },
+  { symbol: 'ETH/USDT', tvSymbol: 'OKX:ETHUSDT' },
   { symbol: 'XMR/USDT', tvSymbol: 'KUCOIN:XMRUSDT' },
-  { symbol: 'SOL/USDT', tvSymbol: 'BINANCE:SOLUSDT' },
+  { symbol: 'SOL/USDT', tvSymbol: 'OKX:SOLUSDT' },
 ];
 
 interface OracleAsset {
