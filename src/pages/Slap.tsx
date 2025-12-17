@@ -64,7 +64,7 @@ const Slap = () => {
               Recent Highlights
             </h2>
             <a 
-              href="https://www.youtube.com/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3" 
+              href="https://yewtu.be/watch?v=6ccxxyPhoPA&list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY&index=3"
               target="_blank" 
               rel="noopener noreferrer"
               className="block group max-w-2xl"
@@ -101,7 +101,7 @@ const Slap = () => {
             </h3>
             <div className="flex flex-wrap gap-3">
               <a 
-                href="https://youtube.com/powerslap" 
+                href="https://yewtu.be/channel/UCmN7dud0yMDhG1AWTH7nnGQ"
                 target="_blank" 
                 rel="noopener noreferrer"
               >
