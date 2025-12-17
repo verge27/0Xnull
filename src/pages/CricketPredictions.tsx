@@ -21,7 +21,7 @@ import { PoolTransparency } from '@/components/PoolTransparency';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Trophy, Gamepad2, ArrowRight, HelpCircle, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Radio } from 'lucide-react';
 
 export default function CricketPredictions() {
@@ -728,17 +728,15 @@ export default function CricketPredictions() {
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
                           Potential profit
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="w-3 h-3 cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-xs">
-                                <p className="mb-2">Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake.</p>
-                                <Link to="/how-betting-works" className="text-primary hover:underline text-xs">Learn more →</Link>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Info className="w-3 h-3 cursor-help" />
+                            </PopoverTrigger>
+                            <PopoverContent className="max-w-xs text-sm">
+                              <p className="mb-2">Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake.</p>
+                              <Link to="/how-betting-works" className="text-primary hover:underline text-xs">Learn more →</Link>
+                            </PopoverContent>
+                          </Popover>
                         </span>
                         <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
                       </div>
