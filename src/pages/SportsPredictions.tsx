@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -418,22 +419,24 @@ export default function SportsPredictions() {
                   )}
                 </div>
 
-              {selectedVideo && (() => {
+                {selectedVideo && (() => {
                   // Extract iframe src from embed HTML
                   const srcMatch = selectedVideo.embed.match(/src=["']([^"']+)["']/);
                   const iframeSrc = srcMatch ? srcMatch[1] : null;
-                  
+
                   if (iframeSrc) {
                     return (
-                      <iframe
-                        src={iframeSrc}
-                        className="w-full aspect-video border-0"
-                        allowFullScreen
-                        allow="autoplay; encrypted-media"
-                      />
+                      <AspectRatio ratio={16 / 9}>
+                        <iframe
+                          src={iframeSrc}
+                          className="h-full w-full border-0"
+                          allowFullScreen
+                          allow="autoplay; fullscreen"
+                        />
+                      </AspectRatio>
                     );
                   }
-                  
+
                   // Fallback to dangerouslySetInnerHTML if no src found
                   return (
                     <div
