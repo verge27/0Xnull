@@ -1,11 +1,36 @@
+import { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { HelpCircle, TrendingUp, Users, Shield, Zap } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { HelpCircle, TrendingUp, Users, Shield, Zap, Calculator } from 'lucide-react';
 
 export default function HowBettingWorks() {
+  const [betAmount, setBetAmount] = useState<string>('50');
+  const [yesPool, setYesPool] = useState<string>('200');
+  const [noPool, setNoPool] = useState<string>('300');
+  const [selectedSide, setSelectedSide] = useState<'yes' | 'no'>('yes');
+
+  const bet = parseFloat(betAmount) || 0;
+  const yes = parseFloat(yesPool) || 0;
+  const no = parseFloat(noPool) || 0;
+  
+  const newYesPool = selectedSide === 'yes' ? yes + bet : yes;
+  const newNoPool = selectedSide === 'no' ? no + bet : no;
+  const totalPool = newYesPool + newNoPool;
+  const winningPool = selectedSide === 'yes' ? newYesPool : newNoPool;
+  
+  const poolAfterFee = totalPool * 0.996;
+  const payout = winningPool > 0 ? (bet / winningPool) * poolAfterFee : 0;
+  const profit = payout - bet;
+  const roi = bet > 0 ? (profit / bet) * 100 : 0;
+  const impliedOdds = winningPool > 0 ? totalPool / winningPool : 0;
+  const impliedProbability = totalPool > 0 ? (winningPool / totalPool) * 100 : 0;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -381,6 +406,124 @@ export default function HowBettingWorks() {
                 <li><strong className="text-foreground">total_pool</strong> = all bets combined</li>
                 <li><strong className="text-foreground">0.996</strong> = 1 - 0.4% fee</li>
               </ul>
+            </CardContent>
+          </Card>
+
+          {/* Calculator */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-primary" />
+                Payout Calculator
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">
+                Enter the pool amounts and your bet to see potential payouts.
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="yesPool">Current YES Pool ($)</Label>
+                    <Input
+                      id="yesPool"
+                      type="number"
+                      min="0"
+                      value={yesPool}
+                      onChange={(e) => setYesPool(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="noPool">Current NO Pool ($)</Label>
+                    <Input
+                      id="noPool"
+                      type="number"
+                      min="0"
+                      value={noPool}
+                      onChange={(e) => setNoPool(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="betAmount">Your Bet Amount ($)</Label>
+                    <Input
+                      id="betAmount"
+                      type="number"
+                      min="0"
+                      value={betAmount}
+                      onChange={(e) => setBetAmount(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Your Side</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Button
+                        variant={selectedSide === 'yes' ? 'default' : 'outline'}
+                        onClick={() => setSelectedSide('yes')}
+                        className={selectedSide === 'yes' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                      >
+                        YES
+                      </Button>
+                      <Button
+                        variant={selectedSide === 'no' ? 'default' : 'outline'}
+                        onClick={() => setSelectedSide('no')}
+                        className={selectedSide === 'no' ? 'bg-red-600 hover:bg-red-700' : ''}
+                      >
+                        NO
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-lg ${selectedSide === 'yes' ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
+                  <h4 className={`font-semibold mb-4 ${selectedSide === 'yes' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    If {selectedSide.toUpperCase()} Wins
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Pool (after your bet):</span>
+                      <span className="font-mono">${totalPool.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{selectedSide.toUpperCase()} Pool:</span>
+                      <span className="font-mono">${winningPool.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Implied Odds:</span>
+                      <span className="font-mono">{impliedOdds.toFixed(2)}x</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Implied Probability:</span>
+                      <span className="font-mono">{impliedProbability.toFixed(1)}%</span>
+                    </div>
+                    <div className="border-t border-border pt-3 mt-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Pool After Fee (0.4%):</span>
+                        <span className="font-mono">${poolAfterFee.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <span className="font-semibold">Your Payout:</span>
+                        <span className={`font-mono font-semibold ${selectedSide === 'yes' ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${payout.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <span className="font-semibold">Profit:</span>
+                        <span className={`font-mono font-semibold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {profit >= 0 ? '+' : ''}${profit.toFixed(2)} ({roi.toFixed(1)}% ROI)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Note: This calculator shows potential payouts if your side wins. Actual odds may change as more bets come in before resolution.
+              </p>
             </CardContent>
           </Card>
 
