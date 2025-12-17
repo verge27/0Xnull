@@ -31,7 +31,7 @@ const Slap = () => {
         <Navbar />
         
         {/* Hero Section */}
-        <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-visible">
+        <section className="relative pt-[calc(6rem+env(safe-area-inset-top))] pb-20 md:pt-[calc(9rem+env(safe-area-inset-top))] md:pb-32 overflow-visible">
           <div className="absolute inset-0 bg-gradient-to-b from-red-900/30 via-transparent to-transparent" />
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
