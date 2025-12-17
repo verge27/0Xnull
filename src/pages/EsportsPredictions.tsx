@@ -20,8 +20,9 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Radio } from 'lucide-react';
 
 export default function EsportsPredictions() {
@@ -685,7 +686,19 @@ export default function EsportsPredictions() {
                         </span>
                       </div>
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>Potential profit</span>
+                        <span className="flex items-center gap-1">
+                          Potential profit
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3 h-3 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake. Your payout = (your bet ÷ winning side pool) × total pool.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </span>
                         <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
                       </div>
                       <p className="text-xs text-muted-foreground/70 mt-2 italic">

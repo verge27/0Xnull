@@ -24,8 +24,9 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface VideoHighlight {
   title: string;
@@ -732,7 +733,19 @@ export default function SportsPredictions() {
                           </span>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span>Potential profit</span>
+                          <span className="flex items-center gap-1">
+                            Potential profit
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <p>Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake. Your payout = (your bet ÷ winning side pool) × total pool.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </span>
                           <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
                         </div>
                         <p className="text-xs text-muted-foreground/70 mt-2 italic">
