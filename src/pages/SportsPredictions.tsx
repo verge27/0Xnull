@@ -428,28 +428,6 @@ export default function SportsPredictions() {
             </DialogContent>
           </Dialog>
 
-          {/* Scorebat Live Scores */}
-          <div className="mb-6">
-            <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Tv className="w-5 h-5 text-primary" />
-                  Live Football Scores
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <iframe
-                  src="https://www.scorebat.com/embed/livescore/"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  allowFullScreen={true}
-                  className="border-0"
-                />
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Category Pills */}
           <div className="mb-6">
             {!categoriesLoading && (
@@ -650,6 +628,28 @@ export default function SportsPredictions() {
               />
             </TabsContent>
           </Tabs>
+
+          {/* Scorebat Live Scores */}
+          <div className="mt-8">
+            <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Tv className="w-5 h-5 text-primary" />
+                  Live Football Scores
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <iframe
+                  src="https://www.scorebat.com/embed/livescore/"
+                  width="100%"
+                  height="600"
+                  frameBorder="0"
+                  allowFullScreen={true}
+                  className="border-0"
+                />
+              </CardContent>
+            </Card>
+          </div>
         </main>
         
         <Footer />
