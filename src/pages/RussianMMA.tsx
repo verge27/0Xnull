@@ -98,7 +98,7 @@ const RussianMMA = () => {
             Watch Top Dog FC
           </h2>
           <a 
-            href="https://www.youtube.com/channel/UCAeCwHL4T91FKoYiFXHy0-g" 
+            href="https://yewtu.be/channel/UCAeCwHL4T91FKoYiFXHy0-g"
             target="_blank" 
             rel="noopener noreferrer"
             className="block group max-w-2xl"
