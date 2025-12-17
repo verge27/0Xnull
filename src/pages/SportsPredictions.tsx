@@ -152,7 +152,22 @@ export default function SportsPredictions() {
   const fetchMarkets = async () => {
     try {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      setMarkets(apiMarkets.filter(m => m.oracle_type === 'sports'));
+      const sportsMarkets = apiMarkets.filter(m => m.oracle_type === 'sports');
+      
+      // Validate each market has a working pool endpoint
+      const validMarkets = await Promise.all(
+        sportsMarkets.map(async (market) => {
+          try {
+            await api.getPoolInfo(market.market_id);
+            return market;
+          } catch {
+            console.log(`Filtering out market ${market.market_id} - pool not found`);
+            return null;
+          }
+        })
+      );
+      
+      setMarkets(validMarkets.filter((m): m is PredictionMarket => m !== null));
     } catch (error) {
       console.error('Error fetching markets:', error);
     } finally {

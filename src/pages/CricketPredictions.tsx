@@ -63,7 +63,22 @@ export default function CricketPredictions() {
   const fetchMarkets = async () => {
     try {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      setMarkets(apiMarkets.filter(m => m.oracle_type === 'cricket'));
+      const cricketMarkets = apiMarkets.filter(m => m.oracle_type === 'cricket');
+      
+      // Validate each market has a working pool endpoint
+      const validMarkets = await Promise.all(
+        cricketMarkets.map(async (market) => {
+          try {
+            await api.getPoolInfo(market.market_id);
+            return market;
+          } catch {
+            console.log(`Filtering out market ${market.market_id} - pool not found`);
+            return null;
+          }
+        })
+      );
+      
+      setMarkets(validMarkets.filter((m): m is PredictionMarket => m !== null));
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
