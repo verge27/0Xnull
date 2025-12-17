@@ -16,7 +16,8 @@ import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
@@ -41,6 +42,13 @@ import uniLogo from '@/assets/crypto/uni.png';
 import aaveLogo from '@/assets/crypto/aave.png';
 import fartcoinLogo from '@/assets/crypto/fartcoin.png';
 import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.jpg';
+
+const TRADING_PAIRS = [
+  { symbol: 'BTC/USDT', url: 'https://aggr.trade/BTCUSDT' },
+  { symbol: 'ETH/USDT', url: 'https://aggr.trade/ETHUSDT' },
+  { symbol: 'XMR/USDT', url: 'https://aggr.trade/XMRUSDT' },
+  { symbol: 'SOL/USDT', url: 'https://aggr.trade/SOLUSDT' },
+];
 
 interface OracleAsset {
   symbol: string;
@@ -106,6 +114,9 @@ export default function CryptoPredictions() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [marketAssetFilter, setMarketAssetFilter] = useState<string>('all');
 
+  const [selectedPair, setSelectedPair] = useState(TRADING_PAIRS[0]);
+  const [tradingFeedOpen, setTradingFeedOpen] = useState(true);
+
   useEffect(() => {
     fetchMarkets();
     fetchOraclePrices();
@@ -139,6 +150,7 @@ export default function CryptoPredictions() {
   };
 
   const fetchMarkets = async () => {
+    setLoading(true);
     try {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       setMarkets(apiMarkets.filter(m => m.oracle_type === 'price'));
@@ -284,6 +296,82 @@ export default function CryptoPredictions() {
             <HelpCircle className="w-4 h-4" /> Learn How It Works
           </Link>
         </div>
+
+
+        {/* Live Markets */}
+        <Collapsible open={tradingFeedOpen} onOpenChange={setTradingFeedOpen} className="mb-6">
+          <Card className="border-primary/20">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Activity className="w-5 h-5 text-primary" />
+                    <CardTitle className="text-lg">Live Markets</CardTitle>
+                    <a
+                      href="https://aggr.trade"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="Open aggr.trade in a new tab"
+                      title="Open aggr.trade"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${tradingFeedOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {TRADING_PAIRS.map((pair) => (
+                    <Button
+                      key={pair.symbol}
+                      variant={selectedPair.symbol === pair.symbol ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedPair(pair)}
+                      className={selectedPair.symbol === pair.symbol ? 'bg-primary text-primary-foreground' : ''}
+                    >
+                      {pair.symbol}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
+                  <iframe
+                    src={selectedPair.url}
+                    width="100%"
+                    height="500"
+                    frameBorder="0"
+                    style={{ borderRadius: '8px' }}
+                    allow="fullscreen"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    title={`${selectedPair.symbol} live trading feed`}
+                  />
+                </div>
+
+                <p className="mt-2 text-xs text-muted-foreground">
+                  If the feed appears blank, aggr.trade may block embedding in some browsers. 
+                  <a
+                    href={selectedPair.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-1 text-primary hover:underline"
+                  >
+                    Open {selectedPair.symbol} on aggr.trade
+                  </a>
+                  .
+                </p>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Tabs defaultValue="prices" className="space-y-6">
           <TabsList className="grid w-full max-w-md grid-cols-3">
