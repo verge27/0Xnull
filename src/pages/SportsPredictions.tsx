@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
@@ -71,6 +72,10 @@ export default function SportsPredictions() {
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<{ embed: string; title: string; matchUrl?: string } | null>(null);
+  const [autoOpenOnBlock, setAutoOpenOnBlock] = useState(() => {
+    const saved = localStorage.getItem('autoOpenHighlights');
+    return saved === 'true';
+  });
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -400,9 +405,19 @@ export default function SportsPredictions() {
               </DialogHeader>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs text-muted-foreground">
-                    If playback is blocked, open the highlight on Scorebat.
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id="auto-open"
+                      checked={autoOpenOnBlock}
+                      onCheckedChange={(checked) => {
+                        setAutoOpenOnBlock(checked);
+                        localStorage.setItem('autoOpenHighlights', String(checked));
+                      }}
+                    />
+                    <Label htmlFor="auto-open" className="text-xs text-muted-foreground cursor-pointer">
+                      Auto-open in new tab if blocked
+                    </Label>
                   </div>
                   {selectedVideo?.matchUrl && (
                     <a
@@ -424,6 +439,14 @@ export default function SportsPredictions() {
                   const srcMatch = selectedVideo.embed.match(/src=["']([^"']+)["']/);
                   const iframeSrc = srcMatch ? srcMatch[1] : null;
 
+                  const handleIframeError = () => {
+                    if (autoOpenOnBlock && selectedVideo.matchUrl) {
+                      window.open(selectedVideo.matchUrl, '_blank');
+                      setSelectedVideo(null);
+                      toast.info('Opened highlight in new tab');
+                    }
+                  };
+
                   if (iframeSrc) {
                     return (
                       <AspectRatio ratio={16 / 9}>
@@ -432,6 +455,7 @@ export default function SportsPredictions() {
                           className="h-full w-full border-0"
                           allowFullScreen
                           allow="autoplay; fullscreen"
+                          onError={handleIframeError}
                         />
                       </AspectRatio>
                     );
