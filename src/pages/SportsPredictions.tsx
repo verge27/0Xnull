@@ -102,7 +102,7 @@ export default function SportsPredictions() {
   const fetchHighlights = async () => {
     setHighlightsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('scorebat-videos');
+      const { data, error } = await supabase.functions.invoke('scorebat_videos');
       if (error) throw error;
       
       // API returns array of video objects
