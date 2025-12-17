@@ -99,30 +99,17 @@ const Slap = () => {
               <Tv className="h-5 w-5 text-red-500" />
               Watch Power Slap
             </h3>
-            <div className="flex flex-wrap gap-3">
-              <a 
-                href="https://yewtu.be/channel/UCmN7dud0yMDhG1AWTH7nnGQ"
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="sm" className="gap-2 border-red-900/50 hover:border-red-600/50">
-                  <Youtube className="h-4 w-4 text-red-500" />
-                  YouTube
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </a>
-              <a 
-                href="https://rumble.com/c/powerslap" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="sm" className="gap-2 border-green-900/50 hover:border-green-600/50">
-                  <Tv className="h-4 w-4 text-green-500" />
-                  Rumble
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </a>
-            </div>
+            <a 
+              href="https://rumble.com/c/powerslap" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="gap-2 border-green-900/50 hover:border-green-600/50">
+                <Tv className="h-4 w-4 text-green-500" />
+                Rumble
+                <ExternalLink className="h-3 w-3" />
+              </Button>
+            </a>
           </section>
 
           {/* Featured Section */}
