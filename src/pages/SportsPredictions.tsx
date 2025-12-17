@@ -735,6 +735,9 @@ export default function SportsPredictions() {
                           <span>Potential profit</span>
                           <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
                         </div>
+                        <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                          Actual payout may vary as pool size changes before market resolution
+                        </p>
                       </div>
                     );
                   })()}
