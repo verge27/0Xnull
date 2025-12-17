@@ -562,7 +562,7 @@ export default function HowBettingWorks() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Minimum bet</TableCell>
-                    <TableCell>None</TableCell>
+                    <TableCell>$1</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Maximum bet</TableCell>
