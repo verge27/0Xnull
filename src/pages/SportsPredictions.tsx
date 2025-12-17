@@ -341,7 +341,6 @@ export default function SportsPredictions() {
                   <Play className="w-5 h-5 text-primary" />
                   Latest Match Highlights
                 </CardTitle>
-                <CardDescription>Free legal football highlights from Scorebat</CardDescription>
               </CardHeader>
               <CardContent>
                 {highlightsLoading ? (
