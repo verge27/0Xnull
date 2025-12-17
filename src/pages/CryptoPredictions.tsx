@@ -523,12 +523,8 @@ export default function CryptoPredictions() {
                           )}
                           
                           {/* Pool Transparency */}
-                          {(market.pool_address || market.view_key) && (
-                            <PoolTransparency 
-                              poolAddress={market.pool_address}
-                              viewKey={market.view_key}
-                            />
-                          )}
+                          <PoolTransparency marketId={market.market_id} />
+                          
                           
                           <div className="flex gap-2">
                             <Button

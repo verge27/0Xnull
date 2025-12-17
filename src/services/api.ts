@@ -142,6 +142,15 @@ export interface PredictionMarket {
   view_key?: string;
 }
 
+export interface PoolInfo {
+  market_id: string;
+  pool_address: string;
+  view_key: string;
+  balance_xmr: number;
+  unlocked_balance_xmr: number;
+  verify_instructions: string;
+}
+
 export interface CreateMarketRequest {
   market_id: string;
   title: string;
@@ -267,5 +276,9 @@ export const api = {
     return proxyRequest<{ success: boolean }>(`/api/predictions/markets/${marketId}`, {
       method: 'DELETE',
     });
+  },
+
+  async getPoolInfo(marketId: string): Promise<PoolInfo> {
+    return proxyRequest<PoolInfo>(`/api/predictions/pool/${marketId}`);
   },
 };
