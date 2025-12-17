@@ -57,7 +57,7 @@ export const TIER_CONFIG = {
 // Helper to make requests - adapts for Tor vs clearnet
 async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isOnion = isTorBrowser();
-  
+
   let url: string;
   if (isOnion) {
     // Direct API call on Tor
@@ -68,7 +68,7 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise
     proxyUrl.searchParams.set('path', path);
     url = proxyUrl.toString();
   }
-  
+
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -76,14 +76,21 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise
       ...options.headers,
     },
   });
-  
-  const data = await res.json();
-  
-  if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Request failed');
+
+  // Be robust to upstream non-JSON responses (common during 5xx incidents)
+  let data: any;
+  try {
+    data = await res.clone().json();
+  } catch {
+    const text = await res.text();
+    data = { error: text };
   }
-  
-  return data;
+
+  if (!res.ok) {
+    throw new Error(data?.detail || data?.error || 'Request failed');
+  }
+
+  return data as T;
 }
 
 // Prediction market types
