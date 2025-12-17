@@ -312,6 +312,7 @@ export default function SportsPredictions() {
                   src="https://www.scorebat.com/embed/livescore/"
                   width="100%"
                   height="600"
+                  frameBorder="0"
                   allowFullScreen={true}
                   className="border-0"
                 />
