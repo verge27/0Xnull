@@ -20,13 +20,6 @@ import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy, HelpCircle, ExternalLink, ChevronDown, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-const TRADING_PAIRS = [
-  { symbol: 'BTC/USDT', url: 'https://aggr.trade/BTCUSDT' },
-  { symbol: 'ETH/USDT', url: 'https://aggr.trade/ETHUSDT' },
-  { symbol: 'XMR/USDT', url: 'https://aggr.trade/XMRUSDT' },
-  { symbol: 'SOL/USDT', url: 'https://aggr.trade/SOLUSDT' },
-];
-
 // Crypto logo imports
 import btcLogo from '@/assets/crypto/btc.png';
 import ethLogo from '@/assets/crypto/eth.png';
@@ -50,6 +43,13 @@ import uniLogo from '@/assets/crypto/uni.png';
 import aaveLogo from '@/assets/crypto/aave.png';
 import fartcoinLogo from '@/assets/crypto/fartcoin.png';
 import predictionsBackground from '@/assets/predictions-background.jpg';
+
+const TRADING_PAIRS = [
+  { symbol: 'BTC/USDT', url: 'https://aggr.trade/BTCUSDT' },
+  { symbol: 'ETH/USDT', url: 'https://aggr.trade/ETHUSDT' },
+  { symbol: 'XMR/USDT', url: 'https://aggr.trade/XMRUSDT' },
+  { symbol: 'SOL/USDT', url: 'https://aggr.trade/SOLUSDT' },
+];
 
 interface OracleAsset {
   symbol: string;
