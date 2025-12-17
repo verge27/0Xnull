@@ -35,10 +35,10 @@ const Slap = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-red-900/30 via-transparent to-transparent" />
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-2xl">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl leading-[1.1] md:leading-[1.1] lg:leading-[1.1] font-bold mb-6 bg-gradient-to-r from-red-500 via-red-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-2xl">
                 Slap Fighting
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 font-medium">
+              <p className="text-xl md:text-2xl leading-snug text-white/90 font-medium">
                 Power Slap • Punchdown • Open Palm Combat
               </p>
             </div>
