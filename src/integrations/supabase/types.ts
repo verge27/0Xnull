@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_markets: {
+        Row: {
+          blocked_by: string | null
+          created_at: string
+          id: string
+          market_id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_by?: string | null
+          created_at?: string
+          id?: string
+          market_id: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_by?: string | null
+          created_at?: string
+          id?: string
+          market_id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       coins: {
         Row: {
           id: string

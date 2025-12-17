@@ -5,6 +5,8 @@ import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionB
 import { useCricketEvents, CRICKET_MATCH_TYPES, getSportLabel, getSportIcon, type CricketMatch } from '@/hooks/useCricketEvents';
 import { api, type PredictionMarket } from '@/services/api';
 import cricketBackground from '@/assets/cricket-background.jpg';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { supabase } from '@/integrations/supabase/client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +30,7 @@ export default function CricketPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { matches, liveMatches, upcomingMatches, loading: matchesLoading, fetchMatches, createCricketMarket } = useCricketEvents();
   const { xmrUsdRate } = useExchangeRate();
+  const { isAdmin } = useIsAdmin();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,17 +65,33 @@ export default function CricketPredictions() {
 
   const fetchMarkets = async () => {
     try {
+      // Fetch blocked markets from database
+      const { data: blockedData } = await supabase
+        .from('blocked_markets')
+        .select('market_id');
+      const blockedIds = new Set((blockedData || []).map(b => b.market_id));
+      
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const cricketMarkets = apiMarkets.filter(m => m.oracle_type === 'cricket');
       
+      // Filter out already-blocked markets first
+      const unblockedMarkets = cricketMarkets.filter(m => !blockedIds.has(m.market_id));
+      
       // Validate each market has a working pool endpoint
       const validMarkets = await Promise.all(
-        cricketMarkets.map(async (market) => {
+        unblockedMarkets.map(async (market) => {
           try {
             await api.getPoolInfo(market.market_id);
             return market;
           } catch {
             console.log(`Filtering out market ${market.market_id} - pool not found`);
+            // Auto-block invalid markets if user is admin
+            if (isAdmin) {
+              await supabase.from('blocked_markets').upsert(
+                { market_id: market.market_id, reason: 'Pool validation failed' },
+                { onConflict: 'market_id' }
+              );
+            }
             return null;
           }
         })
