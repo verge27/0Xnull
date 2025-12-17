@@ -154,8 +154,22 @@ export default function Predictions() {
     setLoading(true);
     try {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      // Filter to only crypto/price markets
-      setMarkets(apiMarkets.filter(m => m.oracle_type === 'price'));
+      const priceMarkets = apiMarkets.filter(m => m.oracle_type === 'price');
+      
+      // Validate each market has a working pool endpoint
+      const validMarkets = await Promise.all(
+        priceMarkets.map(async (market) => {
+          try {
+            await api.getPoolInfo(market.market_id);
+            return market;
+          } catch {
+            console.log(`Filtering out market ${market.market_id} - pool not found`);
+            return null;
+          }
+        })
+      );
+      
+      setMarkets(validMarkets.filter((m): m is PredictionMarket => m !== null));
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
