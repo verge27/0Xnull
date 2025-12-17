@@ -709,50 +709,69 @@ export default function SportsPredictions() {
                       {(parseFloat(betAmountUsd) / xmrUsdRate).toFixed(6)} XMR
                     </span>
                   </div>
-                  {(() => {
-                    const betXmr = parseFloat(betAmountUsd) / xmrUsdRate;
-                    const currentYesPool = selectedMarket.yes_pool_xmr;
-                    const currentNoPool = selectedMarket.no_pool_xmr;
-                    const totalPoolAfterBet = currentYesPool + currentNoPool + betXmr;
-                    const yourPoolAfterBet = betSide === 'yes' 
-                      ? currentYesPool + betXmr 
-                      : currentNoPool + betXmr;
-                    const yourShare = betXmr / yourPoolAfterBet;
-                    const potentialPayout = yourShare * totalPoolAfterBet;
-                    const profit = potentialPayout - betXmr;
-                    const multiplier = potentialPayout / betXmr;
-                    
-                    return (
-                      <div className="pt-2 border-t border-primary/20">
-                        <div className="flex justify-between text-sm">
-                          <span className={betSide === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
-                            If {betSide.toUpperCase()} wins
-                          </span>
-                          <span className="font-mono font-bold text-emerald-500">
-                            ~{potentialPayout.toFixed(4)} XMR
-                          </span>
+                {(() => {
+                  const betXmr = parseFloat(betAmountUsd) / xmrUsdRate;
+                  const currentYesPool = selectedMarket.yes_pool_xmr;
+                  const currentNoPool = selectedMarket.no_pool_xmr;
+                  const yesPoolAfterBet = betSide === 'yes' ? currentYesPool + betXmr : currentYesPool;
+                  const noPoolAfterBet = betSide === 'no' ? currentNoPool + betXmr : currentNoPool;
+                  const totalPoolAfterBet = yesPoolAfterBet + noPoolAfterBet;
+                  const yourPoolAfterBet = betSide === 'yes' ? yesPoolAfterBet : noPoolAfterBet;
+                  const yourShare = betXmr / yourPoolAfterBet;
+                  const potentialPayout = yourShare * totalPoolAfterBet;
+                  const profit = potentialPayout - betXmr;
+                  const multiplier = potentialPayout / betXmr;
+                  const yesPercentAfterBet = totalPoolAfterBet > 0 ? (yesPoolAfterBet / totalPoolAfterBet) * 100 : 50;
+                  
+                  return (
+                    <div className="pt-2 border-t border-primary/20 space-y-3">
+                      {/* Dynamic Pool Ratio Bar */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span className="text-emerald-500">YES {yesPercentAfterBet.toFixed(1)}%</span>
+                          <span className="text-red-500">NO {(100 - yesPercentAfterBet).toFixed(1)}%</span>
                         </div>
-                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1">
-                            Potential profit
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Info className="w-3 h-3 cursor-help" />
-                              </PopoverTrigger>
-                              <PopoverContent className="max-w-xs text-sm">
-                                <p className="mb-2">Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake.</p>
-                                <Link to="/how-betting-works" className="text-primary hover:underline text-xs">Learn more →</Link>
-                              </PopoverContent>
-                            </Popover>
-                          </span>
-                          <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
+                        <div className="h-2 rounded-full bg-red-500/30 overflow-hidden">
+                          <div 
+                            className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+                            style={{ width: `${yesPercentAfterBet}%` }}
+                          />
                         </div>
-                        <p className="text-xs text-muted-foreground/70 mt-2 italic">
-                          Actual payout may vary as pool size changes before market resolution
-                        </p>
+                        <div className="flex justify-between text-xs text-muted-foreground/70">
+                          <span>{yesPoolAfterBet.toFixed(4)} XMR</span>
+                          <span>{noPoolAfterBet.toFixed(4)} XMR</span>
+                        </div>
                       </div>
-                    );
-                  })()}
+                      
+                      <div className="flex justify-between text-sm">
+                        <span className={betSide === 'yes' ? 'text-emerald-500' : 'text-red-500'}>
+                          If {betSide.toUpperCase()} wins
+                        </span>
+                        <span className="font-mono font-bold text-emerald-500">
+                          ~{potentialPayout.toFixed(4)} XMR
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          Potential profit
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Info className="w-3 h-3 cursor-help" />
+                            </PopoverTrigger>
+                            <PopoverContent className="max-w-xs text-sm">
+                              <p className="mb-2">Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake.</p>
+                              <Link to="/how-betting-works" className="text-primary hover:underline text-xs">Learn more →</Link>
+                            </PopoverContent>
+                          </Popover>
+                        </span>
+                        <span className="text-emerald-500">+{profit.toFixed(4)} XMR ({multiplier.toFixed(2)}x)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground/70 italic">
+                        Actual payout may vary as pool size changes before market resolution
+                      </p>
+                    </div>
+                  );
+                })()}
                 </div>
               )}
               
