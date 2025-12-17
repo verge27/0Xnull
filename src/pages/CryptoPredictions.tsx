@@ -46,7 +46,7 @@ import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.
 const TRADING_PAIRS = [
   { symbol: 'BTC/USDT', tvSymbol: 'BINANCE:BTCUSDT' },
   { symbol: 'ETH/USDT', tvSymbol: 'BINANCE:ETHUSDT' },
-  { symbol: 'XMR/USDT', tvSymbol: 'BINANCE:XMRUSDT' },
+  { symbol: 'XMR/USDT', tvSymbol: 'KUCOIN:XMRUSDT' },
   { symbol: 'SOL/USDT', tvSymbol: 'BINANCE:SOLUSDT' },
 ];
 
