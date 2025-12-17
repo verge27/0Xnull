@@ -311,7 +311,7 @@ export default function HowBettingWorks() {
                 </ul>
               </div>
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Resolution:</strong> If only one side has bets, all bettors get their money back (minus fee). No profit, no loss (essentially refunded). This is why markets need liquidity on both sides to be interesting.
+                <strong className="text-foreground">Resolution:</strong> If only one side has bets (unopposed market), all bettors get their full money back. <strong className="text-foreground">No fee applies</strong> — it's a complete refund. This is why markets need liquidity on both sides to be interesting.
               </p>
             </CardContent>
           </Card>
