@@ -149,6 +149,7 @@ export default function Predictions() {
   };
 
   const fetchMarkets = async () => {
+    setLoading(true);
     try {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       // Filter to only crypto/price markets
