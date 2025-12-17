@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpCircle, ExternalLink, Calendar, Tv, Youtube, Users } from 'lucide-react';
+import { HelpCircle, ExternalLink, Calendar, Tv, Youtube, Users, Plus } from 'lucide-react';
 import { useSlapPromotions, useSlapFeatured, useSlapStrikers, useSlapEvents, Striker, SlapEvent, SlapPromotion } from '@/hooks/useSlapFighting';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import { ResolutionBadge } from '@/components/ResolutionBadge';
+import { CreateFightMarketDialog } from '@/components/CreateFightMarketDialog';
 
 const Slap = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -355,59 +356,84 @@ const StrikerCardStatic = ({ nickname, name, description }: { nickname: string; 
   </Card>
 );
 
-const EventCard = ({ event }: { event: SlapEvent }) => (
-  <Card className="border-red-900/30 bg-card/50">
-    <CardHeader>
-      <div className="flex items-center justify-between">
-        <div>
-          <CardTitle>{event.event_name}</CardTitle>
-          {event.tapology_url && (
-            <a 
-              href={event.tapology_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-red-400"
-            >
-              View on Tapology
-            </a>
-          )}
-        </div>
-        <div className="text-right text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            {event.date_raw || event.date}
-          </div>
-        </div>
-      </div>
-    </CardHeader>
-    <CardContent className="space-y-3">
-      {event.matchups && event.matchups.length > 0 && (
-        <div className="space-y-2">
-          {event.matchups.map((matchup, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-              <div className="flex-1">
-                <span className="font-medium">{matchup.fighter1}</span>
-                <span className="mx-2 text-muted-foreground">vs</span>
-                <span className="font-medium">{matchup.fighter2}</span>
-                {matchup.title_fight && (
-                  <Badge variant="outline" className="ml-2 border-yellow-600 text-yellow-400">Title</Badge>
-                )}
-              </div>
-              <Button size="sm" variant="outline" className="border-red-700 text-red-400 hover:bg-red-950">
-                Create Market
-              </Button>
+const EventCard = ({ event }: { event: SlapEvent }) => {
+  const [selectedMatchup, setSelectedMatchup] = useState<{ fighter1: string; fighter2: string } | null>(null);
+
+  return (
+    <>
+      <Card className="border-red-900/30 bg-card/50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>{event.event_name}</CardTitle>
+              {event.tapology_url && (
+                <a 
+                  href={event.tapology_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-red-400"
+                >
+                  View on Tapology
+                </a>
+              )}
             </div>
-          ))}
-        </div>
+            <div className="text-right text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {event.date_raw || event.date}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {event.matchups && event.matchups.length > 0 && (
+            <div className="space-y-2">
+              {event.matchups.map((matchup, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg gap-2">
+                  <div className="flex-1">
+                    <span className="font-medium">{matchup.fighter1}</span>
+                    <span className="mx-2 text-muted-foreground">vs</span>
+                    <span className="font-medium">{matchup.fighter2}</span>
+                    {matchup.title_fight && (
+                      <Badge variant="outline" className="ml-2 border-yellow-600 text-yellow-400">Title</Badge>
+                    )}
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-red-700 text-red-400 hover:bg-red-950 gap-1"
+                    onClick={() => setSelectedMatchup({ fighter1: matchup.fighter1, fighter2: matchup.fighter2 })}
+                  >
+                    <Plus className="h-3 w-3" />
+                    Market
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          {(!event.matchups || event.matchups.length === 0) && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Card not announced yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {selectedMatchup && (
+        <CreateFightMarketDialog
+          open={!!selectedMatchup}
+          onOpenChange={(open) => !open && setSelectedMatchup(null)}
+          fighter1={selectedMatchup.fighter1}
+          fighter2={selectedMatchup.fighter2}
+          eventName={event.event_name}
+          eventDate={event.date_raw || event.date}
+          resolution="auto"
+          promotionName="Power Slap"
+        />
       )}
-      {(!event.matchups || event.matchups.length === 0) && (
-        <Button variant="outline" className="w-full border-red-700 text-red-400 hover:bg-red-950">
-          Create Market for Event
-        </Button>
-      )}
-    </CardContent>
-  </Card>
-);
+    </>
+  );
+};
 
 const PromotionCard = ({ promotion }: { promotion: SlapPromotion }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
