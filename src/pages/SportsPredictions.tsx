@@ -69,7 +69,13 @@ export default function SportsPredictions() {
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<{ embed: string; title: string } | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{ src: string; title: string } | null>(null);
+
+  const extractScorebatEmbedSrc = (embedHtml: string): string | null => {
+    // Scorebat returns an <iframe src='...'> inside HTML. We extract src and render our own iframe.
+    const match = embedHtml.match(/<iframe[^>]*src=['\"]([^'\"]+)['\"]/i);
+    return match?.[1] ?? null;
+  };
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -355,9 +361,17 @@ export default function SportsPredictions() {
                         key={idx} 
                         className="group cursor-pointer"
                         onClick={() => {
-                          if (highlight.videos && highlight.videos.length > 0) {
-                            setSelectedVideo({ embed: highlight.videos[0].embed, title: highlight.title });
+                          const embed = highlight.videos?.[0]?.embed;
+                          if (!embed) {
+                            toast.error('No video embed available for this match');
+                            return;
                           }
+                          const src = extractScorebatEmbedSrc(embed);
+                          if (!src) {
+                            toast.error('Unable to load this video');
+                            return;
+                          }
+                          setSelectedVideo({ src, title: highlight.title });
                         }}
                       >
                         <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
@@ -391,10 +405,18 @@ export default function SportsPredictions() {
               </DialogHeader>
               <div className="p-4">
                 {selectedVideo && (
-                  <div 
-                    className="aspect-video w-full"
-                    dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
-                  />
+                  <div className="aspect-video w-full">
+                    <iframe
+                      src={selectedVideo.src}
+                      title={selectedVideo.title}
+                      width="100%"
+                      height="100%"
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full border-0 rounded-lg bg-muted"
+                    />
+                  </div>
                 )}
               </div>
             </DialogContent>
