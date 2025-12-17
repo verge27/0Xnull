@@ -11,6 +11,7 @@ import { HelpCircle, ExternalLink, Calendar, Tv, Youtube, Users } from 'lucide-r
 import { useSlapPromotions, useSlapFeatured, useSlapStrikers, useSlapEvents, Striker, SlapEvent, SlapPromotion } from '@/hooks/useSlapFighting';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
+import { ResolutionBadge } from '@/components/ResolutionBadge';
 
 const Slap = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -291,11 +292,12 @@ const Slap = () => {
               </div>
             ) : (
               <div className="grid md:grid-cols-3 gap-4">
-                {/* Fallback promotions */}
+              {/* Fallback promotions */}
                 <PromotionCardStatic
                   name="POWER SLAP"
                   type="👋 Official League"
                   description="Dana White's slap fighting promotion"
+                  resolution="auto"
                   youtube="https://youtube.com/powerslap"
                   rumble="https://rumble.com/c/powerslap"
                 />
@@ -303,11 +305,13 @@ const Slap = () => {
                   name="PUNCHDOWN"
                   type="🥊 Polish League"
                   description="European slap fighting"
+                  resolution="manual"
                 />
                 <PromotionCardStatic
                   name="SLAP FIGHTING CHAMPIONSHIP"
                   type="🏆 SFC"
                   description="Independent slap events"
+                  resolution="manual"
                 />
               </div>
             )}
@@ -408,12 +412,22 @@ const EventCard = ({ event }: { event: SlapEvent }) => (
 const PromotionCard = ({ promotion }: { promotion: SlapPromotion }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
-      <CardTitle className="text-lg">{promotion.name}</CardTitle>
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-lg">{promotion.name}</CardTitle>
+        <ResolutionBadge resolution={promotion.resolution} showLabel={false} />
+      </div>
       <p className="text-sm text-red-400">{promotion.type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
       {promotion.description && (
         <p className="text-sm text-muted-foreground">{promotion.description}</p>
+      )}
+      {promotion.resolution && (
+        <p className="text-xs text-muted-foreground">
+          {promotion.resolution === 'auto' 
+            ? '✓ Auto-resolve (24-48h)' 
+            : '⚑ Manual review (1-7 days)'}
+        </p>
       )}
       <div className="flex gap-2 flex-wrap">
         {promotion.youtube && (
@@ -449,22 +463,34 @@ const PromotionCardStatic = ({
   name, 
   type, 
   description,
+  resolution,
   youtube, 
   rumble 
 }: { 
   name: string; 
   type: string; 
   description: string;
+  resolution?: 'auto' | 'manual';
   youtube?: string; 
   rumble?: string; 
 }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
-      <CardTitle className="text-lg">{name}</CardTitle>
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-lg">{name}</CardTitle>
+        <ResolutionBadge resolution={resolution} showLabel={false} />
+      </div>
       <p className="text-sm text-red-400">{type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">{description}</p>
+      {resolution && (
+        <p className="text-xs text-muted-foreground">
+          {resolution === 'auto' 
+            ? '✓ Auto-resolve (24-48h)' 
+            : '⚑ Manual review (1-7 days)'}
+        </p>
+      )}
       <div className="flex gap-2 flex-wrap">
         {youtube && (
           <a href={youtube} target="_blank" rel="noopener noreferrer">

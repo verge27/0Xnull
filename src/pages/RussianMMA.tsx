@@ -11,6 +11,7 @@ import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle 
 import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, Event } from '@/hooks/useRussianMMA';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
+import { ResolutionBadge } from '@/components/ResolutionBadge';
 import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 
 const RussianMMA = () => {
@@ -302,6 +303,7 @@ const RussianMMA = () => {
                 type="🥊 Bare-Knuckle"
                 description="1.5M+ YouTube subs"
                 extra="PPV on topdogfc.tv"
+                resolution="auto"
                 youtube="https://www.youtube.com/@TopDogFighting"
                 telegram="https://t.me/topdogfighting"
               />
@@ -310,6 +312,7 @@ const RussianMMA = () => {
                 type="🥋 MMA + Fist"
                 description="VK Exclusive"
                 extra="Post-event edits"
+                resolution="manual"
                 youtube="https://www.youtube.com/@HardcoreFC"
                 vk="https://vk.com/hardcorefc"
               />
@@ -318,6 +321,7 @@ const RussianMMA = () => {
                 type="🎪 Freak Fights"
                 description="Phone booth fights"
                 extra="Car Jitsu • Shipping containers"
+                resolution="manual"
               />
             </div>
           )}
@@ -367,12 +371,22 @@ const EventCard = ({ event }: { event: Event }) => (
 const PromotionCard = ({ promotion }: { promotion: Promotion }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
-      <CardTitle className="text-lg">{promotion.name}</CardTitle>
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-lg">{promotion.name}</CardTitle>
+        <ResolutionBadge resolution={promotion.resolution} showLabel={false} />
+      </div>
       <p className="text-sm text-red-400">{promotion.type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
       {promotion.country && (
         <p className="text-sm text-muted-foreground">{promotion.country}</p>
+      )}
+      {promotion.resolution && (
+        <p className="text-xs text-muted-foreground">
+          {promotion.resolution === 'auto' 
+            ? '✓ Auto-resolve (24-48h)' 
+            : '⚑ Manual review (1-7 days)'}
+        </p>
       )}
       <div className="flex gap-2 flex-wrap">
         {promotion.youtube && (
@@ -417,6 +431,7 @@ const PromotionCardStatic = ({
   type, 
   description, 
   extra, 
+  resolution,
   youtube, 
   telegram, 
   vk 
@@ -425,18 +440,29 @@ const PromotionCardStatic = ({
   type: string; 
   description: string; 
   extra?: string; 
+  resolution?: 'auto' | 'manual';
   youtube?: string; 
   telegram?: string; 
   vk?: string; 
 }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
-      <CardTitle className="text-lg">{name}</CardTitle>
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-lg">{name}</CardTitle>
+        <ResolutionBadge resolution={resolution} showLabel={false} />
+      </div>
       <p className="text-sm text-red-400">{type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
       <p className="text-sm text-muted-foreground">{description}</p>
       {extra && <p className="text-sm text-muted-foreground">{extra}</p>}
+      {resolution && (
+        <p className="text-xs text-muted-foreground">
+          {resolution === 'auto' 
+            ? '✓ Auto-resolve (24-48h)' 
+            : '⚑ Manual review (1-7 days)'}
+        </p>
+      )}
       <div className="flex gap-2 flex-wrap">
         {youtube && (
           <a href={youtube} target="_blank" rel="noopener noreferrer">
