@@ -790,7 +790,8 @@ export default function StarcraftPredictions() {
                                   <Info className="w-3 h-3 cursor-help" />
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs">
-                                  <p>Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake. Your payout = (your bet ÷ winning side pool) × total pool.</p>
+                                  <p className="mb-2">Parimutuel betting pools all bets together. Winners split the total pool proportionally to their stake.</p>
+                                  <Link to="/how-betting-works" className="text-primary hover:underline text-xs">Learn more →</Link>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
