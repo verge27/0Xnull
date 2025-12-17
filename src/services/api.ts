@@ -101,6 +101,7 @@ export interface PredictionBetResponse {
   amount_xmr: number;
   xmr_price: number;
   deposit_address: string;
+  view_key?: string;
   expires_at: string;
   status: string;
 }
@@ -137,6 +138,8 @@ export interface PredictionMarket {
   yes_pool_xmr: number;
   no_pool_xmr: number;
   created_at: number;
+  pool_address?: string;
+  view_key?: string;
 }
 
 export interface CreateMarketRequest {

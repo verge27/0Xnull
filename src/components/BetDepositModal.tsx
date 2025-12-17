@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check, Loader2, Clock, CheckCircle } from 'lucide-react';
+import { Copy, Check, Loader2, Clock, CheckCircle, ChevronDown, Shield, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PlaceBetResponse, BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api } from '@/services/api';
@@ -25,12 +26,13 @@ export function BetDepositModal({
   onCheckStatus,
   onConfirmed,
 }: BetDepositModalProps) {
-  const [copied, setCopied] = useState<'address' | 'amount' | null>(null);
+  const [copied, setCopied] = useState<'address' | 'amount' | 'viewKey' | null>(null);
   const [status, setStatus] = useState<string>('awaiting_deposit');
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [polling, setPolling] = useState(false);
   const [payoutAddress, setPayoutAddress] = useState('');
   const [submittingPayout, setSubmittingPayout] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
 
   // Calculate time left
   useEffect(() => {
@@ -92,7 +94,7 @@ export function BetDepositModal({
     };
   }, [open, betData, status, onCheckStatus, onConfirmed]);
 
-  const copyToClipboard = async (text: string, type: 'address' | 'amount') => {
+  const copyToClipboard = async (text: string, type: 'address' | 'amount' | 'viewKey') => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(type);
@@ -290,6 +292,73 @@ export function BetDepositModal({
                   This is your only reference for this bet. Keep it safe.
                 </p>
               </div>
+
+              {/* Pool Verification Section */}
+              {betData.view_key && (
+                <Collapsible open={verifyOpen} onOpenChange={setVerifyOpen}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full justify-between text-xs">
+                      <span className="flex items-center gap-2">
+                        <Shield className="w-3 h-3 text-emerald-500" />
+                        Verify Pool
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${verifyOpen ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <p className="text-xs text-muted-foreground">
+                      Import both into Cake Wallet or Feather to independently verify all deposits in this pool.
+                    </p>
+                    
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Pool Address</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          readOnly
+                          value={betData.deposit_address}
+                          className="font-mono text-xs"
+                        />
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => copyToClipboard(betData.deposit_address, 'address')}
+                        >
+                          {copied === 'address' ? (
+                            <Check className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        View Key
+                      </Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          readOnly
+                          value={betData.view_key}
+                          className="font-mono text-xs"
+                        />
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => copyToClipboard(betData.view_key!, 'viewKey')}
+                        >
+                          {copied === 'viewKey' ? (
+                            <Check className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </>
           )}
         </div>

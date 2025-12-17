@@ -14,6 +14,7 @@ export interface PredictionBet {
   amount_xmr: number;
   xmr_price: number;
   deposit_address: string;
+  view_key?: string;
   payout_address?: string;
   payout_xmr?: number;
   payout_tx_hash?: string;
@@ -69,6 +70,7 @@ export function usePredictionBets() {
       amount_xmr: data.amount_xmr,
       xmr_price: data.xmr_price,
       deposit_address: data.deposit_address,
+      view_key: data.view_key,
       status: 'awaiting_deposit',
       created_at: new Date().toISOString(),
       expires_at: data.expires_at,

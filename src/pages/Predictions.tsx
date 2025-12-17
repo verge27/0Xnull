@@ -16,6 +16,7 @@ import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
+import { PoolTransparency } from '@/components/PoolTransparency';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, ChevronRight, Wallet, ArrowRight, Trophy, HelpCircle, ExternalLink, ChevronDown, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -511,6 +512,14 @@ export default function Predictions() {
                                   You have {pendingBets.length} pending bet(s)
                                 </p>
                               </div>
+                            )}
+                            
+                            {/* Pool Transparency */}
+                            {(market.pool_address || market.view_key) && (
+                              <PoolTransparency 
+                                poolAddress={market.pool_address}
+                                viewKey={market.view_key}
+                              />
                             )}
                             
                             <div className="flex gap-2">

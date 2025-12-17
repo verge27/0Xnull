@@ -16,6 +16,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
+import { PoolTransparency } from '@/components/PoolTransparency';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Trophy, Gamepad2, ArrowRight, HelpCircle } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -490,6 +491,15 @@ export default function CricketPredictions() {
                                 </div>
                               ))}
                             </div>
+                          )}
+                          
+                          {/* Pool Transparency */}
+                          {(market.pool_address || market.view_key) && (
+                            <PoolTransparency 
+                              poolAddress={market.pool_address}
+                              viewKey={market.view_key}
+                              className="mb-3"
+                            />
                           )}
                           
                           {!market.resolved && market.resolution_time > Date.now() / 1000 && (

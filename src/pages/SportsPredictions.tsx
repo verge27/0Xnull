@@ -17,6 +17,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
+import { PoolTransparency } from '@/components/PoolTransparency';
 import { TeamLogo } from '@/components/TeamLogo';
 import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
@@ -518,6 +519,14 @@ export default function SportsPredictions() {
                             <div className="text-xs text-muted-foreground text-center">
                               Total Pool: {totalPool.toFixed(4)} XMR
                             </div>
+                            
+                            {/* Pool Transparency */}
+                            {(market.pool_address || market.view_key) && (
+                              <PoolTransparency 
+                                poolAddress={market.pool_address}
+                                viewKey={market.view_key}
+                              />
+                            )}
                             
                             {!market.resolved && (
                               <Button 
