@@ -418,12 +418,30 @@ export default function SportsPredictions() {
                   )}
                 </div>
 
-                {selectedVideo && (
-                  <div
-                    className="w-full aspect-video"
-                    dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
-                  />
-                )}
+              {selectedVideo && (() => {
+                  // Extract iframe src from embed HTML
+                  const srcMatch = selectedVideo.embed.match(/src=["']([^"']+)["']/);
+                  const iframeSrc = srcMatch ? srcMatch[1] : null;
+                  
+                  if (iframeSrc) {
+                    return (
+                      <iframe
+                        src={iframeSrc}
+                        className="w-full aspect-video border-0"
+                        allowFullScreen
+                        allow="autoplay; encrypted-media"
+                      />
+                    );
+                  }
+                  
+                  // Fallback to dangerouslySetInnerHTML if no src found
+                  return (
+                    <div
+                      className="w-full aspect-video"
+                      dangerouslySetInnerHTML={{ __html: selectedVideo.embed }}
+                    />
+                  );
+                })()}
               </div>
             </DialogContent>
           </Dialog>
