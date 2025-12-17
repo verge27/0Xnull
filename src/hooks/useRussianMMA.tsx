@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Region } from '@/lib/nameFixes';
 
 export interface Promotion {
   id: string;
@@ -12,6 +13,7 @@ export interface Promotion {
   telegram?: string;
   vk?: string;
   resolution?: 'auto' | 'manual';
+  description?: string;
 }
 
 export interface Fighter {
@@ -28,6 +30,7 @@ export interface UpcomingEvent {
   stream?: string;
   status?: string;
   ppv_url?: string;
+  resolution?: 'auto' | 'manual';
 }
 
 export interface PastResult {
@@ -47,6 +50,8 @@ export interface FeaturedData {
 export interface Matchup {
   fighter1?: string;
   fighter2?: string;
+  fighter_1?: { name: string; slug?: string; tapology_url?: string };
+  fighter_2?: { name: string; slug?: string; tapology_url?: string };
   weight_class?: string;
 }
 
@@ -57,6 +62,11 @@ export interface Event {
   date_raw?: string;
   is_upcoming?: boolean;
   tapology_url?: string;
+  matchups?: Matchup[];
+  promotion?: string;
+  promotion_name?: string;
+  resolution?: 'auto' | 'manual';
+  country?: string;
 }
 
 async function proxyFetch(path: string) {
@@ -86,8 +96,11 @@ async function fetchFeatured(): Promise<FeaturedData> {
   };
 }
 
-async function fetchUpcomingEvents(): Promise<Event[]> {
-  const data = await proxyFetch('/api/russian-mma/events?upcoming_only=true');
+async function fetchUpcomingEvents(region?: Region): Promise<Event[]> {
+  const path = region && region !== 'all' 
+    ? `/api/russian-mma/events?upcoming_only=true&region=${region}`
+    : '/api/russian-mma/events?upcoming_only=true';
+  const data = await proxyFetch(path);
   const events = data.events || [];
   // Dedupe by event_id
   const seen = new Set<string>();
@@ -114,10 +127,10 @@ export function useFeaturedFights() {
   });
 }
 
-export function useUpcomingEvents() {
+export function useUpcomingEvents(region?: Region) {
   return useQuery({
-    queryKey: ['russian-mma-events'],
-    queryFn: fetchUpcomingEvents,
+    queryKey: ['russian-mma-events', region],
+    queryFn: () => fetchUpcomingEvents(region),
     staleTime: 2 * 60 * 1000,
   });
 }
