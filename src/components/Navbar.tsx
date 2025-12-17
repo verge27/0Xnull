@@ -141,7 +141,7 @@ export const Navbar = () => {
                   </Link>
                   <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Russian MMA</span>
+                    <span>Eastern</span>
                   </Link>
                   <Link to="/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <TrendingUp className="w-5 h-5 text-primary" />
@@ -201,7 +201,7 @@ export const Navbar = () => {
 
             <Link to="/russian-mma">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">RU MMA</span>
+                <span className="hidden md:inline">Eastern</span>
               </Button>
             </Link>
 

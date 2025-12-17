@@ -7,19 +7,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle } from 'lucide-react';
-import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, Event } from '@/hooks/useRussianMMA';
+import { HelpCircle, ExternalLink, Calendar, MapPin, Tv, Youtube, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePromotions, useFeaturedFights, useUpcomingEvents, Promotion, Event, Matchup } from '@/hooks/useRussianMMA';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import { ResolutionBadge } from '@/components/ResolutionBadge';
+import { fixName, getCountryFlag, Region, regionLabels, getPromotionRegion } from '@/lib/nameFixes';
 import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 
 const RussianMMA = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [regionFilter, setRegionFilter] = useState<Region>('all');
   const { data: promotions, isLoading: loadingPromotions } = usePromotions();
   const { data: featured, isLoading: loadingFeatured } = useFeaturedFights();
-  const { data: events, isLoading: loadingEvents } = useUpcomingEvents();
+  const { data: events, isLoading: loadingEvents } = useUpcomingEvents(regionFilter);
   const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
+
+  // Group promotions by region
+  const groupedPromotions = promotions?.reduce((acc, promo) => {
+    const region = getPromotionRegion(promo.id);
+    if (!acc[region]) acc[region] = [];
+    acc[region].push(promo);
+    return acc;
+  }, {} as Record<Region, Promotion[]>);
 
   return (
     <div 
@@ -42,14 +52,31 @@ const RussianMMA = () => {
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
-                Russian Underground Fighting
+                Eastern Markets
               </h1>
               <p className="text-xl md:text-2xl text-white/90 font-medium">
-                Bare-Knuckle Boxing • POP-MMA • Freak Fights
+                Underground • Eastern Europe • Asia
               </p>
             </div>
           </div>
         </section>
+
+      {/* Region Filter Tabs */}
+      <div className="container mb-8">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {(Object.keys(regionLabels) as Region[]).map((region) => (
+            <Button
+              key={region}
+              variant={regionFilter === region ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setRegionFilter(region)}
+              className={regionFilter === region ? 'bg-red-600 hover:bg-red-700' : 'border-red-900/50 hover:bg-red-950'}
+            >
+              {regionLabels[region]}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {/* How It Works Banner */}
       <div className="container mb-8">
@@ -151,7 +178,10 @@ const RussianMMA = () => {
             <Card className="border-red-900/30 bg-gradient-to-br from-card to-red-950/20">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl text-red-400">{featured.upcoming.event}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-xl text-red-400">{fixName(featured.upcoming.event)}</CardTitle>
+                    <ResolutionBadge resolution={featured.upcoming.resolution} />
+                  </div>
                   <Badge className="bg-red-600">{featured.upcoming.status || 'Coming Soon'}</Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -205,7 +235,7 @@ const RussianMMA = () => {
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-red-400">{result.event}</p>
+                        <p className="font-semibold text-red-400">{fixName(result.event)}</p>
                         <p className="text-sm text-muted-foreground">{result.date}</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -240,7 +270,7 @@ const RussianMMA = () => {
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="upcoming">Events</TabsTrigger>
             <TabsTrigger value="markets">Markets</TabsTrigger>
             <TabsTrigger value="mybets">My Bets</TabsTrigger>
           </TabsList>
@@ -261,7 +291,7 @@ const RussianMMA = () => {
             ) : (
               <Card className="border-red-900/30 bg-card/50">
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  No upcoming events. Check back soon!
+                  No upcoming events{regionFilter !== 'all' ? ` in ${regionLabels[regionFilter]}` : ''}. Check back soon!
                 </CardContent>
               </Card>
             )}
@@ -270,7 +300,7 @@ const RussianMMA = () => {
           <TabsContent value="markets" className="mt-6">
             <Card className="border-red-900/30 bg-card/50">
               <CardContent className="py-8 text-center text-muted-foreground">
-                Active markets for Russian MMA will appear here. Create a market from an upcoming fight to get started!
+                Active markets for Eastern fighting will appear here. Create a market from an upcoming fight to get started!
               </CardContent>
             </Card>
           </TabsContent>
@@ -280,20 +310,58 @@ const RussianMMA = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Promotions Section */}
+        {/* Promotions Section - Grouped by Region */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Promotions</h2>
+          <h2 className="text-2xl font-bold mb-6">Promotions</h2>
           {loadingPromotions ? (
             <div className="grid md:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-48" />
               ))}
             </div>
-          ) : promotions && promotions.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-4">
-              {promotions.map((promo) => (
-                <PromotionCard key={promo.id} promotion={promo} />
-              ))}
+          ) : groupedPromotions ? (
+            <div className="space-y-8">
+              {/* Russian Underground */}
+              {groupedPromotions.russian && groupedPromotions.russian.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-red-400 flex items-center gap-2">
+                    🇷🇺 Russian Underground
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {groupedPromotions.russian.map((promo) => (
+                      <PromotionCard key={promo.id} promotion={promo} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Eastern Europe */}
+              {groupedPromotions.eastern_europe && groupedPromotions.eastern_europe.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-red-400 flex items-center gap-2">
+                    🇵🇱 Eastern Europe
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {groupedPromotions.eastern_europe.map((promo) => (
+                      <PromotionCard key={promo.id} promotion={promo} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Asia */}
+              {groupedPromotions.asia && groupedPromotions.asia.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-red-400 flex items-center gap-2">
+                    🌏 Asia
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {groupedPromotions.asia.map((promo) => (
+                      <PromotionCard key={promo.id} promotion={promo} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-4">
@@ -304,6 +372,7 @@ const RussianMMA = () => {
                 description="1.5M+ YouTube subs"
                 extra="PPV on topdogfc.tv"
                 resolution="auto"
+                country="Russia"
                 youtube="https://www.youtube.com/@TopDogFighting"
                 telegram="https://t.me/topdogfighting"
               />
@@ -313,6 +382,7 @@ const RussianMMA = () => {
                 description="VK Exclusive"
                 extra="Post-event edits"
                 resolution="manual"
+                country="Russia"
                 youtube="https://www.youtube.com/@HardcoreFC"
                 vk="https://vk.com/hardcorefc"
               />
@@ -322,6 +392,7 @@ const RussianMMA = () => {
                 description="Phone booth fights"
                 extra="Car Jitsu • Shipping containers"
                 resolution="manual"
+                country="Russia"
               />
             </div>
           )}
@@ -335,51 +406,111 @@ const RussianMMA = () => {
 };
 
 
-const EventCard = ({ event }: { event: Event }) => (
-  <Card className="border-red-900/30 bg-card/50">
-    <CardHeader>
-      <div className="flex items-center justify-between">
-        <div>
-          <CardTitle>{event.event_name}</CardTitle>
+const EventCard = ({ event }: { event: Event }) => {
+  const [expanded, setExpanded] = useState(false);
+  const matchups = event.matchups || [];
+  const displayMatchups = expanded ? matchups : matchups.slice(0, 3);
+
+  return (
+    <Card className="border-red-900/30 bg-card/50">
+      <CardHeader>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">{getCountryFlag(event.country)}</span>
+            <CardTitle>{fixName(event.event_name)}</CardTitle>
+            <ResolutionBadge resolution={event.resolution} showLabel={false} />
+          </div>
+          <div className="text-right text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {event.date_raw || event.date}
+            </div>
+          </div>
+        </div>
+        {event.promotion_name && (
+          <p className="text-sm text-red-400">{fixName(event.promotion_name)}</p>
+        )}
+        {event.tapology_url && (
+          <a 
+            href={event.tapology_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-muted-foreground hover:text-red-400"
+          >
+            View on Tapology
+          </a>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Matchups */}
+        {matchups.length > 0 && (
+          <div className="space-y-2">
+            {displayMatchups.map((matchup, idx) => {
+              const fighter1 = matchup.fighter_1?.name || matchup.fighter1 || 'TBA';
+              const fighter2 = matchup.fighter_2?.name || matchup.fighter2 || 'TBA';
+              return (
+                <div key={idx} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg text-sm">
+                  <span className="flex-1 text-right pr-2">{fixName(fighter1)}</span>
+                  <span className="text-red-400 font-bold px-2">vs</span>
+                  <span className="flex-1 pl-2">{fixName(fighter2)}</span>
+                </div>
+              );
+            })}
+            {matchups.length > 3 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setExpanded(!expanded)}
+                className="w-full text-muted-foreground hover:text-foreground gap-1"
+              >
+                {expanded ? (
+                  <>
+                    <ChevronUp className="h-4 w-4" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    Show {matchups.length - 3} more matchups
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+        
+        <div className="flex gap-2 pt-2">
+          <Button variant="outline" className="flex-1 border-red-700 text-red-400 hover:bg-red-950">
+            Create Markets
+          </Button>
           {event.tapology_url && (
-            <a 
-              href={event.tapology_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-red-400"
-            >
-              View on Tapology
+            <a href={event.tapology_url} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="icon" className="border-red-700 text-red-400 hover:bg-red-950">
+                <ExternalLink className="h-4 w-4" />
+              </Button>
             </a>
           )}
         </div>
-        <div className="text-right text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            {event.date_raw || event.date}
-          </div>
-        </div>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <Button variant="outline" className="w-full border-red-700 text-red-400 hover:bg-red-950">
-        Create Market for Event
-      </Button>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};
 
 const PromotionCard = ({ promotion }: { promotion: Promotion }) => (
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
       <div className="flex items-center justify-between">
-        <CardTitle className="text-lg">{promotion.name}</CardTitle>
+        <div className="flex items-center gap-2">
+          <span>{getCountryFlag(promotion.country)}</span>
+          <CardTitle className="text-lg">{fixName(promotion.name)}</CardTitle>
+        </div>
         <ResolutionBadge resolution={promotion.resolution} showLabel={false} />
       </div>
       <p className="text-sm text-red-400">{promotion.type}</p>
     </CardHeader>
     <CardContent className="space-y-3">
-      {promotion.country && (
-        <p className="text-sm text-muted-foreground">{promotion.country}</p>
+      {promotion.description && (
+        <p className="text-sm text-muted-foreground">{promotion.description}</p>
       )}
       {promotion.resolution && (
         <p className="text-xs text-muted-foreground">
@@ -432,6 +563,7 @@ const PromotionCardStatic = ({
   description, 
   extra, 
   resolution,
+  country,
   youtube, 
   telegram, 
   vk 
@@ -441,6 +573,7 @@ const PromotionCardStatic = ({
   description: string; 
   extra?: string; 
   resolution?: 'auto' | 'manual';
+  country?: string;
   youtube?: string; 
   telegram?: string; 
   vk?: string; 
@@ -448,7 +581,10 @@ const PromotionCardStatic = ({
   <Card className="border-red-900/30 bg-card/50 hover:border-red-700/50 transition-colors">
     <CardHeader>
       <div className="flex items-center justify-between">
-        <CardTitle className="text-lg">{name}</CardTitle>
+        <div className="flex items-center gap-2">
+          <span>{getCountryFlag(country)}</span>
+          <CardTitle className="text-lg">{name}</CardTitle>
+        </div>
         <ResolutionBadge resolution={resolution} showLabel={false} />
       </div>
       <p className="text-sm text-red-400">{type}</p>
