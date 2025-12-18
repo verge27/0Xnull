@@ -113,6 +113,7 @@ export interface PredictionBetRequest {
   market_id: string;
   side: 'YES' | 'NO';
   amount_usd: number;
+  payout_address: string;
 }
 
 export interface PredictionBetResponse {

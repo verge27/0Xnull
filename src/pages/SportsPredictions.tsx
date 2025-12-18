@@ -60,6 +60,7 @@ export default function SportsPredictions() {
   
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmountUsd, setBetAmountUsd] = useState('');
+  const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
   
   // Category/League filters
@@ -186,6 +187,16 @@ export default function SportsPredictions() {
       toast.error('Minimum bet is $1');
       return;
     }
+
+    // Validate payout address
+    if (!payoutAddress || (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
+      toast.error('Please enter a valid Monero address starting with 4 or 8');
+      return;
+    }
+    if (payoutAddress.length < 95) {
+      toast.error('Monero address is too short');
+      return;
+    }
     
     setPlacingBet(true);
     
@@ -194,6 +205,7 @@ export default function SportsPredictions() {
         market_id: selectedMarket.market_id,
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
+        payout_address: payoutAddress,
       });
       
       storeBet(response);
@@ -201,6 +213,7 @@ export default function SportsPredictions() {
       setBetDialogOpen(false);
       setDepositModalOpen(true);
       setBetAmountUsd('');
+      setPayoutAddress('');
       
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
@@ -718,6 +731,19 @@ export default function SportsPredictions() {
                   placeholder="Enter amount in USD"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label>Payout Address (XMR)</Label>
+                <Input
+                  value={payoutAddress}
+                  onChange={(e) => setPayoutAddress(e.target.value)}
+                  placeholder="4... or 8... (your Monero address)"
+                  className="font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Where winnings will be sent if you win
+                </p>
+              </div>
               
               {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
                 <div className="p-3 bg-primary/10 rounded-lg border border-primary/30 space-y-2">
@@ -796,7 +822,7 @@ export default function SportsPredictions() {
               <Button 
                 className="w-full" 
                 onClick={handlePlaceBet}
-                disabled={placingBet || !betAmountUsd}
+                disabled={placingBet || !betAmountUsd || !payoutAddress}
               >
                 {placingBet ? 'Creating Bet...' : 'Create Bet'}
               </Button>
