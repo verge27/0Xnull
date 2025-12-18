@@ -139,6 +139,20 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
     }
   };
 
+  const getPayoutTypeMessage = (bet: PredictionBet) => {
+    if (!bet.payout_type) return null;
+    switch (bet.payout_type) {
+      case 'refund_one_sided':
+        return { text: 'Market was one-sided - full stake refunded', color: 'text-amber-500' };
+      case 'refund_all_losers':
+        return { text: 'No winners - full stake refunded', color: 'text-amber-500' };
+      case 'winner_takes_pool':
+        return { text: 'You won! Share of the pool paid out', color: 'text-emerald-500' };
+      default:
+        return null;
+    }
+  };
+
   const hasBets = bets.length > 0;
 
   const sortedBets = [...bets].sort((a, b) => 
@@ -250,9 +264,15 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
 
                   {bet.status === 'paid' && bet.payout_tx_hash && (
                     <div className="text-xs text-muted-foreground pt-2 border-t border-border space-y-1">
+                      {(() => {
+                        const payoutMsg = getPayoutTypeMessage(bet);
+                        return payoutMsg ? (
+                          <div className={`font-medium ${payoutMsg.color}`}>{payoutMsg.text}</div>
+                        ) : null;
+                      })()}
                       <div className="flex items-center justify-between">
                         <span className="text-emerald-500 font-medium">
-                          Won {bet.payout_xmr?.toFixed(4) || '?'} XMR
+                          Received {bet.payout_xmr?.toFixed(4) || '?'} XMR
                         </span>
                         <Button
                           variant="ghost"

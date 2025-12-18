@@ -516,10 +516,12 @@ export default function EsportsPredictions() {
                             <div className="flex-1 p-2 rounded bg-emerald-600/20 border border-emerald-600/30 text-center">
                               <div className="text-lg font-bold text-emerald-500">{odds.yes}%</div>
                               <div className="text-xs text-muted-foreground">YES</div>
+                              <div className="text-xs font-mono text-emerald-500/70">{market.yes_pool_xmr.toFixed(4)} XMR</div>
                             </div>
                             <div className="flex-1 p-2 rounded bg-red-600/20 border border-red-600/30 text-center">
                               <div className="text-lg font-bold text-red-500">{odds.no}%</div>
                               <div className="text-xs text-muted-foreground">NO</div>
+                              <div className="text-xs font-mono text-red-500/70">{market.no_pool_xmr.toFixed(4)} XMR</div>
                             </div>
                           </div>
                           
@@ -728,8 +730,13 @@ export default function EsportsPredictions() {
                 className="font-mono text-xs"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Where winnings will be sent if you win
+                Where winnings or refunds will be sent
               </p>
+            </div>
+
+            {/* Refund info */}
+            <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
+              <p><strong>Refund Policy:</strong> If no opposing bets by market close, your full stake will be refunded (no fees). Winnings have a 0.4% fee on profits only.</p>
             </div>
             
             {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
