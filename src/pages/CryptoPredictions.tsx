@@ -162,40 +162,54 @@ export default function CryptoPredictions() {
         .from('blocked_markets')
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
-      
+
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const priceMarkets = apiMarkets.filter(m => m.oracle_type === 'price');
-      
+
       // Filter out blocked markets
       const unblockedMarkets = priceMarkets.filter(m => !blockedIds.has(m.market_id));
-      
-      // Show markets immediately, then validate in background
-      setMarkets(unblockedMarkets);
-      setLoading(false);
-      
-      // Background validation with timeout
-      const validatedMarkets = await Promise.all(
-        unblockedMarkets.map(async (market) => {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            await api.getPoolInfo(market.market_id);
-            clearTimeout(timeoutId);
-            return market;
-          } catch {
-            console.log(`Filtering out invalid market ${market.market_id}`);
-            return null;
+
+      const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
+        new Promise<T>((resolve, reject) => {
+          const id = setTimeout(() => reject(new Error('timeout')), ms);
+          promise
+            .then((v) => {
+              clearTimeout(id);
+              resolve(v);
+            })
+            .catch((e) => {
+              clearTimeout(id);
+              reject(e);
+            });
+        });
+
+      const validatePools = async (marketsToValidate: PredictionMarket[]) => {
+        const concurrency = 6;
+        const valid: PredictionMarket[] = [];
+        let i = 0;
+
+        const workers = Array.from({ length: Math.min(concurrency, marketsToValidate.length) }, async () => {
+          while (i < marketsToValidate.length) {
+            const market = marketsToValidate[i++];
+            try {
+              await withTimeout(api.getPoolInfo(market.market_id), 4000);
+              valid.push(market);
+            } catch {
+              // Invalid / missing pool -> exclude
+            }
           }
-        })
-      );
-      
-      const validMarkets = validatedMarkets.filter((m): m is PredictionMarket => m !== null);
-      if (validMarkets.length !== unblockedMarkets.length) {
-        setMarkets(validMarkets);
-      }
+        });
+
+        await Promise.all(workers);
+        return valid;
+      };
+
+      const validMarkets = await validatePools(unblockedMarkets);
+      setMarkets(validMarkets);
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
+    } finally {
       setLoading(false);
     }
   };
