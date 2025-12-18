@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useSportsEvents, getSportLabel as getLegacySportLabel, getSportEmoji, type SportsEvent } from '@/hooks/useSportsEvents';
 import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
-import { api, type PredictionMarket } from '@/services/api';
+import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 import { Button } from '@/components/ui/button';
@@ -80,14 +80,6 @@ export default function SportsPredictions() {
   const [highlightsLoading, setHighlightsLoading] = useState(true);
   
   // Leaderboard
-  interface PayoutEntry {
-    id: string;
-    market_id: string;
-    amount: number;
-    created_at: string;
-    market_title?: string;
-    sport?: string;
-  }
   const [topPayouts, setTopPayouts] = useState<PayoutEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [leaderboardSportFilter, setLeaderboardSportFilter] = useState<string | null>(null);
@@ -124,26 +116,13 @@ export default function SportsPredictions() {
   const fetchLeaderboard = async () => {
     setLeaderboardLoading(true);
     try {
-      // Fetch top payouts from market_payouts table
-      const { data: payouts, error } = await supabase
-        .from('market_payouts')
-        .select('id, market_id, amount, created_at')
-        .order('amount', { ascending: false })
-        .limit(20);
-      
-      if (error) throw error;
-      
-      // Map market IDs to titles and sports from resolved markets
-      const payoutsWithTitles = (payouts || []).map(p => {
-        const market = markets.find(m => m.market_id === p.market_id);
-        return {
-          ...p,
-          market_title: market?.title || p.market_id,
-          sport: market?.oracle_asset || 'unknown',
-        };
-      });
-      
-      setTopPayouts(payoutsWithTitles);
+      const { payouts } = await api.getPredictionPayouts();
+      // Filter for wins only (exclude refunds) and sort by payout amount
+      const winPayouts = payouts
+        .filter(p => p.payout_type === 'win')
+        .sort((a, b) => b.payout_xmr - a.payout_xmr)
+        .slice(0, 20);
+      setTopPayouts(winPayouts);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     } finally {
@@ -151,12 +130,6 @@ export default function SportsPredictions() {
     }
   };
 
-  // Re-fetch leaderboard when markets update to get titles
-  useEffect(() => {
-    if (markets.length > 0) {
-      fetchLeaderboard();
-    }
-  }, [markets]);
 
   const fetchHighlights = async () => {
     setHighlightsLoading(true);
@@ -738,12 +711,19 @@ export default function SportsPredictions() {
             {/* Leaderboard Tab */}
             <TabsContent value="leaderboard" className="space-y-4">
               {(() => {
+                // Extract sport from market_id (format: sports_xxx_teamname)
+                const getSportFromMarketId = (marketId: string) => {
+                  // Match the sport from corresponding markets data or parse from description
+                  const market = markets.find(m => m.market_id === marketId);
+                  return market?.oracle_asset || 'sports';
+                };
+                
                 // Get unique sports from payouts
-                const uniqueSports = [...new Set(topPayouts.map(p => p.sport).filter(Boolean))];
+                const uniqueSports = [...new Set(topPayouts.map(p => getSportFromMarketId(p.market_id)).filter(Boolean))];
                 
                 // Filter payouts by selected sport
                 const filteredPayouts = leaderboardSportFilter 
-                  ? topPayouts.filter(p => p.sport === leaderboardSportFilter)
+                  ? topPayouts.filter(p => getSportFromMarketId(p.market_id) === leaderboardSportFilter)
                   : topPayouts;
                 
                 return (
@@ -801,7 +781,7 @@ export default function SportsPredictions() {
                           <Card className="bg-card/80 backdrop-blur-sm">
                             <CardContent className="pt-4 text-center">
                               <div className="text-2xl font-bold text-primary">
-                                {filteredPayouts.reduce((sum, p) => sum + p.amount, 0).toFixed(4)}
+                                {filteredPayouts.reduce((sum, p) => sum + p.payout_xmr, 0).toFixed(4)}
                               </div>
                               <div className="text-xs text-muted-foreground">Total XMR Paid</div>
                             </CardContent>
@@ -817,7 +797,7 @@ export default function SportsPredictions() {
                           <Card className="bg-card/80 backdrop-blur-sm">
                             <CardContent className="pt-4 text-center">
                               <div className="text-2xl font-bold text-amber-500">
-                                {filteredPayouts.length > 0 ? Math.max(...filteredPayouts.map(p => p.amount)).toFixed(4) : '0'}
+                                {filteredPayouts.length > 0 ? Math.max(...filteredPayouts.map(p => p.payout_xmr)).toFixed(4) : '0'}
                               </div>
                               <div className="text-xs text-muted-foreground">Largest Win (XMR)</div>
                             </CardContent>
@@ -831,15 +811,15 @@ export default function SportsPredictions() {
                               <thead>
                                 <tr className="border-b border-border bg-muted/50">
                                   <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Rank</th>
-                                  <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Sport</th>
                                   <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Market</th>
                                   <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Payout</th>
+                                  <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Tx</th>
                                   <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Date</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {filteredPayouts.map((payout, index) => (
-                                  <tr key={payout.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                                  <tr key={payout.bet_id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                                     <td className="py-3 px-4">
                                       <div className="flex items-center gap-2">
                                         {index === 0 && <span className="text-lg">🥇</span>}
@@ -849,22 +829,31 @@ export default function SportsPredictions() {
                                       </div>
                                     </td>
                                     <td className="py-3 px-4">
-                                      <Badge variant="outline" className="text-xs">
-                                        {getSportLabel(payout.sport || '')}
-                                      </Badge>
-                                    </td>
-                                    <td className="py-3 px-4">
-                                      <div className="max-w-[180px] truncate text-sm" title={payout.market_title}>
-                                        {payout.market_title}
+                                      <div className="max-w-[220px] truncate text-sm" title={payout.title}>
+                                        {payout.title}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground truncate max-w-[220px]" title={payout.description}>
+                                        {payout.description}
                                       </div>
                                     </td>
                                     <td className="py-3 px-4 text-right">
                                       <span className="font-mono font-semibold text-emerald-500">
-                                        {payout.amount.toFixed(4)} XMR
+                                        {payout.payout_xmr.toFixed(4)} XMR
                                       </span>
                                     </td>
+                                    <td className="py-3 px-4 text-right">
+                                      <a 
+                                        href={`https://xmrchain.net/tx/${payout.tx_hash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline text-xs font-mono flex items-center gap-1 justify-end"
+                                      >
+                                        {payout.tx_hash.slice(0, 8)}...
+                                        <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    </td>
                                     <td className="py-3 px-4 text-right text-sm text-muted-foreground">
-                                      {new Date(payout.created_at).toLocaleDateString()}
+                                      {new Date(payout.resolved_at * 1000).toLocaleDateString()}
                                     </td>
                                   </tr>
                                 ))}
