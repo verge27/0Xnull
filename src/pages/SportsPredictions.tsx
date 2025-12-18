@@ -162,14 +162,36 @@ export default function SportsPredictions() {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const sportsMarkets = apiMarkets.filter(m => m.oracle_type === 'sports');
       
-      // Filter out blocked markets and show immediately (no upfront pool validation)
-      // Pool validation happens lazily when users interact with specific markets
+      // Filter out blocked markets
       const unblockedMarkets = sportsMarkets.filter(m => !blockedIds.has(m.market_id));
       
+      // Show markets immediately, then validate in background
       setMarkets(unblockedMarkets);
+      setLoading(false);
+      
+      // Background validation with timeout - remove invalid markets
+      const validatedMarkets = await Promise.all(
+        unblockedMarkets.map(async (market) => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+            
+            await api.getPoolInfo(market.market_id);
+            clearTimeout(timeoutId);
+            return market;
+          } catch {
+            console.log(`Filtering out invalid market ${market.market_id}`);
+            return null;
+          }
+        })
+      );
+      
+      const validMarkets = validatedMarkets.filter((m): m is PredictionMarket => m !== null);
+      if (validMarkets.length !== unblockedMarkets.length) {
+        setMarkets(validMarkets);
+      }
     } catch (error) {
       console.error('Error fetching markets:', error);
-    } finally {
       setLoading(false);
     }
   };

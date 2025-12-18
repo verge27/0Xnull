@@ -166,14 +166,36 @@ export default function CryptoPredictions() {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const priceMarkets = apiMarkets.filter(m => m.oracle_type === 'price');
       
-      // Filter out blocked markets and show immediately (no upfront pool validation)
+      // Filter out blocked markets
       const unblockedMarkets = priceMarkets.filter(m => !blockedIds.has(m.market_id));
       
+      // Show markets immediately, then validate in background
       setMarkets(unblockedMarkets);
+      setLoading(false);
+      
+      // Background validation with timeout
+      const validatedMarkets = await Promise.all(
+        unblockedMarkets.map(async (market) => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            await api.getPoolInfo(market.market_id);
+            clearTimeout(timeoutId);
+            return market;
+          } catch {
+            console.log(`Filtering out invalid market ${market.market_id}`);
+            return null;
+          }
+        })
+      );
+      
+      const validMarkets = validatedMarkets.filter((m): m is PredictionMarket => m !== null);
+      if (validMarkets.length !== unblockedMarkets.length) {
+        setMarkets(validMarkets);
+      }
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
-    } finally {
       setLoading(false);
     }
   };
