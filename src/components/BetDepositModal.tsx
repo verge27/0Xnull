@@ -27,12 +27,19 @@ export function BetDepositModal({
   onConfirmed,
 }: BetDepositModalProps) {
   const [copied, setCopied] = useState<'address' | 'amount' | 'viewKey' | null>(null);
-  const [status, setStatus] = useState<string>('awaiting_deposit');
+  const [status, setStatus] = useState<string>(betData?.status || 'awaiting_deposit');
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [polling, setPolling] = useState(false);
   const [payoutAddress, setPayoutAddress] = useState('');
   const [submittingPayout, setSubmittingPayout] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
+
+  // Sync status with betData when it changes (e.g., bet already confirmed)
+  useEffect(() => {
+    if (betData?.status) {
+      setStatus(betData.status);
+    }
+  }, [betData?.bet_id, betData?.status]);
 
   // Calculate time left
   useEffect(() => {
