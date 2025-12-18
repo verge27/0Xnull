@@ -14,7 +14,6 @@ export function SportsCategoryPills({ categories, selectedCategory, onSelect }: 
   const orderedCategories = [
     'soccer',
     'cricket', 
-    'combat',
     'basketball',
     'football',
     'hockey',
