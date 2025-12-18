@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight } from 'lucide-react';
+import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Swords } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,6 @@ const categories = [
     subCategories: [
       { name: 'All Games', href: '/esports-predictions' },
       { name: 'StarCraft II', href: '/starcraft' },
-      { name: 'Eastern Fighting', href: '/russian-mma' },
     ],
   },
   {
@@ -29,7 +28,7 @@ const categories = [
     color: 'text-green-500',
     subCategories: [
       { name: 'All Sports', href: '/sports-predictions' },
-      { name: 'Slap Fighting', href: '/slap' },
+      { name: 'Combat', href: '/predictions/sports/combat' },
       { name: 'Cricket', href: '/cricket-predictions' },
     ],
   },

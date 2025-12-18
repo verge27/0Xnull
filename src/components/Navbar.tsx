@@ -125,15 +125,18 @@ export const Navbar = () => {
                   <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">StarCraft II</span>
                   </Link>
-                  <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Eastern</span>
-                  </Link>
                   <Link to="/sports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Trophy className="w-5 h-5 text-green-500" />
                     <span>Sports</span>
                   </Link>
-                  <Link to="/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Slap</span>
+                  <Link to="/predictions/sports/combat" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Combat</span>
+                  </Link>
+                  <Link to="/predictions/sports/combat/eastern" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-12">
+                    <span className="text-muted-foreground text-sm">Eastern</span>
+                  </Link>
+                  <Link to="/predictions/sports/combat/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-12">
+                    <span className="text-muted-foreground text-sm">Slap</span>
                   </Link>
                   <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Bitcoin className="w-5 h-5 text-orange-500" />
@@ -219,16 +222,19 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/starcraft" className="cursor-pointer">StarCraft II</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/russian-mma" className="cursor-pointer">Eastern</Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Sports</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/sports-predictions" className="cursor-pointer">All Sports</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/slap" className="cursor-pointer">Slap Fighting</Link>
+                  <Link to="/predictions/sports/combat" className="cursor-pointer">Combat</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="pl-6">
+                  <Link to="/predictions/sports/combat/eastern" className="cursor-pointer text-muted-foreground">Eastern</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="pl-6">
+                  <Link to="/predictions/sports/combat/slap" className="cursor-pointer text-muted-foreground">Slap</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
