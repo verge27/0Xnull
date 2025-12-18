@@ -74,15 +74,10 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       const keyId = getKeyId(publicKey);
       const displayName = `Anon_${keyId}`;
 
-      // Register the public key in the database
-      const { data, error } = await (supabase as any)
-        .from('private_key_users')
-        .insert({
-          public_key: publicKey,
-          display_name: displayName
-        })
-        .select()
-        .single();
+      // Register the public key in the backend (bypasses RLS)
+      const { data, error } = await supabase.functions.invoke('pk-register', {
+        body: { publicKey, displayName },
+      });
 
       if (error) {
         console.error('Failed to register key:', error);
@@ -90,11 +85,11 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         return null;
       }
 
-      const user: PrivateKeyUser = { 
-        id: data.id,
-        publicKey, 
-        keyId, 
-        displayName 
+      const user: PrivateKeyUser = {
+        id: (data as any)?.id,
+        publicKey,
+        keyId,
+        displayName,
       };
       setPrivateKeyUser(user);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
