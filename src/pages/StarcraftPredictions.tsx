@@ -92,6 +92,7 @@ export default function StarcraftPredictions() {
 
   const fetchMarkets = async () => {
     setLoading(true);
+    setMarkets([]);
     try {
       // Fetch blocked markets from database
       const { data: blockedData } = await supabase

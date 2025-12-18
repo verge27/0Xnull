@@ -65,6 +65,7 @@ export default function CricketPredictions() {
 
   const fetchMarkets = async () => {
     setLoading(true);
+    setMarkets([]);
     try {
       // Fetch blocked markets from database
       const { data: blockedData } = await supabase
