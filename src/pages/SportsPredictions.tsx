@@ -181,26 +181,27 @@ export default function SportsPredictions() {
             });
         });
 
-      const validatePools = async (marketsToValidate: PredictionMarket[]) => {
-        const concurrency = 6;
-        const valid: PredictionMarket[] = [];
-        let i = 0;
+       const validatePools = async (marketsToValidate: PredictionMarket[]) => {
+         const concurrency = 6;
+         const valid: PredictionMarket[] = [];
+         let i = 0;
 
-        const workers = Array.from({ length: Math.min(concurrency, marketsToValidate.length) }, async () => {
-          while (i < marketsToValidate.length) {
-            const market = marketsToValidate[i++];
-            try {
-              const result = await withTimeout(api.checkPool(market.market_id), 4000);
-              if (result?.exists) valid.push(market);
-            } catch {
-              // Invalid / missing pool -> exclude
-            }
-          }
-        });
+         const workers = Array.from({ length: Math.min(concurrency, marketsToValidate.length) }, async () => {
+           while (i < marketsToValidate.length) {
+             const market = marketsToValidate[i++];
+             try {
+               const result = await withTimeout(api.checkPool(market.market_id), 4000);
+               const hasWallet = Boolean(result?.pool && (result.pool as any).pool_address && (result.pool as any).view_key);
+               if (result?.exists && hasWallet) valid.push(market);
+             } catch {
+               // Invalid / missing pool -> exclude
+             }
+           }
+         });
 
-        await Promise.all(workers);
-        return valid;
-      };
+         await Promise.all(workers);
+         return valid;
+       };
 
       const validMarkets = await validatePools(unblockedMarkets);
       setMarkets(validMarkets);
