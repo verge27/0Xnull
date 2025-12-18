@@ -166,11 +166,13 @@ export interface PredictionMarket {
 
 export interface PoolInfo {
   market_id: string;
-  pool_address: string;
-  view_key: string;
-  balance_xmr: number;
-  unlocked_balance_xmr: number;
-  verify_instructions: string;
+  exists: boolean;
+  wallet_created: boolean;
+  yes_pool_xmr: number;
+  no_pool_xmr: number;
+  pool_address: string | null;
+  view_key: string | null;
+  created_at: number;
 }
 
 export interface CreateMarketRequest {
@@ -306,7 +308,7 @@ export const api = {
 
   // Soft pool existence check: never throws / never propagates 5xx.
   // Uses the proxy's `soft_pool=1` mode to avoid surfacing upstream timeouts as runtime errors.
-  async checkPool(marketId: string): Promise<{ exists: boolean; pool?: PoolInfo }> {
+  async checkPool(marketId: string): Promise<PoolInfo> {
     const isOnion = isTorBrowser();
 
     let url: string;
@@ -322,11 +324,14 @@ export const api = {
     try {
       const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
       const data = await res.json().catch(() => ({}));
-      if (typeof data?.exists === 'boolean') return data;
-      // Onion/direct fallback
-      return { exists: res.ok };
+
+      // Proxy soft mode returns { exists, pool } while the direct endpoint returns the pool status itself.
+      if (data?.pool && typeof data?.exists === 'boolean') return data.pool as PoolInfo;
+      if (typeof data?.exists === 'boolean' && typeof data?.market_id === 'string') return data as PoolInfo;
+
+      return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, created_at: 0 };
     } catch {
-      return { exists: false };
+      return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, created_at: 0 };
     }
   },
 };
