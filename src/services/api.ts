@@ -140,6 +140,7 @@ export interface PredictionBetStatus {
   payout_address: string | null;
   payout_xmr?: number;
   payout_tx_hash?: string;
+  payout_type?: 'refund_one_sided' | 'refund_all_losers' | 'winner_takes_pool';
   status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid';
   tx_hash: string | null;
   created_at: number;

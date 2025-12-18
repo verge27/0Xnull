@@ -18,6 +18,7 @@ export interface PredictionBet {
   payout_address?: string;
   payout_xmr?: number;
   payout_tx_hash?: string;
+  payout_type?: 'refund_one_sided' | 'refund_all_losers' | 'winner_takes_pool';
   status: 'awaiting_deposit' | 'confirmed' | 'won' | 'lost' | 'paid';
   created_at: string;
   expires_at: string;
@@ -93,6 +94,7 @@ export function usePredictionBets() {
                 payout_xmr: data.payout_xmr,
                 payout_tx_hash: data.payout_tx_hash,
                 payout_address: data.payout_address || bet.payout_address,
+                payout_type: data.payout_type,
               }
             : bet
         )
