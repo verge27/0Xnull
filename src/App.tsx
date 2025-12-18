@@ -52,6 +52,7 @@ import RussianMMA from "./pages/RussianMMA";
 import Slap from "./pages/Slap";
 import InfraHub from "./pages/InfraHub";
 import PredictionsHub from "./pages/PredictionsHub";
+import CombatSports from "./pages/CombatSports";
 
 const queryClient = new QueryClient();
 
@@ -93,8 +94,19 @@ const App = () => (
                   <Route path="/esports-predictions" element={<EsportsPredictions />} />
                   <Route path="/cricket-predictions" element={<CricketPredictions />} />
                   <Route path="/starcraft" element={<StarcraftPredictions />} />
-                  <Route path="/russian-mma" element={<RussianMMA />} />
-                  <Route path="/slap" element={<Slap />} />
+                  
+                  {/* Combat Sports */}
+                  <Route path="/predictions/sports/combat" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/mma" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/boxing" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/eastern" element={<RussianMMA />} />
+                  <Route path="/predictions/sports/combat/slap" element={<Slap />} />
+                  
+                  {/* Combat aliases */}
+                  <Route path="/russian-mma" element={<Navigate to="/predictions/sports/combat/eastern" replace />} />
+                  <Route path="/eastern" element={<Navigate to="/predictions/sports/combat/eastern" replace />} />
+                  <Route path="/slap" element={<Navigate to="/predictions/sports/combat/slap" replace />} />
+                  
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />
                   
                   {/* AI */}
