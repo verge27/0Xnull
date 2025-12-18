@@ -124,8 +124,16 @@ serve(async (req) => {
     let finalStatus = response.status;
 
     try {
-      JSON.parse(responseText);
-      responseData = responseText;
+      const parsed = JSON.parse(responseText);
+      
+      // Handle "already exists" as a soft success (200) to prevent frontend errors
+      if (response.status === 400 && parsed?.detail?.includes('already exists')) {
+        console.log('Market already exists - returning soft success');
+        responseData = JSON.stringify({ already_exists: true, detail: parsed.detail });
+        finalStatus = 200;
+      } else {
+        responseData = responseText;
+      }
     } catch {
       if (!response.ok) {
         responseData = JSON.stringify({
