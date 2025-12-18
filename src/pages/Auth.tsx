@@ -7,18 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
-import { Key, Copy, AlertTriangle, Check, Loader2 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Key, Copy, AlertTriangle, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { generateNewKeys, signInWithKey, privateKeyUser, isSolvingPoW } = usePrivateKeyAuth();
+  const { generateNewKeys, signInWithKey, privateKeyUser } = usePrivateKeyAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<{ privateKey: string; publicKey: string; keyId: string } | null>(null);
   const [privateKeyInput, setPrivateKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
-  const [powProgress, setPowProgress] = useState(0);
 
   // Redirect if already logged in
   // But NOT if we're showing the confirmation screen after key generation
@@ -29,15 +27,10 @@ const Auth = () => {
 
   const handleGenerateKey = async () => {
     setIsLoading(true);
-    setPowProgress(0);
-    const result = await generateNewKeys((hashes) => {
-      // Estimate progress based on typical solve time (~100k-500k hashes)
-      setPowProgress(Math.min(95, Math.floor((hashes / 300000) * 100)));
-    });
+    const result = await generateNewKeys();
     if (result) {
       setGeneratedKey(result);
     }
-    setPowProgress(100);
     setIsLoading(false);
   };
 
@@ -93,28 +86,10 @@ const Auth = () => {
                 <Button 
                   onClick={handleGenerateKey} 
                   className="w-full" 
-                  disabled={isLoading || isSolvingPoW}
+                  disabled={isLoading}
                 >
-                  {isSolvingPoW ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Solving puzzle...
-                    </span>
-                  ) : isLoading ? (
-                    'Creating account...'
-                  ) : (
-                    'Generate New Keypair'
-                  )}
+                  {isLoading ? 'Creating account...' : 'Generate New Keypair'}
                 </Button>
-
-                {isSolvingPoW && (
-                  <div className="space-y-2">
-                    <Progress value={powProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground text-center">
-                      Proof of Work: {powProgress}% (prevents spam accounts)
-                    </p>
-                  </div>
-                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
