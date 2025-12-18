@@ -72,6 +72,8 @@ export default function SportsPredictions() {
     match: null,
   });
   const [creating, setCreating] = useState(false);
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
@@ -238,7 +240,28 @@ export default function SportsPredictions() {
     setCreating(false);
     setTeamSelectDialog({ open: false, match: null });
     if (success) {
-      fetchMarkets();
+      // Generate the market ID that was created
+      const teamSlug = team.toLowerCase().replace(/\s+/g, '_');
+      const marketId = `sports_${match.event_id}_${teamSlug}`;
+      setNewlyCreatedMarketId(marketId);
+      
+      // Switch to markets tab and scroll after data loads
+      setActiveTab('markets');
+      await fetchMarkets();
+      
+      // Scroll to the new market after a brief delay for DOM update
+      setTimeout(() => {
+        const element = document.querySelector(`[data-market-id="${marketId}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add highlight animation
+          element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+            setNewlyCreatedMarketId(null);
+          }, 3000);
+        }
+      }, 300);
     }
   };
 
@@ -441,7 +464,7 @@ export default function SportsPredictions() {
             </div>
           )}
 
-          <Tabs defaultValue="upcoming" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-4">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
@@ -525,7 +548,7 @@ export default function SportsPredictions() {
                     const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
                     
                     return (
-                      <Card key={market.market_id} className="hover:border-primary/50 transition-colors bg-card/80 backdrop-blur-sm">
+                      <Card key={market.market_id} data-market-id={market.market_id} className="hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
