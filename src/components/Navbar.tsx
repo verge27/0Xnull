@@ -157,6 +157,7 @@ export const Navbar = () => {
                   </Link>
                   <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Kokoro</span>
+                    <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded">Soon</span>
                   </Link>
 
                   {/* Infrastructure */}
@@ -265,7 +266,10 @@ export const Navbar = () => {
                   <Link to="/therapy" className="cursor-pointer">AI Therapy</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/kokoro" className="cursor-pointer">Kokoro Companion</Link>
+                  <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
+                    Kokoro Companion
+                    <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded ml-2">Soon</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
