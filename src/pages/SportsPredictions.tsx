@@ -617,24 +617,36 @@ export default function SportsPredictions() {
                 </Card>
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {resolvedMarkets.map((market) => (
-                    <Card key={market.market_id} className="bg-card/80 backdrop-blur-sm">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg">{market.title}</CardTitle>
-                          {getStatusBadge(market)}
-                        </div>
-                        {market.description && (
-                          <CardDescription className="text-sm">{market.description}</CardDescription>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                          Resolved: {new Date(market.resolution_time * 1000).toLocaleDateString()}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {resolvedMarkets.map((market) => {
+                    const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                    return (
+                      <Card key={market.market_id} className="bg-card/80 backdrop-blur-sm">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <CardTitle className="text-lg">{market.title}</CardTitle>
+                            {getStatusBadge(market)}
+                          </div>
+                          {market.description && (
+                            <CardDescription className="text-sm">{market.description}</CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <div className="text-sm text-muted-foreground">
+                            Resolved: {new Date(market.resolution_time * 1000).toLocaleDateString()}
+                          </div>
+                          {totalPool > 0 && (
+                            <div className="flex gap-4 text-sm">
+                              <span className="text-emerald-500">YES: {market.yes_pool_xmr.toFixed(4)} XMR</span>
+                              <span className="text-red-500">NO: {market.no_pool_xmr.toFixed(4)} XMR</span>
+                            </div>
+                          )}
+                          {totalPool === 0 && (
+                            <div className="text-xs text-muted-foreground">No bets placed</div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
