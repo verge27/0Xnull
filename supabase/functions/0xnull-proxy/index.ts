@@ -84,6 +84,8 @@ serve(async (req) => {
 
     // Ensure we always return valid JSON
     let responseData: string;
+    let finalStatus = response.status;
+    
     try {
       // Check if it's already valid JSON
       JSON.parse(responseText);
@@ -91,14 +93,23 @@ serve(async (req) => {
     } catch {
       // If not JSON, wrap it in a JSON error response
       if (!response.ok) {
-        responseData = JSON.stringify({ error: responseText || 'Request failed', status: response.status });
+        responseData = JSON.stringify({ 
+          error: responseText || 'Upstream request failed', 
+          status: response.status,
+          upstream: true 
+        });
+        // Return 502 for upstream 5xx errors to distinguish from our own errors
+        if (response.status >= 500) {
+          finalStatus = 502;
+          console.error(`Upstream server error for ${targetPath}: ${response.status} - ${responseText}`);
+        }
       } else {
         responseData = JSON.stringify({ data: responseText });
       }
     }
 
     return new Response(responseData, {
-      status: response.status,
+      status: finalStatus,
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/json',
