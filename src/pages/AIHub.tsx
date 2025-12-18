@@ -30,6 +30,7 @@ const services = [
     href: '/kokoro',
     price: 'From $0.02',
     color: 'text-purple-500',
+    comingSoon: true,
   },
 ];
 
@@ -95,11 +96,16 @@ export default function AIHub() {
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {services.map((service) => {
               const Icon = service.icon;
+              const CardWrapper = service.comingSoon ? 'div' : Link;
+              const cardProps = service.comingSoon ? {} : { to: service.href };
               return (
-                <Link key={service.title} to={service.href}>
-                  <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer group">
+                <CardWrapper key={service.title} {...cardProps as any}>
+                  <Card className={`h-full transition-all ${service.comingSoon ? 'opacity-70' : 'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 cursor-pointer'} group relative`}>
+                    {service.comingSoon && (
+                      <Badge className="absolute top-3 right-3 bg-amber-500/90">Coming Soon</Badge>
+                    )}
                     <CardHeader>
-                      <div className={`h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                      <div className={`h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-2 ${!service.comingSoon && 'group-hover:scale-110'} transition-transform`}>
                         <Icon className={`h-6 w-6 ${service.color}`} />
                       </div>
                       <CardTitle className="text-xl">{service.title}</CardTitle>
@@ -109,7 +115,7 @@ export default function AIHub() {
                       <Badge variant="secondary">{service.price}</Badge>
                     </CardContent>
                   </Card>
-                </Link>
+                </CardWrapper>
               );
             })}
           </div>
