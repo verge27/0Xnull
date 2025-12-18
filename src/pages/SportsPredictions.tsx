@@ -324,8 +324,9 @@ export default function SportsPredictions() {
     return Number(a.commence_timestamp) - Number(b.commence_timestamp);
   });
 
-  const activeMarkets = markets.filter(m => m.resolved === 0);
-  const resolvedMarkets = markets.filter(m => m.resolved === 1);
+  const now = Date.now() / 1000;
+  const activeMarkets = markets.filter(m => m.resolved === 0 && m.resolution_time > now);
+  const resolvedMarkets = markets.filter(m => m.resolved === 1 || (m.resolved === 0 && m.resolution_time <= now));
 
   return (
     <div className="min-h-screen bg-background relative">
