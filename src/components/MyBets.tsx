@@ -72,12 +72,15 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
 
   const handleRefresh = async (betId: string) => {
     setPollingBets(prev => new Set(prev).add(betId));
-    await onStatusUpdate(betId);
-    setPollingBets(prev => {
-      const next = new Set(prev);
-      next.delete(betId);
-      return next;
-    });
+    try {
+      await onStatusUpdate(betId);
+    } finally {
+      setPollingBets(prev => {
+        const next = new Set(prev);
+        next.delete(betId);
+        return next;
+      });
+    }
   };
 
   const handlePayoutSubmit = async (betId: string) => {
