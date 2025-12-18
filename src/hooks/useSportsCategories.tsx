@@ -227,8 +227,8 @@ export function useSportsMatches() {
         }
       }
       
-      // Sort by commence time
-      allEvents.sort((a, b) => a.commence_timestamp - b.commence_timestamp);
+      // Sort by commence time (ensure numeric comparison)
+      allEvents.sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp));
       setMatches(allEvents);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
