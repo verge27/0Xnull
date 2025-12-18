@@ -17,12 +17,61 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const targetPath = url.searchParams.get('path');
+    const softPoolCheck = url.searchParams.get('soft_pool') === '1';
     
     if (!targetPath) {
       return new Response(
         JSON.stringify({ error: 'Missing path parameter' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Soft pool validation mode: never error, just report existence.
+    // Prevents upstream 5xx/504s from surfacing as runtime errors in the web app.
+    if (softPoolCheck && req.method === 'GET' && targetPath.startsWith('/api/predictions/pool/')) {
+      const targetUrl = new URL(`${API_BASE}${targetPath}`);
+      // (also forward other query params except 'path' + 'soft_pool')
+      url.searchParams.forEach((value, key) => {
+        if (key !== 'path' && key !== 'soft_pool') targetUrl.searchParams.set(key, value);
+      });
+
+      console.log(`Soft pool check -> ${targetUrl.toString()}`);
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
+        const upstreamRes = await fetch(targetUrl.toString(), { method: 'GET', signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!upstreamRes.ok) {
+          return new Response(JSON.stringify({ exists: false, status: upstreamRes.status }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // For valid pools, return pool info so the caller can reuse it.
+        const text = await upstreamRes.text();
+        try {
+          const pool = JSON.parse(text);
+          return new Response(JSON.stringify({ exists: true, pool }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch {
+          // Unexpected response format
+          return new Response(JSON.stringify({ exists: false, status: upstreamRes.status }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } catch (e) {
+        console.error('Soft pool check error:', e);
+        return new Response(JSON.stringify({ exists: false, status: 0 }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Build target URL with query params (excluding 'path')

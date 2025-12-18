@@ -190,8 +190,8 @@ export default function SportsPredictions() {
           while (i < marketsToValidate.length) {
             const market = marketsToValidate[i++];
             try {
-              await withTimeout(api.getPoolInfo(market.market_id), 4000);
-              valid.push(market);
+              const result = await withTimeout(api.checkPool(market.market_id), 4000);
+              if (result?.exists) valid.push(market);
             } catch {
               // Invalid / missing pool -> exclude
             }
