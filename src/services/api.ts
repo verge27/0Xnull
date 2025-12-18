@@ -69,28 +69,43 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise
     url = proxyUrl.toString();
   }
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
+  // Prevent infinite loading when the upstream API hangs
+  const controller = new AbortController();
+  const timeoutMs = 8000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  // Be robust to upstream non-JSON responses (common during 5xx incidents)
-  let data: any;
   try {
-    data = await res.clone().json();
-  } catch {
-    const text = await res.text();
-    data = { error: text };
-  }
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
 
-  if (!res.ok) {
-    throw new Error(data?.detail || data?.error || 'Request failed');
-  }
+    // Be robust to upstream non-JSON responses (common during 5xx incidents)
+    let data: any;
+    try {
+      data = await res.clone().json();
+    } catch {
+      const text = await res.text();
+      data = { error: text };
+    }
 
-  return data as T;
+    if (!res.ok) {
+      throw new Error(data?.detail || data?.error || 'Request failed');
+    }
+
+    return data as T;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // Prediction market types
