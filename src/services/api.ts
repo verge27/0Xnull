@@ -177,6 +177,21 @@ export interface PoolInfo {
   created_at: number;
 }
 
+export interface PayoutEntry {
+  bet_id: string;
+  market_id: string;
+  title: string;
+  description: string;
+  side: 'YES' | 'NO';
+  outcome: 'YES' | 'NO';
+  stake_xmr: number;
+  payout_xmr: number;
+  payout_type: 'win' | 'refund';
+  payout_address: string;
+  tx_hash: string;
+  resolved_at: number;
+}
+
 export interface CreateMarketRequest {
   market_id: string;
   title: string;
@@ -309,6 +324,10 @@ export const api = {
 
   async getPoolInfo(marketId: string): Promise<PoolInfo> {
     return proxyRequest<PoolInfo>(`/api/predictions/pool/${marketId}`);
+  },
+
+  async getPredictionPayouts(): Promise<{ payouts: PayoutEntry[]; total: number }> {
+    return proxyRequest<{ payouts: PayoutEntry[]; total: number }>('/api/predictions/payouts');
   },
 
   // Soft pool existence check: never throws / never propagates 5xx.
