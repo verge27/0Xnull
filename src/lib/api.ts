@@ -1,8 +1,7 @@
 // 0xNull Backend API Client
 // Use Supabase Edge Function as proxy to avoid CORS issues
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
-
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 interface ApiResponse<T> {
   data?: T;
   error?: string;

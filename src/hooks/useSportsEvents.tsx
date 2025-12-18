@@ -31,7 +31,7 @@ export interface LiveScores {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 async function sportsRequest<T>(path: string): Promise<T> {
   const proxyUrl = new URL(SPORTS_API_BASE);

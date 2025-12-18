@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 export interface SportsCategories {
   [category: string]: string[];

@@ -1,7 +1,7 @@
 // 0xNull API Client - Adapts for clearnet (via proxy) and Tor (direct)
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const PROXY_URL = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 const ONION_API = 'http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion/api';
 
 // Detect if we're running on Tor (.onion)

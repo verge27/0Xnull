@@ -64,7 +64,7 @@ async function proxyFetch(path: string) {
   const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqa29qaWFtZXh1ZnV4c3J1cGpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1MDc1NDcsImV4cCI6MjA4MDA4MzU0N30.3kwYnFyQv4g36TvbvPWJLIYIR8kb4Jrcl0J7Z1UZJwo';
   
   const res = await fetch(
-    `https://qjkojiamexufuxsrupjq.supabase.co/functions/v1/0xnull-proxy?path=${encodeURIComponent(path)}`,
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy?path=${encodeURIComponent(path)}`,
     {
       headers: {
         'Authorization': `Bearer ${session?.access_token || anonKey}`,
