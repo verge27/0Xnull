@@ -15,10 +15,10 @@ export function SportsCategoryPills({ categories, selectedCategory, onSelect }: 
     'soccer',
     'cricket', 
     'basketball',
+    'rugby',
     'football',
     'hockey',
     'golf',
-    'rugby',
     'other',
   ].filter(c => categories.includes(c));
 
