@@ -114,6 +114,7 @@ export default function CryptoPredictions() {
   
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmountUsd, setBetAmountUsd] = useState('');
+  const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
   
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -223,6 +224,16 @@ export default function CryptoPredictions() {
       toast.error('Minimum bet is $1');
       return;
     }
+
+    // Validate payout address
+    if (!payoutAddress || (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
+      toast.error('Please enter a valid Monero address starting with 4 or 8');
+      return;
+    }
+    if (payoutAddress.length < 95) {
+      toast.error('Monero address is too short');
+      return;
+    }
     
     setPlacingBet(true);
     
@@ -231,6 +242,7 @@ export default function CryptoPredictions() {
         market_id: selectedMarket.market_id,
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
+        payout_address: payoutAddress,
       });
       
       storeBet(response);
@@ -238,6 +250,7 @@ export default function CryptoPredictions() {
       setBetDialogOpen(false);
       setDepositModalOpen(true);
       setBetAmountUsd('');
+      setPayoutAddress('');
       
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
@@ -669,6 +682,20 @@ export default function CryptoPredictions() {
                   Minimum: $1 USD. You'll pay in XMR at current rate.
                 </p>
               </div>
+
+              <div>
+                <Label htmlFor="payout-address">Payout Address (XMR)</Label>
+                <Input
+                  id="payout-address"
+                  value={payoutAddress}
+                  onChange={(e) => setPayoutAddress(e.target.value)}
+                  placeholder="4... or 8... (your Monero address)"
+                  className="font-mono text-xs mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Where winnings will be sent if you win
+                </p>
+              </div>
               
               {betAmountUsd && parseFloat(betAmountUsd) > 0 && oraclePrices['XMR'] && (
                 <div className="p-3 bg-primary/10 rounded-lg border border-primary/30 space-y-2">
@@ -752,7 +779,7 @@ export default function CryptoPredictions() {
                 onClick={handlePlaceBet} 
                 className={`w-full ${betSide === 'yes' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
                 variant={betSide === 'no' ? 'destructive' : 'default'}
-                disabled={placingBet || !betAmountUsd || parseFloat(betAmountUsd) < 1}
+                disabled={placingBet || !betAmountUsd || !payoutAddress || parseFloat(betAmountUsd) < 1}
               >
                 {placingBet ? (
                   <>

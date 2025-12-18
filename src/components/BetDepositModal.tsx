@@ -156,57 +156,11 @@ export function BetDepositModal({
               <div>
                 <p className="text-lg font-medium">Deposit Confirmed!</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Enter your XMR payout address to receive winnings.
+                  Your bet has been placed. Good luck!
                 </p>
               </div>
-              
-              <div className="text-left">
-                <Label htmlFor="payout-address" className="text-sm">Payout Address</Label>
-                <Input
-                  id="payout-address"
-                  placeholder="4... or 8..."
-                  value={payoutAddress}
-                  onChange={(e) => setPayoutAddress(e.target.value)}
-                  className="mt-1 font-mono text-xs"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Must start with 4 or 8 (Monero address)
-                </p>
-              </div>
-              
-              <Button 
-                className="w-full" 
-                onClick={async () => {
-                  if (!payoutAddress || (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
-                    toast.error('Invalid Monero address');
-                    return;
-                  }
-                  if (payoutAddress.length < 95) {
-                    toast.error('Address too short');
-                    return;
-                  }
-                  
-                  setSubmittingPayout(true);
-                  try {
-                    await api.submitPredictionPayoutAddress(betData.bet_id, payoutAddress);
-                    toast.success('Payout address saved!');
-                    onOpenChange(false);
-                  } catch (error) {
-                    toast.error(error instanceof Error ? error.message : 'Failed to save');
-                  } finally {
-                    setSubmittingPayout(false);
-                  }
-                }}
-                disabled={submittingPayout || !payoutAddress}
-              >
-                {submittingPayout ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Payout Address'
-                )}
+              <Button className="w-full" onClick={() => onOpenChange(false)}>
+                Close
               </Button>
             </div>
           ) : (
@@ -246,7 +200,7 @@ export function BetDepositModal({
 
               {/* Amount */}
               <div>
-                <Label className="text-xs text-muted-foreground">Amount (exact)</Label>
+                <Label className="text-xs text-muted-foreground">Amount</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <Input
                     readOnly
@@ -265,6 +219,9 @@ export function BetDepositModal({
                     )}
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  You can send any amount - larger bets get proportionally larger winnings
+                </p>
               </div>
 
               {/* Timer and status */}

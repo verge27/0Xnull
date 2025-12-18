@@ -42,6 +42,7 @@ export default function CricketPredictions() {
   
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmountUsd, setBetAmountUsd] = useState('');
+  const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
   
   const [selectedMatchType, setSelectedMatchType] = useState<string>('all');
@@ -132,6 +133,16 @@ export default function CricketPredictions() {
       toast.error('Minimum bet is $1');
       return;
     }
+
+    // Validate payout address
+    if (!payoutAddress || (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
+      toast.error('Please enter a valid Monero address starting with 4 or 8');
+      return;
+    }
+    if (payoutAddress.length < 95) {
+      toast.error('Monero address is too short');
+      return;
+    }
     
     setPlacingBet(true);
     
@@ -140,6 +151,7 @@ export default function CricketPredictions() {
         market_id: selectedMarket.market_id,
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
+        payout_address: payoutAddress,
       });
       
       storeBet(response);
@@ -147,6 +159,7 @@ export default function CricketPredictions() {
       setBetDialogOpen(false);
       setDepositModalOpen(true);
       setBetAmountUsd('');
+      setPayoutAddress('');
       
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
@@ -745,6 +758,20 @@ export default function CricketPredictions() {
               />
               <p className="text-xs text-muted-foreground mt-1">Minimum: $1</p>
             </div>
+
+            <div>
+              <Label htmlFor="payout">Payout Address (XMR)</Label>
+              <Input
+                id="payout"
+                value={payoutAddress}
+                onChange={(e) => setPayoutAddress(e.target.value)}
+                placeholder="4... or 8... (your Monero address)"
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Where winnings will be sent if you win
+              </p>
+            </div>
             
             {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
               <div className="p-3 bg-primary/10 rounded-lg border border-primary/30 space-y-2">
@@ -822,7 +849,7 @@ export default function CricketPredictions() {
             
             <Button
               className="w-full"
-              disabled={placingBet || !betAmountUsd}
+              disabled={placingBet || !betAmountUsd || !payoutAddress}
               onClick={handlePlaceBet}
             >
               {placingBet ? (
