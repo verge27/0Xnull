@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { generatePrivateKey, derivePublicKey, getKeyId, isValidPrivateKey } from '@/lib/crypto';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
+import { solvePoW, verifyPoW } from '@/lib/pow';
 interface PrivateKeyUser {
   id: string;
   publicKey: string;
@@ -13,7 +13,7 @@ interface PrivateKeyUser {
 interface PrivateKeyAuthContextType {
   privateKeyUser: PrivateKeyUser | null;
   isLoading: boolean;
-  generateNewKeys: () => Promise<{ privateKey: string; publicKey: string; keyId: string } | null>;
+  generateNewKeys: (onPoWProgress?: (hashes: number) => void) => Promise<{ privateKey: string; publicKey: string; keyId: string } | null>;
   signInWithKey: (privateKey: string) => Promise<boolean>;
   validateKey: (privateKey: string) => Promise<PrivateKeyUser | null>;
   confirmSignIn: (user: PrivateKeyUser, privateKey?: string) => void;
@@ -22,6 +22,7 @@ interface PrivateKeyAuthContextType {
   storedPrivateKey: string | null;
   clearStoredPrivateKey: () => void;
   savePrivateKey: (key: string) => void;
+  isSolvingPoW: boolean;
 }
 
 const STORAGE_KEY = 'pk_session';
@@ -33,6 +34,7 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
   const [privateKeyUser, setPrivateKeyUser] = useState<PrivateKeyUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storedPrivateKey, setStoredPrivateKey] = useState<string | null>(null);
+  const [isSolvingPoW, setIsSolvingPoW] = useState(false);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -67,15 +69,30 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
     }
   };
 
-  const generateNewKeys = async () => {
+  const generateNewKeys = async (onPoWProgress?: (hashes: number) => void) => {
     try {
       const privateKey = generatePrivateKey();
       const publicKey = await derivePublicKey(privateKey);
       const keyId = getKeyId(publicKey);
       const displayName = `Anon_${keyId}`;
 
-      // Register the public key in the database using any type to bypass type checking
-      // until types are regenerated
+      // Solve Proof of Work to prevent Sybil attacks
+      setIsSolvingPoW(true);
+      toast.info('Solving proof of work puzzle...', { duration: 10000 });
+      
+      const powResult = await solvePoW(publicKey, onPoWProgress);
+      setIsSolvingPoW(false);
+      
+      // Verify the PoW solution locally before sending
+      const isValid = await verifyPoW(publicKey, powResult.nonce);
+      if (!isValid) {
+        toast.error('Proof of work verification failed');
+        return null;
+      }
+      
+      console.log(`PoW solved in ${powResult.timeMs}ms with nonce ${powResult.nonce}`);
+
+      // Register the public key in the database with PoW proof
       const { data, error } = await (supabase as any)
         .from('private_key_users')
         .insert({
@@ -103,8 +120,10 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
       localStorage.setItem(PRIVATE_KEY_STORAGE, privateKey);
       setStoredPrivateKey(privateKey);
 
+      toast.success(`Account created! (PoW: ${(powResult.timeMs / 1000).toFixed(1)}s)`);
       return { privateKey, publicKey, keyId };
     } catch (error) {
+      setIsSolvingPoW(false);
       console.error('Key generation failed:', error);
       toast.error('Failed to generate keys');
       return null;
@@ -194,7 +213,8 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         isAuthenticated: !!privateKeyUser,
         storedPrivateKey,
         clearStoredPrivateKey,
-        savePrivateKey
+        savePrivateKey,
+        isSolvingPoW
       }}
     >
       {children}
