@@ -207,8 +207,29 @@ export function useSportsMatches() {
     setLoading(true);
     setError(null);
     try {
-      const data = await sportsRequest<{ events: SportsMatch[] }>('/events');
-      setMatches(data.events || []);
+      // Fetch from all categories and combine results
+      const allCategories = ['soccer', 'cricket', 'basketball', 'football', 'hockey', 'rugby', 'golf', 'combat', 'other'];
+      const results = await Promise.allSettled(
+        allCategories.map(cat => sportsRequest<{ events: SportsMatch[] }>(`/events?category=${cat}`))
+      );
+      
+      const allEvents: SportsMatch[] = [];
+      const seenIds = new Set<string>();
+      
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value.events) {
+          for (const event of result.value.events) {
+            if (!seenIds.has(event.event_id)) {
+              seenIds.add(event.event_id);
+              allEvents.push(event);
+            }
+          }
+        }
+      }
+      
+      // Sort by commence time
+      allEvents.sort((a, b) => a.commence_timestamp - b.commence_timestamp);
+      setMatches(allEvents);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
       setError(message);
