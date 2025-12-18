@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,16 +27,12 @@ export function PoolTransparency({ marketId, className }: PoolTransparencyProps)
       const data = await api.getPoolInfo(marketId);
       setPoolInfo(data);
     } catch (e) {
-      setError('Failed to load pool info');
+      setError('Pool info is temporarily unavailable');
       console.error('Pool info error:', e);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchPoolInfo();
-  }, [marketId]);
 
   const copyToClipboard = async (text: string, type: 'address' | 'viewKey') => {
     try {
@@ -49,22 +45,44 @@ export function PoolTransparency({ marketId, className }: PoolTransparencyProps)
     }
   };
 
-  if (loading && !poolInfo) {
+  // Lazy-load pool info: only fetch when user requests it.
+  if (!poolInfo) {
     return (
       <Card className={className}>
-        <CardContent className="py-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading pool info...
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Shield className="w-4 h-4 text-emerald-500" />
+              Pool Transparency
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchPoolInfo}
+              disabled={loading}
+              className="h-7"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                  Loading
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3 h-3 mr-2" />
+                  Load
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="py-2 text-xs text-muted-foreground">
+          {error ? error : 'Load pool details to verify deposits with a watch-only wallet.'}
         </CardContent>
       </Card>
     );
   }
 
-  if (error && !poolInfo) {
-    return null;
-  }
-
-  if (!poolInfo) return null;
 
   return (
     <Card className={className}>
