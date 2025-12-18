@@ -86,9 +86,11 @@ export default function SportsPredictions() {
     amount: number;
     created_at: string;
     market_title?: string;
+    sport?: string;
   }
   const [topPayouts, setTopPayouts] = useState<PayoutEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [leaderboardSportFilter, setLeaderboardSportFilter] = useState<string | null>(null);
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -131,12 +133,13 @@ export default function SportsPredictions() {
       
       if (error) throw error;
       
-      // Map market IDs to titles from resolved markets
+      // Map market IDs to titles and sports from resolved markets
       const payoutsWithTitles = (payouts || []).map(p => {
         const market = markets.find(m => m.market_id === p.market_id);
         return {
           ...p,
           market_title: market?.title || p.market_id,
+          sport: market?.oracle_asset || 'unknown',
         };
       });
       
@@ -734,94 +737,146 @@ export default function SportsPredictions() {
 
             {/* Leaderboard Tab */}
             <TabsContent value="leaderboard" className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-500" />
-                Top Winners
-              </h2>
-              
-              {leaderboardLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading leaderboard...</div>
-              ) : topPayouts.length === 0 ? (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No payouts yet. Be the first winner!</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {/* Stats Summary */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <Card className="bg-card/80 backdrop-blur-sm">
-                      <CardContent className="pt-4 text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {topPayouts.reduce((sum, p) => sum + p.amount, 0).toFixed(4)}
+              {(() => {
+                // Get unique sports from payouts
+                const uniqueSports = [...new Set(topPayouts.map(p => p.sport).filter(Boolean))];
+                
+                // Filter payouts by selected sport
+                const filteredPayouts = leaderboardSportFilter 
+                  ? topPayouts.filter(p => p.sport === leaderboardSportFilter)
+                  : topPayouts;
+                
+                return (
+                  <>
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <h2 className="text-xl font-semibold flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-amber-500" />
+                        Top Winners
+                      </h2>
+                      
+                      {uniqueSports.length > 1 && (
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-4 h-4 text-muted-foreground" />
+                          <select
+                            value={leaderboardSportFilter || ''}
+                            onChange={(e) => setLeaderboardSportFilter(e.target.value || null)}
+                            className="bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <option value="">All Sports</option>
+                            {uniqueSports.map(sport => (
+                              <option key={sport} value={sport}>
+                                {getSportLabel(sport || '')}
+                              </option>
+                            ))}
+                          </select>
                         </div>
-                        <div className="text-xs text-muted-foreground">Total XMR Paid</div>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-card/80 backdrop-blur-sm">
-                      <CardContent className="pt-4 text-center">
-                        <div className="text-2xl font-bold text-emerald-500">
-                          {topPayouts.length}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Winning Bets</div>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-card/80 backdrop-blur-sm">
-                      <CardContent className="pt-4 text-center">
-                        <div className="text-2xl font-bold text-amber-500">
-                          {topPayouts.length > 0 ? Math.max(...topPayouts.map(p => p.amount)).toFixed(4) : '0'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Largest Win (XMR)</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Leaderboard Table */}
-                  <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border bg-muted/50">
-                            <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Rank</th>
-                            <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Market</th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Payout</th>
-                            <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Date</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {topPayouts.map((payout, index) => (
-                            <tr key={payout.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-2">
-                                  {index === 0 && <span className="text-lg">🥇</span>}
-                                  {index === 1 && <span className="text-lg">🥈</span>}
-                                  {index === 2 && <span className="text-lg">🥉</span>}
-                                  {index > 2 && <span className="text-muted-foreground font-mono">#{index + 1}</span>}
-                                </div>
-                              </td>
-                              <td className="py-3 px-4">
-                                <div className="max-w-[200px] truncate text-sm" title={payout.market_title}>
-                                  {payout.market_title}
-                                </div>
-                              </td>
-                              <td className="py-3 px-4 text-right">
-                                <span className="font-mono font-semibold text-emerald-500">
-                                  {payout.amount.toFixed(4)} XMR
-                                </span>
-                              </td>
-                              <td className="py-3 px-4 text-right text-sm text-muted-foreground">
-                                {new Date(payout.created_at).toLocaleDateString()}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      )}
                     </div>
-                  </Card>
-                </div>
-              )}
+                    
+                    {leaderboardLoading ? (
+                      <div className="text-center py-8 text-muted-foreground">Loading leaderboard...</div>
+                    ) : filteredPayouts.length === 0 ? (
+                      <Card className="text-center py-12">
+                        <CardContent>
+                          <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                          <p className="text-muted-foreground">
+                            {leaderboardSportFilter ? 'No payouts in this sport yet.' : 'No payouts yet. Be the first winner!'}
+                          </p>
+                          {leaderboardSportFilter && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => setLeaderboardSportFilter(null)}
+                              className="mt-2"
+                            >
+                              Clear filter
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Stats Summary */}
+                        <div className="grid grid-cols-3 gap-4">
+                          <Card className="bg-card/80 backdrop-blur-sm">
+                            <CardContent className="pt-4 text-center">
+                              <div className="text-2xl font-bold text-primary">
+                                {filteredPayouts.reduce((sum, p) => sum + p.amount, 0).toFixed(4)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Total XMR Paid</div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-card/80 backdrop-blur-sm">
+                            <CardContent className="pt-4 text-center">
+                              <div className="text-2xl font-bold text-emerald-500">
+                                {filteredPayouts.length}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Winning Bets</div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-card/80 backdrop-blur-sm">
+                            <CardContent className="pt-4 text-center">
+                              <div className="text-2xl font-bold text-amber-500">
+                                {filteredPayouts.length > 0 ? Math.max(...filteredPayouts.map(p => p.amount)).toFixed(4) : '0'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">Largest Win (XMR)</div>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Leaderboard Table */}
+                        <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-border bg-muted/50">
+                                  <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Rank</th>
+                                  <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Sport</th>
+                                  <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Market</th>
+                                  <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Payout</th>
+                                  <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {filteredPayouts.map((payout, index) => (
+                                  <tr key={payout.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                                    <td className="py-3 px-4">
+                                      <div className="flex items-center gap-2">
+                                        {index === 0 && <span className="text-lg">🥇</span>}
+                                        {index === 1 && <span className="text-lg">🥈</span>}
+                                        {index === 2 && <span className="text-lg">🥉</span>}
+                                        {index > 2 && <span className="text-muted-foreground font-mono">#{index + 1}</span>}
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      <Badge variant="outline" className="text-xs">
+                                        {getSportLabel(payout.sport || '')}
+                                      </Badge>
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      <div className="max-w-[180px] truncate text-sm" title={payout.market_title}>
+                                        {payout.market_title}
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 text-right">
+                                      <span className="font-mono font-semibold text-emerald-500">
+                                        {payout.amount.toFixed(4)} XMR
+                                      </span>
+                                    </td>
+                                    <td className="py-3 px-4 text-right text-sm text-muted-foreground">
+                                      {new Date(payout.created_at).toLocaleDateString()}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </TabsContent>
 
             {/* My Bets Tab */}
