@@ -283,8 +283,11 @@ export const api = {
     });
   },
 
-  async getPredictionMarkets(): Promise<{ markets: PredictionMarket[] }> {
-    return proxyRequest<{ markets: PredictionMarket[] }>('/api/predictions/markets');
+  async getPredictionMarkets(includeResolved = false): Promise<{ markets: PredictionMarket[] }> {
+    const path = includeResolved 
+      ? '/api/predictions/markets?include_resolved=true' 
+      : '/api/predictions/markets';
+    return proxyRequest<{ markets: PredictionMarket[] }>(path);
   },
 
   async getPredictionMarket(marketId: string): Promise<PredictionMarket & { bets: unknown[] }> {

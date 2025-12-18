@@ -163,7 +163,8 @@ export default function SportsPredictions() {
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
-      const { markets: apiMarkets } = await api.getPredictionMarkets();
+      // Fetch all markets including resolved ones
+      const { markets: apiMarkets } = await api.getPredictionMarkets(true);
       const sportsMarkets = apiMarkets.filter(m => m.oracle_type === 'sports');
 
       // Show markets immediately; only filter out blocked ones.
@@ -326,10 +327,10 @@ export default function SportsPredictions() {
 
   const now = Date.now() / 1000;
   const activeMarkets = markets.filter(m => m.resolved === 0 && m.resolution_time > now);
-  // Only show in Results if market had betting activity (pool > 0) AND is resolved or past resolution time
+  // Only show in Results if market is resolved (resolved === 1) AND had betting activity (pool > 0)
   const resolvedMarkets = markets.filter(m => 
-    (m.yes_pool_xmr > 0 || m.no_pool_xmr > 0) && 
-    (m.resolved === 1 || (m.resolved === 0 && m.resolution_time <= now))
+    m.resolved === 1 && 
+    (m.yes_pool_xmr > 0 || m.no_pool_xmr > 0)
   );
 
   return (
