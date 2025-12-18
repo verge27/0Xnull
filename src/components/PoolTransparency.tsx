@@ -112,7 +112,7 @@ export function PoolTransparency({ marketId, className }: PoolTransparencyProps)
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
             <p className="text-xs text-muted-foreground mb-1">Pool Totals</p>
             <p className="text-sm font-mono">
-              YES: {poolInfo.yes_pool_xmr.toFixed(6)} XMR &nbsp;&nbsp; NO: {poolInfo.no_pool_xmr.toFixed(6)} XMR
+              YES: {(poolInfo.yes_pool_xmr ?? 0).toFixed(6)} XMR &nbsp;&nbsp; NO: {(poolInfo.no_pool_xmr ?? 0).toFixed(6)} XMR
             </p>
           </div>
         )}
