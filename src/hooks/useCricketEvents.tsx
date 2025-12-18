@@ -25,7 +25,7 @@ export interface CricketResult {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const CRICKET_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const CRICKET_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 async function cricketRequest<T>(path: string): Promise<T> {
   const proxyUrl = new URL(CRICKET_API_BASE);

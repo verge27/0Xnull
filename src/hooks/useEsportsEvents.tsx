@@ -33,7 +33,7 @@ export interface EsportsGame {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/0xnull-proxy`;
+const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 async function esportsRequest<T>(path: string): Promise<T> {
   const proxyUrl = new URL(ESPORTS_API_BASE);

@@ -156,7 +156,7 @@ export default function StarcraftPredictions() {
     setEventsLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/events?game=starcraft-2')}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy?path=${encodeURIComponent('/api/esports/events?game=starcraft-2')}`,
         {
           headers: {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -178,7 +178,7 @@ export default function StarcraftPredictions() {
   const fetchLiveEvents = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/live?game=starcraft-2')}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy?path=${encodeURIComponent('/api/esports/live?game=starcraft-2')}`,
         {
           headers: {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -198,7 +198,7 @@ export default function StarcraftPredictions() {
   const fetchResults = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/esports/results?game=starcraft-2')}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy?path=${encodeURIComponent('/api/esports/results?game=starcraft-2')}`,
         {
           headers: {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -266,7 +266,7 @@ export default function StarcraftPredictions() {
       }
       
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy?path=${encodeURIComponent('/api/predictions/markets')}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy?path=${encodeURIComponent('/api/predictions/markets')}`,
         {
           method: 'POST',
           headers: {

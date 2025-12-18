@@ -70,7 +70,7 @@ export interface Event {
 }
 
 async function proxyFetch(path: string) {
-  const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/0xnull-proxy`;
+  const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/xnull-proxy`;
   const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
   const res = await fetch(url, {
     headers: {
