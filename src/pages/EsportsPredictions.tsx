@@ -67,6 +67,7 @@ export default function EsportsPredictions() {
 
   const fetchMarkets = async () => {
     setLoading(true);
+    setMarkets([]);
     try {
       // Fetch blocked markets from database
       const { data: blockedData } = await supabase
