@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,20 +66,31 @@ export function BetDepositModal({
     return () => clearInterval(interval);
   }, [betData?.expires_at]);
 
-  // Poll for status updates
+  // Poll for status updates - using refs to avoid dependency issues
+  const onCheckStatusRef = useRef(onCheckStatus);
+  const onConfirmedRef = useRef(onConfirmed);
+  onCheckStatusRef.current = onCheckStatus;
+  onConfirmedRef.current = onConfirmed;
+
   useEffect(() => {
     if (!open || !betData || status === 'confirmed') return;
 
     setPolling(true);
+    let isMounted = true;
     
     const pollStatus = async () => {
-      const result = await onCheckStatus(betData.bet_id);
-      if (result) {
-        setStatus(result.status);
-        if (result.status === 'confirmed') {
-          toast.success('Deposit confirmed!');
-          onConfirmed();
+      if (!isMounted) return;
+      try {
+        const result = await onCheckStatusRef.current(betData.bet_id);
+        if (result && isMounted) {
+          setStatus(result.status);
+          if (result.status === 'confirmed') {
+            toast.success('Deposit confirmed!');
+            onConfirmedRef.current();
+          }
         }
+      } catch (e) {
+        console.error('Poll status error:', e);
       }
     };
 
@@ -89,10 +100,11 @@ export function BetDepositModal({
     // Poll every 10 seconds
     const interval = setInterval(pollStatus, 10000);
     return () => {
+      isMounted = false;
       clearInterval(interval);
       setPolling(false);
     };
-  }, [open, betData, status, onCheckStatus, onConfirmed]);
+  }, [open, betData?.bet_id, status]);
 
   const copyToClipboard = async (text: string, type: 'address' | 'amount' | 'viewKey') => {
     try {

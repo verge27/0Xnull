@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,19 +56,26 @@ export function MyBets({ bets, onStatusUpdate, onPayoutSubmit }: MyBetsProps) {
     setPreviousStatuses(newStatuses);
   }, [bets]);
 
+  // Use ref to avoid effect re-runs when onStatusUpdate changes
+  const onStatusUpdateRef = useRef(onStatusUpdate);
+  onStatusUpdateRef.current = onStatusUpdate;
+
   // Poll for status updates on awaiting_deposit bets
   useEffect(() => {
-    const awaitingBets = bets.filter(bet => bet.status === 'awaiting_deposit');
-    if (awaitingBets.length === 0) return;
+    const awaitingBetIds = bets
+      .filter(bet => bet.status === 'awaiting_deposit')
+      .map(bet => bet.bet_id);
+    
+    if (awaitingBetIds.length === 0) return;
 
     const interval = setInterval(() => {
-      awaitingBets.forEach(bet => {
-        onStatusUpdate(bet.bet_id);
+      awaitingBetIds.forEach(betId => {
+        onStatusUpdateRef.current(betId);
       });
     }, 30000); // Poll every 30 seconds
 
     return () => clearInterval(interval);
-  }, [bets, onStatusUpdate]);
+  }, [bets.map(b => `${b.bet_id}:${b.status}`).join(',')]);
 
   const handleRefresh = async (betId: string) => {
     setPollingBets(prev => new Set(prev).add(betId));
