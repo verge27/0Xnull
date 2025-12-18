@@ -273,14 +273,19 @@ export default function SportsPredictions() {
     return odds.find(o => o.event_id === match.event_id);
   };
 
-  // Sort matches with priority sports first
+  // Sort matches - by date when viewing "All", by priority sports when filtered
   const sortedMatches = [...matches].sort((a, b) => {
+    // When viewing all categories, sort purely by date
+    if (!selectedCategory) {
+      return Number(a.commence_timestamp) - Number(b.commence_timestamp);
+    }
+    // When viewing a specific category, sort by priority sports first, then by date
     const aPriority = PRIORITY_SPORTS.indexOf(a.sport);
     const bPriority = PRIORITY_SPORTS.indexOf(b.sport);
     if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
     if (aPriority !== -1) return -1;
     if (bPriority !== -1) return 1;
-    return a.commence_timestamp - b.commence_timestamp;
+    return Number(a.commence_timestamp) - Number(b.commence_timestamp);
   });
 
   const activeMarkets = markets.filter(m => m.resolved === 0);
