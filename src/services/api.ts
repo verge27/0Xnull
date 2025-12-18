@@ -288,4 +288,30 @@ export const api = {
   async getPoolInfo(marketId: string): Promise<PoolInfo> {
     return proxyRequest<PoolInfo>(`/api/predictions/pool/${marketId}`);
   },
+
+  // Soft pool existence check: never throws / never propagates 5xx.
+  // Uses the proxy's `soft_pool=1` mode to avoid surfacing upstream timeouts as runtime errors.
+  async checkPool(marketId: string): Promise<{ exists: boolean; pool?: PoolInfo }> {
+    const isOnion = isTorBrowser();
+
+    let url: string;
+    if (isOnion) {
+      url = `${ONION_API}/predictions/pool/${marketId}`;
+    } else {
+      const proxyUrl = new URL(PROXY_URL);
+      proxyUrl.searchParams.set('path', `/api/predictions/pool/${marketId}`);
+      proxyUrl.searchParams.set('soft_pool', '1');
+      url = proxyUrl.toString();
+    }
+
+    try {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+      const data = await res.json().catch(() => ({}));
+      if (typeof data?.exists === 'boolean') return data;
+      // Onion/direct fallback
+      return { exists: res.ok };
+    } catch {
+      return { exists: false };
+    }
+  },
 };
