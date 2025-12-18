@@ -622,29 +622,56 @@ export default function SportsPredictions() {
                 </Card>
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {resolvedMarkets.map((market) => {
+                {resolvedMarkets.map((market) => {
                     const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                    const winningPool = market.outcome === 'YES' ? market.yes_pool_xmr : market.no_pool_xmr;
+                    const losingPool = market.outcome === 'YES' ? market.no_pool_xmr : market.yes_pool_xmr;
+                    const isPaidOut = market.resolved === 1 && market.outcome;
+                    
                     return (
                       <Card key={market.market_id} className="bg-card/80 backdrop-blur-sm">
                         <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between">
+                          <div className="flex items-start justify-between gap-2">
                             <CardTitle className="text-lg">{market.title}</CardTitle>
-                            {getStatusBadge(market)}
+                            <div className="flex flex-col gap-1 items-end shrink-0">
+                              {getStatusBadge(market)}
+                              {isPaidOut && (
+                                <Badge variant="outline" className="border-emerald-500 text-emerald-500 text-xs">
+                                  <CheckCircle className="w-3 h-3 mr-1" /> Paid Out
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                           {market.description && (
                             <CardDescription className="text-sm">{market.description}</CardDescription>
                           )}
                         </CardHeader>
-                        <CardContent className="space-y-2">
+                        <CardContent className="space-y-3">
                           <div className="text-sm text-muted-foreground">
                             Resolved: {new Date(market.resolution_time * 1000).toLocaleDateString()}
                           </div>
+                          
                           {totalPool > 0 && (
-                            <div className="flex gap-4 text-sm">
-                              <span className="text-emerald-500">YES: {market.yes_pool_xmr.toFixed(4)} XMR</span>
-                              <span className="text-red-500">NO: {market.no_pool_xmr.toFixed(4)} XMR</span>
+                            <div className="space-y-2">
+                              <div className="flex gap-4 text-sm">
+                                <span className={market.outcome === 'YES' ? 'text-emerald-500 font-semibold' : 'text-muted-foreground'}>
+                                  YES: {market.yes_pool_xmr.toFixed(4)} XMR
+                                </span>
+                                <span className={market.outcome === 'NO' ? 'text-red-500 font-semibold' : 'text-muted-foreground'}>
+                                  NO: {market.no_pool_xmr.toFixed(4)} XMR
+                                </span>
+                              </div>
+                              
+                              {isPaidOut && winningPool > 0 && (
+                                <div className="text-xs text-muted-foreground bg-muted/50 rounded p-2">
+                                  <div className="font-medium text-foreground mb-1">Payout Summary</div>
+                                  <div>Winners split: {totalPool.toFixed(4)} XMR</div>
+                                  <div>Multiplier: {winningPool > 0 ? (totalPool / winningPool).toFixed(2) : '—'}x</div>
+                                </div>
+                              )}
                             </div>
                           )}
+                          
                           {totalPool === 0 && (
                             <div className="text-xs text-muted-foreground">No bets placed</div>
                           )}
