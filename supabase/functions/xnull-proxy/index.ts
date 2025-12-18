@@ -25,9 +25,13 @@ serve(async (req) => {
       });
     }
 
-    // Pool endpoints are always "soft" to avoid upstream 5xx/504s bubbling to the client.
-    // Returns HTTP 200 with { exists: boolean, pool?: object, status?: number }
-    if (req.method === 'GET' && targetPath.startsWith('/api/predictions/pool/')) {
+    // Pool endpoints can run in "soft" mode (soft_pool=1) to avoid upstream 5xx/504s bubbling to the client.
+    // When soft_pool=1, always returns HTTP 200 with { exists: boolean, pool?: object, status?: number }
+    if (
+      req.method === 'GET' &&
+      targetPath.startsWith('/api/predictions/pool/') &&
+      url.searchParams.get('soft_pool') === '1'
+    ) {
       const targetUrl = new URL(`${API_BASE}${targetPath}`);
       url.searchParams.forEach((value, key) => {
         if (key !== 'path' && key !== 'soft_pool') targetUrl.searchParams.set(key, value);

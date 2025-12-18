@@ -153,7 +153,6 @@ export default function SportsPredictions() {
 
   const fetchMarkets = async () => {
     setLoading(true);
-    setMarkets([]);
     try {
       // Fetch blocked markets from database
       const { data: blockedData } = await supabase
@@ -164,47 +163,9 @@ export default function SportsPredictions() {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const sportsMarkets = apiMarkets.filter(m => m.oracle_type === 'sports');
 
-      // Filter out blocked markets
+      // Show markets immediately; only filter out blocked ones.
       const unblockedMarkets = sportsMarkets.filter(m => !blockedIds.has(m.market_id));
-
-      const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
-        new Promise<T>((resolve, reject) => {
-          const id = setTimeout(() => reject(new Error('timeout')), ms);
-          promise
-            .then((v) => {
-              clearTimeout(id);
-              resolve(v);
-            })
-            .catch((e) => {
-              clearTimeout(id);
-              reject(e);
-            });
-        });
-
-       const validatePools = async (marketsToValidate: PredictionMarket[]) => {
-         const concurrency = 6;
-         const valid: PredictionMarket[] = [];
-         let i = 0;
-
-         const workers = Array.from({ length: Math.min(concurrency, marketsToValidate.length) }, async () => {
-           while (i < marketsToValidate.length) {
-             const market = marketsToValidate[i++];
-             try {
-               const result = await withTimeout(api.checkPool(market.market_id), 4000);
-               const hasWallet = Boolean(result?.pool && (result.pool as any).pool_address && (result.pool as any).view_key);
-               if (result?.exists && hasWallet) valid.push(market);
-             } catch {
-               // Invalid / missing pool -> exclude
-             }
-           }
-         });
-
-         await Promise.all(workers);
-         return valid;
-       };
-
-      const validMarkets = await validatePools(unblockedMarkets);
-      setMarkets(validMarkets);
+      setMarkets(unblockedMarkets);
     } catch (error) {
       console.error('Error fetching markets:', error);
     } finally {
