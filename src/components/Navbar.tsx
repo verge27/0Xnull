@@ -139,6 +139,10 @@ export const Navbar = () => {
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span>Esports Predict</span>
                   </Link>
+                  <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span>StarCraft</span>
+                  </Link>
                   <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span>Eastern</span>
@@ -146,10 +150,6 @@ export const Navbar = () => {
                   <Link to="/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span>Slap</span>
-                  </Link>
-                  <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>StarCraft</span>
                   </Link>
                   <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <AlertTriangle className="w-5 h-5 text-primary" />
