@@ -199,6 +199,12 @@ export const Navbar = () => {
               </Button>
             </Link>
 
+            <Link to="/starcraft">
+              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
+                <span className="hidden md:inline">SC2</span>
+              </Button>
+            </Link>
+
             <Link to="/russian-mma">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">Eastern</span>
@@ -208,12 +214,6 @@ export const Navbar = () => {
             <Link to="/slap">
               <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
                 <span className="hidden md:inline">Slap</span>
-              </Button>
-            </Link>
-
-            <Link to="/starcraft">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">SC2</span>
               </Button>
             </Link>
 
