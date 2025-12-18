@@ -117,12 +117,11 @@ export default function SportsPredictions() {
     setLeaderboardLoading(true);
     try {
       const { payouts } = await api.getPredictionPayouts();
-      // Filter for wins only (exclude refunds) and sort by payout amount
-      const winPayouts = payouts
-        .filter(p => p.payout_type === 'win')
+      // Sort by payout amount descending
+      const sortedPayouts = payouts
         .sort((a, b) => b.payout_xmr - a.payout_xmr)
         .slice(0, 20);
-      setTopPayouts(winPayouts);
+      setTopPayouts(sortedPayouts);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     } finally {
