@@ -78,6 +78,17 @@ export default function SportsPredictions() {
   // Video highlights
   const [highlights, setHighlights] = useState<VideoHighlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
+  
+  // Leaderboard
+  interface PayoutEntry {
+    id: string;
+    market_id: string;
+    amount: number;
+    created_at: string;
+    market_title?: string;
+  }
+  const [topPayouts, setTopPayouts] = useState<PayoutEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
 
   // Get available leagues for selected category
   const availableLeagues = selectedCategory ? categories[selectedCategory] || [] : [];
@@ -96,6 +107,7 @@ export default function SportsPredictions() {
     fetchMarkets();
     fetchAll();
     fetchHighlights();
+    fetchLeaderboard();
     
     const interval = setInterval(() => {
       fetchMarkets();
@@ -106,6 +118,42 @@ export default function SportsPredictions() {
       stopLiveScorePolling();
     };
   }, [fetchAll, stopLiveScorePolling]);
+
+  const fetchLeaderboard = async () => {
+    setLeaderboardLoading(true);
+    try {
+      // Fetch top payouts from market_payouts table
+      const { data: payouts, error } = await supabase
+        .from('market_payouts')
+        .select('id, market_id, amount, created_at')
+        .order('amount', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      
+      // Map market IDs to titles from resolved markets
+      const payoutsWithTitles = (payouts || []).map(p => {
+        const market = markets.find(m => m.market_id === p.market_id);
+        return {
+          ...p,
+          market_title: market?.title || p.market_id,
+        };
+      });
+      
+      setTopPayouts(payoutsWithTitles);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
+
+  // Re-fetch leaderboard when markets update to get titles
+  useEffect(() => {
+    if (markets.length > 0) {
+      fetchLeaderboard();
+    }
+  }, [markets]);
 
   const fetchHighlights = async () => {
     setHighlightsLoading(true);
@@ -471,10 +519,11 @@ export default function SportsPredictions() {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-4">
+            <TabsList className="grid w-full max-w-lg grid-cols-5">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
+              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
               <TabsTrigger value="my-bets">My Bets</TabsTrigger>
             </TabsList>
 
@@ -679,6 +728,98 @@ export default function SportsPredictions() {
                       </Card>
                     );
                   })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Leaderboard Tab */}
+            <TabsContent value="leaderboard" className="space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" />
+                Top Winners
+              </h2>
+              
+              {leaderboardLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading leaderboard...</div>
+              ) : topPayouts.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No payouts yet. Be the first winner!</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {/* Stats Summary */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="bg-card/80 backdrop-blur-sm">
+                      <CardContent className="pt-4 text-center">
+                        <div className="text-2xl font-bold text-primary">
+                          {topPayouts.reduce((sum, p) => sum + p.amount, 0).toFixed(4)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Total XMR Paid</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-card/80 backdrop-blur-sm">
+                      <CardContent className="pt-4 text-center">
+                        <div className="text-2xl font-bold text-emerald-500">
+                          {topPayouts.length}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Winning Bets</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-card/80 backdrop-blur-sm">
+                      <CardContent className="pt-4 text-center">
+                        <div className="text-2xl font-bold text-amber-500">
+                          {topPayouts.length > 0 ? Math.max(...topPayouts.map(p => p.amount)).toFixed(4) : '0'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Largest Win (XMR)</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Leaderboard Table */}
+                  <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-border bg-muted/50">
+                            <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Rank</th>
+                            <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Market</th>
+                            <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Payout</th>
+                            <th className="text-right py-3 px-4 text-xs font-medium text-muted-foreground">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {topPayouts.map((payout, index) => (
+                            <tr key={payout.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  {index === 0 && <span className="text-lg">🥇</span>}
+                                  {index === 1 && <span className="text-lg">🥈</span>}
+                                  {index === 2 && <span className="text-lg">🥉</span>}
+                                  {index > 2 && <span className="text-muted-foreground font-mono">#{index + 1}</span>}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="max-w-[200px] truncate text-sm" title={payout.market_title}>
+                                  {payout.market_title}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <span className="font-mono font-semibold text-emerald-500">
+                                  {payout.amount.toFixed(4)} XMR
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-right text-sm text-muted-foreground">
+                                {new Date(payout.created_at).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
                 </div>
               )}
             </TabsContent>
