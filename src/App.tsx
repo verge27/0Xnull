@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
@@ -29,7 +29,7 @@ import Privacy from "./pages/Privacy";
 import Swaps from "./pages/Swaps";
 import VPS from "./pages/VPS";
 import Phone from "./pages/Phone";
-import AI from "./pages/AI";
+import AIHub from "./pages/AIHub";
 import VpnResources from "./pages/VpnResources";
 import Philosophy from "./pages/Philosophy";
 import GrapheneOS from "./pages/GrapheneOS";
@@ -41,7 +41,6 @@ import Therapy from "./pages/Therapy";
 import Kokoro from "./pages/Kokoro";
 import Verify from "./pages/Verify";
 import Support from "./pages/Support";
-import Predictions from "./pages/Predictions";
 import CryptoPredictions from "./pages/CryptoPredictions";
 import SportsPredictions from "./pages/SportsPredictions";
 import EsportsPredictions from "./pages/EsportsPredictions";
@@ -51,6 +50,9 @@ import TorGuide from "./pages/TorGuide";
 import HowBettingWorks from "./pages/HowBettingWorks";
 import RussianMMA from "./pages/RussianMMA";
 import Slap from "./pages/Slap";
+import InfraHub from "./pages/InfraHub";
+import PredictionsHub from "./pages/PredictionsHub";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -65,48 +67,63 @@ const App = () => (
             <PrivateKeyAuthProvider>
               <TokenProvider>
                 <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/browse" element={<Browse />} />
-            <Route path="/listing/:id" element={<ListingDetail />} />
-            <Route path="/checkout/:orderId" element={<Checkout />} />
-            <Route path="/order/:id" element={<OrderTracking />} />
-            <Route path="/seller/:id" element={<SellerProfile />} />
-            <Route path="/sell" element={<Sell />} />
-            <Route path="/sell/new" element={<NewListing />} />
-            <Route path="/sell/edit/:id" element={<EditListing />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/messages/:conversationId" element={<Messages />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/safety" element={<HarmReduction />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/swaps" element={<Swaps />} />
-            <Route path="/vps" element={<VPS />} />
-            <Route path="/phone" element={<Phone />} />
-            <Route path="/ai" element={<AI />} />
-            <Route path="/vpn-resources" element={<VpnResources />} />
-            <Route path="/philosophy" element={<Philosophy />} />
-            <Route path="/grapheneos" element={<GrapheneOS />} />
-            <Route path="/cashout" element={<FiatOfframp />} />
-            <Route path="/buy" element={<FiatOnramp />} />
-            <Route path="/api-analytics" element={<ApiAnalytics />} />
-            <Route path="/voice" element={<Voice />} />
-            <Route path="/therapy" element={<Therapy />} />
-            <Route path="/kokoro" element={<Kokoro />} />
-            <Route path="/verify" element={<Verify />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/predictions" element={<CryptoPredictions />} />
-            <Route path="/sports-predictions" element={<SportsPredictions />} />
-            <Route path="/esports-predictions" element={<EsportsPredictions />} />
-            <Route path="/cricket-predictions" element={<CricketPredictions />} />
-            <Route path="/starcraft" element={<StarcraftPredictions />} />
-            <Route path="/russian-mma" element={<RussianMMA />} />
-            <Route path="/slap" element={<Slap />} />
-            <Route path="/tor-guide" element={<TorGuide />} />
-            <Route path="/how-betting-works" element={<HowBettingWorks />} />
+                  <Route path="/" element={<Index />} />
+                  
+                  {/* Marketplace */}
+                  <Route path="/browse" element={<Browse />} />
+                  <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
+                  <Route path="/listing/:id" element={<ListingDetail />} />
+                  <Route path="/checkout/:orderId" element={<Checkout />} />
+                  <Route path="/order/:id" element={<OrderTracking />} />
+                  <Route path="/seller/:id" element={<SellerProfile />} />
+                  <Route path="/sell" element={<Sell />} />
+                  <Route path="/sell/new" element={<NewListing />} />
+                  <Route path="/sell/edit/:id" element={<EditListing />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/messages/:conversationId" element={<Messages />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/auth" element={<Auth />} />
+                  
+                  {/* Predictions */}
+                  <Route path="/predict" element={<PredictionsHub />} />
+                  <Route path="/predictions" element={<CryptoPredictions />} />
+                  <Route path="/sports-predictions" element={<SportsPredictions />} />
+                  <Route path="/esports-predictions" element={<EsportsPredictions />} />
+                  <Route path="/cricket-predictions" element={<CricketPredictions />} />
+                  <Route path="/starcraft" element={<StarcraftPredictions />} />
+                  <Route path="/russian-mma" element={<RussianMMA />} />
+                  <Route path="/slap" element={<Slap />} />
+                  <Route path="/how-betting-works" element={<HowBettingWorks />} />
+                  
+                  {/* AI */}
+                  <Route path="/ai" element={<AIHub />} />
+                  <Route path="/voice" element={<Voice />} />
+                  <Route path="/therapy" element={<Therapy />} />
+                  <Route path="/kokoro" element={<Kokoro />} />
+                  
+                  {/* Infrastructure */}
+                  <Route path="/infra" element={<InfraHub />} />
+                  <Route path="/swaps" element={<Swaps />} />
+                  <Route path="/vps" element={<VPS />} />
+                  <Route path="/phone" element={<Phone />} />
+                  <Route path="/esim" element={<Navigate to="/phone" replace />} />
+                  
+                  {/* Other */}
+                  <Route path="/safety" element={<HarmReduction />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/vpn-resources" element={<VpnResources />} />
+                  <Route path="/philosophy" element={<Philosophy />} />
+                  <Route path="/grapheneos" element={<GrapheneOS />} />
+                  <Route path="/cashout" element={<FiatOfframp />} />
+                  <Route path="/buy" element={<FiatOnramp />} />
+                  <Route path="/api-analytics" element={<ApiAnalytics />} />
+                  <Route path="/verify" element={<Verify />} />
+                  <Route path="/support" element={<Support />} />
+                  <Route path="/tor-guide" element={<TorGuide />} />
+                  
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

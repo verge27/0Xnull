@@ -5,111 +5,118 @@ export const Footer = () => {
   return (
     <footer className="border-t border-border bg-card/30 mt-auto">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-3">
               <Shield className="w-6 h-6 text-primary" />
               <span className="text-xl font-bold text-gradient">0xNull</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Private infrastructure for the permissionless economy.
+              No logs. No accounts. Privacy by default.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Marketplace */}
           <div>
-            <h4 className="font-semibold mb-3">Quick Links</h4>
+            <h4 className="font-semibold mb-3">Marketplace</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/browse" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Browse Listings
+                  Browse
                 </Link>
               </li>
               <li>
                 <Link to="/sell" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Start Selling
-                </Link>
-              </li>
-              <li>
-                <Link to="/safety" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Safety Guide
-                </Link>
-              </li>
-              <li>
-                <Link to="/philosophy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Philosophy
-                </Link>
-              </li>
-              <li>
-                <Link to="/vpn-resources" className="text-muted-foreground hover:text-foreground transition-colors">
-                  VPN Guide
-                </Link>
-              </li>
-              <li>
-                <Link to="/grapheneos" className="text-muted-foreground hover:text-foreground transition-colors">
-                  GrapheneOS
-                </Link>
-              </li>
-              <li>
-                <Link to="/cashout" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Fiat Gateway
-                </Link>
-              </li>
-              <li>
-                <Link to="/voice" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Voice Cloning
-                </Link>
-              </li>
-              <li>
-                <Link to="/therapy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  AI Therapy
+                  Sell
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal & Contact */}
+          {/* Predictions */}
           <div>
-            <h4 className="font-semibold mb-3">Legal & Contact</h4>
+            <h4 className="font-semibold mb-3">Predictions</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Terms of Service
+                <Link to="/esports-predictions" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Esports
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Privacy Policy
+                <Link to="/sports-predictions" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Sports
                 </Link>
               </li>
               <li>
-                <Link to="/verify" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Verify & Security
+                <Link to="/predictions" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Crypto
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* AI */}
+          <div>
+            <h4 className="font-semibold mb-3">AI</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/voice" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Voice
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Support
+                <Link to="/therapy" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Therapy
                 </Link>
               </li>
               <li>
-                <a 
-                  href="https://kycnot.me/service/0xnull"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  KYCNOT.ME Listing
-                </a>
+                <Link to="/kokoro" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Kokoro
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Infrastructure */}
+          <div>
+            <h4 className="font-semibold mb-3">Infrastructure</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/swaps" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Swaps
+                </Link>
+              </li>
+              <li>
+                <Link to="/vps" className="text-muted-foreground hover:text-foreground transition-colors">
+                  VPS
+                </Link>
+              </li>
+              <li>
+                <Link to="/phone" className="text-muted-foreground hover:text-foreground transition-colors">
+                  eSIM
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-6 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} 0xNull Marketplace. All transactions conducted in XMR.</p>
+        <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <a 
+              href="https://kycnot.me/service/0xnull"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              KYCNOT.ME
+            </a>
+            <Link to="/support" className="hover:text-foreground transition-colors">Contact</Link>
+          </div>
+          <p>© {new Date().getFullYear()} 0xNull. All transactions in XMR.</p>
         </div>
       </div>
     </footer>

@@ -1,14 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, AlertTriangle, Menu, RefreshCw, Server, Smartphone, Bot, Sparkles, Key, Copy, Check, Trash2, TrendingUp } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
-import { NavLink } from './NavLink';
 import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
@@ -26,14 +26,12 @@ export const Navbar = () => {
   const [keyInput, setKeyInput] = useState('');
   const [keyCopied, setKeyCopied] = useState(false);
 
-  // Use stored private key if available
   useEffect(() => {
     if (storedPrivateKey && !keyInput) {
       setKeyInput(storedPrivateKey);
     }
   }, [storedPrivateKey]);
 
-  // Check if authenticated via either method
   const isAuthenticated = !!user || isPkAuthenticated;
 
   useEffect(() => {
@@ -83,7 +81,7 @@ export const Navbar = () => {
             </div>
           </form>
 
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
@@ -91,163 +89,206 @@ export const Navbar = () => {
                   <Menu className="w-5 h-5 text-primary" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72">
+              <SheetContent side="left" className="w-72 overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-primary" />
                     <span className="text-gradient">0xNull</span>
                   </SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-6">
+                <nav className="flex flex-col gap-1 mt-6">
+                  {/* Marketplace */}
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</div>
                   <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <ShoppingBag className="w-5 h-5 text-primary" />
                     <span>Browse</span>
                   </Link>
+                  {isAuthenticated && (
+                    <>
+                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                        <Package className="w-5 h-5 text-primary" />
+                        <span>Sell</span>
+                      </Link>
+                      <Link to="/orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                        <Package className="w-5 h-5 text-primary" />
+                        <span>My Orders</span>
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Predictions */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Predictions</div>
+                  <Link to="/esports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Gamepad2 className="w-5 h-5 text-purple-500" />
+                    <span>Esports</span>
+                  </Link>
+                  <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">StarCraft II</span>
+                  </Link>
+                  <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Eastern</span>
+                  </Link>
+                  <Link to="/sports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Trophy className="w-5 h-5 text-green-500" />
+                    <span>Sports</span>
+                  </Link>
+                  <Link to="/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Slap</span>
+                  </Link>
+                  <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Bitcoin className="w-5 h-5 text-orange-500" />
+                    <span>Crypto</span>
+                  </Link>
+
+                  {/* AI */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI</div>
+                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Bot className="w-5 h-5 text-primary" />
+                    <span>AI Hub</span>
+                  </Link>
+                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Voice</span>
+                  </Link>
+                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Therapy</span>
+                  </Link>
+                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Kokoro</span>
+                  </Link>
+
+                  {/* Infrastructure */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infrastructure</div>
                   <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <RefreshCw className="w-5 h-5 text-primary" />
                     <span>Swaps</span>
                   </Link>
                   <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Server className="w-5 h-5 text-primary" />
+                    <Server className="w-5 h-5 text-blue-500" />
                     <span>VPS</span>
                   </Link>
                   <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Smartphone className="w-5 h-5 text-primary" />
+                    <Smartphone className="w-5 h-5 text-green-500" />
                     <span>eSIM</span>
                   </Link>
-                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Bot className="w-5 h-5 text-primary" />
-                    <span>AI</span>
-                  </Link>
-                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Heart className="w-5 h-5 text-primary" />
-                    <span>Therapy</span>
-                  </Link>
-                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <span>Voice Clone</span>
-                  </Link>
-                  <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Crypto Predict</span>
-                  </Link>
-                  <Link to="/sports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Sports Predict</span>
-                  </Link>
-                  <Link to="/esports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Esports Predict</span>
-                  </Link>
-                  <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>StarCraft</span>
-                  </Link>
-                  <Link to="/russian-mma" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Eastern</span>
-                  </Link>
-                  <Link to="/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Slap</span>
-                  </Link>
-                  <Link to="/safety" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <AlertTriangle className="w-5 h-5 text-primary" />
-                    <span>Safety</span>
-                  </Link>
-                  {isAuthenticated && (
-                    <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                      <Package className="w-5 h-5 text-primary" />
-                      <span>Sell</span>
-                    </Link>
-                  )}
                 </nav>
               </SheetContent>
             </Sheet>
 
-            {/* Desktop Navigation */}
-            <Link to="/browse">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <ShoppingBag className="w-4 h-4" />
-                <span className="hidden md:inline">Browse</span>
-              </Button>
-            </Link>
+            {/* Desktop Navigation - 4 Main Dropdowns */}
+            
+            {/* Marketplace Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <ShoppingBag className="w-4 h-4" />
+                  <span className="hidden md:inline">Marketplace</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuItem asChild>
+                  <Link to="/browse" className="cursor-pointer">Browse Listings</Link>
+                </DropdownMenuItem>
+                {isAuthenticated && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/sell" className="cursor-pointer">Sell</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">My Orders</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <Link to="/swaps">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Swaps</span>
-              </Button>
-            </Link>
+            {/* Predictions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="hidden md:inline">Predictions</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Esports</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/esports-predictions" className="cursor-pointer">All Esports</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/starcraft" className="cursor-pointer">StarCraft II</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/russian-mma" className="cursor-pointer">Eastern</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Sports</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/sports-predictions" className="cursor-pointer">All Sports</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/slap" className="cursor-pointer">Slap Fighting</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/predictions" className="cursor-pointer">Crypto Markets</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <Link to="/predictions">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <TrendingUp className="w-4 h-4" />
-                <span className="hidden md:inline">Crypto</span>
-              </Button>
-            </Link>
+            {/* AI Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <Bot className="w-4 h-4" />
+                  <span className="hidden md:inline">AI</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuItem asChild>
+                  <Link to="/ai" className="cursor-pointer">AI Hub</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/therapy" className="cursor-pointer">AI Therapy</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/kokoro" className="cursor-pointer">Kokoro Companion</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <Link to="/sports-predictions">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Sports</span>
-              </Button>
-            </Link>
-
-
-            <Link to="/esports-predictions">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Esports</span>
-              </Button>
-            </Link>
-
-            <Link to="/starcraft">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">SC2</span>
-              </Button>
-            </Link>
-
-            <Link to="/russian-mma">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Eastern</span>
-              </Button>
-            </Link>
-
-            <Link to="/slap">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">Slap</span>
-              </Button>
-            </Link>
-
-            <Link to="/ai">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">AI</span>
-              </Button>
-            </Link>
-
-            <Link to="/phone">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">eSIM</span>
-              </Button>
-            </Link>
-
-            <Link to="/vps">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <span className="hidden md:inline">VPS</span>
-              </Button>
-            </Link>
-
-            <Link to="/voice">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden md:inline">Voice</span>
-              </Button>
-            </Link>
-
-            <Link to="/safety">
-              <Button variant="ghost" className="gap-2 hidden sm:inline-flex">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="hidden md:inline">Safety</span>
-              </Button>
-            </Link>
+            {/* Infra Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <Server className="w-4 h-4" />
+                  <span className="hidden md:inline">Infra</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuItem asChild>
+                  <Link to="/infra" className="cursor-pointer">Infrastructure Hub</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/swaps" className="cursor-pointer">Crypto Swaps</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/vps" className="cursor-pointer">Anonymous VPS</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/phone" className="cursor-pointer">eSIM & Phone</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Token Balance Badge */}
             <TokenBadge />
@@ -275,14 +316,9 @@ export const Navbar = () => {
                     )}
                   </Button>
                 </Link>
-                <Link to="/orders">
+                <Link to="/orders" className="hidden sm:block">
                   <Button variant="ghost" size="icon">
                     <Package className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Link to="/sell">
-                  <Button variant="secondary" className="hidden sm:inline-flex">
-                    Sell
                   </Button>
                 </Link>
                 
@@ -382,7 +418,9 @@ export const Navbar = () => {
 
             {!isAuthenticated && (
               <Link to="/auth">
-                <Button>Sign In</Button>
+                <Button variant="default" size="sm" className="hidden sm:inline-flex">
+                  Get Started
+                </Button>
               </Link>
             )}
           </div>
