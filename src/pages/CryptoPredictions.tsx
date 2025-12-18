@@ -166,30 +166,10 @@ export default function CryptoPredictions() {
       const { markets: apiMarkets } = await api.getPredictionMarkets();
       const priceMarkets = apiMarkets.filter(m => m.oracle_type === 'price');
       
-      // Filter out already-blocked markets first
+      // Filter out blocked markets and show immediately (no upfront pool validation)
       const unblockedMarkets = priceMarkets.filter(m => !blockedIds.has(m.market_id));
       
-      // Validate each market has a working pool endpoint
-      const validMarkets = await Promise.all(
-        unblockedMarkets.map(async (market) => {
-          try {
-            await api.getPoolInfo(market.market_id);
-            return market;
-          } catch {
-            console.log(`Filtering out market ${market.market_id} - pool not found`);
-            // Auto-block invalid markets if user is admin
-            if (isAdmin) {
-              await supabase.from('blocked_markets').upsert(
-                { market_id: market.market_id, reason: 'Pool validation failed' },
-                { onConflict: 'market_id' }
-              );
-            }
-            return null;
-          }
-        })
-      );
-      
-      setMarkets(validMarkets.filter((m): m is PredictionMarket => m !== null));
+      setMarkets(unblockedMarkets);
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
