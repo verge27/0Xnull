@@ -193,7 +193,7 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
         isAuthenticated: !!privateKeyUser,
         storedPrivateKey,
         clearStoredPrivateKey,
-        savePrivateKey
+        savePrivateKey,
       }}
     >
       {children}
