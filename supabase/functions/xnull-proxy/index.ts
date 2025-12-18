@@ -118,7 +118,34 @@ serve(async (req) => {
 
     console.log(`Proxying ${req.method} to: ${targetUrl.toString()}`);
 
-    const response = await fetch(targetUrl.toString(), fetchOptions);
+    // Use longer timeout for bet placement (wallet creation can be slow)
+    const isBetRequest = targetPath.includes('/api/predictions/bet');
+    const timeoutMs = isBetRequest ? 60000 : 30000; // 60s for bets, 30s for others
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    let response: Response;
+    try {
+      response = await fetch(targetUrl.toString(), { ...fetchOptions, signal: controller.signal });
+    } catch (e) {
+      clearTimeout(timeoutId);
+      if (e instanceof Error && e.name === 'AbortError') {
+        console.error(`Request timeout after ${timeoutMs}ms for ${targetPath}`);
+        return new Response(JSON.stringify({ 
+          error: isBetRequest 
+            ? 'Bet placement is taking longer than expected. The backend may be creating your wallet. Please try again in a moment.'
+            : 'Request timed out. Please try again.',
+          timeout: true 
+        }), {
+          status: 504,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      throw e;
+    }
+    clearTimeout(timeoutId);
+    
     const responseText = await response.text();
 
     console.log(`Response status: ${response.status}, body preview: ${responseText.substring(0, 200)}`);
