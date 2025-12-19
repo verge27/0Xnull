@@ -3,7 +3,7 @@ import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import esportsBackground from '@/assets/esports-background.jpg';
-import { useEsportsEvents, ESPORTS_GAMES, getGameLabel, getGameIcon, type EsportsEvent } from '@/hooks/useEsportsEvents';
+import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,6 +49,7 @@ export default function EsportsPredictions() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [selectedGame, setSelectedGame] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('upcoming');
   const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);
@@ -321,13 +322,31 @@ export default function EsportsPredictions() {
         return { border: 'border-green-500/30', bg: 'from-green-950/30', accent: 'text-green-400', glow: 'hover:shadow-[0_0_15px_hsl(120_100%_40%/0.2)]' };
       case 'r6siege':
         return { border: 'border-amber-500/30', bg: 'from-amber-950/30', accent: 'text-amber-400', glow: 'hover:shadow-[0_0_15px_hsl(40_100%_50%/0.2)]' };
+      case 'starcraft-2':
+      case 'starcraft-brood-war':
+        return { border: 'border-purple-500/30', bg: 'from-purple-950/30', accent: 'text-purple-400', glow: 'hover:shadow-[0_0_15px_hsl(270_100%_50%/0.2)]' };
+      case 'pubg':
+        return { border: 'border-yellow-600/30', bg: 'from-yellow-900/30', accent: 'text-yellow-500', glow: 'hover:shadow-[0_0_15px_hsl(45_80%_45%/0.2)]' };
+      case 'fifa':
+        return { border: 'border-green-400/30', bg: 'from-green-900/30', accent: 'text-green-300', glow: 'hover:shadow-[0_0_15px_hsl(140_100%_45%/0.2)]' };
+      case 'kog':
+        return { border: 'border-pink-500/30', bg: 'from-pink-950/30', accent: 'text-pink-400', glow: 'hover:shadow-[0_0_15px_hsl(330_100%_50%/0.2)]' };
+      case 'lol-wild-rift':
+        return { border: 'border-teal-500/30', bg: 'from-teal-950/30', accent: 'text-teal-400', glow: 'hover:shadow-[0_0_15px_hsl(180_70%_45%/0.2)]' };
+      case 'mlbb':
+        return { border: 'border-indigo-500/30', bg: 'from-indigo-950/30', accent: 'text-indigo-400', glow: 'hover:shadow-[0_0_15px_hsl(240_100%_60%/0.2)]' };
       default:
         return { border: 'border-cyan-500/30', bg: 'from-cyan-950/30', accent: 'text-cyan-400', glow: 'hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]' };
     }
   };
-  const filteredEvents = selectedGame === 'all'
+  const filteredEvents = selectedGame === 'all' && selectedCategory === 'all'
     ? events 
-    : events.filter(e => e.game === selectedGame);
+    : selectedGame !== 'all'
+      ? events.filter(e => e.game === selectedGame)
+      : events.filter(e => {
+          const gameInfo = ESPORTS_GAMES.find(g => g.key === e.game);
+          return gameInfo?.category === selectedCategory;
+        });
 
   const activeMarkets = markets
     .filter(m => m.resolved === 0)
@@ -433,13 +452,49 @@ export default function EsportsPredictions() {
                 </h2>
               </div>
               
+              {/* Category Filter */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs text-muted-foreground">Category:</span>
+                <div className="flex gap-1 flex-wrap">
+                  <Button 
+                    variant={selectedCategory === 'all' ? 'default' : 'outline'} 
+                    size="sm" 
+                    className="text-xs h-7"
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSelectedGame('all');
+                      fetchEvents();
+                    }}
+                  >
+                    All
+                  </Button>
+                  {ESPORTS_CATEGORIES.map(cat => (
+                    <Button 
+                      key={cat.key}
+                      variant={selectedCategory === cat.key ? 'default' : 'outline'} 
+                      size="sm" 
+                      className="text-xs h-7"
+                      onClick={() => {
+                        setSelectedCategory(cat.key);
+                        setSelectedGame('all');
+                        fetchEvents(undefined, cat.key);
+                      }}
+                    >
+                      {cat.icon} {cat.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Game Filter */}
               <Tabs value={selectedGame} onValueChange={(v) => {
                 setSelectedGame(v);
+                setSelectedCategory('all');
                 if (v === 'all') fetchEvents();
                 else fetchEvents(v);
               }}>
                 <TabsList className="mb-4 flex-wrap h-auto gap-1">
-                  <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                  <TabsTrigger value="all" className="text-xs">All Games</TabsTrigger>
                   {ESPORTS_GAMES.map(game => (
                     <TabsTrigger key={game.key} value={game.key} className="text-xs" title={game.name}>
                       {game.icon}
