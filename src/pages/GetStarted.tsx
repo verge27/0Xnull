@@ -120,9 +120,17 @@ const GetStarted = () => {
             className="w-full text-lg py-6"
             onClick={() => window.open("https://trocador.app/?ref=mkaShKWUZA", "_blank")}
           >
-            Buy Crypto
+            Go to Trocador
             <ExternalLink className="ml-2 h-5 w-5" />
           </Button>
+          
+          <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <p className="text-sm text-center">
+              <span className="font-semibold text-amber-400">Tip:</span> Click the{" "}
+              <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Buy/Sell</span>{" "}
+              tab at the top right to buy crypto with fiat
+            </p>
+          </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-center">
             <div className="p-4 rounded-lg bg-muted/50">
