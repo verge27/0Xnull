@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
@@ -49,6 +49,8 @@ export default function EsportsPredictions() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [selectedGame, setSelectedGame] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: EsportsEvent | null }>({
     open: false,
     event: null,
@@ -202,7 +204,12 @@ export default function EsportsPredictions() {
     setCreating(false);
     setTeamSelectDialog({ open: false, event: null });
     if (success) {
-      fetchMarkets();
+      await fetchMarkets();
+      // Switch to markets tab and scroll to it
+      setActiveTab('markets');
+      setTimeout(() => {
+        marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
@@ -399,7 +406,7 @@ export default function EsportsPredictions() {
 
 
 
-          <Tabs defaultValue="upcoming" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-4">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
@@ -508,7 +515,7 @@ export default function EsportsPredictions() {
             </TabsContent>
 
             {/* Markets Tab */}
-            <TabsContent value="markets" className="space-y-4">
+            <TabsContent value="markets" className="space-y-4" ref={marketsRef}>
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Clock className="w-5 h-5" />
                 Active Markets ({activeMarkets.length})
