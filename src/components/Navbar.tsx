@@ -132,12 +132,6 @@ export const Navbar = () => {
                   <Link to="/predictions/sports/combat" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Combat</span>
                   </Link>
-                  <Link to="/predictions/sports/combat/eastern" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-12">
-                    <span className="text-muted-foreground text-sm">Eastern</span>
-                  </Link>
-                  <Link to="/predictions/sports/combat/slap" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-12">
-                    <span className="text-muted-foreground text-sm">Slap</span>
-                  </Link>
                   <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Bitcoin className="w-5 h-5 text-orange-500" />
                     <span>Crypto</span>
@@ -230,12 +224,6 @@ export const Navbar = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/predictions/sports/combat" className="cursor-pointer">Combat</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="pl-6">
-                  <Link to="/predictions/sports/combat/eastern" className="cursor-pointer text-muted-foreground">Eastern</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="pl-6">
-                  <Link to="/predictions/sports/combat/slap" className="cursor-pointer text-muted-foreground">Slap</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
