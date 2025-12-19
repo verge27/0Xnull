@@ -369,12 +369,20 @@ export default function SportsPredictions() {
   });
 
   const now = Date.now() / 1000;
-  const activeMarkets = markets.filter(m => m.resolved === 0 && m.resolution_time > now);
+  const activeMarkets = markets
+    .filter(m => m.resolved === 0 && m.resolution_time > now)
+    .sort((a, b) => {
+      const poolA = a.yes_pool_xmr + a.no_pool_xmr;
+      const poolB = b.yes_pool_xmr + b.no_pool_xmr;
+      // Markets with money first, then by largest pool
+      if (poolA > 0 && poolB === 0) return -1;
+      if (poolB > 0 && poolA === 0) return 1;
+      return poolB - poolA;
+    });
   // Only show in Results if market is resolved (resolved === 1) AND had betting activity (pool > 0)
-  const resolvedMarkets = markets.filter(m => 
-    m.resolved === 1 && 
-    (m.yes_pool_xmr > 0 || m.no_pool_xmr > 0)
-  );
+  const resolvedMarkets = markets
+    .filter(m => m.resolved === 1 && (m.yes_pool_xmr > 0 || m.no_pool_xmr > 0))
+    .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (
     <div className="min-h-screen bg-background relative">

@@ -321,7 +321,15 @@ export default function CryptoPredictions() {
     ? ORACLE_ASSETS
     : ORACLE_ASSETS.filter(a => a.category === selectedCategory);
 
-  const activeMarkets = markets.filter(m => m.resolved === 0);
+  const activeMarkets = markets
+    .filter(m => m.resolved === 0)
+    .sort((a, b) => {
+      const poolA = a.yes_pool_xmr + a.no_pool_xmr;
+      const poolB = b.yes_pool_xmr + b.no_pool_xmr;
+      if (poolA > 0 && poolB === 0) return -1;
+      if (poolB > 0 && poolA === 0) return 1;
+      return poolB - poolA;
+    });
 
   return (
     <div className="min-h-screen bg-background relative">
