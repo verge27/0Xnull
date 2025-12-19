@@ -5,18 +5,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Twitch game IDs
+// Twitch game IDs - covers all PandaScore supported games
 const GAME_IDS: Record<string, string> = {
+  // FPS
   csgo: '32399',
   cs2: '32399',
-  lol: '21779',
-  dota2: '29595',
   valorant: '516575',
-  rl: '30921',
-  ow: '488552', // Overwatch 2
   cod: '512710', // Call of Duty: Warzone
   r6siege: '460630',
-  sc2: '490422', // StarCraft II
+  ow: '488552', // Overwatch 2
+  pubg: '493057',
+  // MOBA
+  lol: '21779',
+  dota2: '29595',
+  kog: '513181', // King of Glory / Honor of Kings
+  'lol-wild-rift': '511399',
+  mlbb: '495931', // Mobile Legends
+  // Sports
+  fifa: '1745202732', // EA Sports FC 24
+  rl: '30921', // Rocket League
+  // Strategy
+  'starcraft-2': '490422',
+  'starcraft-brood-war': '11989',
+  sc2: '490422',
   starcraft: '490422',
 };
 

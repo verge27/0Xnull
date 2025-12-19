@@ -20,12 +20,26 @@ interface TwitchStreamEmbedProps {
 }
 
 const GAME_FILTERS = [
-  { key: 'all', label: 'All Games', icon: '🎮' },
-  { key: 'lol', label: 'League of Legends', icon: '⚔️' },
-  { key: 'csgo', label: 'CS2', icon: '🔫' },
+  { key: 'all', label: 'All', icon: '🎮' },
+  // MOBA
+  { key: 'lol', label: 'LoL', icon: '⚔️' },
   { key: 'dota2', label: 'Dota 2', icon: '🛡️' },
+  { key: 'mlbb', label: 'MLBB', icon: '📲' },
+  { key: 'lol-wild-rift', label: 'Wild Rift', icon: '📱' },
+  { key: 'kog', label: 'King of Glory', icon: '👑' },
+  // FPS
+  { key: 'csgo', label: 'CS2', icon: '🔫' },
   { key: 'valorant', label: 'Valorant', icon: '🎯' },
-  { key: 'sc2', label: 'StarCraft II', icon: '🌌' },
+  { key: 'ow', label: 'Overwatch', icon: '🦸' },
+  { key: 'cod', label: 'CoD', icon: '💥' },
+  { key: 'r6siege', label: 'R6 Siege', icon: '🛡️' },
+  { key: 'pubg', label: 'PUBG', icon: '🪂' },
+  // Sports
+  { key: 'rl', label: 'Rocket League', icon: '🚗' },
+  { key: 'fifa', label: 'EA FC', icon: '⚽' },
+  // Strategy
+  { key: 'starcraft-2', label: 'SC2', icon: '🌌' },
+  { key: 'starcraft-brood-war', label: 'SC:BW', icon: '👾' },
 ];
 
 export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmbedProps) {
