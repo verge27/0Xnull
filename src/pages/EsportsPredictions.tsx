@@ -45,6 +45,8 @@ export default function EsportsPredictions() {
   const [betAmountUsd, setBetAmountUsd] = useState('');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
+  const [betCreationStartTime, setBetCreationStartTime] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: EsportsEvent | null }>({
@@ -52,6 +54,22 @@ export default function EsportsPredictions() {
     event: null,
   });
   const [creating, setCreating] = useState(false);
+
+  // Timer for bet creation progress
+  useEffect(() => {
+    if (!placingBet) {
+      setBetCreationStartTime(null);
+      setElapsedSeconds(0);
+      return;
+    }
+    
+    setBetCreationStartTime(Date.now());
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [placingBet]);
 
   useEffect(() => {
     fetchMarkets();
@@ -147,6 +165,7 @@ export default function EsportsPredictions() {
     }
     
     setPlacingBet(true);
+    setElapsedSeconds(0);
     
     try {
       const response = await api.placePredictionBet({
@@ -169,6 +188,7 @@ export default function EsportsPredictions() {
       toast.error(message);
     } finally {
       setPlacingBet(false);
+      setElapsedSeconds(0);
     }
   };
   
@@ -813,12 +833,41 @@ export default function EsportsPredictions() {
               </div>
             )}
             
+            {placingBet && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Creating bet wallet...</span>
+                  <span>{elapsedSeconds}s / ~60s</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-1000 ease-linear"
+                    style={{ width: `${Math.min((elapsedSeconds / 60) * 100, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground/70 text-center">
+                  {elapsedSeconds < 10 
+                    ? 'Initializing wallet...' 
+                    : elapsedSeconds < 30 
+                      ? 'Generating deposit address...'
+                      : elapsedSeconds < 50
+                        ? 'Almost there...'
+                        : 'This is taking longer than usual...'}
+                </p>
+              </div>
+            )}
+
             <Button 
               className="w-full" 
               onClick={handlePlaceBet}
               disabled={placingBet || !betAmountUsd || !payoutAddress}
             >
-              {placingBet ? 'Creating Bet...' : 'Place Bet'}
+              {placingBet ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Creating Bet... ({elapsedSeconds}s)
+                </span>
+              ) : 'Place Bet'}
             </Button>
           </div>
         </DialogContent>
