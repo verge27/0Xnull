@@ -19,7 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
-import { PlutoTVEmbed } from '@/components/PlutoTVEmbed';
+import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
 import { toast } from 'sonner';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
@@ -292,7 +292,7 @@ export default function CombatSports() {
 
           {/* Live Combat TV */}
           <div className="mb-6">
-            <PlutoTVEmbed />
+            <TrillerTVEmbed />
           </div>
 
           <div className="flex gap-2 mb-6">
