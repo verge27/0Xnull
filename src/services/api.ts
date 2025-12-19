@@ -55,7 +55,7 @@ export const TIER_CONFIG = {
 } as const;
 
 // Helper to make requests - adapts for Tor vs clearnet
-async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutMs = 8000): Promise<T> {
   const isOnion = isTorBrowser();
 
   let url: string;
@@ -71,7 +71,6 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}): Promise
 
   // Prevent infinite loading when the upstream API hangs
   const controller = new AbortController();
-  const timeoutMs = 8000;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
@@ -281,10 +280,11 @@ export const api = {
 
   // Prediction market APIs - Use proxy for CORS
   async placePredictionBet(request: PredictionBetRequest): Promise<PredictionBetResponse> {
+    // Longer timeout (90 seconds) for bet placement as it involves wallet operations
     return proxyRequest<PredictionBetResponse>('/api/predictions/bet', {
       method: 'POST',
       body: JSON.stringify(request),
-    });
+    }, 90000);
   },
 
   async getPredictionBetStatus(betId: string): Promise<PredictionBetStatus> {

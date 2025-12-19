@@ -1083,7 +1083,12 @@ export default function SportsPredictions() {
                 onClick={handlePlaceBet}
                 disabled={placingBet || !betAmountUsd || !payoutAddress}
               >
-                {placingBet ? 'Creating Bet...' : 'Create Bet'}
+                {placingBet ? (
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Creating Bet...
+                  </span>
+                ) : 'Create Bet'}
               </Button>
             </div>
           )}
