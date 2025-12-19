@@ -97,6 +97,12 @@ export const Navbar = () => {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-1 mt-6">
+                  {/* Get Started - First */}
+                  <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30 mb-4">
+                    <Rocket className="w-5 h-5 text-primary" />
+                    <span className="font-medium">Get Started</span>
+                  </Link>
+
                   {/* Marketplace */}
                   <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</div>
                   <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
@@ -164,13 +170,6 @@ export const Navbar = () => {
                   <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Smartphone className="w-5 h-5 text-green-500" />
                     <span>eSIM</span>
-                  </Link>
-
-                  {/* Get Started */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Here?</div>
-                  <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30">
-                    <Rocket className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Get Started</span>
                   </Link>
                 </nav>
               </SheetContent>
