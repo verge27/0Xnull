@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tv, EyeOff, Eye, Volume2, VolumeX, Maximize, RefreshCw, ExternalLink, Radio, Clock } from 'lucide-react';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Tv, EyeOff, Eye, Volume2, VolumeX, Maximize, RefreshCw, ExternalLink, Radio, Clock, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PlutoChannel {
@@ -19,13 +20,14 @@ interface ProgramInfo {
   description?: string;
   startTime: string;
   endTime: string;
-  progress: number;
+  progress?: number;
 }
 
 interface ChannelEPG {
   name: string;
   currentProgram: ProgramInfo | null;
   nextProgram: { title: string; startTime: string } | null;
+  upcomingPrograms: ProgramInfo[];
 }
 
 interface EPGData {
@@ -77,6 +79,7 @@ export function PlutoTVEmbed() {
   const [error, setError] = useState<string | null>(null);
   const [epgData, setEpgData] = useState<EPGData | null>(null);
   const [epgLoading, setEpgLoading] = useState(false);
+  const [showEpgGrid, setShowEpgGrid] = useState(false);
 
   // Fetch EPG data
   const fetchEPG = useCallback(async () => {
@@ -337,7 +340,101 @@ export function PlutoTVEmbed() {
               <Volume2 className="w-3 h-3" /> Click speaker to unmute
             </p>
           )}
+
+          {/* EPG Grid Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mt-3 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setShowEpgGrid(!showEpgGrid)}
+          >
+            <Calendar className="w-3 h-3 mr-1" />
+            {showEpgGrid ? 'Hide' : 'Show'} TV Guide
+            {showEpgGrid ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+          </Button>
         </div>
+
+        {/* EPG Grid */}
+        {showEpgGrid && epgData && (
+          <div className="border-t border-red-500/20">
+            <ScrollArea className="w-full">
+              <div className="min-w-[600px]">
+                {/* Header */}
+                <div className="grid grid-cols-[120px_1fr] border-b border-red-500/20 bg-red-500/5">
+                  <div className="p-2 text-xs font-medium text-red-400 border-r border-red-500/20">
+                    Channel
+                  </div>
+                  <div className="p-2 text-xs font-medium text-red-400">
+                    Upcoming Programs
+                  </div>
+                </div>
+                
+                {/* Channel Rows */}
+                {PLUTO_CHANNELS.map((channel) => {
+                  const channelEPG = epgData.channels?.[channel.id];
+                  const programs = [
+                    channelEPG?.currentProgram,
+                    ...(channelEPG?.upcomingPrograms || [])
+                  ].filter(Boolean).slice(0, 5);
+
+                  return (
+                    <div 
+                      key={channel.id}
+                      className={`grid grid-cols-[120px_1fr] border-b border-red-500/10 hover:bg-red-500/5 transition-colors ${
+                        selectedChannel.id === channel.id ? 'bg-red-500/10' : ''
+                      }`}
+                    >
+                      <button
+                        className="p-2 text-left border-r border-red-500/10 hover:bg-red-500/10 transition-colors"
+                        onClick={() => setSelectedChannel(channel)}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm">{channel.icon}</span>
+                          <span className="text-xs font-medium truncate">{channel.name}</span>
+                        </div>
+                      </button>
+                      <div className="flex">
+                        {programs.length > 0 ? (
+                          programs.map((program, idx) => {
+                            const isNowPlaying = idx === 0 && channelEPG?.currentProgram;
+                            return (
+                              <div
+                                key={idx}
+                                className={`flex-1 min-w-[120px] max-w-[180px] p-2 border-r border-red-500/5 ${
+                                  isNowPlaying ? 'bg-red-500/10' : ''
+                                }`}
+                              >
+                                <div className="flex items-center gap-1 mb-0.5">
+                                  {isNowPlaying && (
+                                    <Badge variant="outline" className="text-[8px] px-1 py-0 h-3 border-red-500/50 text-red-400">
+                                      LIVE
+                                    </Badge>
+                                  )}
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {formatTime(program!.startTime)}
+                                  </span>
+                                </div>
+                                <p className="text-xs font-medium truncate">{program!.title}</p>
+                                {program!.description && (
+                                  <p className="text-[10px] text-muted-foreground truncate">{program!.description}</p>
+                                )}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="p-2 text-xs text-muted-foreground">
+                            No schedule data
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
