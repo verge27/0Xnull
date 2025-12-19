@@ -16,16 +16,13 @@ const GetStarted = () => {
 
   const handleHasCrypto = (has: boolean) => {
     setHasCrypto(has);
-    if (has) {
-      setCurrentStep("get-wallet");
-    } else {
-      setCurrentStep("get-crypto");
-    }
+    // Always start with wallet, regardless of crypto status
+    setCurrentStep("get-wallet");
   };
 
   const getStepNumber = () => {
-    if (currentStep === "get-crypto") return 1;
-    if (currentStep === "get-wallet") return hasCrypto ? 1 : 2;
+    if (currentStep === "get-wallet") return 1;
+    if (currentStep === "get-crypto") return 2; // Only shown if no crypto
     if (currentStep === "get-xmr") return hasCrypto ? 2 : 3;
     return 0;
   };
@@ -219,7 +216,7 @@ const GetStarted = () => {
       <div className="flex justify-center pt-4">
         <Button
           size="lg"
-          onClick={() => setCurrentStep("get-xmr")}
+          onClick={() => setCurrentStep(hasCrypto ? "get-xmr" : "get-crypto")}
         >
           I have Cake Wallet
           <ArrowRight className="ml-2 h-5 w-5" />
