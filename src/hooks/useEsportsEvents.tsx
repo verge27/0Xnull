@@ -71,7 +71,7 @@ export const ESPORTS_GAMES = [
 export const ESPORTS_CATEGORIES = [
   { key: 'fps', name: 'FPS', icon: '🔫' },
   { key: 'moba', name: 'MOBA', icon: '🎮' },
-  { key: 'sports', name: 'Sports', icon: '⚽' },
+  { key: 'sports', name: 'Sim Sports', icon: '🚗' },
   { key: 'strategy', name: 'Strategy', icon: '🧠' },
 ] as const;
 
