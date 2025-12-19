@@ -53,6 +53,7 @@ const TRADING_PAIRS = [
   { symbol: 'XMR/USDT', tvSymbol: 'KUCOIN:XMRUSDT' },
   { symbol: 'SOL/USDT', tvSymbol: 'OKX:SOLUSDT' },
   { symbol: 'BNB/USDT', tvSymbol: 'OKX:BNBUSDT' },
+  { symbol: 'NIGHT/USDT', tvSymbol: 'OKX:NIGHTUSDT' },
   { symbol: 'DOGE/USDT', tvSymbol: 'OKX:DOGEUSDT' },
   { symbol: 'SUI/USDT', tvSymbol: 'OKX:SUIUSDT' },
   { symbol: 'ADA/USDT', tvSymbol: 'OKX:ADAUSDT' },
