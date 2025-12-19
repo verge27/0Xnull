@@ -44,6 +44,7 @@ export default function CricketPredictions() {
   const [betAmountUsd, setBetAmountUsd] = useState('');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [selectedMatchType, setSelectedMatchType] = useState<string>('all');
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: CricketMatch | null }>({
@@ -51,6 +52,20 @@ export default function CricketPredictions() {
     match: null,
   });
   const [creating, setCreating] = useState(false);
+
+  // Timer for bet creation progress
+  useEffect(() => {
+    if (!placingBet) {
+      setElapsedSeconds(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [placingBet]);
 
   useEffect(() => {
     fetchMarkets();
@@ -145,6 +160,7 @@ export default function CricketPredictions() {
     }
     
     setPlacingBet(true);
+    setElapsedSeconds(0);
     
     try {
       const response = await api.placePredictionBet({
@@ -167,6 +183,7 @@ export default function CricketPredictions() {
       toast.error(message);
     } finally {
       setPlacingBet(false);
+      setElapsedSeconds(0);
     }
   };
   
@@ -854,6 +871,30 @@ export default function CricketPredictions() {
               </div>
             )}
             
+            {placingBet && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Creating bet wallet...</span>
+                  <span>{elapsedSeconds}s / ~60s</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-1000 ease-linear"
+                    style={{ width: `${Math.min((elapsedSeconds / 60) * 100, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground/70 text-center">
+                  {elapsedSeconds < 10 
+                    ? 'Initializing wallet...' 
+                    : elapsedSeconds < 30 
+                      ? 'Generating deposit address...'
+                      : elapsedSeconds < 50
+                        ? 'Almost there...'
+                        : 'This is taking longer than usual...'}
+                </p>
+              </div>
+            )}
+
             <Button
               className="w-full"
               disabled={placingBet || !betAmountUsd || !payoutAddress}
@@ -862,7 +903,7 @@ export default function CricketPredictions() {
               {placingBet ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
+                  Creating Bet... ({elapsedSeconds}s)
                 </>
               ) : (
                 `Place $${betAmountUsd || '0'} on ${betSide.toUpperCase()}`
