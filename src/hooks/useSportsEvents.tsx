@@ -318,17 +318,34 @@ export function getSportLabel(sport: string): string {
     ufc: 'UFC',
     nba: 'NBA',
     mlb: 'MLB',
+    nhl: 'NHL',
+    afl: 'AFL',
+    ipl: 'IPL',
+    big_bash: 'Big Bash',
+    champions_league: 'Champions League',
   };
-  return labels[sport] || sport.toUpperCase();
+  return labels[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 export function getSportEmoji(sport: string): string {
   const emojis: Record<string, string> = {
     nfl: '🏈',
     premier_league: '⚽',
+    soccer: '⚽',
     ufc: '🥊',
+    mma: '🥊',
+    boxing: '🥊',
     nba: '🏀',
+    basketball: '🏀',
     mlb: '⚾',
+    baseball: '⚾',
+    nhl: '🏒',
+    hockey: '🏒',
+    cricket: '🏏',
+    tennis: '🎾',
+    golf: '⛳',
+    rugby: '🏉',
+    afl: '🏉',
   };
   return emojis[sport] || '🎯';
 }
