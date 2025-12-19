@@ -50,6 +50,7 @@ export default function EsportsPredictions() {
   
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: EsportsEvent | null }>({
     open: false,
@@ -200,16 +201,25 @@ export default function EsportsPredictions() {
 
   const handleCreateMarket = async (event: EsportsEvent, team: string) => {
     setCreating(true);
+    // Generate the market ID the same way the hook does
+    const teamSlug = team.toLowerCase().replace(/\s+/g, '_');
+    const expectedMarketId = `esports_${event.event_id}_${teamSlug}`;
+    
     const success = await createEsportsMarket(event, team);
     setCreating(false);
     setTeamSelectDialog({ open: false, event: null });
     if (success) {
+      setNewlyCreatedMarketId(expectedMarketId);
       await fetchMarkets();
       // Switch to markets tab and scroll to it
       setActiveTab('markets');
       setTimeout(() => {
         marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+      // Clear highlight after 5 seconds
+      setTimeout(() => {
+        setNewlyCreatedMarketId(null);
+      }, 5000);
     }
   };
 
@@ -538,7 +548,14 @@ export default function EsportsPredictions() {
                     const marketBets = getBetsForMarket(market.market_id);
                     
                     return (
-                      <Card key={market.market_id} className="hover:border-primary/50 transition-colors">
+                      <Card 
+                        key={market.market_id} 
+                        className={`hover:border-primary/50 transition-all duration-300 ${
+                          newlyCreatedMarketId === market.market_id 
+                            ? 'animate-pulse ring-2 ring-primary shadow-lg shadow-primary/20' 
+                            : ''
+                        }`}
+                      >
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">

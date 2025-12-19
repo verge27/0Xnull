@@ -73,6 +73,7 @@ export default function StarcraftPredictions() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: SC2Event | null }>({
     open: false,
@@ -324,12 +325,17 @@ export default function StarcraftPredictions() {
       }
       
       toast.success(`Market created for ${player}!`);
+      setNewlyCreatedMarketId(marketId);
       await fetchMarkets();
       // Switch to markets tab and scroll to it
       setActiveTab('markets');
       setTimeout(() => {
         marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+      // Clear highlight after 5 seconds
+      setTimeout(() => {
+        setNewlyCreatedMarketId(null);
+      }, 5000);
     } catch (error) {
       console.error('Error creating market:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create market');
@@ -682,7 +688,15 @@ export default function StarcraftPredictions() {
                     const odds = getOdds(market);
                     
                     return (
-                      <Card key={market.market_id} className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => { setSelectedMarket(market); setBetDialogOpen(true); }}>
+                      <Card 
+                        key={market.market_id} 
+                        className={`hover:border-primary/50 transition-all duration-300 cursor-pointer ${
+                          newlyCreatedMarketId === market.market_id 
+                            ? 'animate-pulse ring-2 ring-primary shadow-lg shadow-primary/20' 
+                            : ''
+                        }`}
+                        onClick={() => { setSelectedMarket(market); setBetDialogOpen(true); }}
+                      >
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
                             {getStatusBadge(market)}
