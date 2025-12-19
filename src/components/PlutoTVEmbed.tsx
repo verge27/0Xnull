@@ -1,15 +1,35 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Hls from 'hls.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tv, EyeOff, Eye, Volume2, VolumeX, Maximize, RefreshCw, ExternalLink, Radio } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Tv, EyeOff, Eye, Volume2, VolumeX, Maximize, RefreshCw, ExternalLink, Radio, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PlutoChannel {
   id: string;
   name: string;
   icon: string;
   description: string;
+}
+
+interface ProgramInfo {
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  progress: number;
+}
+
+interface ChannelEPG {
+  name: string;
+  currentProgram: ProgramInfo | null;
+  nextProgram: { title: string; startTime: string } | null;
+}
+
+interface EPGData {
+  channels: Record<string, ChannelEPG>;
 }
 
 const PLUTO_CHANNELS: PlutoChannel[] = [
@@ -27,6 +47,26 @@ function getPlutoStreamUrl(channelId: string): string {
   return `https://service-stitcher.clusters.pluto.tv/stitch/hls/channel/${channelId}/master.m3u8?deviceType=web&deviceMake=web&deviceModel=web&deviceVersion=1.0&appVersion=1.0&deviceDNT=0&serverSideAds=false`;
 }
 
+function formatTime(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function getTimeUntil(isoString: string): string {
+  const now = Date.now();
+  const target = new Date(isoString).getTime();
+  const diff = target - now;
+  
+  if (diff <= 0) return 'Now';
+  
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `in ${minutes}m`;
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMins = minutes % 60;
+  return `in ${hours}h ${remainingMins}m`;
+}
+
 export function PlutoTVEmbed() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -35,6 +75,32 @@ export function PlutoTVEmbed() {
   const [muted, setMuted] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [epgData, setEpgData] = useState<EPGData | null>(null);
+  const [epgLoading, setEpgLoading] = useState(false);
+
+  // Fetch EPG data
+  const fetchEPG = useCallback(async () => {
+    setEpgLoading(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('pluto-epg');
+      if (fnError) throw fnError;
+      setEpgData(data as EPGData);
+    } catch (err) {
+      console.error('Error fetching EPG:', err);
+    } finally {
+      setEpgLoading(false);
+    }
+  }, []);
+
+  // Fetch EPG on mount and every 5 minutes
+  useEffect(() => {
+    fetchEPG();
+    const interval = setInterval(fetchEPG, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchEPG]);
+
+  // Get current channel's EPG info
+  const currentEPG = epgData?.channels?.[selectedChannel.id];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -65,9 +131,7 @@ export function PlutoTVEmbed() {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         setLoading(false);
-        video.play().catch(() => {
-          // Autoplay blocked, user needs to interact
-        });
+        video.play().catch(() => {});
       });
 
       hls.on(Hls.Events.ERROR, (_, data) => {
@@ -77,15 +141,11 @@ export function PlutoTVEmbed() {
           setLoading(false);
           
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-            // Try to recover
-            setTimeout(() => {
-              hls.startLoad();
-            }, 3000);
+            setTimeout(() => hls.startLoad(), 3000);
           }
         }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native HLS support (Safari)
       video.src = streamUrl;
       video.addEventListener('loadedmetadata', () => {
         setLoading(false);
@@ -108,7 +168,6 @@ export function PlutoTVEmbed() {
     };
   }, [selectedChannel, hidden]);
 
-  // Update muted state
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = muted;
@@ -116,17 +175,14 @@ export function PlutoTVEmbed() {
   }, [muted]);
 
   const handleFullscreen = () => {
-    if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
-      }
+    if (videoRef.current?.requestFullscreen) {
+      videoRef.current.requestFullscreen();
     }
   };
 
   const handleRefresh = () => {
-    // Force reload by re-selecting the same channel
-    const channel = selectedChannel;
-    setSelectedChannel({ ...channel });
+    setSelectedChannel({ ...selectedChannel });
+    fetchEPG();
   };
 
   if (hidden) {
@@ -158,61 +214,52 @@ export function PlutoTVEmbed() {
             </Badge>
           </CardTitle>
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7"
-              onClick={() => setMuted(!muted)}
-            >
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setMuted(!muted)}>
               {muted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7"
-              onClick={handleFullscreen}
-            >
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleFullscreen}>
               <Maximize className="w-3 h-3" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7"
-              onClick={handleRefresh}
-              disabled={loading}
-            >
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRefresh} disabled={loading}>
               <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7"
-              onClick={() => setHidden(true)}
-            >
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setHidden(true)}>
               <EyeOff className="w-3 h-3" />
             </Button>
           </div>
         </div>
         
-        {/* Channel Selector */}
+        {/* Channel Selector with EPG preview */}
         <div className="flex flex-wrap gap-1.5 mt-3">
-          {PLUTO_CHANNELS.map((channel) => (
-            <Button
-              key={channel.id}
-              variant={selectedChannel.id === channel.id ? "default" : "outline"}
-              size="sm"
-              className={`h-7 text-xs px-2 transition-all ${
-                selectedChannel.id === channel.id 
-                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-500' 
-                  : 'border-red-500/30 hover:border-red-500/60 hover:bg-red-500/10'
-              }`}
-              onClick={() => setSelectedChannel(channel)}
-              disabled={loading}
-            >
-              <span className="mr-1">{channel.icon}</span>
-              <span className="hidden sm:inline">{channel.name}</span>
-            </Button>
-          ))}
+          {PLUTO_CHANNELS.map((channel) => {
+            const channelEPG = epgData?.channels?.[channel.id];
+            return (
+              <Button
+                key={channel.id}
+                variant={selectedChannel.id === channel.id ? "default" : "outline"}
+                size="sm"
+                className={`h-auto py-1.5 px-2 text-xs flex flex-col items-start gap-0.5 transition-all ${
+                  selectedChannel.id === channel.id 
+                    ? 'bg-red-600 hover:bg-red-700 text-white border-red-500' 
+                    : 'border-red-500/30 hover:border-red-500/60 hover:bg-red-500/10'
+                }`}
+                onClick={() => setSelectedChannel(channel)}
+                disabled={loading}
+              >
+                <span className="flex items-center gap-1">
+                  <span>{channel.icon}</span>
+                  <span className="font-medium">{channel.name}</span>
+                </span>
+                {channelEPG?.currentProgram && (
+                  <span className={`text-[10px] truncate max-w-[100px] ${
+                    selectedChannel.id === channel.id ? 'text-white/80' : 'text-muted-foreground'
+                  }`}>
+                    {channelEPG.currentProgram.title}
+                  </span>
+                )}
+              </Button>
+            );
+          })}
         </div>
       </CardHeader>
       
@@ -231,44 +278,65 @@ export function PlutoTVEmbed() {
             <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
               <div className="text-center p-4">
                 <p className="text-sm text-red-400 mb-2">{error}</p>
-                <Button size="sm" variant="outline" onClick={handleRefresh}>
-                  Try Again
-                </Button>
+                <Button size="sm" variant="outline" onClick={handleRefresh}>Try Again</Button>
               </div>
             </div>
           )}
           
-          <video
-            ref={videoRef}
-            className="w-full h-full"
-            playsInline
-            muted={muted}
-            autoPlay
-          />
+          <video ref={videoRef} className="w-full h-full" playsInline muted={muted} autoPlay />
         </div>
         
-        {/* Channel Info Footer */}
+        {/* Now Playing Info */}
         <div className="px-4 py-3 border-t border-red-500/20 bg-background/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{selectedChannel.icon}</span>
-              <div>
-                <p className="font-medium text-sm text-red-400">{selectedChannel.name}</p>
-                <p className="text-xs text-muted-foreground">{selectedChannel.description}</p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{selectedChannel.icon}</span>
+                <span className="font-medium text-sm text-red-400">{selectedChannel.name}</span>
               </div>
+              
+              {currentEPG?.currentProgram ? (
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-semibold text-sm truncate">{currentEPG.currentProgram.title}</p>
+                    {currentEPG.currentProgram.description && (
+                      <p className="text-xs text-muted-foreground truncate">{currentEPG.currentProgram.description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Progress value={currentEPG.currentProgram.progress} className="h-1.5 flex-1" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatTime(currentEPG.currentProgram.startTime)} - {formatTime(currentEPG.currentProgram.endTime)}
+                    </span>
+                  </div>
+                  {currentEPG.nextProgram && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Up next: <span className="text-foreground">{currentEPG.nextProgram.title}</span>
+                      <span className="text-red-400">{getTimeUntil(currentEPG.nextProgram.startTime)}</span>
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">{selectedChannel.description}</p>
+              )}
             </div>
+            
             <a 
               href={`https://pluto.tv/live-tv/${selectedChannel.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
+              className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 shrink-0"
             >
-              Watch on Pluto <ExternalLink className="w-3 h-3" />
+              Pluto <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {muted ? 'Click the speaker icon to unmute' : 'Live 24/7 combat sports - Free on Pluto TV'}
-          </p>
+          
+          {muted && (
+            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+              <Volume2 className="w-3 h-3" /> Click speaker to unmute
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

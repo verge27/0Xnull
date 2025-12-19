@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.scorebat-videos]
 verify_jwt = false
+
+[functions.pluto-epg]
+verify_jwt = false
