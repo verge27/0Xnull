@@ -51,14 +51,28 @@ async function esportsRequest<T>(path: string): Promise<T> {
 }
 
 export const ESPORTS_GAMES = [
-  { key: 'lol', name: 'League of Legends', icon: '🎮' },
-  { key: 'csgo', name: 'CS2', icon: '🔫' },
-  { key: 'dota2', name: 'Dota 2', icon: '⚔️' },
-  { key: 'valorant', name: 'Valorant', icon: '🎯' },
-  { key: 'ow', name: 'Overwatch', icon: '🦸' },
-  { key: 'rl', name: 'Rocket League', icon: '🚗' },
-  { key: 'cod', name: 'Call of Duty', icon: '💥' },
-  { key: 'r6siege', name: 'R6 Siege', icon: '🛡️' },
+  { key: 'lol', name: 'League of Legends', icon: '🎮', category: 'moba' },
+  { key: 'csgo', name: 'CS2', icon: '🔫', category: 'fps' },
+  { key: 'dota2', name: 'Dota 2', icon: '⚔️', category: 'moba' },
+  { key: 'valorant', name: 'Valorant', icon: '🎯', category: 'fps' },
+  { key: 'ow', name: 'Overwatch', icon: '🦸', category: 'fps' },
+  { key: 'rl', name: 'Rocket League', icon: '🚗', category: 'sports' },
+  { key: 'cod', name: 'Call of Duty', icon: '💥', category: 'fps' },
+  { key: 'r6siege', name: 'R6 Siege', icon: '🛡️', category: 'fps' },
+  { key: 'starcraft-2', name: 'StarCraft 2', icon: '🌌', category: 'strategy' },
+  { key: 'starcraft-brood-war', name: 'SC: Brood War', icon: '👾', category: 'strategy' },
+  { key: 'pubg', name: 'PUBG', icon: '🪂', category: 'fps' },
+  { key: 'fifa', name: 'EA Sports FC', icon: '⚽', category: 'sports' },
+  { key: 'kog', name: 'King of Glory', icon: '👑', category: 'moba' },
+  { key: 'lol-wild-rift', name: 'Wild Rift', icon: '📱', category: 'moba' },
+  { key: 'mlbb', name: 'Mobile Legends', icon: '📲', category: 'moba' },
+] as const;
+
+export const ESPORTS_CATEGORIES = [
+  { key: 'fps', name: 'FPS', icon: '🔫' },
+  { key: 'moba', name: 'MOBA', icon: '🎮' },
+  { key: 'sports', name: 'Sports', icon: '⚽' },
+  { key: 'strategy', name: 'Strategy', icon: '🧠' },
 ] as const;
 
 export function useEsportsEvents() {
@@ -67,12 +81,17 @@ export function useEsportsEvents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEvents = useCallback(async (game?: string) => {
+  const fetchEvents = useCallback(async (game?: string, category?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const path = game ? `/events?game=${game}` : '/events';
-      const data = await esportsRequest<{ events: EsportsEvent[] }>(path);
+      let path = '/events';
+      const params = new URLSearchParams();
+      if (game) params.set('game', game);
+      if (category) params.set('category', category);
+      if (params.toString()) path += `?${params.toString()}`;
+      
+      const data = await esportsRequest<{ events: EsportsEvent[], count?: number }>(path);
       setEvents(data.events || []);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch events';
@@ -174,5 +193,20 @@ export function getGameLabel(game: string): string {
 
 export function getGameIcon(game: string): string {
   const found = ESPORTS_GAMES.find(g => g.key === game);
+  return found?.icon || '🎮';
+}
+
+export function getGameCategory(game: string): string | undefined {
+  const found = ESPORTS_GAMES.find(g => g.key === game);
+  return found?.category;
+}
+
+export function getCategoryLabel(category: string): string {
+  const found = ESPORTS_CATEGORIES.find(c => c.key === category);
+  return found?.name || category.toUpperCase();
+}
+
+export function getCategoryIcon(category: string): string {
+  const found = ESPORTS_CATEGORIES.find(c => c.key === category);
   return found?.icon || '🎮';
 }
