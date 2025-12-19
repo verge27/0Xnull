@@ -270,8 +270,18 @@ export default function CricketPredictions() {
     ? matches 
     : matches.filter(m => m.sport === selectedMatchType);
 
-  const activeMarkets = markets.filter(m => m.resolved === 0);
-  const resolvedMarkets = markets.filter(m => m.resolved === 1);
+  const activeMarkets = markets
+    .filter(m => m.resolved === 0)
+    .sort((a, b) => {
+      const poolA = a.yes_pool_xmr + a.no_pool_xmr;
+      const poolB = b.yes_pool_xmr + b.no_pool_xmr;
+      if (poolA > 0 && poolB === 0) return -1;
+      if (poolB > 0 && poolA === 0) return 1;
+      return poolB - poolA;
+    });
+  const resolvedMarkets = markets
+    .filter(m => m.resolved === 1)
+    .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (
     <div className="min-h-screen bg-background relative">
