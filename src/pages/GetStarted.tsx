@@ -320,7 +320,7 @@ const GetStarted = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8">
         <Card 
           className="cursor-pointer hover:border-primary/50 transition-colors"
-          onClick={() => navigate("/predictions/esports")}
+          onClick={() => navigate("/esports-predictions")}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">🎮 Esports</CardTitle>
@@ -332,7 +332,7 @@ const GetStarted = () => {
         
         <Card 
           className="cursor-pointer hover:border-primary/50 transition-colors"
-          onClick={() => navigate("/predictions/sports")}
+          onClick={() => navigate("/sports-predictions")}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">⚽ Sports</CardTitle>
