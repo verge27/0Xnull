@@ -117,9 +117,8 @@ export default function StarcraftPredictions() {
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      const starcraftMarkets = apiMarkets.filter(
-        m => m.oracle_type === 'esports' && m.description?.toLowerCase().includes('starcraft')
-      );
+      // Show ALL esports markets on all esports pages
+      const starcraftMarkets = apiMarkets.filter(m => m.oracle_type === 'esports');
 
       // Filter out blocked markets
       const unblockedMarkets = starcraftMarkets.filter(m => !blockedIds.has(m.market_id));
