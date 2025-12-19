@@ -39,6 +39,7 @@ const POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
   { ticker: 'bnb', network: 'BEP2', label: 'Binance Coin' },
   { ticker: 'sol', network: 'Mainnet', label: 'Solana' },
   { ticker: 'usdc', network: 'ERC20', label: 'USD Coin' },
+  { ticker: 'zec', network: 'Mainnet', label: 'Zcash' },
 ];
 
 const PRIVACY_COINS = ['xmr', 'zec', 'dash'];
