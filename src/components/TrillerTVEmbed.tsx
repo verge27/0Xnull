@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tv, Maximize, Eye, EyeOff, Volume2, VolumeX, RefreshCw, Radio, Clock, AlertCircle } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tv, Maximize, Eye, EyeOff, Volume2, VolumeX, Radio, Clock, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 // TrillerTV channel
@@ -31,6 +32,7 @@ interface ChannelEPG {
   name: string;
   currentProgram: ProgramInfo | null;
   nextProgram: { title: string; startTime: string } | null;
+  upcomingPrograms?: { title: string; startTime: string; endTime: string }[];
 }
 
 interface EPGData {
@@ -63,14 +65,12 @@ export function TrillerTVEmbed() {
   
   const [source, setSource] = useState<'triller' | 'pluto'>('triller');
   const [selectedPlutoChannel, setSelectedPlutoChannel] = useState<PlutoChannel | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [muted, setMuted] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [epgData, setEpgData] = useState<EPGData | null>(null);
-  const [availableChannels, setAvailableChannels] = useState<Set<string>>(new Set());
-  const [checkingChannels, setCheckingChannels] = useState(false);
-  const [streamActive, setStreamActive] = useState(false);
 
   // Fetch EPG data for Pluto
   const fetchEPG = useCallback(async () => {
@@ -83,86 +83,22 @@ export function TrillerTVEmbed() {
     }
   }, []);
 
-  // Check if a Pluto channel stream is available
-  const checkChannelAvailability = useCallback(async (channelId: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (!Hls.isSupported()) {
-        resolve(false);
-        return;
-      }
-
-      const hls = new Hls({
-        enableWorker: false,
-        maxBufferLength: 1,
-        maxMaxBufferLength: 1,
-      });
-
-      const timeout = setTimeout(() => {
-        hls.destroy();
-        resolve(false);
-      }, 5000);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        clearTimeout(timeout);
-        hls.destroy();
-        resolve(true);
-      });
-
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          clearTimeout(timeout);
-          hls.destroy();
-          resolve(false);
-        }
-      });
-
-      hls.loadSource(getPlutoStreamUrl(channelId));
-    });
-  }, []);
-
-  // Check Pluto channels when switching to Pluto source
+  // Fetch EPG when switching to Pluto
   useEffect(() => {
-    if (source === 'pluto' && availableChannels.size === 0 && !checkingChannels) {
-      const checkAllChannels = async () => {
-        setCheckingChannels(true);
-        const available = new Set<string>();
-        
-        const results = await Promise.all(
-          PLUTO_CHANNELS.map(async (channel) => {
-            const isAvailable = await checkChannelAvailability(channel.id);
-            return { id: channel.id, available: isAvailable };
-          })
-        );
-
-        results.forEach(({ id, available: isAvailable }) => {
-          if (isAvailable) available.add(id);
-        });
-
-        setAvailableChannels(available);
-        setCheckingChannels(false);
-
-        // Auto-select first available channel
-        if (available.size > 0 && !selectedPlutoChannel) {
-          const firstAvailable = PLUTO_CHANNELS.find(c => available.has(c.id));
-          if (firstAvailable) setSelectedPlutoChannel(firstAvailable);
-        }
-      };
-
-      checkAllChannels();
+    if (source === 'pluto' && !epgData) {
       fetchEPG();
     }
-  }, [source, availableChannels.size, checkingChannels, selectedPlutoChannel, checkChannelAvailability, fetchEPG]);
+  }, [source, epgData, fetchEPG]);
 
   // Load Pluto stream when channel is selected
   useEffect(() => {
-    if (source !== 'pluto' || !selectedPlutoChannel || !isVisible) return;
+    if (source !== 'pluto' || !selectedPlutoChannel || !isVisible || showSchedule) return;
     
     const video = videoRef.current;
     if (!video) return;
 
     setLoading(true);
     setError(null);
-    setStreamActive(false);
 
     // Cleanup previous HLS instance
     if (hlsRef.current) {
@@ -185,7 +121,6 @@ export function TrillerTVEmbed() {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         setLoading(false);
-        setStreamActive(true);
         video.play().catch(() => {});
       });
 
@@ -193,12 +128,6 @@ export function TrillerTVEmbed() {
         if (data.fatal) {
           setError('Stream unavailable');
           setLoading(false);
-          setStreamActive(false);
-          setAvailableChannels(prev => {
-            const next = new Set(prev);
-            next.delete(selectedPlutoChannel.id);
-            return next;
-          });
         }
       });
     } else {
@@ -212,7 +141,7 @@ export function TrillerTVEmbed() {
         hlsRef.current = null;
       }
     };
-  }, [source, selectedPlutoChannel, isVisible]);
+  }, [source, selectedPlutoChannel, isVisible, showSchedule]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -232,7 +161,12 @@ export function TrillerTVEmbed() {
   const handleSourceChange = (newSource: string) => {
     setSource(newSource as 'triller' | 'pluto');
     setError(null);
-    setStreamActive(false);
+    setShowSchedule(false);
+  };
+
+  const handleChannelSelect = (channel: PlutoChannel) => {
+    setSelectedPlutoChannel(channel);
+    setShowSchedule(false);
   };
 
   const currentEPG = selectedPlutoChannel ? epgData?.channels?.[selectedPlutoChannel.id] : null;
@@ -258,14 +192,16 @@ export function TrillerTVEmbed() {
             </Badge>
           </CardTitle>
           <div className="flex items-center gap-2">
-            {source === 'pluto' && (
+            {source === 'pluto' && !showSchedule && (
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMuted(!muted)}>
                 {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleFullscreen} title="Fullscreen">
-              <Maximize className="w-4 h-4" />
-            </Button>
+            {!showSchedule && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleFullscreen} title="Fullscreen">
+                <Maximize className="w-4 h-4" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsVisible(false)} title="Hide">
               <EyeOff className="w-4 h-4" />
             </Button>
@@ -289,21 +225,24 @@ export function TrillerTVEmbed() {
         {/* Pluto Channel Selector */}
         {source === 'pluto' && (
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {checkingChannels && (
-              <Badge variant="outline" className="text-xs border-yellow-500/50 text-yellow-400">
-                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                Checking streams...
-              </Badge>
-            )}
-            {!checkingChannels && availableChannels.size > 0 && (
-              <Badge variant="outline" className="text-xs border-green-500/50 text-green-400 mb-2">
-                {availableChannels.size} channels live
-              </Badge>
-            )}
+            {/* Schedule Button */}
+            <Button
+              variant={showSchedule ? "default" : "outline"}
+              size="sm"
+              className={`h-auto py-1.5 px-2 text-xs ${
+                showSchedule 
+                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-500' 
+                  : 'border-red-500/30 hover:border-red-500 hover:bg-red-500/10'
+              }`}
+              onClick={() => setShowSchedule(true)}
+            >
+              <Calendar className="w-3 h-3 mr-1" />
+              Schedule
+            </Button>
+            
             {PLUTO_CHANNELS.map((channel) => {
               const channelEPG = epgData?.channels?.[channel.id];
-              const isAvailable = availableChannels.has(channel.id);
-              const isSelected = selectedPlutoChannel?.id === channel.id;
+              const isSelected = selectedPlutoChannel?.id === channel.id && !showSchedule;
               
               return (
                 <Button
@@ -313,19 +252,14 @@ export function TrillerTVEmbed() {
                   className={`h-auto py-1.5 px-2 text-xs flex flex-col items-start gap-0.5 ${
                     isSelected 
                       ? 'bg-red-600 hover:bg-red-700 text-white border-red-500' 
-                      : isAvailable
-                        ? 'border-green-500/50 hover:border-green-500 hover:bg-green-500/10'
-                        : 'border-red-500/20 opacity-50'
+                      : 'border-border/50 hover:border-red-500/50 hover:bg-red-500/10'
                   }`}
-                  onClick={() => setSelectedPlutoChannel(channel)}
-                  disabled={loading || checkingChannels}
+                  onClick={() => handleChannelSelect(channel)}
+                  disabled={loading}
                 >
                   <span className="flex items-center gap-1">
                     <span>{channel.icon}</span>
                     <span className="font-medium">{channel.name}</span>
-                    {!checkingChannels && (
-                      <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-green-500' : 'bg-red-500/50'}`} />
-                    )}
                   </span>
                   {channelEPG?.currentProgram && (
                     <span className={`text-[10px] truncate max-w-[100px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
@@ -361,21 +295,80 @@ export function TrillerTVEmbed() {
           </div>
         )}
 
-        {/* Pluto TV video player */}
+        {/* Pluto TV */}
         {source === 'pluto' && (
           <>
-            {!checkingChannels && availableChannels.size === 0 ? (
-              <div className="p-4 text-center">
-                <AlertCircle className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No Pluto streams available right now</p>
-                <p className="text-xs text-muted-foreground mt-1">Try TrillerTV or check back later</p>
-              </div>
+            {/* Schedule View */}
+            {showSchedule ? (
+              <ScrollArea className="h-[400px]">
+                <div className="p-4 space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar className="w-5 h-5 text-red-500" />
+                    <h3 className="font-semibold">What's On Now</h3>
+                  </div>
+                  
+                  {PLUTO_CHANNELS.map((channel) => {
+                    const channelEPG = epgData?.channels?.[channel.id];
+                    
+                    return (
+                      <div 
+                        key={channel.id} 
+                        className="p-3 rounded-lg border border-border/50 bg-card/50 hover:border-red-500/30 transition-colors cursor-pointer"
+                        onClick={() => handleChannelSelect(channel)}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-lg">{channel.icon}</span>
+                          <span className="font-medium text-sm">{channel.name}</span>
+                        </div>
+                        
+                        {channelEPG?.currentProgram ? (
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm text-red-400 truncate">
+                                  Now: {channelEPG.currentProgram.title}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Progress value={channelEPG.currentProgram.progress} className="h-1 flex-1 max-w-[150px]" />
+                                  <span className="text-[10px] text-muted-foreground">
+                                    until {formatTime(channelEPG.currentProgram.endTime)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {channelEPG.nextProgram && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatTime(channelEPG.nextProgram.startTime)}: {channelEPG.nextProgram.title}
+                              </p>
+                            )}
+                            
+                            {channelEPG.upcomingPrograms && channelEPG.upcomingPrograms.length > 0 && (
+                              <div className="pt-2 border-t border-border/30 space-y-1">
+                                {channelEPG.upcomingPrograms.slice(0, 2).map((prog, idx) => (
+                                  <p key={idx} className="text-xs text-muted-foreground/70">
+                                    {formatTime(prog.startTime)}: {prog.title}
+                                  </p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">{channel.description}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             ) : selectedPlutoChannel ? (
+              /* Video Player */
               <div className="aspect-video bg-black relative">
                 {loading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
                     <div className="text-center">
-                      <RefreshCw className="w-8 h-8 animate-spin text-red-500 mx-auto mb-2" />
+                      <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground">Loading {selectedPlutoChannel.name}...</p>
                     </div>
                   </div>
@@ -401,7 +394,7 @@ export function TrillerTVEmbed() {
             )}
 
             {/* Now Playing Info */}
-            {streamActive && currentEPG?.currentProgram && (
+            {!showSchedule && selectedPlutoChannel && currentEPG?.currentProgram && (
               <div className="px-4 py-3 border-t border-red-500/20 bg-background/50">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{selectedPlutoChannel?.icon}</span>
