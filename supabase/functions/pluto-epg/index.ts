@@ -43,20 +43,20 @@ interface PlutoChannel {
   timelines?: PlutoTimeline[];
 }
 
+interface ProgramInfo {
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  progress?: number;
+}
+
 interface EPGResponse {
   channels: Record<string, {
     name: string;
-    currentProgram: {
-      title: string;
-      description?: string;
-      startTime: string;
-      endTime: string;
-      progress: number;
-    } | null;
-    nextProgram: {
-      title: string;
-      startTime: string;
-    } | null;
+    currentProgram: ProgramInfo | null;
+    nextProgram: { title: string; startTime: string } | null;
+    upcomingPrograms: ProgramInfo[];
   }>;
 }
 
@@ -78,10 +78,10 @@ serve(async (req) => {
       });
     }
 
-    // Fetch EPG from Pluto TV
+    // Fetch EPG from Pluto TV - get 4 hours of programming
     const now = new Date();
     const start = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // 1 hour ago
-    const stop = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString(); // 2 hours from now
+    const stop = new Date(now.getTime() + 4 * 60 * 60 * 1000).toISOString(); // 4 hours from now
     
     const epgUrl = `https://api.pluto.tv/v2/channels?start=${encodeURIComponent(start)}&stop=${encodeURIComponent(stop)}`;
     
@@ -123,11 +123,21 @@ serve(async (req) => {
         return nowMs >= start && nowMs < stop;
       });
 
-      // Find next program
-      const nextProgram = timelines.find(t => {
-        const start = new Date(t.start).getTime();
-        return start > nowMs;
-      });
+      // Find all upcoming programs (next 4 hours)
+      const upcomingPrograms = timelines
+        .filter(t => {
+          const start = new Date(t.start).getTime();
+          return start > nowMs;
+        })
+        .slice(0, 6) // Get up to 6 upcoming programs
+        .map(t => ({
+          title: t.episode?.series?.name || t.title,
+          description: t.episode?.name || t.episode?.description,
+          startTime: t.start,
+          endTime: t.stop,
+        }));
+
+      const nextProgram = upcomingPrograms[0] || null;
 
       let currentInfo = null;
       if (currentProgram) {
@@ -144,18 +154,11 @@ serve(async (req) => {
         };
       }
 
-      let nextInfo = null;
-      if (nextProgram) {
-        nextInfo = {
-          title: nextProgram.episode?.series?.name || nextProgram.title,
-          startTime: nextProgram.start,
-        };
-      }
-
       result.channels[channelId] = {
         name: channel.name,
         currentProgram: currentInfo,
-        nextProgram: nextInfo,
+        nextProgram: nextProgram ? { title: nextProgram.title, startTime: nextProgram.startTime } : null,
+        upcomingPrograms,
       };
     }
 
