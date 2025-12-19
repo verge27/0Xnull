@@ -62,6 +62,8 @@ export default function SportsPredictions() {
   const [betAmountUsd, setBetAmountUsd] = useState('');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
+  const [betCreationStartTime, setBetCreationStartTime] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   // Category/League filters
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -96,6 +98,22 @@ export default function SportsPredictions() {
     if (bPriority !== -1) return 1;
     return 0;
   });
+
+  // Timer for bet creation progress
+  useEffect(() => {
+    if (!placingBet) {
+      setBetCreationStartTime(null);
+      setElapsedSeconds(0);
+      return;
+    }
+    
+    setBetCreationStartTime(Date.now());
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [placingBet]);
 
   useEffect(() => {
     fetchMarkets();
@@ -225,6 +243,7 @@ export default function SportsPredictions() {
     }
     
     setPlacingBet(true);
+    setElapsedSeconds(0);
     
     try {
       const response = await api.placePredictionBet({
@@ -247,6 +266,7 @@ export default function SportsPredictions() {
       toast.error(message);
     } finally {
       setPlacingBet(false);
+      setElapsedSeconds(0);
     }
   };
   
@@ -1078,6 +1098,30 @@ export default function SportsPredictions() {
                 </div>
               )}
               
+              {placingBet && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Creating bet wallet...</span>
+                    <span>{elapsedSeconds}s / ~60s</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-1000 ease-linear"
+                      style={{ width: `${Math.min((elapsedSeconds / 60) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 text-center">
+                    {elapsedSeconds < 10 
+                      ? 'Initializing wallet...' 
+                      : elapsedSeconds < 30 
+                        ? 'Generating deposit address...'
+                        : elapsedSeconds < 50
+                          ? 'Almost there...'
+                          : 'This is taking longer than usual...'}
+                  </p>
+                </div>
+              )}
+
               <Button 
                 className="w-full" 
                 onClick={handlePlaceBet}
@@ -1086,7 +1130,7 @@ export default function SportsPredictions() {
                 {placingBet ? (
                   <span className="flex items-center gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    Creating Bet...
+                    Creating Bet... ({elapsedSeconds}s)
                   </span>
                 ) : 'Create Bet'}
               </Button>
