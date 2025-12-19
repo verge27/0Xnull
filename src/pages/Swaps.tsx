@@ -253,7 +253,7 @@ const Swaps = () => {
       .from('coins')
       .select('*')
       .order('ticker')
-      .limit(2000);
+      .limit(5000);
     
     if (popularError || allError) {
       console.error('Error fetching coins:', popularError || allError);
