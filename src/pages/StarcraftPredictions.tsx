@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse, type BetStatusResponse } from '@/hooks/usePredictionBets';
@@ -72,6 +72,8 @@ export default function StarcraftPredictions() {
   const [placingBet, setPlacingBet] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: SC2Event | null }>({
     open: false,
     event: null,
@@ -322,7 +324,12 @@ export default function StarcraftPredictions() {
       }
       
       toast.success(`Market created for ${player}!`);
-      fetchMarkets();
+      await fetchMarkets();
+      // Switch to markets tab and scroll to it
+      setActiveTab('markets');
+      setTimeout(() => {
+        marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (error) {
       console.error('Error creating market:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create market');
@@ -562,7 +569,7 @@ export default function StarcraftPredictions() {
             </div>
           )}
 
-          <Tabs defaultValue="upcoming" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-4">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
@@ -657,7 +664,7 @@ export default function StarcraftPredictions() {
             </TabsContent>
 
             {/* Active Markets */}
-            <TabsContent value="markets" className="space-y-4">
+            <TabsContent value="markets" className="space-y-4" ref={marketsRef}>
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 Active Markets
