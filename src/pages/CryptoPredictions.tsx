@@ -52,6 +52,13 @@ const TRADING_PAIRS = [
   { symbol: 'ETH/USDT', tvSymbol: 'OKX:ETHUSDT' },
   { symbol: 'XMR/USDT', tvSymbol: 'KUCOIN:XMRUSDT' },
   { symbol: 'SOL/USDT', tvSymbol: 'OKX:SOLUSDT' },
+  { symbol: 'BNB/USDT', tvSymbol: 'OKX:BNBUSDT' },
+  { symbol: 'DOGE/USDT', tvSymbol: 'OKX:DOGEUSDT' },
+  { symbol: 'SUI/USDT', tvSymbol: 'OKX:SUIUSDT' },
+  { symbol: 'ADA/USDT', tvSymbol: 'OKX:ADAUSDT' },
+  { symbol: 'ZEC/USDT', tvSymbol: 'OKX:ZECUSDT' },
+  { symbol: 'LINK/USDT', tvSymbol: 'OKX:LINKUSDT' },
+  { symbol: 'BCH/USDT', tvSymbol: 'OKX:BCHUSDT' },
 ];
 
 interface OracleAsset {
