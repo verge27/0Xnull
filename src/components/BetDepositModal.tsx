@@ -258,6 +258,16 @@ export function BetDepositModal({
                 <span>Checking for payment every 10s...</span>
               </div>
 
+              {/* Blockchain confirmation info */}
+              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-xs text-blue-400">
+                  <strong>How confirmation works:</strong> Your bet is confirmed after 1 confirmation on the Monero blockchain (typically 2-20 minutes).
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Check the block explorer in your wallet to track transaction progress.
+                </p>
+              </div>
+
               {/* Important note */}
               <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
                 <p className="text-xs text-amber-500">
