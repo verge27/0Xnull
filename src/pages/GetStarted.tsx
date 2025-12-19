@@ -141,7 +141,7 @@ const GetStarted = () => {
       <div className="flex justify-center pt-4">
         <Button
           size="lg"
-          onClick={() => setCurrentStep("get-wallet")}
+          onClick={() => setCurrentStep("get-xmr")}
         >
           I have crypto now
           <ArrowRight className="ml-2 h-5 w-5" />
