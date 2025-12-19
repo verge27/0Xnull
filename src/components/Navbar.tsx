@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -165,6 +165,13 @@ export const Navbar = () => {
                     <Smartphone className="w-5 h-5 text-green-500" />
                     <span>eSIM</span>
                   </Link>
+
+                  {/* Get Started */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Here?</div>
+                  <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30">
+                    <Rocket className="w-5 h-5 text-primary" />
+                    <span className="font-medium">Get Started</span>
+                  </Link>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -281,6 +288,14 @@ export const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Get Started Button */}
+            <Link to="/get-started" className="hidden sm:block">
+              <Button variant="outline" size="sm" className="gap-1 border-primary/50 bg-primary/10 hover:bg-primary/20">
+                <Rocket className="w-4 h-4" />
+                <span className="hidden lg:inline">Get Started</span>
+              </Button>
+            </Link>
 
             {/* Token Balance Badge */}
             <TokenBadge />

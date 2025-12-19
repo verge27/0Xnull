@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -96,6 +96,12 @@ const Index = () => {
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
                   <TrendingUp className="w-5 h-5" />
                   Esports
+                </Button>
+              </Link>
+              <Link to="/get-started">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-primary/20 border-primary/50 hover:bg-primary/30 backdrop-blur-sm">
+                  <Rocket className="w-5 h-5" />
+                  Get Started
                 </Button>
               </Link>
             </div>
