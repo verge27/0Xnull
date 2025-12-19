@@ -382,7 +382,7 @@ export default function EsportsPredictions() {
               </h1>
               <p className="text-muted-foreground mt-1">Bet on LoL, CS2, Dota 2, Valorant & more with XMR</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link to="/predictions">
                 <Button variant="outline" size="sm">
                   <TrendingUp className="w-4 h-4 mr-2" />
@@ -393,6 +393,11 @@ export default function EsportsPredictions() {
                 <Button variant="outline" size="sm">
                   <Swords className="w-4 h-4 mr-2" />
                   Sports
+                </Button>
+              </Link>
+              <Link to="/starcraft">
+                <Button variant="outline" size="sm">
+                  🌌 StarCraft II
                 </Button>
               </Link>
               <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loading}>

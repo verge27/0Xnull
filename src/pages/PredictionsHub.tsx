@@ -17,7 +17,6 @@ const categories = [
     color: 'text-purple-500',
     subCategories: [
       { name: 'All Games', href: '/esports-predictions' },
-      { name: 'StarCraft II', href: '/starcraft' },
     ],
   },
   {

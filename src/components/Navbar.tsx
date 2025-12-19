@@ -122,9 +122,6 @@ export const Navbar = () => {
                     <Gamepad2 className="w-5 h-5 text-purple-500" />
                     <span>Esports</span>
                   </Link>
-                  <Link to="/starcraft" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">StarCraft II</span>
-                  </Link>
                   <Link to="/sports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Trophy className="w-5 h-5 text-green-500" />
                     <span>Sports</span>
@@ -213,9 +210,6 @@ export const Navbar = () => {
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Esports</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/esports-predictions" className="cursor-pointer">All Esports</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/starcraft" className="cursor-pointer">StarCraft II</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Sports</DropdownMenuLabel>
