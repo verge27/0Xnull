@@ -295,7 +295,7 @@ export default function CombatSports() {
             <TrillerTVEmbed />
           </div>
 
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             <Button 
               variant={activeFilter === 'all' ? 'default' : 'outline'} 
               onClick={() => setActiveFilter('all')}
@@ -316,6 +316,18 @@ export default function CombatSports() {
               className={activeFilter === 'boxing' ? 'bg-red-600 hover:bg-red-700' : ''}
             >
               🥊 Boxing
+            </Button>
+            <Button 
+              variant="outline" 
+              asChild
+            >
+              <Link to="/slap">👋 Slap Fighting</Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              asChild
+            >
+              <Link to="/russian-mma">🐻 Eastern MMA</Link>
             </Button>
           </div>
 
