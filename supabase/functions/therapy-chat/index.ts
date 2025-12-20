@@ -126,9 +126,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'cognitivecomputations/dolphin-2.9.2-qwen2-72b',
         messages: fullMessages,
         stream: true,
+        max_tokens: 1000,
       }),
     });
 
