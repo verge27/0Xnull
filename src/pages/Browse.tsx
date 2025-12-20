@@ -301,10 +301,13 @@ const Browse = () => {
         {/* Centered Text Overlay */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground drop-shadow-lg animate-fade-in">
-            Bet Privately
+            Bet Privately on Marketplace
           </h1>
-          <p className="text-lg md:text-xl text-foreground/90 max-w-2xl mb-8 drop-shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <p className="text-lg md:text-xl text-foreground/90 max-w-2xl mb-4 drop-shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
             Prediction markets on 150+ sports and 15 esports titles. No accounts. No KYC. No limits.
+          </p>
+          <p className="text-base md:text-lg text-foreground/80 max-w-xl mb-8 drop-shadow-md animate-fade-in" style={{ animationDelay: '0.15s' }}>
+            Buy and sell. No identity required.
           </p>
           <div className="flex flex-wrap gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <Link to="/get-started">
