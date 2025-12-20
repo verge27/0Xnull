@@ -67,12 +67,10 @@ const Index = () => {
             </a>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              Buy & Sell
-              <br />
-              <span className="text-gradient">Anonymously</span>
+              Scan. Send. Bet.
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              Private infrastructure for the permissionless economy. Trade physical goods, digital products, and services without compromising your identity.
+              Anonymous prediction markets for sports and esports. XMR only. 0.4% rake. Winners always get paid.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/get-started">
