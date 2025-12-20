@@ -74,31 +74,31 @@ const Index = () => {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/get-started">
-                <Button size="lg" className="gap-2 text-lg px-8 shadow-lg">
+                <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-pulse">
                   <Rocket className="w-5 h-5" />
                   Get Started
                 </Button>
               </Link>
               <Link to="/swaps">
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 shadow-lg">
+                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-cyan">
                   <RefreshCw className="w-5 h-5" />
                   Swaps
                 </Button>
               </Link>
               <Link to="/predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta">
                   <TrendingUp className="w-5 h-5" />
                   Predictions
                 </Button>
               </Link>
               <Link to="/infra">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan" style={{ animationDelay: '0.5s' }}>
                   <Server className="w-5 h-5" />
                   Infra
                 </Button>
               </Link>
               <Link to="/browse">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta" style={{ animationDelay: '1s' }}>
                   <ShoppingBag className="w-5 h-5" />
                   Marketplace
                 </Button>
