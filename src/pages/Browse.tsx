@@ -16,7 +16,7 @@ import { DisclaimerBanner } from '@/components/DisclaimerBanner';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronRight, ChevronDown, X, SlidersHorizontal, ExternalLink } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, X, SlidersHorizontal, ExternalLink, Rocket, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -282,20 +282,54 @@ const Browse = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={heroBackground} 
-          alt="" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background" />
-      </div>
-      
+    <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      {/* Hero Section */}
+      <section className="relative w-full h-[65vh] overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src={heroBackground} 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+          {/* Dark gradient overlay - transparent at top, solid dark at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
+        </div>
+        
+        {/* Centered Text Overlay */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground drop-shadow-lg animate-fade-in">
+            Bet Privately
+          </h1>
+          <p className="text-lg md:text-xl text-foreground/90 max-w-2xl mb-8 drop-shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            Prediction markets on 150+ sports and 15 esports titles. No accounts. No KYC. No limits.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <Link to="/get-started">
+              <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-orange">
+                <Rocket className="w-5 h-5" />
+                Get Started
+              </Button>
+            </Link>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan"
+              onClick={() => {
+                document.getElementById('marketplace-content')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Browse Markets
+            </Button>
+          </div>
+        </div>
+      </section>
+      
+      {/* Main Content - on solid dark background */}
+      <div id="marketplace-content" className="container mx-auto px-4 py-8 relative z-10">
         <div className="mb-6">
           {urlSearchQuery ? (
             <div className="mb-6">
