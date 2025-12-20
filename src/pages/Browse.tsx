@@ -300,10 +300,10 @@ const Browse = () => {
         
         {/* Centered Text Overlay */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <p className="text-2xl md:text-3xl text-foreground/90 max-w-xl drop-shadow-md animate-fade-in">
+          <p className="text-4xl md:text-6xl font-semibold text-foreground drop-shadow-lg animate-fade-in">
             Buy and sell. No identity required.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="flex flex-wrap gap-4 justify-center animate-fade-in mt-24 md:mt-32" style={{ animationDelay: '0.2s' }}>
             <Link to="/get-started">
               <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-orange">
                 <Rocket className="w-5 h-5" />
