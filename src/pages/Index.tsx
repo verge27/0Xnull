@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Server, ShoppingBag } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -85,22 +85,28 @@ const Index = () => {
                   Swaps
                 </Button>
               </Link>
-              <Link to="/predictions">
+              <Link to="/esports-predictions">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta">
-                  <TrendingUp className="w-5 h-5" />
-                  Predictions
+                  <Gamepad2 className="w-5 h-5" />
+                  eSports
                 </Button>
               </Link>
-              <Link to="/infra">
+              <Link to="/sports-predictions">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan" style={{ animationDelay: '0.5s' }}>
-                  <Server className="w-5 h-5" />
-                  Infra
+                  <Trophy className="w-5 h-5" />
+                  Sports
                 </Button>
               </Link>
-              <Link to="/browse">
+              <Link to="/predictions/sports/combat">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta" style={{ animationDelay: '1s' }}>
-                  <ShoppingBag className="w-5 h-5" />
-                  Marketplace
+                  <Swords className="w-5 h-5" />
+                  Combat
+                </Button>
+              </Link>
+              <Link to="/predictions">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan" style={{ animationDelay: '1.5s' }}>
+                  <Coins className="w-5 h-5" />
+                  Crypto
                 </Button>
               </Link>
             </div>
