@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Server, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -75,15 +75,16 @@ const Index = () => {
               Private infrastructure for the permissionless economy. Trade physical goods, digital products, and services without compromising your identity.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/browse">
+              <Link to="/get-started">
                 <Button size="lg" className="gap-2 text-lg px-8 shadow-lg">
-                  Start Shopping
-                  <ArrowRight className="w-5 h-5" />
+                  <Rocket className="w-5 h-5" />
+                  Get Started
                 </Button>
               </Link>
-              <Link to="/sell">
+              <Link to="/swaps">
                 <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 shadow-lg">
-                  Start Selling
+                  <RefreshCw className="w-5 h-5" />
+                  Swaps
                 </Button>
               </Link>
               <Link to="/predictions">
@@ -92,16 +93,16 @@ const Index = () => {
                   Predictions
                 </Button>
               </Link>
-              <Link to="/esports-predictions">
+              <Link to="/infra">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
-                  <TrendingUp className="w-5 h-5" />
-                  Esports
+                  <Server className="w-5 h-5" />
+                  Infra
                 </Button>
               </Link>
-              <Link to="/get-started">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-primary/20 border-primary/50 hover:bg-primary/30 backdrop-blur-sm">
-                  <Rocket className="w-5 h-5" />
-                  Get Started
+              <Link to="/browse">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm">
+                  <ShoppingBag className="w-5 h-5" />
+                  Marketplace
                 </Button>
               </Link>
             </div>
