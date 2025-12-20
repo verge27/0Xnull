@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
+import heroBackground from '@/assets/hero-background.png';
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -281,10 +282,20 @@ const Browse = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src={heroBackground} 
+          alt="" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background" />
+      </div>
+      
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="mb-6">
           {urlSearchQuery ? (
             <div className="mb-6">
