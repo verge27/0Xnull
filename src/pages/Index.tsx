@@ -174,7 +174,7 @@ const Index = () => {
               Ready to Get Started?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Access the permissionless economy today. No registration required to browse.
+              Access the permissionless economy today.
             </p>
             <Link to="/get-started">
               <Button size="lg" className="gap-2">
