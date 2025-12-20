@@ -54,6 +54,7 @@ import InfraHub from "./pages/InfraHub";
 import PredictionsHub from "./pages/PredictionsHub";
 import CombatSports from "./pages/CombatSports";
 import GetStarted from "./pages/GetStarted";
+import ApiDocs from "./pages/ApiDocs";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,7 @@ const App = () => (
                   <Route path="/support" element={<Support />} />
                   <Route path="/tor-guide" element={<TorGuide />} />
                   <Route path="/get-started" element={<GetStarted />} />
+                  <Route path="/api-docs" element={<ApiDocs />} />
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
