@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Code, Zap, Shield, Globe, Trophy, Gamepad2, CircleDollarSign } from "lucide-react";
+import { CodeBlock } from "@/components/CodeBlock";
 
 const ApiDocs = () => {
   return (
@@ -48,8 +49,9 @@ const ApiDocs = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-              <code>{`import requests
+            <CodeBlock
+              language="python"
+              code={`import requests
 
 BASE = "https://0xnull.io/api"
 
@@ -79,8 +81,8 @@ bet = requests.post(f"{BASE}/predictions/bet", json={
 
 # Returns deposit address — send XMR to confirm bet
 print(bet["deposit_address"])
-print(bet["amount_xmr"])`}</code>
-            </pre>
+print(bet["amount_xmr"])`}
+            />
           </CardContent>
         </Card>
 
@@ -161,8 +163,9 @@ print(bet["amount_xmr"])`}</code>
                   <p className="text-sm text-muted-foreground mt-2 mb-3">
                     Parameters: <code className="bg-muted px-1 rounded">include_resolved</code> (bool, default: false)
                   </p>
-                  <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`{
+                  <CodeBlock
+                    language="json"
+                    code={`{
   "markets": [
     {
       "market_id": "btc_100k_dec2024",
@@ -181,15 +184,17 @@ print(bet["amount_xmr"])`}</code>
     }
   ]
 }`}
-                  </pre>
+                  />
                 </div>
 
                 {/* Get Market Details */}
                 <div>
                   <h3 className="font-semibold mb-2">Get Market Details</h3>
                   <code className="bg-muted px-2 py-1 rounded text-sm">GET /api/predictions/markets/{'{market_id}'}</code>
-                  <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mt-3">
-{`{
+                  <CodeBlock
+                    language="json"
+                    className="mt-3"
+                    code={`{
   "market_id": "btc_100k_dec2024",
   "title": "BTC above $100k by Dec 31",
   "yes_pool_xmr": 2.5,
@@ -205,15 +210,17 @@ print(bet["amount_xmr"])`}</code>
     }
   ]
 }`}
-                  </pre>
+                  />
                 </div>
 
                 {/* Create Market */}
                 <div>
                   <h3 className="font-semibold mb-2">Create Market</h3>
                   <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/markets</code>
-                  <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mt-3">
-{`{
+                  <CodeBlock
+                    language="json"
+                    className="mt-3"
+                    code={`{
   "market_id": "unique_id",
   "title": "Market question",
   "description": "Optional details",
@@ -223,7 +230,7 @@ print(bet["amount_xmr"])`}</code>
   "oracle_value": 100000,
   "resolution_time": 1735689600
 }`}
-                  </pre>
+                  />
                   
                   <h4 className="font-medium mt-4 mb-2">Oracle Types</h4>
                   <Table>
@@ -284,19 +291,21 @@ print(bet["amount_xmr"])`}</code>
                   <div className="grid md:grid-cols-2 gap-3 mt-3">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Request:</p>
-                      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`{
+                      <CodeBlock
+                        language="json"
+                        code={`{
   "market_id": "btc_100k_dec2024",
   "side": "YES",
   "amount_usd": 100,
   "payout_address": "4..."
 }`}
-                      </pre>
+                      />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Response:</p>
-                      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`{
+                      <CodeBlock
+                        language="json"
+                        code={`{
   "bet_id": "bet_a1b2c3d4",
   "market_id": "btc_100k_dec2024",
   "side": "YES",
@@ -309,7 +318,7 @@ print(bet["amount_xmr"])`}</code>
   "expires_at": "2024-12-25T12:00:00Z",
   "status": "awaiting_deposit"
 }`}
-                      </pre>
+                      />
                     </div>
                   </div>
                 </div>
@@ -486,8 +495,9 @@ print(bet["amount_xmr"])`}</code>
           <CardContent className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">Telegram Bot</h3>
-              <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`async def bet(update, context):
+              <CodeBlock
+                language="python"
+                code={`async def bet(update, context):
     sport, side, amount = context.args[0], context.args[1], float(context.args[2])
     
     events = requests.get(f"{BASE}/sports/events?sport={sport}").json()
@@ -511,13 +521,14 @@ print(bet["amount_xmr"])`}</code>
     }).json()
     
     await update.message.reply_text(f"Send {bet['amount_xmr']} XMR to {bet['deposit_address']}")`}
-              </pre>
+              />
             </div>
 
             <div>
               <h3 className="font-semibold mb-2">AI Agent</h3>
-              <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`class OxNullAgent:
+              <CodeBlock
+                language="python"
+                code={`class OxNullAgent:
     def __init__(self, payout_address: str):
         self.base = "https://0xnull.io/api"
         self.payout_address = payout_address
@@ -532,7 +543,7 @@ print(bet["amount_xmr"])`}</code>
             "amount_usd": amount_usd,
             "payout_address": self.payout_address
         }).json()`}
-              </pre>
+              />
             </div>
           </CardContent>
         </Card>
