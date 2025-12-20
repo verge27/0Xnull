@@ -260,16 +260,6 @@ class ApiClient {
   }
 
   // AI Chat Services
-  async therapyChat(messages: ChatMessage[]): Promise<ApiResponse<ChatResponse>> {
-    if (!this.token) {
-      return { error: 'No token set' };
-    }
-    return this.request<ChatResponse>('/api/therapy/chat', {
-      method: 'POST',
-      body: JSON.stringify({ token: this.token, messages }),
-    });
-  }
-
   async kokoroChat(messages: ChatMessage[]): Promise<ApiResponse<ChatResponse>> {
     if (!this.token) {
       return { error: 'No token set' };
@@ -282,7 +272,7 @@ class ApiClient {
 
   // Streaming chat (for real-time responses)
   async *streamChat(
-    endpoint: '/api/therapy/chat' | '/api/kokoro/chat',
+    endpoint: '/api/kokoro/chat',
     messages: ChatMessage[]
   ): AsyncGenerator<string, void, unknown> {
     if (!this.token) {

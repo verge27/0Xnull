@@ -71,11 +71,6 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/therapy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Therapy
-                </Link>
-              </li>
-              <li>
                 <Link to="/kokoro" className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2">
                   Kokoro
                   <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded">Soon</span>

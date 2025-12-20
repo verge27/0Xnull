@@ -1,4 +1,4 @@
-import { Bot, Mic, Heart, MessageCircle, Lock, Zap, DollarSign, ExternalLink } from 'lucide-react';
+import { Bot, Mic, MessageCircle, Lock, Zap, DollarSign, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -14,14 +14,6 @@ const services = [
     href: '/voice',
     price: 'From $0.15',
     color: 'text-primary',
-  },
-  {
-    title: 'AI Therapy',
-    description: 'Anonymous AI therapist. Talk through anything without judgment.',
-    icon: Heart,
-    href: '/therapy',
-    price: 'Free',
-    color: 'text-pink-500',
   },
   {
     title: 'Kokoro Companion',

@@ -37,7 +37,6 @@ import FiatOfframp from "./pages/FiatOfframp";
 import FiatOnramp from "./pages/FiatOnramp";
 import ApiAnalytics from "./pages/ApiAnalytics";
 import Voice from "./pages/Voice";
-import Therapy from "./pages/Therapy";
 import Kokoro from "./pages/Kokoro";
 import Verify from "./pages/Verify";
 import Support from "./pages/Support";
@@ -114,7 +113,6 @@ const App = () => (
                   {/* AI */}
                   <Route path="/ai" element={<AIHub />} />
                   <Route path="/voice" element={<Voice />} />
-                  <Route path="/therapy" element={<Therapy />} />
                   <Route path="/kokoro" element={<Kokoro />} />
                   
                   {/* Infrastructure */}
