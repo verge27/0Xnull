@@ -136,7 +136,7 @@ const Index = () => {
               <div>
                 <h3 className="text-xl font-semibold mb-2">Pick a Market</h3>
                 <p className="text-muted-foreground">
-                  Browse sports, esports, and crypto price predictions. Choose YES or NO on the outcome you believe in.
+                  Browse sports, esports, combat and crypto price predictions. Choose YES or NO on the outcome you believe in.
                 </p>
               </div>
             </div>
