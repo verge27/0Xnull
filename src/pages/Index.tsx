@@ -171,14 +171,14 @@ const Index = () => {
         <Card className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/20">
           <CardContent className="p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Start Trading?
+              Ready to Get Started?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               Access the permissionless economy today. No registration required to browse.
             </p>
-            <Link to="/browse">
+            <Link to="/get-started">
               <Button size="lg" className="gap-2">
-                Explore Marketplace
+                Get Started
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
