@@ -340,22 +340,6 @@ print(bet["amount_xmr"])`}
                       <span className="text-muted-foreground">— Pool balances + view key</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/scan-deposits</code>
-                      <span className="text-muted-foreground">— Scan wallets for deposits</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/markets/{'{market_id}'}/resolve</code>
-                      <span className="text-muted-foreground">— Resolve market (optional: outcome=YES|NO)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/markets/{'{market_id}'}/process-payouts</code>
-                      <span className="text-muted-foreground">— Distribute funds to winners</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/resolve-due</code>
-                      <span className="text-muted-foreground">— Auto-resolve due markets</span>
-                    </div>
-                    <div className="flex items-center gap-2">
                       <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/payouts</code>
                       <span className="text-muted-foreground">— Payout history</span>
                     </div>
