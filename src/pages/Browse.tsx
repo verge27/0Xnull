@@ -294,8 +294,9 @@ const Browse = () => {
             alt="" 
             className="w-full h-full object-cover"
           />
-          {/* Dark gradient overlay - transparent at top, solid dark at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
+          {/* Darker gradient overlay for better text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background" />
+          <div className="absolute inset-0 bg-background/30" />
         </div>
         
         {/* Centered Text Overlay */}
@@ -319,7 +320,7 @@ const Browse = () => {
               }}
             >
               <ShoppingBag className="w-5 h-5" />
-              Browse Markets
+              Browse Marketplace
             </Button>
           </div>
         </div>
