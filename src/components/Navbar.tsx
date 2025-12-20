@@ -136,9 +136,6 @@ export const Navbar = () => {
                   <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Voice</span>
                   </Link>
-                  <Link to="/therapy" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Therapy</span>
-                  </Link>
                   <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Kokoro</span>
                     <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded">Soon</span>
@@ -225,9 +222,6 @@ export const Navbar = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/therapy" className="cursor-pointer">AI Therapy</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
