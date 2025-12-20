@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords } from 'lucide-react';
+import { Target, Zap, BarChart3, Lock, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,24 +11,24 @@ import predictionsBackground from '@/assets/predictions-hero-background.png';
 const Index = () => {
   const features = [
     {
-      icon: Shield,
-      title: 'Anonymous Trading',
-      description: 'Buy and sell with complete privacy using Monero (XMR) payments'
-    },
-    {
-      icon: Lock,
-      title: 'Secure Payments',
-      description: 'Powered by Trocador AnonPay for safe cryptocurrency transactions'
+      icon: Target,
+      title: 'No Account Needed',
+      description: 'Scan QR, send XMR, you\'re in. No signup, no email, no identity.'
     },
     {
       icon: Zap,
-      title: 'Instant Listings',
-      description: 'Start selling in minutes with our simple listing creation'
+      title: 'Instant Payouts',
+      description: 'Winners paid automatically when markets resolve. No withdrawal requests.'
     },
     {
-      icon: Package,
-      title: 'Order Tracking',
-      description: 'Track your orders from payment to delivery'
+      icon: BarChart3,
+      title: '0.4% Rake Only',
+      description: 'Lowest fees in the industry. No house edge — you bet against other users.'
+    },
+    {
+      icon: Lock,
+      title: 'Fully Private',
+      description: 'XMR only. No blockchain trail. No KYC. Ever.'
     }
   ];
 
