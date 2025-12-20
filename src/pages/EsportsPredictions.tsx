@@ -339,14 +339,45 @@ export default function EsportsPredictions() {
         return { border: 'border-cyan-500/30', bg: 'from-cyan-950/30', accent: 'text-cyan-400', glow: 'hover:shadow-[0_0_15px_hsl(180_100%_50%/0.2)]' };
     }
   };
+  // Helper to get event timestamp for sorting
+  const getEventTimestamp = (event: EsportsEvent): number => {
+    if (typeof event.start_timestamp === 'number' && event.start_timestamp > 0) return event.start_timestamp;
+    if (typeof event.scheduled_at === 'number' && event.scheduled_at > 0) return event.scheduled_at;
+    if (typeof event.scheduled_at === 'string') {
+      const ts = new Date(event.scheduled_at).getTime() / 1000;
+      if (!isNaN(ts) && ts > 0) return ts;
+    }
+    if (typeof event.start_time === 'string') {
+      const ts = new Date(event.start_time).getTime() / 1000;
+      if (!isNaN(ts) && ts > 0) return ts;
+    }
+    return 0; // TBD events get 0
+  };
+
+  // Sort: events with dates first (by time), then TBD events
+  const sortEvents = (evts: EsportsEvent[]) => {
+    return [...evts].sort((a, b) => {
+      const tsA = getEventTimestamp(a);
+      const tsB = getEventTimestamp(b);
+      // Both have dates: sort by time
+      if (tsA > 0 && tsB > 0) return tsA - tsB;
+      // Only A has date: A comes first
+      if (tsA > 0 && tsB === 0) return -1;
+      // Only B has date: B comes first
+      if (tsA === 0 && tsB > 0) return 1;
+      // Both TBD: keep original order
+      return 0;
+    });
+  };
+
   const filteredEvents = selectedGame === 'all' && selectedCategory === 'all'
-    ? events 
+    ? sortEvents(events) 
     : selectedGame !== 'all'
-      ? events.filter(e => e.game === selectedGame)
-      : events.filter(e => {
+      ? sortEvents(events.filter(e => e.game === selectedGame))
+      : sortEvents(events.filter(e => {
           const gameInfo = ESPORTS_GAMES.find(g => g.key === e.game);
           return gameInfo?.category === selectedCategory;
-        });
+        }));
 
   const activeMarkets = markets
     .filter(m => m.resolved === 0)
