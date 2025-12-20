@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Zap, BarChart3, Lock, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords } from 'lucide-react';
+import { Target, Zap, BarChart3, Lock, ArrowRight, TrendingUp, ExternalLink, Rocket, Gamepad2, Trophy, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,12 +77,6 @@ const Index = () => {
                 <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-pulse">
                   <Rocket className="w-5 h-5" />
                   Get Started
-                </Button>
-              </Link>
-              <Link to="/swaps">
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-cyan">
-                  <RefreshCw className="w-5 h-5" />
-                  Swaps
                 </Button>
               </Link>
               <Link to="/esports-predictions">
