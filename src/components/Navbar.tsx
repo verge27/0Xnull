@@ -103,27 +103,14 @@ export const Navbar = () => {
                     <span className="font-medium">Get Started</span>
                   </Link>
 
-                  {/* Marketplace */}
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</div>
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <ShoppingBag className="w-5 h-5 text-primary" />
-                    <span>Browse</span>
+                  {/* Swaps - Second */}
+                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors border border-border mb-4">
+                    <RefreshCw className="w-5 h-5 text-primary" />
+                    <span className="font-medium">Swaps</span>
                   </Link>
-                  {isAuthenticated && (
-                    <>
-                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>Sell</span>
-                      </Link>
-                      <Link to="/orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>My Orders</span>
-                      </Link>
-                    </>
-                  )}
 
                   {/* Predictions */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Predictions</div>
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Predictions</div>
                   <Link to="/esports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Gamepad2 className="w-5 h-5 text-purple-500" />
                     <span>Esports</span>
@@ -159,10 +146,6 @@ export const Navbar = () => {
 
                   {/* Infrastructure */}
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infrastructure</div>
-                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <RefreshCw className="w-5 h-5 text-primary" />
-                    <span>Swaps</span>
-                  </Link>
                   <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Server className="w-5 h-5 text-blue-500" />
                     <span>VPS</span>
@@ -171,38 +154,31 @@ export const Navbar = () => {
                     <Smartphone className="w-5 h-5 text-green-500" />
                     <span>eSIM</span>
                   </Link>
+
+                  {/* Marketplace - Bottom */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</div>
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <ShoppingBag className="w-5 h-5 text-primary" />
+                    <span>Browse</span>
+                  </Link>
+                  {isAuthenticated && (
+                    <>
+                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                        <Package className="w-5 h-5 text-primary" />
+                        <span>Sell</span>
+                      </Link>
+                      <Link to="/orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                        <Package className="w-5 h-5 text-primary" />
+                        <span>My Orders</span>
+                      </Link>
+                    </>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>
 
-            {/* Desktop Navigation - 4 Main Dropdowns */}
+            {/* Desktop Navigation - Reordered: Predictions, AI, Infra, Marketplace */}
             
-            {/* Marketplace Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span className="hidden md:inline">Marketplace</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuItem asChild>
-                  <Link to="/browse" className="cursor-pointer">Browse Listings</Link>
-                </DropdownMenuItem>
-                {isAuthenticated && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/sell" className="cursor-pointer">Sell</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/orders" className="cursor-pointer">My Orders</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Predictions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -288,7 +264,32 @@ export const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Get Started Button */}
+            {/* Marketplace Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <ShoppingBag className="w-4 h-4" />
+                  <span className="hidden md:inline">Marketplace</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuItem asChild>
+                  <Link to="/browse" className="cursor-pointer">Browse Listings</Link>
+                </DropdownMenuItem>
+                {isAuthenticated && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/sell" className="cursor-pointer">Sell</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">My Orders</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Link to="/get-started" className="hidden sm:block">
               <Button variant="outline" size="sm" className="gap-1 border-primary/50 bg-primary/10 hover:bg-primary/20">
                 <Rocket className="w-4 h-4" />
