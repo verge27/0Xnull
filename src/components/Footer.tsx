@@ -111,6 +111,7 @@ export const Footer = () => {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
             <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link to="/api-docs" className="hover:text-foreground transition-colors">API</Link>
             <Link to="/verify" className="hover:text-foreground transition-colors">Verify & Canary</Link>
             <a 
               href="https://kycnot.me/service/0xnull"
