@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords, Coins } from 'lucide-react';
+import { Shield, Lock, Zap, Package, ArrowRight, TrendingUp, ExternalLink, Rocket, RefreshCw, Gamepad2, Trophy, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -101,12 +101,6 @@ const Index = () => {
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta" style={{ animationDelay: '1s' }}>
                   <Swords className="w-5 h-5" />
                   Combat
-                </Button>
-              </Link>
-              <Link to="/predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan" style={{ animationDelay: '1.5s' }}>
-                  <Coins className="w-5 h-5" />
-                  Crypto
                 </Button>
               </Link>
             </div>
