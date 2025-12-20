@@ -134,9 +134,9 @@ const Index = () => {
                 1
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Browse Listings</h3>
+                <h3 className="text-xl font-semibold mb-2">Pick a Market</h3>
                 <p className="text-muted-foreground">
-                  Explore our marketplace for physical goods, digital products, and services. All transactions are conducted in XMR for maximum privacy.
+                  Browse sports, esports, and crypto price predictions. Choose YES or NO on the outcome you believe in.
                 </p>
               </div>
             </div>
@@ -145,9 +145,9 @@ const Index = () => {
                 2
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Pay with Crypto</h3>
+                <h3 className="text-xl font-semibold mb-2">Scan & Send XMR</h3>
                 <p className="text-muted-foreground">
-                  Complete your purchase using Trocador AnonPay. Pay with various cryptocurrencies and convert to XMR automatically.
+                  Get a unique deposit address. Scan the QR with your Monero wallet. One confirmation and you're in.
                 </p>
               </div>
             </div>
@@ -156,9 +156,9 @@ const Index = () => {
                 3
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Track Your Order</h3>
+                <h3 className="text-xl font-semibold mb-2">Get Paid Automatically</h3>
                 <p className="text-muted-foreground">
-                  Monitor your order status from payment confirmation to delivery. Sellers ship directly to you.
+                  Winners split the pool when the market resolves. Payouts sent instantly to your wallet — no withdrawal requests.
                 </p>
               </div>
             </div>
