@@ -351,6 +351,8 @@ const Slap = () => {
           }}
           totalUsd={betSlip.totalUsd}
           isCheckingOut={betSlip.isCheckingOut}
+          activeSlip={betSlip.activeSlip}
+          onViewActiveSlip={() => setMultibetDepositOpen(true)}
         />
 
         <MultibetDepositModal

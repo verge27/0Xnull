@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer } from 'lucide-react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,13 @@ import { BetSlipItem } from '@/hooks/useMultibetSlip';
 // Bet slip expires 60 minutes after creation
 const EXPIRY_MINUTES = 60;
 
+interface ActiveSlip {
+  slip_id: string;
+  status: string;
+  xmr_address?: string;
+  total_amount_xmr?: number;
+}
+
 interface BetSlipPanelProps {
   items: BetSlipItem[];
   isOpen: boolean;
@@ -36,6 +43,8 @@ interface BetSlipPanelProps {
   calculateTotalPotentialPayout: () => number;
   onCheckout: (payoutAddress?: string) => Promise<any>;
   isCheckingOut: boolean;
+  activeSlip?: ActiveSlip | null;
+  onViewActiveSlip?: () => void;
 }
 
 export function BetSlipPanel({
@@ -53,6 +62,8 @@ export function BetSlipPanel({
   calculateTotalPotentialPayout,
   onCheckout,
   isCheckingOut,
+  activeSlip,
+  onViewActiveSlip,
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -262,20 +273,39 @@ export function BetSlipPanel({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, items.length, isCheckingOut, handleCheckout, onOpenChange, onClear, lastRemoved, onUndo]);
 
+  const hasAwaitingDeposit = activeSlip && activeSlip.status === 'awaiting_deposit';
+
   return (
     <>
-      {/* Floating button when closed */}
-      {!isOpen && items.length > 0 && (
-        <Button
-          onClick={() => onOpenChange(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 px-4 gap-2 shadow-lg"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          <span className="font-semibold">{items.length}</span>
-          <Badge variant="secondary" className="ml-1">
-            ${totalUsd.toFixed(2)}
-          </Badge>
-        </Button>
+      {/* Floating buttons when closed */}
+      {!isOpen && (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 items-end">
+          {/* View Active Slip button - shown when there's an awaiting deposit */}
+          {hasAwaitingDeposit && onViewActiveSlip && (
+            <Button
+              onClick={onViewActiveSlip}
+              variant="secondary"
+              className="h-12 px-4 gap-2 shadow-lg bg-amber-500 hover:bg-amber-600 text-white border-0"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="font-medium">View Active Slip</span>
+            </Button>
+          )}
+          
+          {/* Regular bet slip button */}
+          {items.length > 0 && (
+            <Button
+              onClick={() => onOpenChange(true)}
+              className="h-14 px-4 gap-2 shadow-lg"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="font-semibold">{items.length}</span>
+              <Badge variant="secondary" className="ml-1">
+                ${totalUsd.toFixed(2)}
+              </Badge>
+            </Button>
+          )}
+        </div>
       )}
 
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
