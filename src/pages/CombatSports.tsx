@@ -493,6 +493,7 @@ export default function CombatSports() {
                               marketId={market.market_id}
                               marketTitle={market.title}
                               onAdd={(id, title, side, amount) => betSlip.addToBetSlip(id, title, side, amount)}
+                              onOpenSlip={() => betSlip.setIsOpen(true)}
                             />
                           </div>
                         </CardContent>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,7 @@ export function BetSlipPanel({
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
 
-  const handleCheckout = async () => {
+  const handleCheckout = useCallback(async () => {
     if (items.length === 0) {
       toast.error('Add at least one bet to your slip');
       return;
@@ -62,7 +62,38 @@ export function BetSlipPanel({
       const message = error instanceof Error ? error.message : 'Failed to create multibet';
       toast.error(message);
     }
-  };
+  }, [items, payoutAddress, onCheckout]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to close
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+        return;
+      }
+
+      // Ctrl/Cmd + Enter to checkout
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && items.length > 0 && !isCheckingOut) {
+        e.preventDefault();
+        handleCheckout();
+        return;
+      }
+
+      // Ctrl/Cmd + Backspace to clear
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Backspace' && items.length > 0) {
+        e.preventDefault();
+        onClear();
+        toast.info('Bet slip cleared');
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, items.length, isCheckingOut, handleCheckout, onOpenChange, onClear]);
 
   return (
     <>
@@ -194,7 +225,7 @@ export function BetSlipPanel({
             </>
           )}
 
-          <SheetFooter className="mt-4">
+          <SheetFooter className="mt-4 space-y-2">
             <Button
               className="w-full"
               size="lg"
@@ -213,6 +244,9 @@ export function BetSlipPanel({
                 </>
               )}
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">↵</kbd> to checkout • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> to close
+            </p>
           </SheetFooter>
         </SheetContent>
       </Sheet>
