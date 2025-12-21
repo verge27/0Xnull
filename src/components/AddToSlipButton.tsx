@@ -1,13 +1,20 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+
+const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
 
 interface AddToSlipButtonProps {
   marketId: string;
@@ -28,9 +35,9 @@ export function AddToSlipButton({
 }: AddToSlipButtonProps) {
   const [open, setOpen] = useState(false);
 
-  const handleAdd = (side: 'YES' | 'NO') => {
-    onAdd(marketId, marketTitle, side, defaultAmount);
-    toast.success(`Added ${side} bet to slip`);
+  const handleAdd = (side: 'YES' | 'NO', amount: number = defaultAmount) => {
+    onAdd(marketId, marketTitle, side, amount);
+    toast.success(`Added $${amount} ${side} bet to slip`);
     setOpen(false);
   };
 
@@ -47,21 +54,45 @@ export function AddToSlipButton({
             <Plus className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
-          <DropdownMenuItem
-            onClick={() => handleAdd('YES')}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span>Add YES</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handleAdd('NO')}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <TrendingDown className="w-4 h-4 text-red-500" />
-            <span>Add NO</span>
-          </DropdownMenuItem>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <span>Add YES</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {PRESET_AMOUNTS.map((amount) => (
+                  <DropdownMenuItem
+                    key={amount}
+                    onClick={() => handleAdd('YES', amount)}
+                    className="cursor-pointer"
+                  >
+                    ${amount}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+              <TrendingDown className="w-4 h-4 text-red-500" />
+              <span>Add NO</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {PRESET_AMOUNTS.map((amount) => (
+                  <DropdownMenuItem
+                    key={amount}
+                    onClick={() => handleAdd('NO', amount)}
+                    className="cursor-pointer"
+                  >
+                    ${amount}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -77,21 +108,45 @@ export function AddToSlipButton({
             <ChevronDown className="w-3 h-3" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
-          <DropdownMenuItem
-            onClick={() => handleAdd('YES')}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span>Add YES</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handleAdd('NO')}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <TrendingDown className="w-4 h-4 text-red-500" />
-            <span>Add NO</span>
-          </DropdownMenuItem>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <span>Add YES</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {PRESET_AMOUNTS.map((amount) => (
+                  <DropdownMenuItem
+                    key={amount}
+                    onClick={() => handleAdd('YES', amount)}
+                    className="cursor-pointer"
+                  >
+                    ${amount}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+              <TrendingDown className="w-4 h-4 text-red-500" />
+              <span>Add NO</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {PRESET_AMOUNTS.map((amount) => (
+                  <DropdownMenuItem
+                    key={amount}
+                    onClick={() => handleAdd('NO', amount)}
+                    className="cursor-pointer"
+                  >
+                    ${amount}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -107,21 +162,45 @@ export function AddToSlipButton({
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem
-          onClick={() => handleAdd('YES')}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <TrendingUp className="w-4 h-4 text-emerald-500" />
-          <span>Add YES ($5)</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleAdd('NO')}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <TrendingDown className="w-4 h-4 text-red-500" />
-          <span>Add NO ($5)</span>
-        </DropdownMenuItem>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <span>Add YES</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {PRESET_AMOUNTS.map((amount) => (
+                <DropdownMenuItem
+                  key={amount}
+                  onClick={() => handleAdd('YES', amount)}
+                  className="cursor-pointer"
+                >
+                  ${amount}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+            <TrendingDown className="w-4 h-4 text-red-500" />
+            <span>Add NO</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {PRESET_AMOUNTS.map((amount) => (
+                <DropdownMenuItem
+                  key={amount}
+                  onClick={() => handleAdd('NO', amount)}
+                  className="cursor-pointer"
+                >
+                  ${amount}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );
