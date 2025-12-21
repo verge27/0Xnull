@@ -1192,6 +1192,11 @@ export default function SportsPredictions() {
         calculatePotentialPayout={betSlip.calculatePotentialPayout}
         calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
         onCheckout={async (payoutAddress) => {
+          // If there's already an active slip awaiting deposit, just reopen the modal
+          if (betSlip.activeSlip && betSlip.activeSlip.status === 'awaiting_deposit') {
+            setMultibetDepositOpen(true);
+            return betSlip.activeSlip;
+          }
           const slip = await betSlip.checkout(payoutAddress);
           if (slip) {
             setMultibetDepositOpen(true);
