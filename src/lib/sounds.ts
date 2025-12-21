@@ -8,8 +8,19 @@ const getAudioContext = () => {
   return audioContext;
 };
 
+// Trigger vibration on mobile devices
+export const triggerVibration = (pattern: number | number[] = 200) => {
+  try {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(pattern);
+    }
+  } catch (e) {
+    console.warn('Could not trigger vibration:', e);
+  }
+};
+
 // Play a success/confirmation sound (ascending chime)
-export const playConfirmationSound = () => {
+export const playConfirmationSound = (withVibration = true) => {
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
@@ -47,6 +58,11 @@ export const playConfirmationSound = () => {
     oscillator2.start(now);
     oscillator1.stop(now + 0.5);
     oscillator2.stop(now + 0.5);
+
+    // Vibrate on mobile
+    if (withVibration) {
+      triggerVibration([100, 50, 100, 50, 200]); // Success pattern
+    }
   } catch (e) {
     console.warn('Could not play confirmation sound:', e);
   }
@@ -79,7 +95,7 @@ export const playNotificationSound = () => {
 };
 
 // Play an error/warning sound
-export const playErrorSound = () => {
+export const playErrorSound = (withVibration = true) => {
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
@@ -100,6 +116,11 @@ export const playErrorSound = () => {
 
     oscillator.start(now);
     oscillator.stop(now + 0.2);
+
+    // Vibrate on mobile
+    if (withVibration) {
+      triggerVibration([300, 100, 300]); // Error pattern
+    }
   } catch (e) {
     console.warn('Could not play error sound:', e);
   }
