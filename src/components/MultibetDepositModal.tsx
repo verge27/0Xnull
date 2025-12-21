@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { toast } from 'sonner';
 import { MultibetSlip } from '@/services/api';
 
@@ -119,8 +119,8 @@ export function MultibetDepositModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-[400px] max-h-[90vh] flex flex-col p-4">
+        <DialogHeader className="pb-2">
           <DialogTitle className="flex items-center gap-2">
             {isConfirmed ? (
               <>
@@ -136,89 +136,88 @@ export function MultibetDepositModal({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-6 py-4">
-            {/* Summary */}
-            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-3 border border-primary/20">
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-background/50 rounded-md p-2">
-                  <p className="text-xs text-muted-foreground mb-1">Legs</p>
-                  <p className="text-lg font-bold text-primary">{slip.legs.length}</p>
-                </div>
-                <div className="bg-background/50 rounded-md p-2">
-                  <p className="text-xs text-muted-foreground mb-1">Total USD</p>
-                  <p className="text-lg font-bold text-emerald-500">${slip.total_amount_usd.toFixed(2)}</p>
-                </div>
-                <div className="bg-background/50 rounded-md p-2 overflow-hidden">
-                  <p className="text-xs text-muted-foreground mb-1">Total XMR</p>
-                  <p className="text-xs font-bold font-mono text-amber-500 truncate">{slip.total_amount_xmr.toFixed(6)}</p>
-                </div>
+        <div className="flex-1 overflow-y-auto space-y-4 py-2">
+          {/* Summary */}
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-2 border border-primary/20">
+            <div className="flex justify-between text-center gap-1">
+              <div className="bg-background/50 rounded-md p-2 flex-1">
+                <p className="text-xs text-muted-foreground">Legs</p>
+                <p className="text-lg font-bold text-primary">{slip.legs.length}</p>
+              </div>
+              <div className="bg-background/50 rounded-md p-2 flex-1">
+                <p className="text-xs text-muted-foreground">USD</p>
+                <p className="text-base font-bold text-emerald-500">${slip.total_amount_usd.toFixed(2)}</p>
+              </div>
+              <div className="bg-background/50 rounded-md p-2 flex-1">
+                <p className="text-xs text-muted-foreground">XMR</p>
+                <p className="text-xs font-bold font-mono text-amber-500">{slip.total_amount_xmr.toFixed(4)}</p>
               </div>
             </div>
+          </div>
 
-            {/* QR Code and Address */}
-            {!isConfirmed && (
-              <div className="space-y-4">
-                <div className="flex justify-center">
-                  <div className="bg-white p-3 rounded-lg border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
-                    <QRCodeSVG value={moneroUri} size={150} />
-                  </div>
+          {/* QR Code and Address */}
+          {!isConfirmed && (
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <div className="bg-white p-3 rounded-lg border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
+                  <QRCodeSVG value={moneroUri} size={140} />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-amber-500">Deposit Address</label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={slip.xmr_address}
-                      readOnly
-                      className="font-mono text-xs bg-muted/50 border-amber-500/20 flex-1 min-w-0"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="border-amber-500/30 hover:bg-amber-500/10 shrink-0"
-                      onClick={() => copyToClipboard(slip.xmr_address, 'address')}
-                    >
-                      {copied === 'address' ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-amber-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-amber-500">Amount</label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={`${slip.total_amount_xmr.toFixed(12)} XMR`}
-                      readOnly
-                      className="font-mono bg-muted/50 border-amber-500/20 flex-1 min-w-0"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="border-amber-500/30 hover:bg-amber-500/10 shrink-0"
-                      onClick={() => copyToClipboard(slip.total_amount_xmr.toString(), 'amount')}
-                    >
-                      {copied === 'amount' ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-amber-500" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {polling && (
-                  <div className="flex items-center justify-center gap-2 text-sm text-amber-500 bg-amber-500/10 rounded-md py-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Checking for deposit...
-                  </div>
-                )}
               </div>
-            )}
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-amber-500">Deposit Address</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={slip.xmr_address}
+                    readOnly
+                    className="font-mono text-xs bg-muted/50 border-amber-500/20"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="border-amber-500/30 hover:bg-amber-500/10 flex-shrink-0"
+                    onClick={() => copyToClipboard(slip.xmr_address, 'address')}
+                  >
+                    {copied === 'address' ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-amber-500" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-amber-500">Amount</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={`${slip.total_amount_xmr.toFixed(12)} XMR`}
+                    readOnly
+                    className="font-mono text-sm bg-muted/50 border-amber-500/20"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="border-amber-500/30 hover:bg-amber-500/10 flex-shrink-0"
+                    onClick={() => copyToClipboard(slip.total_amount_xmr.toString(), 'amount')}
+                  >
+                    {copied === 'amount' ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-amber-500" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {polling && (
+                <div className="flex items-center justify-center gap-2 text-sm text-amber-500 bg-amber-500/10 rounded-md py-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Checking for deposit...
+                </div>
+              )}
+            </div>
+          )}
 
             {/* Legs */}
             <div className="space-y-2">
@@ -324,8 +323,7 @@ export function MultibetDepositModal({
                 </p>
               </div>
             )}
-          </div>
-        </ScrollArea>
+        </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
