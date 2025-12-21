@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, ExternalLink, GripHorizontal } from 'lucide-react';
 import type { StreamInfo } from '@/components/TwitchStreamEmbed';
 
 // Discord icon as inline SVG since lucide doesn't have it
@@ -25,6 +25,10 @@ interface ChatPanelProps {
 
 type ChatSource = 'twitch' | 'discord';
 
+const MIN_HEIGHT = 250;
+const MAX_HEIGHT = 600;
+const DEFAULT_HEIGHT = 400;
+
 export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [activeSource, setActiveSource] = useState<ChatSource>('twitch');
@@ -32,6 +36,9 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
   const [delayComplete, setDelayComplete] = useState(false);
   const [discordLoaded, setDiscordLoaded] = useState(false);
   const [discordError, setDiscordError] = useState(false);
+  const [chatHeight, setChatHeight] = useState(DEFAULT_HEIGHT);
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Capture location info on mount
   useEffect(() => {
@@ -67,6 +74,30 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
     return () => window.clearTimeout(timeout);
   }, [activeSource, delayComplete, discordLoaded]);
 
+  // Handle resize drag
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newHeight = e.clientY - containerRect.top;
+      setChatHeight(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, newHeight)));
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
   // Build Twitch chat iframe src
   const twitchChatSrc = useMemo(() => {
     if (!locationInfo || !streamInfo?.channel) return null;
@@ -94,6 +125,11 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
     setDiscordError(false);
   }, []);
 
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
   // Don't render if no stream
   if (!streamInfo?.channel) return null;
 
@@ -101,8 +137,8 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
   const hasDiscord = !!discordSrc && !discordError;
 
   return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <Card className="bg-card/80 border-purple-500/30">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-card/80 border-purple-500/30">
         <CollapsibleTrigger asChild>
           <CardHeader className="pb-2 cursor-pointer hover:bg-purple-500/10 transition-colors rounded-t-lg">
             <CardTitle className="text-sm font-medium flex items-center justify-between">
@@ -151,21 +187,28 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
               </Button>
             </div>
 
-            {/* Chat content */}
-            <div className="min-h-[300px]">
+            {/* Chat content - resizable */}
+            <div 
+              ref={containerRef}
+              className="relative"
+              style={{ height: chatHeight }}
+            >
               {activeSource === 'twitch' && (
                 <>
                   {twitchChatSrc && delayComplete ? (
                     <iframe
                       src={twitchChatSrc}
                       width="100%"
-                      height="300"
+                      height={chatHeight}
                       frameBorder="0"
                       className="rounded-lg pointer-events-auto"
                       title={`${streamInfo.channelName || streamInfo.channel} - Twitch Chat`}
                     />
                   ) : twitchChatSrc && !delayComplete ? (
-                    <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center h-[300px] flex items-center justify-center">
+                    <div 
+                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
+                      style={{ height: chatHeight }}
+                    >
                       <p className="text-muted-foreground">Loading Twitch chat...</p>
                     </div>
                   ) : null}
@@ -178,7 +221,7 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
                     <iframe
                       src={discordSrc}
                       width="100%"
-                      height="300"
+                      height={chatHeight}
                       frameBorder="0"
                       sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
                       className="rounded-lg pointer-events-auto"
@@ -186,11 +229,17 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
                       onLoad={handleDiscordLoad}
                     />
                   ) : discordSrc && !delayComplete ? (
-                    <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center h-[300px] flex items-center justify-center">
+                    <div 
+                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
+                      style={{ height: chatHeight }}
+                    >
                       <p className="text-muted-foreground">Loading Discord community...</p>
                     </div>
                   ) : discordError ? (
-                    <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm h-[300px] flex flex-col items-center justify-center">
+                    <div 
+                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm flex flex-col items-center justify-center"
+                      style={{ height: chatHeight }}
+                    >
                       <p className="text-foreground">Discord embed unavailable</p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Server widget may be disabled
@@ -199,6 +248,16 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
                   ) : null}
                 </>
               )}
+
+              {/* Resize handle */}
+              <div
+                onMouseDown={handleResizeStart}
+                className={`absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize bg-gradient-to-t from-card/80 to-transparent hover:from-purple-500/20 transition-colors ${
+                  isResizing ? 'from-purple-500/30' : ''
+                }`}
+              >
+                <GripHorizontal className="w-4 h-4 text-muted-foreground/50" />
+              </div>
             </div>
 
             {/* External links */}
