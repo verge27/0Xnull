@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tv, EyeOff, Eye, Users, ExternalLink, RefreshCw, Info } from 'lucide-react';
+import { Tv, EyeOff, Eye, Users, ExternalLink, RefreshCw, Info, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { GAME_DOWNLOAD_URLS } from '@/hooks/useEsportsEvents';
 
 interface StreamInfo {
   channel: string | null;
@@ -41,6 +42,37 @@ const GAME_FILTERS = [
   { key: 'starcraft-2', label: 'SC2', icon: '🌌' },
   { key: 'starcraft-brood-war', label: 'SC:BW', icon: '👾' },
 ];
+
+// Map Twitch game names to our slug keys for download URLs
+const GAME_NAME_TO_SLUG: Record<string, string> = {
+  'League of Legends': 'lol',
+  'Counter-Strike 2': 'csgo',
+  'Counter-Strike': 'csgo',
+  'CS:GO': 'csgo',
+  'Dota 2': 'dota2',
+  'VALORANT': 'valorant',
+  'Valorant': 'valorant',
+  'Overwatch 2': 'ow',
+  'Overwatch': 'ow',
+  'Rocket League': 'rl',
+  'Call of Duty': 'cod',
+  'Call of Duty: Modern Warfare III': 'cod',
+  'Call of Duty: Warzone': 'cod',
+  'Rainbow Six Siege': 'r6siege',
+  "Tom Clancy's Rainbow Six Siege": 'r6siege',
+  'StarCraft II': 'starcraft-2',
+  'StarCraft 2': 'starcraft-2',
+  'StarCraft: Brood War': 'starcraft-brood-war',
+  'PUBG: BATTLEGROUNDS': 'pubg',
+  'EA Sports FC 24': 'fifa',
+  'EA Sports FC 25': 'fifa',
+  'FIFA 24': 'fifa',
+  'Mobile Legends: Bang Bang': 'mlbb',
+  'Wild Rift': 'lol-wild-rift',
+  'Honor of Kings': 'kog',
+  'Arena of Valor': 'kog',
+  'Apex Legends': 'apex',
+};
 
 export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmbedProps) {
   const [locationInfo, setLocationInfo] = useState<{
@@ -249,9 +281,27 @@ export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmb
                   <ExternalLink className="w-3 h-3" />
                 </a>
                 {streamInfo.gameName && (
-                  <Badge variant="outline" className="text-xs border-cyan-500/50 text-cyan-400">
-                    {streamInfo.gameName}
-                  </Badge>
+                  <>
+                    <Badge variant="outline" className="text-xs border-cyan-500/50 text-cyan-400">
+                      {streamInfo.gameName}
+                    </Badge>
+                    {(() => {
+                      const slug = GAME_NAME_TO_SLUG[streamInfo.gameName];
+                      const downloadUrl = slug ? GAME_DOWNLOAD_URLS[slug] : null;
+                      if (!downloadUrl) return null;
+                      return (
+                        <a
+                          href={downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                        >
+                          <Download className="w-3 h-3" />
+                          Play
+                        </a>
+                      );
+                    })()}
+                  </>
                 )}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
