@@ -3,6 +3,7 @@ import { useExchangeRate } from '@/hooks/useExchangeRate';
 import sportsBackground from '@/assets/sports-background.jpg';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useSportsEvents, getSportLabel as getLegacySportLabel, getSportEmoji, type SportsEvent } from '@/hooks/useSportsEvents';
 import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
@@ -18,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TeamLogo } from '@/components/TeamLogo';
@@ -25,7 +28,7 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -49,6 +52,10 @@ export default function SportsPredictions() {
   const { odds, fetchOdds } = useSportsOdds();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  
+  // Multibet slip
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -642,12 +649,22 @@ export default function SportsPredictions() {
                             
                             
                             {!market.resolved && (
-                              <Button 
-                                className="w-full" 
-                                onClick={() => { setSelectedMarket(market); setBetDialogOpen(true); }}
-                              >
-                                Place Bet
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  className="flex-1" 
+                                  onClick={() => { setSelectedMarket(market); setBetDialogOpen(true); }}
+                                >
+                                  Place Bet
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => betSlip.addToBetSlip(market.market_id, market.title, 'YES', 5)}
+                                  title="Add to bet slip"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </CardContent>
@@ -1157,6 +1174,38 @@ export default function SportsPredictions() {
           onConfirmed={handleBetConfirmed}
         />
       )}
+
+      {/* Bet Slip Panel */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        totalUsd={betSlip.totalUsd}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+          return slip;
+        }}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      {/* Multibet Deposit Modal */}
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+          toast.success('All bets confirmed!');
+        }}
+      />
     </div>
   );
 }
