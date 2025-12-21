@@ -478,200 +478,18 @@ export default function SportsPredictions() {
             </div>
           </div>
 
-          {/* Market Status Filters - Compact */}
-          <div className="mb-4 overflow-x-auto pb-2">
-            <div className="flex items-center gap-2 min-w-max">
-              <Button
-                variant={marketFilter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMarketFilter('all')}
-                className="h-8 text-xs px-3"
-              >
-                <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                Open ({activeMarkets.length})
-              </Button>
-              <Button
-                variant={marketFilter === 'live' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMarketFilter('live')}
-                className={`h-8 text-xs px-3 ${liveMarkets.length > 0 ? 'border-red-500/50' : ''}`}
-              >
-                <Radio className={`w-3.5 h-3.5 mr-1 ${liveMarkets.length > 0 ? 'text-red-500 animate-pulse' : ''}`} />
-                Live ({liveMarkets.length})
-              </Button>
-              <Button
-                variant={marketFilter === 'closing' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setMarketFilter('closing')}
-                className={`h-8 text-xs px-3 ${closingSoonMarkets.length > 0 ? 'border-amber-500/50' : ''}`}
-              >
-                <Clock className="w-3.5 h-3.5 mr-1" />
-                Soon ({closingSoonMarkets.length})
-              </Button>
-            </div>
+          {/* League Filter - Always visible */}
+          <div className="mb-4">
+            <SportsLeagueSelect
+              leagues={['All Leagues', ...sortedLeagues]}
+              selectedLeague={selectedLeague || 'All Leagues'}
+              onSelect={(league) => setSelectedLeague(league === 'All Leagues' ? null : league)}
+            />
           </div>
 
-          {/* Video Highlights - Compact horizontal scroll */}
-          {highlights.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                  <Tv className="w-4 h-4" />
-                  Latest Highlights
-                </h3>
-                <Button variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setActiveTab('highlights')}>
-                  View all
-                </Button>
-              </div>
-              <div className="overflow-x-auto pb-2">
-                <div className="flex gap-3 min-w-max">
-                  {highlights.slice(0, 6).map((highlight, idx) => (
-                    <div 
-                      key={idx} 
-                      className="group cursor-pointer w-40 shrink-0"
-                      onClick={() => {
-                        if (highlight.matchviewUrl) {
-                          window.open(highlight.matchviewUrl, '_blank');
-                        }
-                      }}
-                    >
-                      <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                        <img 
-                          src={highlight.thumbnail} 
-                          alt={highlight.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ExternalLink className="w-5 h-5 text-white" />
-                        </div>
-                        <Badge className="absolute bottom-1 left-1 bg-black/70 text-[10px] py-0 h-4">
-                          {highlight.competition.length > 15 ? highlight.competition.slice(0, 15) + '...' : highlight.competition}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 text-xs font-medium line-clamp-1">{highlight.title}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* LIVE MARKETS - Pinned at top */}
-          {liveMarkets.length > 0 && marketFilter === 'all' && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
-                <h2 className="text-lg font-semibold text-red-400">Live Now</h2>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {liveMarkets.slice(0, 3).map((market) => (
-                  <SportsMarketCard
-                    key={market.market_id}
-                    market={market}
-                    isLive={true}
-                    onBetClick={(m, side) => {
-                      setSelectedMarket(m);
-                      setBetSide(side);
-                      setBetDialogOpen(true);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* UPCOMING MARKETS - Primary content */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Flame className="w-5 h-5 text-primary" />
-                {marketFilter === 'all' ? 'Open Markets' : marketFilter === 'live' ? 'Live Markets' : 'Closing Soon'}
-                <Badge variant="secondary">{filteredActiveMarkets.length}</Badge>
-              </h2>
-            </div>
-            
-            {loading ? (
-              <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
-            ) : filteredActiveMarkets.length === 0 ? (
-              <Card className="text-center py-12 bg-card/80">
-                <CardContent>
-                  <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-2">
-                    {marketFilter === 'all' 
-                      ? 'No open markets - check back soon!' 
-                      : marketFilter === 'live' 
-                        ? 'No live markets right now' 
-                        : 'No markets closing soon'}
-                  </p>
-                  {marketFilter !== 'all' && (
-                    <Button variant="ghost" size="sm" onClick={() => setMarketFilter('all')}>
-                      View all markets
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredActiveMarkets.map((market) => {
-                  const hoursLeft = (market.resolution_time - now) / 3600;
-                  const isClosing = hoursLeft <= 2 && hoursLeft > 0;
-                  const isLive = liveMarkets.some(m => m.market_id === market.market_id);
-                  
-                  return (
-                    <SportsMarketCard
-                      key={market.market_id}
-                      market={market}
-                      isLive={isLive}
-                      isClosingSoon={isClosing && !isLive}
-                      onBetClick={(m, side) => {
-                        setSelectedMarket(m);
-                        setBetSide(side);
-                        setBetDialogOpen(true);
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Community Links - Sidebar on desktop */}
-          <div className="hidden lg:block mb-6">
-            <GameCommunityLinks category="sports" />
-          </div>
-          {/* Mobile community links */}
-          <div className="lg:hidden mb-6">
-            <GameCommunityLinks category="sports" />
-          </div>
-
-          {/* Category Pills */}
-          <div className="mb-6">
-            {!categoriesLoading && (
-              <SportsCategoryPills
-                categories={Object.keys(categories)}
-                selectedCategory={selectedCategory}
-                onSelect={handleCategoryChange}
-              />
-            )}
-          </div>
-
-          {/* League Filter */}
-          {selectedCategory && availableLeagues.length > 0 && (
-            <div className="flex items-center gap-3 mb-6">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <SportsLeagueSelect
-                leagues={sortedLeagues}
-                selectedLeague={selectedLeague}
-                onSelect={setSelectedLeague}
-              />
-            </div>
-          )}
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-3xl grid-cols-7">
+          {/* Main Tabs - Primary navigation */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="w-full max-w-3xl grid grid-cols-7 mb-4">
               <TabsTrigger value="markets">Markets</TabsTrigger>
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="highlights">Highlights</TabsTrigger>
@@ -683,10 +501,166 @@ export default function SportsPredictions() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Markets Tab - Now Primary */}
-            <TabsContent value="markets" className="space-y-4">
-              <div className="text-sm text-muted-foreground mb-4">
-                Select a market above to place your bet, or browse upcoming matches to create new markets.
+            {/* Markets Tab Content */}
+            <TabsContent value="markets" className="space-y-4 mt-0">
+              {/* Market Status Filters - Compact */}
+              <div className="overflow-x-auto pb-2">
+                <div className="flex items-center gap-2 min-w-max">
+                  <Button
+                    variant={marketFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMarketFilter('all')}
+                    className="h-8 text-xs px-3"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 mr-1" />
+                    Open ({activeMarkets.length})
+                  </Button>
+                  <Button
+                    variant={marketFilter === 'live' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMarketFilter('live')}
+                    className={`h-8 text-xs px-3 ${liveMarkets.length > 0 ? 'border-red-500/50' : ''}`}
+                  >
+                    <Radio className={`w-3.5 h-3.5 mr-1 ${liveMarkets.length > 0 ? 'text-red-500 animate-pulse' : ''}`} />
+                    Live ({liveMarkets.length})
+                  </Button>
+                  <Button
+                    variant={marketFilter === 'closing' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMarketFilter('closing')}
+                    className={`h-8 text-xs px-3 ${closingSoonMarkets.length > 0 ? 'border-amber-500/50' : ''}`}
+                  >
+                    <Clock className="w-3.5 h-3.5 mr-1" />
+                    Soon ({closingSoonMarkets.length})
+                  </Button>
+                </div>
+              </div>
+
+              {/* Video Highlights - Compact horizontal scroll */}
+              {highlights.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Tv className="w-4 h-4" />
+                      Latest Highlights
+                    </h3>
+                    <Button variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setActiveTab('highlights')}>
+                      View all
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto pb-2">
+                    <div className="flex gap-3 min-w-max">
+                      {highlights.slice(0, 6).map((highlight, idx) => (
+                        <div 
+                          key={idx} 
+                          className="group cursor-pointer w-40 shrink-0"
+                          onClick={() => {
+                            if (highlight.matchviewUrl) {
+                              window.open(highlight.matchviewUrl, '_blank');
+                            }
+                          }}
+                        >
+                          <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                            <img 
+                              src={highlight.thumbnail} 
+                              alt={highlight.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <ExternalLink className="w-5 h-5 text-white" />
+                            </div>
+                            <Badge className="absolute bottom-1 left-1 bg-black/70 text-[10px] py-0 h-4">
+                              {highlight.competition.length > 15 ? highlight.competition.slice(0, 15) + '...' : highlight.competition}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-xs font-medium line-clamp-1">{highlight.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* LIVE MARKETS - Pinned at top */}
+              {liveMarkets.length > 0 && marketFilter === 'all' && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                    <h2 className="text-lg font-semibold text-red-400">Live Now</h2>
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {liveMarkets.slice(0, 3).map((market) => (
+                      <SportsMarketCard
+                        key={market.market_id}
+                        market={market}
+                        isLive={true}
+                        onBetClick={(m, side) => {
+                          setSelectedMarket(m);
+                          setBetSide(side);
+                          setBetDialogOpen(true);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* OPEN MARKETS */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-primary" />
+                    {marketFilter === 'all' ? 'Open Markets' : marketFilter === 'live' ? 'Live Markets' : 'Closing Soon'}
+                    <Badge variant="secondary">{filteredActiveMarkets.length}</Badge>
+                  </h2>
+                </div>
+                
+                {loading ? (
+                  <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
+                ) : filteredActiveMarkets.length === 0 ? (
+                  <Card className="text-center py-12 bg-card/80">
+                    <CardContent>
+                      <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-2">
+                        {marketFilter === 'all' 
+                          ? 'No open markets - check back soon!' 
+                          : marketFilter === 'live' 
+                            ? 'No live markets right now' 
+                            : 'No markets closing soon'}
+                      </p>
+                      {marketFilter !== 'all' && (
+                        <Button variant="ghost" size="sm" onClick={() => setMarketFilter('all')}>
+                          View all markets
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredActiveMarkets.map((market) => {
+                      const hoursLeft = (market.resolution_time - now) / 3600;
+                      const isClosing = hoursLeft <= 2 && hoursLeft > 0;
+                      const isLive = liveMarkets.some(m => m.market_id === market.market_id);
+                      
+                      return (
+                        <SportsMarketCard
+                          key={market.market_id}
+                          market={market}
+                          isLive={isLive}
+                          isClosingSoon={isClosing && !isLive}
+                          onBetClick={(m, side) => {
+                            setSelectedMarket(m);
+                            setBetSide(side);
+                            setBetDialogOpen(true);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -700,16 +674,16 @@ export default function SportsPredictions() {
                     <Badge variant="secondary">{matches.length}</Badge>
                   )}
                 </h2>
-                {lastUpdated && pollingActive && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    Updated {lastUpdated.toLocaleTimeString()}
-                  </p>
-                )}
               </div>
+
+              {/* Category Pills */}
+              {!categoriesLoading && (
+                <SportsCategoryPills
+                  categories={Object.keys(categories)}
+                  selectedCategory={selectedCategory}
+                  onSelect={handleCategoryChange}
+                />
+              )}
 
               {matchesLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading events...</div>
@@ -724,8 +698,8 @@ export default function SportsPredictions() {
                   {sortedMatches.map(match => {
                     const marketStatus = getMatchMarketStatus(match);
                     const matchOdds = getMatchOdds(match);
-                    const now = Date.now() / 1000;
-                    const isLive = match.commence_timestamp <= now && match.commence_timestamp > now - 14400;
+                    const matchNow = Date.now() / 1000;
+                    const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
                     
                     return (
                       <SportsMatchCard
@@ -742,10 +716,7 @@ export default function SportsPredictions() {
               )}
             </TabsContent>
 
-            {/* Markets Tab */}
-            {/* Old Markets Tab - Now removed, markets shown above */}
-
-            {/* Highlights Tab - Secondary Content */}
+            {/* Highlights Tab */}
             <TabsContent value="highlights" className="space-y-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Tv className="w-5 h-5 text-primary" />
@@ -812,10 +783,9 @@ export default function SportsPredictions() {
                 </Card>
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
-                {resolvedMarkets.map((market) => {
+                  {resolvedMarkets.map((market) => {
                     const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
                     const winningPool = market.outcome === 'YES' ? market.yes_pool_xmr : market.no_pool_xmr;
-                    const losingPool = market.outcome === 'YES' ? market.no_pool_xmr : market.yes_pool_xmr;
                     const isPaidOut = market.resolved === 1 && market.outcome;
                     
                     return (
@@ -876,17 +846,13 @@ export default function SportsPredictions() {
             {/* Leaderboard Tab */}
             <TabsContent value="leaderboard" className="space-y-4">
               {(() => {
-                // Extract sport from market_id (format: sports_xxx_teamname)
                 const getSportFromMarketId = (marketId: string) => {
-                  // Match the sport from corresponding markets data or parse from description
                   const market = markets.find(m => m.market_id === marketId);
                   return market?.oracle_asset || 'sports';
                 };
                 
-                // Get unique sports from payouts
                 const uniqueSports = [...new Set(topPayouts.map(p => getSportFromMarketId(p.market_id)).filter(Boolean))];
                 
-                // Filter payouts by selected sport
                 const filteredPayouts = leaderboardSportFilter 
                   ? topPayouts.filter(p => getSportFromMarketId(p.market_id) === leaderboardSportFilter)
                   : topPayouts;
@@ -941,7 +907,6 @@ export default function SportsPredictions() {
                       </Card>
                     ) : (
                       <div className="space-y-4">
-                        {/* Stats Summary */}
                         <div className="grid grid-cols-3 gap-4">
                           <Card className="bg-card/80 backdrop-blur-sm">
                             <CardContent className="pt-4 text-center">
@@ -969,7 +934,6 @@ export default function SportsPredictions() {
                           </Card>
                         </div>
 
-                        {/* Leaderboard Table */}
                         <Card className="bg-card/80 backdrop-blur-sm overflow-hidden">
                           <div className="overflow-x-auto">
                             <table className="w-full">
