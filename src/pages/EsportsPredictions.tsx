@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import esportsBackground from '@/assets/esports-background.jpg';
-import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, type EsportsEvent } from '@/hooks/useEsportsEvents';
+import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, getGameDownloadUrl, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,7 +26,7 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -604,10 +604,23 @@ export default function EsportsPredictions() {
                           
                           <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
                           
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
-                              {formatGameTime(event.start_timestamp)}
-                            </span>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {formatGameTime(event.start_timestamp)}
+                              </span>
+                              {getGameDownloadUrl(event.game) && (
+                                <a
+                                  href={getGameDownloadUrl(event.game)!}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  Play
+                                </a>
+                              )}
+                            </div>
                             {marketStatus !== 'both' && !isLive && (
                               <Button
                                 size="sm"
