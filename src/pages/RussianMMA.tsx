@@ -403,10 +403,15 @@ const RussianMMA = () => {
         calculatePotentialPayout={betSlip.calculatePotentialPayout}
         calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
         onCheckout={async (payoutAddress) => {
+          if (betSlip.activeSlip && betSlip.activeSlip.status === 'awaiting_deposit') {
+            setMultibetDepositOpen(true);
+            return betSlip.activeSlip;
+          }
           const slip = await betSlip.checkout(payoutAddress);
           if (slip) {
             setMultibetDepositOpen(true);
           }
+          return slip;
         }}
         totalUsd={betSlip.totalUsd}
         isCheckingOut={betSlip.isCheckingOut}
