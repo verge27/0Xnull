@@ -24,6 +24,7 @@ import {
 import { api, type MultibetSlip } from '@/services/api';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
+import { roundUpXmr } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -347,7 +348,7 @@ export default function MySlips() {
                       <div className="text-right">
                         <p className="font-bold">${slip.total_amount_usd.toFixed(2)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {slip.total_amount_xmr.toFixed(6)} XMR
+                          {roundUpXmr(slip.total_amount_xmr)} XMR
                         </p>
                       </div>
                     </div>
@@ -394,7 +395,7 @@ export default function MySlips() {
                 <div className="p-4 rounded-lg bg-secondary/50 border space-y-3">
                   <p className="text-sm font-medium text-center">Send exactly:</p>
                   <p className="text-2xl font-bold text-center font-mono">
-                    {selectedSlip.total_amount_xmr.toFixed(12)} XMR
+                    {roundUpXmr(selectedSlip.total_amount_xmr)} XMR
                   </p>
                   
                   <div className="flex justify-center">
@@ -454,7 +455,7 @@ export default function MySlips() {
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>XMR</span>
-                  <span>{selectedSlip.total_amount_xmr.toFixed(6)}</span>
+                  <span>{roundUpXmr(selectedSlip.total_amount_xmr)}</span>
                 </div>
               </div>
 

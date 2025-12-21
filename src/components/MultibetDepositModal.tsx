@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { toast } from 'sonner';
 import { MultibetSlip } from '@/services/api';
 import { playConfirmationSound } from '@/lib/sounds';
+import { roundUpXmr } from '@/lib/utils';
 
 interface MultibetDepositModalProps {
   open: boolean;
@@ -219,7 +220,7 @@ export function MultibetDepositModal({
             </div>
             <div className="bg-gradient-to-br from-amber-500/20 to-amber-500/5 rounded-xl p-3 text-center border border-amber-500/20 shadow-sm">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">XMR</p>
-              <p className="text-sm font-bold font-mono text-amber-500">{slip.total_amount_xmr.toFixed(4)}</p>
+              <p className="text-sm font-bold font-mono text-amber-500">{roundUpXmr(slip.total_amount_xmr)} XMR</p>
             </div>
           </div>
 
@@ -267,13 +268,13 @@ export function MultibetDepositModal({
                 </label>
                 <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-orange-500/10 to-transparent rounded-lg border border-orange-500/20">
                   <code className="flex-1 text-sm font-mono font-bold text-foreground">
-                    {slip.total_amount_xmr.toFixed(12)} XMR
+                    {roundUpXmr(slip.total_amount_xmr)} XMR
                   </code>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 hover:bg-orange-500/20 text-orange-500"
-                    onClick={() => copyToClipboard(slip.total_amount_xmr.toString(), 'amount')}
+                    onClick={() => copyToClipboard(roundUpXmr(slip.total_amount_xmr), 'amount')}
                   >
                     {copied === 'amount' ? (
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
