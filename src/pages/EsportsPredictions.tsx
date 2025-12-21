@@ -1031,6 +1031,7 @@ export default function EsportsPredictions() {
         onRemove={betSlip.removeFromBetSlip}
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
+        onReorder={betSlip.reorderItems}
         totalUsd={betSlip.totalUsd}
         onCheckout={async (payoutAddress) => {
           const slip = await betSlip.checkout(payoutAddress);

@@ -81,6 +81,10 @@ export function useMultibetSlip() {
     setItems(prev => prev.map(i => i.id === id ? { ...i, amount } : i));
   }, []);
 
+  const reorderItems = useCallback((newItems: BetSlipItem[]) => {
+    setItems(newItems);
+  }, []);
+
   const clearBetSlip = useCallback(() => {
     setItems([]);
     setActiveSlip(null);
@@ -142,6 +146,7 @@ export function useMultibetSlip() {
     addToBetSlip,
     removeFromBetSlip,
     updateAmount,
+    reorderItems,
     clearBetSlip,
     totalUsd,
     checkout,

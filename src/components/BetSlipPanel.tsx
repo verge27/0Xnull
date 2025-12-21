@@ -1,10 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { BetSlipItem } from '@/hooks/useMultibetSlip';
 
@@ -15,6 +25,7 @@ interface BetSlipPanelProps {
   onRemove: (id: string) => void;
   onUpdateAmount: (id: string, amount: number) => void;
   onClear: () => void;
+  onReorder: (items: BetSlipItem[]) => void;
   totalUsd: number;
   onCheckout: (payoutAddress?: string) => Promise<any>;
   isCheckingOut: boolean;
@@ -27,11 +38,74 @@ export function BetSlipPanel({
   onRemove,
   onUpdateAmount,
   onClear,
+  onReorder,
   totalUsd,
   onCheckout,
   isCheckingOut,
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragNodeRef = useRef<HTMLDivElement | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    if (e.currentTarget instanceof HTMLElement) {
+      dragNodeRef.current = e.currentTarget as HTMLDivElement;
+      setTimeout(() => {
+        if (dragNodeRef.current) {
+          dragNodeRef.current.style.opacity = '0.5';
+        }
+      }, 0);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (dragNodeRef.current) {
+      dragNodeRef.current.style.opacity = '1';
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    dragNodeRef.current = null;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && index !== draggedIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newItems = [...items];
+    const [draggedItem] = newItems.splice(draggedIndex, 1);
+    newItems.splice(dropIndex, 0, draggedItem);
+    onReorder(newItems);
+    
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleClearClick = () => {
+    setShowClearDialog(true);
+  };
+
+  const handleConfirmClear = () => {
+    onClear();
+    setShowClearDialog(false);
+    toast.info('Bet slip cleared');
+  };
 
   const handleCheckout = useCallback(async () => {
     if (items.length === 0) {
@@ -82,11 +156,10 @@ export function BetSlipPanel({
         return;
       }
 
-      // Ctrl/Cmd + Backspace to clear
+      // Ctrl/Cmd + Backspace to clear (with confirmation)
       if ((e.ctrlKey || e.metaKey) && e.key === 'Backspace' && items.length > 0) {
         e.preventDefault();
-        onClear();
-        toast.info('Bet slip cleared');
+        setShowClearDialog(true);
         return;
       }
     };
@@ -120,13 +193,31 @@ export function BetSlipPanel({
                 Bet Slip ({items.length})
               </span>
               {items.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={onClear}>
+                <Button variant="ghost" size="sm" onClick={handleClearClick}>
                   <Trash2 className="w-4 h-4 mr-1" />
                   Clear
                 </Button>
               )}
             </SheetTitle>
           </SheetHeader>
+
+          {/* Clear Confirmation Dialog */}
+          <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear Bet Slip?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all {items.length} bet{items.length !== 1 ? 's' : ''} from your slip. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmClear} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Clear All
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -140,22 +231,33 @@ export function BetSlipPanel({
             <>
               <ScrollArea className="flex-1 -mx-6 px-6">
                 <div className="space-y-3 py-4">
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <div
                       key={item.id}
-                      className="bg-muted/50 rounded-lg p-3 space-y-2"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className={`bg-muted/50 rounded-lg p-3 space-y-2 cursor-grab active:cursor-grabbing transition-all ${
+                        dragOverIndex === index ? 'border-2 border-primary border-dashed' : 'border-2 border-transparent'
+                      } ${draggedIndex === index ? 'opacity-50' : ''}`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {item.marketTitle}
-                          </p>
-                          <Badge 
-                            variant={item.side === 'YES' ? 'default' : 'destructive'}
-                            className="mt-1"
-                          >
-                            {item.side}
-                          </Badge>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {item.marketTitle}
+                            </p>
+                            <Badge 
+                              variant={item.side === 'YES' ? 'default' : 'destructive'}
+                              className="mt-1"
+                            >
+                              {item.side}
+                            </Badge>
+                          </div>
                         </div>
                         <Button
                           variant="ghost"
