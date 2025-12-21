@@ -711,6 +711,8 @@ export default function EsportsPredictions() {
                             <AddToSlipButton
                               marketId={market.market_id}
                               marketTitle={market.title}
+                              yesPool={market.yes_pool_xmr || 0}
+                              noPool={market.no_pool_xmr || 0}
                               onAdd={betSlip.addToBetSlip}
                               onOpenSlip={() => betSlip.setIsOpen(true)}
                               variant="icon"
@@ -1032,7 +1034,11 @@ export default function EsportsPredictions() {
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
         onReorder={betSlip.reorderItems}
+        onUndo={betSlip.undoRemove}
+        lastRemoved={betSlip.lastRemoved}
         totalUsd={betSlip.totalUsd}
+        calculatePotentialPayout={betSlip.calculatePotentialPayout}
+        calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
         onCheckout={async (payoutAddress) => {
           const slip = await betSlip.checkout(payoutAddress);
           if (slip) {

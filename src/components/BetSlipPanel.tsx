@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical } from 'lucide-react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,11 @@ interface BetSlipPanelProps {
   onUpdateAmount: (id: string, amount: number) => void;
   onClear: () => void;
   onReorder: (items: BetSlipItem[]) => void;
+  onUndo: () => void;
+  lastRemoved: { item: BetSlipItem; index: number } | null;
   totalUsd: number;
+  calculatePotentialPayout: (item: BetSlipItem) => number;
+  calculateTotalPotentialPayout: () => number;
   onCheckout: (payoutAddress?: string) => Promise<any>;
   isCheckingOut: boolean;
 }
@@ -39,7 +43,11 @@ export function BetSlipPanel({
   onUpdateAmount,
   onClear,
   onReorder,
+  onUndo,
+  lastRemoved,
   totalUsd,
+  calculatePotentialPayout,
+  calculateTotalPotentialPayout,
   onCheckout,
   isCheckingOut,
 }: BetSlipPanelProps) {
@@ -48,6 +56,9 @@ export function BetSlipPanel({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
+
+  const potentialPayout = calculateTotalPotentialPayout();
+  const potentialProfit = potentialPayout - totalUsd;
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -107,6 +118,20 @@ export function BetSlipPanel({
     toast.info('Bet slip cleared');
   };
 
+  const handleRemove = (id: string) => {
+    const item = items.find(i => i.id === id);
+    onRemove(id);
+    if (item) {
+      toast('Bet removed', {
+        action: {
+          label: 'Undo',
+          onClick: onUndo,
+        },
+        duration: 5000,
+      });
+    }
+  };
+
   const handleCheckout = useCallback(async () => {
     if (items.length === 0) {
       toast.error('Add at least one bet to your slip');
@@ -138,6 +163,19 @@ export function BetSlipPanel({
     }
   }, [items, payoutAddress, onCheckout]);
 
+  // Calculate individual odds for display
+  const getOddsDisplay = (item: BetSlipItem): string => {
+    const totalPool = item.yesPool + item.noPool + item.amount;
+    const winningPool = item.side === 'YES' 
+      ? item.yesPool + item.amount 
+      : item.noPool + item.amount;
+    
+    if (winningPool === 0 || totalPool === 0) return '2.00x';
+    
+    const multiplier = totalPool / winningPool;
+    return `${multiplier.toFixed(2)}x`;
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     if (!isOpen) return;
@@ -162,11 +200,19 @@ export function BetSlipPanel({
         setShowClearDialog(true);
         return;
       }
+
+      // Ctrl/Cmd + Z to undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && lastRemoved) {
+        e.preventDefault();
+        onUndo();
+        toast.success('Bet restored');
+        return;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, items.length, isCheckingOut, handleCheckout, onOpenChange, onClear]);
+  }, [isOpen, items.length, isCheckingOut, handleCheckout, onOpenChange, onClear, lastRemoved, onUndo]);
 
   return (
     <>
@@ -192,12 +238,20 @@ export function BetSlipPanel({
                 <ShoppingCart className="w-5 h-5" />
                 Bet Slip ({items.length})
               </span>
-              {items.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={handleClearClick}>
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Clear
-                </Button>
-              )}
+              <div className="flex items-center gap-1">
+                {lastRemoved && (
+                  <Button variant="ghost" size="sm" onClick={() => { onUndo(); toast.success('Bet restored'); }}>
+                    <Undo2 className="w-4 h-4 mr-1" />
+                    Undo
+                  </Button>
+                )}
+                {items.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={handleClearClick}>
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
             </SheetTitle>
           </SheetHeader>
 
@@ -231,76 +285,90 @@ export function BetSlipPanel({
             <>
               <ScrollArea className="flex-1 -mx-6 px-6">
                 <div className="space-y-3 py-4">
-                  {items.map((item, index) => (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className={`bg-muted/50 rounded-lg p-3 space-y-2 cursor-grab active:cursor-grabbing transition-all ${
-                        dragOverIndex === index ? 'border-2 border-primary border-dashed' : 'border-2 border-transparent'
-                      } ${draggedIndex === index ? 'opacity-50' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {item.marketTitle}
+                  {items.map((item, index) => {
+                    const itemPayout = calculatePotentialPayout(item);
+                    const itemOdds = getOddsDisplay(item);
+                    
+                    return (
+                      <div
+                        key={item.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className={`bg-muted/50 rounded-lg p-3 space-y-2 cursor-grab active:cursor-grabbing transition-all ${
+                          dragOverIndex === index ? 'border-2 border-primary border-dashed' : 'border-2 border-transparent'
+                        } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {item.marketTitle}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge 
+                                  variant={item.side === 'YES' ? 'default' : 'destructive'}
+                                >
+                                  {item.side}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground font-mono">
+                                  {itemOdds}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0"
+                            onClick={() => handleRemove(item.id)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onUpdateAmount(item.id, item.amount - 1)}
+                            disabled={item.amount <= 0.5}
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                          <Input
+                            type="number"
+                            value={item.amount}
+                            onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || 0.5)}
+                            className="h-8 w-20 text-center"
+                            min={0.5}
+                            step={0.5}
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onUpdateAmount(item.id, item.amount + 1)}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                          <div className="ml-auto text-right">
+                            <span className="text-sm text-muted-foreground">
+                              ${item.amount.toFixed(2)}
+                            </span>
+                            <p className="text-xs text-green-500">
+                              → ${itemPayout.toFixed(2)}
                             </p>
-                            <Badge 
-                              variant={item.side === 'YES' ? 'default' : 'destructive'}
-                              className="mt-1"
-                            >
-                              {item.side}
-                            </Badge>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0"
-                          onClick={() => onRemove(item.id)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
                       </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onUpdateAmount(item.id, item.amount - 1)}
-                          disabled={item.amount <= 0.5}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <Input
-                          type="number"
-                          value={item.amount}
-                          onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || 0.5)}
-                          className="h-8 w-20 text-center"
-                          min={0.5}
-                          step={0.5}
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onUpdateAmount(item.id, item.amount + 1)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                        <span className="text-sm text-muted-foreground ml-auto">
-                          ${item.amount.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </ScrollArea>
 
@@ -319,9 +387,28 @@ export function BetSlipPanel({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between text-lg font-semibold">
-                  <span>Total</span>
-                  <span>${totalUsd.toFixed(2)}</span>
+                {/* Summary Section */}
+                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Stake</span>
+                    <span className="font-medium">${totalUsd.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Potential Payout</span>
+                    <span className="font-medium text-green-500">${potentialPayout.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm border-t pt-2">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      Potential Profit
+                    </span>
+                    <span className="font-semibold text-green-500">+${potentialProfit.toFixed(2)}</span>
+                  </div>
+                  {items.length > 1 && (
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      Combined odds: {(potentialPayout / totalUsd).toFixed(2)}x
+                    </p>
+                  )}
                 </div>
               </div>
             </>
@@ -341,13 +428,13 @@ export function BetSlipPanel({
                 </>
               ) : (
                 <>
-                  Place {items.length} Bet{items.length !== 1 ? 's' : ''}
+                  Place {items.length} Bet{items.length !== 1 ? 's' : ''} - Win ${potentialPayout.toFixed(2)}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">↵</kbd> to checkout • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> to close
+              <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">↵</kbd> checkout • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Z</kbd> undo • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> close
             </p>
           </SheetFooter>
         </SheetContent>

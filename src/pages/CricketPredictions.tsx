@@ -627,6 +627,8 @@ export default function CricketPredictions() {
                               <AddToSlipButton
                                 marketId={market.market_id}
                                 marketTitle={market.title}
+                                yesPool={market.yes_pool_xmr || 0}
+                                noPool={market.no_pool_xmr || 0}
                                 onAdd={betSlip.addToBetSlip}
                                 onOpenSlip={() => betSlip.setIsOpen(true)}
                               />
@@ -953,6 +955,10 @@ export default function CricketPredictions() {
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
         onReorder={betSlip.reorderItems}
+        onUndo={betSlip.undoRemove}
+        lastRemoved={betSlip.lastRemoved}
+        calculatePotentialPayout={betSlip.calculatePotentialPayout}
+        calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
         onCheckout={async (payoutAddress) => {
           const slip = await betSlip.checkout(payoutAddress);
           if (slip) {
