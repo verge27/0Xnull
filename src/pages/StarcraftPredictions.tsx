@@ -1029,6 +1029,7 @@ export default function StarcraftPredictions() {
         onRemove={betSlip.removeFromBetSlip}
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
+        onReorder={betSlip.reorderItems}
         onCheckout={async (payoutAddress) => {
           const slip = await betSlip.checkout(payoutAddress);
           if (slip) {

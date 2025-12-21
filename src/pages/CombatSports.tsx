@@ -694,6 +694,7 @@ export default function CombatSports() {
         onRemove={betSlip.removeFromBetSlip}
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
+        onReorder={betSlip.reorderItems}
         totalUsd={betSlip.totalUsd}
         isCheckingOut={betSlip.isCheckingOut}
         onCheckout={async (payoutAddress) => {
