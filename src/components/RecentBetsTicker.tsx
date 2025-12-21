@@ -1,34 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecentBet {
   id: string;
   side: 'YES' | 'NO';
-  amount_xmr: number;
+  amount: number;
   market_title: string;
-  timestamp: number;
+  timestamp: string;
 }
-
-// Mock data generator for social proof (in production, this would come from API)
-const generateMockBets = (): RecentBet[] => {
-  const sides: ('YES' | 'NO')[] = ['YES', 'NO'];
-  const amounts = [0.1, 0.25, 0.5, 1, 2, 5];
-  const markets = [
-    'Team Spirit wins',
-    'Gen.G wins',
-    'NIP wins',
-    'Paper Rex wins',
-  ];
-  
-  return Array.from({ length: 5 }, (_, i) => ({
-    id: `mock-${i}-${Date.now()}`,
-    side: sides[Math.floor(Math.random() * sides.length)],
-    amount_xmr: amounts[Math.floor(Math.random() * amounts.length)],
-    market_title: markets[Math.floor(Math.random() * markets.length)],
-    timestamp: Date.now() - Math.random() * 60000 * 10, // Random time in last 10 mins
-  }));
-};
 
 interface RecentBetsTickerProps {
   className?: string;
@@ -37,34 +18,84 @@ interface RecentBetsTickerProps {
 export function RecentBetsTicker({ className }: RecentBetsTickerProps) {
   const [bets, setBets] = useState<RecentBet[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize with mock data
+  const fetchRecentBets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('market_positions')
+        .select(`
+          id,
+          side,
+          amount,
+          created_at,
+          prediction_markets (
+            question
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      const formattedBets: RecentBet[] = (data || []).map((bet: any) => ({
+        id: bet.id,
+        side: bet.side.toUpperCase() as 'YES' | 'NO',
+        amount: bet.amount,
+        market_title: bet.prediction_markets?.question || 'Unknown market',
+        timestamp: bet.created_at,
+      }));
+
+      setBets(formattedBets);
+    } catch (error) {
+      console.error('Error fetching recent bets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setBets(generateMockBets());
-    
+    fetchRecentBets();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('recent-bets')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'market_positions'
+        },
+        () => {
+          fetchRecentBets();
+        }
+      )
+      .subscribe();
+
     // Rotate through bets every 4 seconds
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % 5);
+    const rotateInterval = setInterval(() => {
+      setCurrentIndex(prev => (bets.length > 0 ? (prev + 1) % bets.length : 0));
     }, 4000);
 
-    // Refresh mock data periodically
-    const refreshInterval = setInterval(() => {
-      setBets(generateMockBets());
-    }, 30000);
-
     return () => {
-      clearInterval(interval);
-      clearInterval(refreshInterval);
+      supabase.removeChannel(channel);
+      clearInterval(rotateInterval);
     };
-  }, []);
+  }, [bets.length]);
 
-  if (bets.length === 0) return null;
+  if (loading || bets.length === 0) return null;
 
   const currentBet = bets[currentIndex];
   if (!currentBet) return null;
 
-  const timeAgo = Math.floor((Date.now() - currentBet.timestamp) / 60000);
-  const timeString = timeAgo < 1 ? 'just now' : `${timeAgo}m ago`;
+  const timeAgo = Math.floor((Date.now() - new Date(currentBet.timestamp).getTime()) / 60000);
+  const timeString = timeAgo < 1 ? 'just now' : timeAgo < 60 ? `${timeAgo}m ago` : `${Math.floor(timeAgo / 60)}h ago`;
+
+  // Truncate market title for display
+  const displayTitle = currentBet.market_title.length > 30 
+    ? currentBet.market_title.substring(0, 30) + '...' 
+    : currentBet.market_title;
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 bg-card/60 rounded-lg border border-border/50 text-xs ${className}`}>
@@ -84,9 +115,9 @@ export function RecentBetsTicker({ className }: RecentBetsTickerProps) {
           ) : (
             <TrendingDown className="w-2.5 h-2.5 mr-0.5" />
           )}
-          {currentBet.amount_xmr} XMR
+          {currentBet.amount.toFixed(2)} XMR
         </Badge>
-        <span className="text-muted-foreground truncate">on {currentBet.market_title}</span>
+        <span className="text-muted-foreground truncate">on {displayTitle}</span>
         <span className="text-muted-foreground/60 shrink-0">• {timeString}</span>
       </div>
     </div>
