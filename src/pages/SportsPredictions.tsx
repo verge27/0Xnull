@@ -478,37 +478,83 @@ export default function SportsPredictions() {
             </div>
           </div>
 
-          {/* Market Status Filters - PROMINENT */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 flex-wrap">
+          {/* Market Status Filters - Compact */}
+          <div className="mb-4 overflow-x-auto pb-2">
+            <div className="flex items-center gap-2 min-w-max">
               <Button
                 variant={marketFilter === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setMarketFilter('all')}
+                className="h-8 text-xs px-3"
               >
-                <TrendingUp className="w-4 h-4 mr-1" />
-                Open Markets ({activeMarkets.length})
+                <TrendingUp className="w-3.5 h-3.5 mr-1" />
+                Open ({activeMarkets.length})
               </Button>
               <Button
                 variant={marketFilter === 'live' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setMarketFilter('live')}
-                className={liveMarkets.length > 0 ? 'border-red-500/50' : ''}
+                className={`h-8 text-xs px-3 ${liveMarkets.length > 0 ? 'border-red-500/50' : ''}`}
               >
-                <Radio className={`w-4 h-4 mr-1 ${liveMarkets.length > 0 ? 'text-red-500 animate-pulse' : ''}`} />
-                Live Now ({liveMarkets.length})
+                <Radio className={`w-3.5 h-3.5 mr-1 ${liveMarkets.length > 0 ? 'text-red-500 animate-pulse' : ''}`} />
+                Live ({liveMarkets.length})
               </Button>
               <Button
                 variant={marketFilter === 'closing' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setMarketFilter('closing')}
-                className={closingSoonMarkets.length > 0 ? 'border-amber-500/50' : ''}
+                className={`h-8 text-xs px-3 ${closingSoonMarkets.length > 0 ? 'border-amber-500/50' : ''}`}
               >
-                <Clock className="w-4 h-4 mr-1" />
-                Closing Soon ({closingSoonMarkets.length})
+                <Clock className="w-3.5 h-3.5 mr-1" />
+                Soon ({closingSoonMarkets.length})
               </Button>
             </div>
           </div>
+
+          {/* Video Highlights - Compact horizontal scroll */}
+          {highlights.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Tv className="w-4 h-4" />
+                  Latest Highlights
+                </h3>
+                <Button variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setActiveTab('highlights')}>
+                  View all
+                </Button>
+              </div>
+              <div className="overflow-x-auto pb-2">
+                <div className="flex gap-3 min-w-max">
+                  {highlights.slice(0, 6).map((highlight, idx) => (
+                    <div 
+                      key={idx} 
+                      className="group cursor-pointer w-40 shrink-0"
+                      onClick={() => {
+                        if (highlight.matchviewUrl) {
+                          window.open(highlight.matchviewUrl, '_blank');
+                        }
+                      }}
+                    >
+                      <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                        <img 
+                          src={highlight.thumbnail} 
+                          alt={highlight.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-5 h-5 text-white" />
+                        </div>
+                        <Badge className="absolute bottom-1 left-1 bg-black/70 text-[10px] py-0 h-4">
+                          {highlight.competition.length > 15 ? highlight.competition.slice(0, 15) + '...' : highlight.competition}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs font-medium line-clamp-1">{highlight.title}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* LIVE MARKETS - Pinned at top */}
           {liveMarkets.length > 0 && marketFilter === 'all' && (
