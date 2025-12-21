@@ -26,7 +26,10 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed, type StreamInfo } from '@/components/TwitchStreamEmbed';
 import { ChatPanel } from '@/components/ChatPanel';
-import { GameCommunityLinks, getDiscordCommunityForGame } from '@/components/GameCommunityLinks';
+import { GameCommunityLinks, getDiscordCommunityForGame, getRedditCommunityForGame } from '@/components/GameCommunityLinks';
+import { LiveOddsOverlay } from '@/components/LiveOddsOverlay';
+import { RecentBetsTicker } from '@/components/RecentBetsTicker';
+import { BetSlipFloatingButton } from '@/components/BetSlipFloatingButton';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -489,8 +492,10 @@ export default function EsportsPredictions() {
                   <ChatPanel 
                     streamInfo={activeStream}
                     discordCommunity={getDiscordCommunityForGame(livestreamGame || undefined, 'esports')}
+                    redditCommunity={getRedditCommunityForGame(livestreamGame || undefined, 'esports')}
                   />
-                  <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
+                  <RecentBetsTicker />
+                  <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit />
                 </div>
               </div>
             </div>
@@ -499,8 +504,10 @@ export default function EsportsPredictions() {
               <ChatPanel 
                 streamInfo={activeStream}
                 discordCommunity={getDiscordCommunityForGame(livestreamGame || undefined, 'esports')}
+                redditCommunity={getRedditCommunityForGame(livestreamGame || undefined, 'esports')}
               />
-              <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
+              <RecentBetsTicker />
+              <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit />
             </div>
           </div>
 

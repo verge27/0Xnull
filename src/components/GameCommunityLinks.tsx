@@ -175,6 +175,7 @@ const getLinkColor = (type: CommunityLink['type']) => {
 interface GameCommunityLinksProps {
   selectedGame?: string;
   category?: 'esports' | 'sports' | 'crypto';
+  hideReddit?: boolean; // When true, exclude reddit links (shown separately)
 }
 
 // Map alternative game keys to our community keys
@@ -213,7 +214,35 @@ export function getDiscordCommunityForGame(gameKey: string | undefined, category
   return null;
 }
 
-export function GameCommunityLinks({ selectedGame, category }: GameCommunityLinksProps) {
+// Export helper to get reddit community for a game
+export function getRedditCommunityForGame(gameKey: string | undefined, category?: 'esports' | 'sports' | 'crypto') {
+  if (!gameKey || gameKey === 'all') return null;
+  
+  const normalizedGame = GAME_KEY_MAP[gameKey] || gameKey;
+  let communities = GAME_COMMUNITIES;
+  
+  if (category) {
+    communities = communities.filter((c) => c.category === category);
+  }
+  
+  const matched = communities.find(
+    (c) => c.game === normalizedGame || c.game.includes(normalizedGame) || normalizedGame.includes(c.game)
+  );
+  
+  if (matched) {
+    const redditLink = matched.links.find(l => l.type === 'reddit');
+    if (redditLink) {
+      return {
+        name: redditLink.name,
+        url: redditLink.url,
+      };
+    }
+  }
+  
+  return null;
+}
+
+export function GameCommunityLinks({ selectedGame, category, hideReddit = false }: GameCommunityLinksProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   // Normalize selected game key
@@ -236,7 +265,15 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
     }
   }
 
-  if (displayCommunities.length === 0) return null;
+  // Filter out reddit links if hideReddit is true
+  const filteredCommunities = displayCommunities.map(community => ({
+    ...community,
+    links: hideReddit 
+      ? community.links.filter(link => link.type !== 'reddit')
+      : community.links,
+  })).filter(community => community.links.length > 0);
+
+  if (filteredCommunities.length === 0) return null;
 
   return (
     <div className="space-y-3">
@@ -257,7 +294,7 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
           
           <CollapsibleContent>
             <CardContent className="pt-0 space-y-3">
-              {displayCommunities.map((community) => (
+              {filteredCommunities.map((community) => (
                 <div key={community.game} className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span>{community.icon}</span>
