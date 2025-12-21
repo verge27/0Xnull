@@ -136,11 +136,11 @@ export function MultibetDepositModal({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-x-hidden">
-          <div className="space-y-6 py-4 pr-2">
+        <ScrollArea className="flex-1">
+          <div className="space-y-6 py-4 px-1">
             {/* Summary */}
-            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-4 border border-primary/20">
-              <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-3 border border-primary/20">
+              <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-background/50 rounded-md p-2">
                   <p className="text-xs text-muted-foreground mb-1">Legs</p>
                   <p className="text-lg font-bold text-primary">{slip.legs.length}</p>
@@ -149,9 +149,9 @@ export function MultibetDepositModal({
                   <p className="text-xs text-muted-foreground mb-1">Total USD</p>
                   <p className="text-lg font-bold text-emerald-500">${slip.total_amount_usd.toFixed(2)}</p>
                 </div>
-                <div className="bg-background/50 rounded-md p-2">
+                <div className="bg-background/50 rounded-md p-2 overflow-hidden">
                   <p className="text-xs text-muted-foreground mb-1">Total XMR</p>
-                  <p className="text-sm font-bold font-mono text-amber-500">{slip.total_amount_xmr.toFixed(6)}</p>
+                  <p className="text-xs font-bold font-mono text-amber-500 truncate">{slip.total_amount_xmr.toFixed(6)}</p>
                 </div>
               </div>
             </div>
@@ -171,12 +171,12 @@ export function MultibetDepositModal({
                     <Input
                       value={slip.xmr_address}
                       readOnly
-                      className="font-mono text-xs bg-muted/50 border-amber-500/20"
+                      className="font-mono text-xs bg-muted/50 border-amber-500/20 flex-1 min-w-0"
                     />
                     <Button
                       variant="outline"
                       size="icon"
-                      className="border-amber-500/30 hover:bg-amber-500/10"
+                      className="border-amber-500/30 hover:bg-amber-500/10 shrink-0"
                       onClick={() => copyToClipboard(slip.xmr_address, 'address')}
                     >
                       {copied === 'address' ? (
@@ -194,12 +194,12 @@ export function MultibetDepositModal({
                     <Input
                       value={`${slip.total_amount_xmr.toFixed(12)} XMR`}
                       readOnly
-                      className="font-mono bg-muted/50 border-amber-500/20"
+                      className="font-mono bg-muted/50 border-amber-500/20 flex-1 min-w-0"
                     />
                     <Button
                       variant="outline"
                       size="icon"
-                      className="border-amber-500/30 hover:bg-amber-500/10"
+                      className="border-amber-500/30 hover:bg-amber-500/10 shrink-0"
                       onClick={() => copyToClipboard(slip.total_amount_xmr.toString(), 'amount')}
                     >
                       {copied === 'amount' ? (
