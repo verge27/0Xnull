@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Swords } from 'lucide-react';
+import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Swords, Receipt } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 
 const categories = [
   {
@@ -48,6 +51,8 @@ export default function PredictionsHub() {
   const navigate = useNavigate();
   const initialTab = searchParams.get('tab') || 'esports';
   const [activeTab, setActiveTab] = useState(initialTab);
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -152,9 +157,50 @@ export default function PredictionsHub() {
             </Link>
           </div>
         </div>
+
+        {/* My Slips Link */}
+        {betSlip.savedSlips.length > 0 && (
+          <div className="mt-4 text-center">
+            <Link to="/my-slips">
+              <Button variant="outline" className="gap-2">
+                <Receipt className="w-4 h-4" />
+                View My Slips ({betSlip.savedSlips.length})
+              </Button>
+            </Link>
+          </div>
+        )}
       </main>
 
       <Footer />
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+        }}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+        }}
+      />
     </div>
   );
 }
