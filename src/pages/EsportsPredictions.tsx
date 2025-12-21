@@ -24,7 +24,8 @@ import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
-import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
+import { TwitchStreamEmbed, type StreamInfo } from '@/components/TwitchStreamEmbed';
+import { TwitchChatEmbed } from '@/components/TwitchChatEmbed';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
@@ -61,6 +62,7 @@ export default function EsportsPredictions() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   const [livestreamGame, setLivestreamGame] = useState<string | null>(null);
+  const [activeStream, setActiveStream] = useState<StreamInfo | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: EsportsEvent | null }>({
     open: false,
@@ -478,14 +480,23 @@ export default function EsportsPredictions() {
                 <TwitchStreamEmbed 
                   selectedGame={selectedGame} 
                   onActiveGameChange={setLivestreamGame}
+                  onStreamChange={setActiveStream}
                 />
               </div>
-              <div className="hidden lg:block w-64 shrink-0">
+              <div className="hidden lg:block w-64 shrink-0 space-y-3">
+                <TwitchChatEmbed 
+                  channel={activeStream?.channel || null}
+                  channelName={activeStream?.channelName}
+                />
                 <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
               </div>
             </div>
             {/* Mobile community links */}
-            <div className="lg:hidden mt-4 max-w-4xl mx-auto">
+            <div className="lg:hidden mt-4 max-w-4xl mx-auto space-y-3">
+              <TwitchChatEmbed 
+                channel={activeStream?.channel || null}
+                channelName={activeStream?.channelName}
+              />
               <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
             </div>
           </div>
