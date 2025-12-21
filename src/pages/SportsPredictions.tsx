@@ -30,7 +30,8 @@ import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio } from 'lucide-react';
+import { SportsMarketCard } from '@/components/SportsMarketCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -83,7 +84,8 @@ export default function SportsPredictions() {
     match: null,
   });
   const [creating, setCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const [activeTab, setActiveTab] = useState('markets');
+  const [marketFilter, setMarketFilter] = useState<'all' | 'live' | 'closing'>('all');
   const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   
   // Video highlights
@@ -378,6 +380,18 @@ export default function SportsPredictions() {
   });
 
   const now = Date.now() / 1000;
+  
+  // Separate live, closing soon, and regular markets
+  const liveMarkets = markets.filter(m => {
+    const matchStarted = m.resolution_time - 7200 < now; // Assume 2h before resolution = live
+    return m.resolved === 0 && matchStarted && m.resolution_time > now;
+  });
+  
+  const closingSoonMarkets = markets.filter(m => {
+    const hoursLeft = (m.resolution_time - now) / 3600;
+    return m.resolved === 0 && m.resolution_time > now && hoursLeft <= 2 && hoursLeft > 0;
+  });
+  
   const activeMarkets = markets
     .filter(m => m.resolved === 0 && m.resolution_time > now)
     .sort((a, b) => {
@@ -388,6 +402,14 @@ export default function SportsPredictions() {
       if (poolB > 0 && poolA === 0) return 1;
       return poolB - poolA;
     });
+  
+  // Filter markets based on selected filter
+  const filteredActiveMarkets = marketFilter === 'all' 
+    ? activeMarkets 
+    : marketFilter === 'live' 
+      ? liveMarkets 
+      : closingSoonMarkets;
+  
   // Only show in Results if market is resolved (resolved === 1) AND had betting activity (pool > 0)
   const resolvedMarkets = markets
     .filter(m => m.resolved === 1 && (m.yes_pool_xmr > 0 || m.no_pool_xmr > 0))
@@ -456,58 +478,123 @@ export default function SportsPredictions() {
             </div>
           </div>
 
-          {/* Video Highlights + Community Links */}
-          <div className="mb-6 flex gap-4">
-            <Card className="bg-card/80 backdrop-blur-sm flex-1">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Tv className="w-5 h-5 text-primary" />
-                  Latest Match Highlights
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {highlightsLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading highlights...</div>
-                ) : highlights.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No highlights available</div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {highlights.map((highlight, idx) => (
-                      <div 
-                        key={idx} 
-                        className="group cursor-pointer"
-                        onClick={() => {
-                          if (highlight.matchviewUrl) {
-                            window.open(highlight.matchviewUrl, '_blank');
-                          } else {
-                            toast.error('No video URL available for this match');
-                          }
-                        }}
-                      >
-                        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                          <img 
-                            src={highlight.thumbnail} 
-                            alt={highlight.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ExternalLink className="w-8 h-8 text-white" />
-                          </div>
-                          <Badge className="absolute bottom-2 left-2 bg-black/70 text-xs">
-                            {highlight.competition}
-                          </Badge>
-                        </div>
-                        <p className="mt-2 text-sm font-medium line-clamp-2">{highlight.title}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(highlight.date).toLocaleDateString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            <div className="hidden lg:block w-64 shrink-0">
-              <GameCommunityLinks category="sports" />
+          {/* Market Status Filters - PROMINENT */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant={marketFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMarketFilter('all')}
+              >
+                <TrendingUp className="w-4 h-4 mr-1" />
+                Open Markets ({activeMarkets.length})
+              </Button>
+              <Button
+                variant={marketFilter === 'live' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMarketFilter('live')}
+                className={liveMarkets.length > 0 ? 'border-red-500/50' : ''}
+              >
+                <Radio className={`w-4 h-4 mr-1 ${liveMarkets.length > 0 ? 'text-red-500 animate-pulse' : ''}`} />
+                Live Now ({liveMarkets.length})
+              </Button>
+              <Button
+                variant={marketFilter === 'closing' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMarketFilter('closing')}
+                className={closingSoonMarkets.length > 0 ? 'border-amber-500/50' : ''}
+              >
+                <Clock className="w-4 h-4 mr-1" />
+                Closing Soon ({closingSoonMarkets.length})
+              </Button>
             </div>
+          </div>
+
+          {/* LIVE MARKETS - Pinned at top */}
+          {liveMarkets.length > 0 && marketFilter === 'all' && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <h2 className="text-lg font-semibold text-red-400">Live Now</h2>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {liveMarkets.slice(0, 3).map((market) => (
+                  <SportsMarketCard
+                    key={market.market_id}
+                    market={market}
+                    isLive={true}
+                    onBetClick={(m, side) => {
+                      setSelectedMarket(m);
+                      setBetSide(side);
+                      setBetDialogOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* UPCOMING MARKETS - Primary content */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Flame className="w-5 h-5 text-primary" />
+                {marketFilter === 'all' ? 'Open Markets' : marketFilter === 'live' ? 'Live Markets' : 'Closing Soon'}
+                <Badge variant="secondary">{filteredActiveMarkets.length}</Badge>
+              </h2>
+            </div>
+            
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
+            ) : filteredActiveMarkets.length === 0 ? (
+              <Card className="text-center py-12 bg-card/80">
+                <CardContent>
+                  <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground mb-2">
+                    {marketFilter === 'all' 
+                      ? 'No open markets - check back soon!' 
+                      : marketFilter === 'live' 
+                        ? 'No live markets right now' 
+                        : 'No markets closing soon'}
+                  </p>
+                  {marketFilter !== 'all' && (
+                    <Button variant="ghost" size="sm" onClick={() => setMarketFilter('all')}>
+                      View all markets
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredActiveMarkets.map((market) => {
+                  const hoursLeft = (market.resolution_time - now) / 3600;
+                  const isClosing = hoursLeft <= 2 && hoursLeft > 0;
+                  const isLive = liveMarkets.some(m => m.market_id === market.market_id);
+                  
+                  return (
+                    <SportsMarketCard
+                      key={market.market_id}
+                      market={market}
+                      isLive={isLive}
+                      isClosingSoon={isClosing && !isLive}
+                      onBetClick={(m, side) => {
+                        setSelectedMarket(m);
+                        setBetSide(side);
+                        setBetDialogOpen(true);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Community Links - Sidebar on desktop */}
+          <div className="hidden lg:block mb-6">
+            <GameCommunityLinks category="sports" />
           </div>
           {/* Mobile community links */}
           <div className="lg:hidden mb-6">
@@ -538,9 +625,10 @@ export default function SportsPredictions() {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl grid-cols-6">
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsList className="grid w-full max-w-3xl grid-cols-7">
               <TabsTrigger value="markets">Markets</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="highlights">Highlights</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
               <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
               <TabsTrigger value="my-bets">My Bets</TabsTrigger>
@@ -548,6 +636,13 @@ export default function SportsPredictions() {
                 <Link to="/my-slips">My Slips</Link>
               </TabsTrigger>
             </TabsList>
+
+            {/* Markets Tab - Now Primary */}
+            <TabsContent value="markets" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Select a market above to place your bet, or browse upcoming matches to create new markets.
+              </div>
+            </TabsContent>
 
             {/* Upcoming Events Tab */}
             <TabsContent value="upcoming" className="space-y-4">
@@ -602,88 +697,55 @@ export default function SportsPredictions() {
             </TabsContent>
 
             {/* Markets Tab */}
-            <TabsContent value="markets" className="space-y-4">
+            {/* Old Markets Tab - Now removed, markets shown above */}
+
+            {/* Highlights Tab - Secondary Content */}
+            <TabsContent value="highlights" className="space-y-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Active Markets ({activeMarkets.length})
+                <Tv className="w-5 h-5 text-primary" />
+                Match Highlights & Replays
               </h2>
               
-              {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Loading markets...</div>
-              ) : activeMarkets.length === 0 ? (
-                <Card className="text-center py-12">
+              {highlightsLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading highlights...</div>
+              ) : highlights.length === 0 ? (
+                <Card className="text-center py-12 bg-card/80">
                   <CardContent>
-                    <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-4">No active markets yet.</p>
-                    <p className="text-sm text-muted-foreground">Go to Upcoming tab to create markets.</p>
+                    <Tv className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No highlights available</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {activeMarkets.map((market) => {
-                    const odds = getOdds(market);
-                    const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
-                    
-                    return (
-                      <Card key={market.market_id} data-market-id={market.market_id} className="hover:border-primary/50 transition-all bg-card/80 backdrop-blur-sm">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg">{market.title}</CardTitle>
-                              {market.description && (
-                                <CardDescription className="mt-1 text-sm">{market.description}</CardDescription>
-                              )}
-                            </div>
-                            {getStatusBadge(market)}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex gap-2">
-                              <div className="flex-1 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
-                                <div className="text-2xl font-bold text-emerald-400">{odds.yes}%</div>
-                                <div className="text-xs text-muted-foreground">YES</div>
-                                <div className="text-xs font-mono text-emerald-500/70">{market.yes_pool_xmr.toFixed(4)} XMR</div>
-                              </div>
-                              <div className="flex-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
-                                <div className="text-2xl font-bold text-red-400">{odds.no}%</div>
-                                <div className="text-xs text-muted-foreground">NO</div>
-                                <div className="text-xs font-mono text-red-500/70">{market.no_pool_xmr.toFixed(4)} XMR</div>
-                              </div>
-                            </div>
-                            
-                            <div className="text-xs text-muted-foreground text-center">
-                              Total Pool: {totalPool.toFixed(4)} XMR
-                            </div>
-                            
-                            {/* Pool Transparency */}
-                            <PoolTransparency marketId={market.market_id} />
-                            
-                            
-                            {!market.resolved && (
-                              <div className="flex gap-2">
-                                <Button 
-                                  className="flex-1" 
-                                  onClick={() => { setSelectedMarket(market); setBetDialogOpen(true); }}
-                                >
-                                  Place Bet
-                                </Button>
-                                <AddToSlipButton
-                                  marketId={market.market_id}
-                                  marketTitle={market.title}
-                                  yesPool={market.yes_pool_xmr || 0}
-                                  noPool={market.no_pool_xmr || 0}
-                                  onAdd={betSlip.addToBetSlip}
-                                  onOpenSlip={() => betSlip.setIsOpen(true)}
-                                  variant="icon"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {highlights.map((highlight, idx) => (
+                    <div 
+                      key={idx} 
+                      className="group cursor-pointer"
+                      onClick={() => {
+                        if (highlight.matchviewUrl) {
+                          window.open(highlight.matchviewUrl, '_blank');
+                        } else {
+                          toast.error('No video URL available for this match');
+                        }
+                      }}
+                    >
+                      <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                        <img 
+                          src={highlight.thumbnail} 
+                          alt={highlight.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-8 h-8 text-white" />
+                        </div>
+                        <Badge className="absolute bottom-2 left-2 bg-black/70 text-xs">
+                          {highlight.competition}
+                        </Badge>
+                      </div>
+                      <p className="mt-2 text-sm font-medium line-clamp-2">{highlight.title}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(highlight.date).toLocaleDateString()}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </TabsContent>
