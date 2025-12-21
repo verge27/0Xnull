@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
@@ -60,6 +60,7 @@ export default function EsportsPredictions() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('upcoming');
   const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
+  const [livestreamGame, setLivestreamGame] = useState<string | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; event: EsportsEvent | null }>({
     open: false,
@@ -474,15 +475,18 @@ export default function EsportsPredictions() {
           <div className="mb-6">
             <div className="flex gap-4 max-w-6xl mx-auto">
               <div className="flex-1 max-w-4xl">
-                <TwitchStreamEmbed selectedGame={selectedGame} />
+                <TwitchStreamEmbed 
+                  selectedGame={selectedGame} 
+                  onActiveGameChange={setLivestreamGame}
+                />
               </div>
               <div className="hidden lg:block w-64 shrink-0">
-                <GameCommunityLinks selectedGame={selectedGame} category="esports" />
+                <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
               </div>
             </div>
             {/* Mobile community links */}
             <div className="lg:hidden mt-4 max-w-4xl mx-auto">
-              <GameCommunityLinks selectedGame={selectedGame} category="esports" />
+              <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
             </div>
           </div>
 
