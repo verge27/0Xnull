@@ -132,6 +132,9 @@ export function BetSlipPanel({
     }
   };
 
+  const isValidPayoutAddress = payoutAddress.trim().length > 0 && 
+    (payoutAddress.startsWith('4') || payoutAddress.startsWith('8'));
+
   const handleCheckout = useCallback(async () => {
     if (items.length === 0) {
       toast.error('Add at least one bet to your slip');
@@ -146,9 +149,14 @@ export function BetSlipPanel({
       }
     }
 
-    // Validate payout address if provided
-    if (payoutAddress && (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8'))) {
-      toast.error('Invalid Monero address');
+    // Validate payout address is required
+    if (!payoutAddress.trim()) {
+      toast.error('Payout address is required');
+      return;
+    }
+
+    if (!payoutAddress.startsWith('4') && !payoutAddress.startsWith('8')) {
+      toast.error('Invalid Monero address - must start with 4 or 8');
       return;
     }
 
@@ -375,15 +383,16 @@ export function BetSlipPanel({
               <div className="border-t pt-4 space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    Payout Address (optional)
+                    Payout Address <span className="text-destructive">*</span>
                   </label>
                   <Input
                     placeholder="Your Monero address (4... or 8...)"
                     value={payoutAddress}
                     onChange={(e) => setPayoutAddress(e.target.value)}
+                    className={!isValidPayoutAddress && payoutAddress.length > 0 ? 'border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    You can add this later before claiming winnings
+                    Required to receive your winnings
                   </p>
                 </div>
 
@@ -419,7 +428,7 @@ export function BetSlipPanel({
               className="w-full"
               size="lg"
               onClick={handleCheckout}
-              disabled={items.length === 0 || isCheckingOut}
+              disabled={items.length === 0 || isCheckingOut || !isValidPayoutAddress}
             >
               {isCheckingOut ? (
                 <>
