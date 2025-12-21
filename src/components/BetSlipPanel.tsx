@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp } from 'lucide-react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { BetSlipItem } from '@/hooks/useMultibetSlip';
+
+// Bet slip expires 60 minutes after creation
+const EXPIRY_MINUTES = 60;
 
 interface BetSlipPanelProps {
   items: BetSlipItem[];
@@ -55,10 +58,47 @@ export function BetSlipPanel({
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [slipCreatedAt, setSlipCreatedAt] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(EXPIRY_MINUTES * 60);
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
 
   const potentialPayout = calculateTotalPotentialPayout();
   const potentialProfit = potentialPayout - totalUsd;
+
+  // Track when the slip was first created (first item added)
+  useEffect(() => {
+    if (items.length > 0 && !slipCreatedAt) {
+      setSlipCreatedAt(Date.now());
+    } else if (items.length === 0) {
+      setSlipCreatedAt(null);
+      setTimeLeft(EXPIRY_MINUTES * 60);
+    }
+  }, [items.length, slipCreatedAt]);
+
+  // Update countdown timer
+  useEffect(() => {
+    if (!slipCreatedAt || items.length === 0) return;
+
+    const expiresAt = slipCreatedAt + EXPIRY_MINUTES * 60 * 1000;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+      setTimeLeft(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [slipCreatedAt, items.length]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isExpiringSoon = timeLeft < 300; // Less than 5 minutes
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -261,6 +301,17 @@ export function BetSlipPanel({
                 )}
               </div>
             </SheetTitle>
+            {/* Expiry Timer */}
+            {items.length > 0 && slipCreatedAt && (
+              <div className={`flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium mt-2 ${
+                isExpiringSoon 
+                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse' 
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                <Timer className="w-3 h-3" />
+                <span>Slip expires in {formatTime(timeLeft)}</span>
+              </div>
+            )}
           </SheetHeader>
 
           {/* Clear Confirmation Dialog */}
