@@ -530,12 +530,15 @@ export default function SportsPredictions() {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-lg grid-cols-5">
+            <TabsList className="grid w-full max-w-2xl grid-cols-6">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
               <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
               <TabsTrigger value="my-bets">My Bets</TabsTrigger>
+              <TabsTrigger value="my-slips" asChild>
+                <Link to="/my-slips">My Slips</Link>
+              </TabsTrigger>
             </TabsList>
 
             {/* Upcoming Events Tab */}
