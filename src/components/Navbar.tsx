@@ -129,9 +129,22 @@ export const Navbar = () => {
                     <span>Crypto</span>
                   </Link>
                   <Link to="/my-slips" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <Receipt className="w-5 h-5 text-primary" />
                     <span>My Slips</span>
                   </Link>
+                  {betSlip.items.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        betSlip.setIsOpen(true);
+                      }}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30"
+                    >
+                      <Receipt className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Bet Slip</span>
+                      <Badge className="ml-auto bg-primary">{betSlip.items.length}</Badge>
+                    </button>
+                  )}
 
                   {/* AI */}
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI</div>
