@@ -176,6 +176,7 @@ interface GameCommunityLinksProps {
   selectedGame?: string;
   category?: 'esports' | 'sports' | 'crypto';
   hideReddit?: boolean; // When true, exclude reddit links (shown separately)
+  defaultOpen?: boolean; // When false, section starts collapsed
 }
 
 // Map alternative game keys to our community keys
@@ -242,8 +243,8 @@ export function getRedditCommunityForGame(gameKey: string | undefined, category?
   return null;
 }
 
-export function GameCommunityLinks({ selectedGame, category, hideReddit = false }: GameCommunityLinksProps) {
-  const [isOpen, setIsOpen] = useState(true);
+export function GameCommunityLinks({ selectedGame, category, hideReddit = false, defaultOpen = true }: GameCommunityLinksProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Normalize selected game key
   const normalizedGame = selectedGame ? (GAME_KEY_MAP[selectedGame] || selectedGame) : selectedGame;
