@@ -192,6 +192,7 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
   const [discordOpen, setDiscordOpen] = useState(true);
   const [discordLoaded, setDiscordLoaded] = useState(false);
   const [discordTimedOut, setDiscordTimedOut] = useState(false);
+  const [delayComplete, setDelayComplete] = useState(false);
 
   // Normalize selected game key
   const normalizedGame = selectedGame ? (GAME_KEY_MAP[selectedGame] || selectedGame) : selectedGame;
@@ -226,6 +227,13 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
     return `https://discord.com/widget?id=${discordCommunity.discordServerId}&theme=dark`;
   }, [discordCommunity?.discordServerId]);
 
+  // 10 second delay before loading Discord embed
+  useEffect(() => {
+    setDelayComplete(false);
+    const delayTimer = window.setTimeout(() => setDelayComplete(true), 10000);
+    return () => window.clearTimeout(delayTimer);
+  }, [discordSrc]);
+
   // Reset + timeout guard so we don't show an infinite spinner
   useEffect(() => {
     setDiscordLoaded(false);
@@ -233,11 +241,11 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
   }, [discordSrc]);
 
   useEffect(() => {
-    if (!discordSrc || !discordOpen || discordLoaded) return;
+    if (!discordSrc || !discordOpen || discordLoaded || !delayComplete) return;
 
     const t = window.setTimeout(() => setDiscordTimedOut(true), 6500);
     return () => window.clearTimeout(t);
-  }, [discordSrc, discordOpen, discordLoaded]);
+  }, [discordSrc, discordOpen, discordLoaded, delayComplete]);
 
   if (displayCommunities.length === 0) return null;
 
@@ -262,7 +270,7 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
             
             <CollapsibleContent>
               <CardContent className="pt-0">
-                {discordSrc && !discordTimedOut ? (
+                {discordSrc && delayComplete && !discordTimedOut ? (
                   <iframe
                     src={discordSrc}
                     width="100%"
@@ -276,11 +284,15 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
                       setDiscordTimedOut(false);
                     }}
                   />
+                ) : discordSrc && !delayComplete ? (
+                  <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center">
+                    <p className="text-muted-foreground">Loading Discord community...</p>
+                  </div>
                 ) : (
                   <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm">
                     <p className="text-foreground">Discord embed unavailable.</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      This usually happens when the server has its Discord “Server Widget” disabled.
+                      This usually happens when the server has its Discord "Server Widget" disabled.
                     </p>
                   </div>
                 )}
