@@ -442,11 +442,14 @@ export default function CricketPredictions() {
           )}
 
           <Tabs defaultValue="upcoming" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-4">
+            <TabsList className="grid w-full max-w-xl grid-cols-5">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="markets">Markets</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
               <TabsTrigger value="my-bets">My Bets</TabsTrigger>
+              <TabsTrigger value="my-slips" asChild>
+                <Link to="/my-slips">My Slips</Link>
+              </TabsTrigger>
             </TabsList>
 
             {/* Upcoming Tab */}
