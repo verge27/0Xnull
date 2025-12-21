@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
 import { MultibetSlip } from '@/services/api';
+import { playConfirmationSound } from '@/lib/sounds';
 
 interface MultibetDepositModalProps {
   open: boolean;
@@ -82,6 +83,7 @@ export function MultibetDepositModal({
         if (result && isMounted) {
           setStatus(result.status);
           if (result.status === 'confirmed') {
+            playConfirmationSound();
             toast.success('Deposit confirmed! Bets are now active.');
             onConfirmedRef.current();
           }
