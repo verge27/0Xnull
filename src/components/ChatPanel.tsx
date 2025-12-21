@@ -80,7 +80,7 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
     const uniqueParents = [...new Set(parentDomains.filter(Boolean))];
     const parentParams = uniqueParents.map(p => `parent=${p}`).join('&');
 
-    return `https://www.twitch.tv/popout/${streamInfo.channel}/chat?${parentParams}&darkpopout`;
+    return `https://www.twitch.tv/embed/${streamInfo.channel}/chat?${parentParams}&darkpopout`;
   }, [locationInfo, streamInfo?.channel]);
 
   // Build Discord widget src
