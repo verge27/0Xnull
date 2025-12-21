@@ -489,14 +489,14 @@ export default function SportsPredictions() {
 
           {/* Main Tabs - Primary navigation */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="w-full max-w-3xl grid grid-cols-7 mb-4">
-              <TabsTrigger value="markets">Markets</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="highlights">Highlights</TabsTrigger>
-              <TabsTrigger value="results">Results</TabsTrigger>
-              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-              <TabsTrigger value="my-bets">My Bets</TabsTrigger>
-              <TabsTrigger value="my-slips" asChild>
+            <TabsList className="w-full max-w-3xl flex overflow-x-auto gap-1 mb-4 justify-start md:justify-center">
+              <TabsTrigger value="markets" className="shrink-0">Markets</TabsTrigger>
+              <TabsTrigger value="upcoming" className="shrink-0">Upcoming</TabsTrigger>
+              <TabsTrigger value="highlights" className="shrink-0">Highlights</TabsTrigger>
+              <TabsTrigger value="results" className="shrink-0">Results</TabsTrigger>
+              <TabsTrigger value="leaderboard" className="shrink-0">Leaderboard</TabsTrigger>
+              <TabsTrigger value="my-bets" className="shrink-0">My Bets</TabsTrigger>
+              <TabsTrigger value="my-slips" className="shrink-0" asChild>
                 <Link to="/my-slips">My Slips</Link>
               </TabsTrigger>
             </TabsList>
