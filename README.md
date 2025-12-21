@@ -1,217 +1,247 @@
-# 0xNull.io
+# 0xNull
 
-A privacy-first Monero (XMR) marketplace for trading physical goods, digital products, and services anonymously.
+**Private Infrastructure for the Permissionless Economy**
 
-**Live Site:** [0xnull.io](https://0xnull.io)
+**Live Site:** [0xnull.io](https://0xnull.io) | **Tor:** Available via .onion mirror
 
 ## Overview
 
-0xNull is a decentralized marketplace that prioritizes user privacy through cryptocurrency payments. The platform integrates with XMRBazaar for extended listings and uses Trocador AnonPay for secure, anonymous transactions.
+0xNull is a privacy-first platform offering prediction markets, cryptocurrency swaps, AI services, and an anonymous marketplace—all settled in Monero (XMR) with no KYC requirements.
 
-### Key Features
+**Built for humans and machines. No accounts. No identity. Just XMR and outcomes.**
 
-- **Anonymous Trading** - Buy and sell with complete privacy using Monero (XMR)
-- **Secure Payments** - Trocador AnonPay integration for cryptocurrency transactions
-- **Live XMR Rates** - Real-time USD/XMR conversion via Supabase edge functions
-- **XMRBazaar Integration** - Curated referral listings from the XMRBazaar marketplace
-- **Partner Network** - Referral listings from vetted partner merchants
-- **User Listings** - Sellers can create and manage their own listings (stored in Supabase)
-- **AI Site Assistant** - Chatbot powered by NanoGPT for navigation help
-- **AI Comment Moderation** - Automated moderation for community discussions
+---
 
-## Tech Stack
+## Core Products
+
+### 🎯 Prediction Markets
+
+Parimutuel betting on sports, esports, and crypto prices with automated oracle resolution.
+
+**How it works:**
+- All bets go into a pool (YES pool + NO pool)
+- Winners split the losers' pool proportionally
+- 0.4% fee on winnings only — stakes returned fee-free
+- One-sided markets (no opposing bets) = full refund, no fee
+
+**Coverage:**
+- **Sports:** NFL, NBA, MLB, NHL, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, F1, Cricket, and 150+ leagues
+- **Esports:** CS2, Valorant, League of Legends, Dota 2, StarCraft II, and 15+ titles with live Twitch integration
+- **Crypto:** BTC/ETH price targets via CoinGecko oracle
+
+**Technical:**
+- Subaddress-based deposit matching (unique address per bet)
+- Automated resolution via The Odds API (sports) and CoinGecko (crypto)
+- View keys available for independent pool verification
+- Multi-bet API for placing multiple legs with single deposit
+
+**vs Competitors:**
+
+| Platform | Fee Model | Effective Rate | Privacy |
+|----------|-----------|----------------|---------|
+| 0xNull | 0.4% on winnings | ~0.2% average | Full (XMR, no KYC) |
+| Polymarket | 0% (VC subsidized) | Spread costs | None (on-chain) |
+| Kalshi | 0.07%-7% taker | ~1.2% | None (full KYC) |
+| PredictIt | 10% + 5% withdrawal | ~15% | None (full KYC) |
+| Traditional Bookies | Spread/vigorish | 5-15% | None (bank trail) |
+
+### 💱 Crypto Swaps
+
+Non-custodial cryptocurrency swaps via Trocador aggregation.
+
+- Swap any supported crypto to XMR (or vice versa)
+- No accounts, no KYC
+- Best rates aggregated across multiple exchanges
+- Direct wallet-to-wallet settlement
+
+### 🤖 AI Services
+
+Access to Claude, GPT, and other models for XMR.
+
+- Pay-per-use, no subscription
+- No account required
+- Powered by NanoGPT routing
+- Voice, text, and specialized models available
+
+### 🛒 Anonymous Marketplace
+
+Buy and sell physical goods, digital products, and services.
+
+- No seller accounts required for browsing
+- XMRBazaar integration (curated referral listings)
+- Partner merchant network
+- User-created listings via Supabase
+- **Categories:** Electronics, Digital Goods, Services, Accessories, Tools & Outdoors, Health & Wellness, and more
+
+---
+
+## Why 0xNull?
+
+### For Users
+
+- **No KYC** — Scan QR, send XMR, done
+- **No accounts** — No email, no password, no identity
+- **No geo-blocking** — Works anywhere, including US
+- **Verifiable** — View keys let you audit pool balances
+- **Low fees** — 0.4% on winnings beats 5-15% vigorish
+
+### For AI Agents
+
+- **Permissionless API** — No API keys required for market data
+- **Programmatic betting** — Agents can place bets autonomously
+- **No human gatekeeping** — No KYC means machines can participate
+- **Multi-bet support** — Single deposit, multiple legs, one payout address
+
+### Architecture Philosophy
+
+> Decentralization is a means, not an end
+
+The goals: censorship resistance, privacy, permissionless access
+
+Centralized backend + Monero settlement + accountable operator = better tradeoffs than "trustless" smart contracts with surveillance
+
+---
+
+## Technical Architecture
+
+### Prediction Markets Backend
+
+- 4x monero-wallet-rpc instances (ports 18082-18085) with round-robin load balancing
+- Pool wallets created lazily on first bet per market
+- Subaddresses generated via `create_address` RPC call
+- Scanner polls every 2 minutes, matches deposits by address index
+- Auto-resolution cron for sports/esports/crypto oracles
+
+### Oracles
+
+- **Sports:** The Odds API (70+ leagues)
+- **Esports:** Tapology + ScraperAPI proxy (Russian MMA, global esports)
+- **Crypto:** CoinGecko + Binance price feeds
+
+### Stack
 
 | Layer | Technology |
 |-------|------------|
 | Frontend | React 18, TypeScript, Vite |
-| Styling | Tailwind CSS, shadcn/ui (Radix primitives) |
-| Backend | Supabase (PostgreSQL, Edge Functions, Auth) |
-| State | TanStack Query, React hooks |
-| Routing | React Router v6 |
-| Payments | Trocador AnonPay (XMR) |
-| Icons | Lucide React |
+| Styling | Tailwind CSS, shadcn/ui |
+| Backend | Supabase (PostgreSQL, Edge Functions) |
+| Predictions | Python/Flask, monero-wallet-rpc |
+| Payments | Trocador AnonPay, direct XMR |
+| AI | NanoGPT API |
 
-## Project Structure
+### Key Integrations
 
-```
-src/
-├── assets/              # Product images (XMRBazaar, partners)
-├── components/          # Reusable UI components
-│   ├── ui/              # shadcn/ui base components
-│   ├── ListingCard.tsx  # Product card display
-│   ├── Navbar.tsx       # Site navigation
-│   ├── PriceDisplay.tsx # USD/XMR price conversion
-│   └── SiteAssistant.tsx # AI chatbot
-├── hooks/               # Custom React hooks
-│   ├── useAuth.tsx      # Supabase authentication
-│   ├── useExchangeRate.tsx # Live XMR rates
-│   ├── useListings.tsx  # Database listings
-│   └── useProfile.tsx   # User profiles
-├── integrations/
-│   └── supabase/        # Supabase client & types
-├── lib/
-│   ├── categories.ts    # Category hierarchy
-│   ├── data.ts          # Demo listings & helpers
-│   ├── partners/        # Partner listing configs
-│   ├── types.ts         # TypeScript interfaces
-│   └── xmrbazaar.ts     # XMRBazaar referral listings
-├── pages/               # Route components
-└── App.tsx              # Router & providers
+| Partner | Integration |
+|---------|-------------|
+| Trocador | Swap aggregation, AnonPay |
+| NanoGPT | AI model routing |
+| SporeStack | Anonymous VPS provisioning |
+| LNVPN | eSIM affiliate |
+| The Odds API | Sports oracle data |
+| XMRBazaar | Marketplace referrals |
 
-supabase/
-├── functions/           # Edge functions
-│   ├── moderate-comment/   # AI content moderation
-│   ├── site-assistant/     # AI chatbot
-│   └── update-xmr-price/   # Exchange rate updates
-└── migrations/          # Database schema
-```
+---
 
 ## Routes
 
 | Path | Description |
 |------|-------------|
-| `/` | Landing page with features & CTA |
-| `/browse` | Marketplace with filters, search, categories |
-| `/listing/:id` | Individual listing details |
-| `/checkout/:orderId` | Payment flow with Trocador |
-| `/order/:id` | Order tracking |
-| `/sell` | Seller dashboard |
-| `/sell/new` | Create new listing |
-| `/orders` | User order history |
-| `/wishlist` | Saved listings |
-| `/messages` | Buyer/seller messaging |
-| `/settings` | Account settings |
-| `/seller/:id` | Seller profile |
-| `/auth` | Login/signup |
+| `/` | Landing page |
+| `/sports-predictions` | Sports betting markets |
+| `/esports-predictions` | Esports betting with live streams |
+| `/predictions` | Crypto price predictions |
+| `/swaps` | Cryptocurrency swaps |
+| `/ai` | AI services |
+| `/browse` | Marketplace |
+| `/how-betting-works` | Parimutuel explainer |
+| `/listing/:id` | Individual listing |
+| `/checkout/:orderId` | Payment flow |
 
-## Categories
+---
 
-The marketplace supports 13 top-level categories with subcategories:
+## API (For AI Agents)
 
-- Accessories (hats, scarves, sunglasses, etc.)
-- Art & Collectibles
-- Bags & Purses
-- Bath & Beauty
-- Clothing
-- Electronics (phones, gadgets, accessories)
-- Home & Living
-- Jewelry
-- Digital Goods (VPN, software, courses)
-- Services (consulting, programming, design)
-- Adult & Intimacy
-- Health & Wellness (peptides, nootropics, supplements)
-- Tools & Outdoors (knives, multi-tools, camping, hunting)
+### Get Available Markets
 
-## Listing Sources
-
-Listings come from four sources, displayed in this order:
-
-1. **Database Listings** - User-created listings stored in Supabase
-2. **XMRBazaar** - Curated referral links to XMRBazaar.com (green badge)
-3. **Partner Listings** - Referral links to vetted partners
-4. **Demo Listings** - Sample listings for demonstration (gray "Demo" badge)
-
-## Database Schema
-
-### Tables
-
-**profiles**
-- `id` (uuid, FK to auth.users)
-- `display_name` (text)
-- `xmr_address` (text, nullable)
-- `created_at`, `updated_at` (timestamptz)
-
-**listings**
-- `id` (uuid)
-- `seller_id` (uuid, FK to profiles)
-- `title`, `description` (text)
-- `price_usd`, `shipping_price_usd` (numeric)
-- `category` (text)
-- `images` (text[])
-- `stock` (integer)
-- `status` (active/sold_out/draft)
-- `condition` (new/used/digital)
-- `created_at` (timestamptz)
-
-**exchange_rates**
-- `currency_pair` (text, e.g., "XMR/USD")
-- `rate` (numeric)
-- `updated_at` (timestamptz)
-
-## Edge Functions
-
-### update-xmr-price
-Fetches current XMR/USD rate from external APIs and updates `exchange_rates` table. Can be scheduled via cron.
-
-### site-assistant
-AI-powered chatbot with full site knowledge. Uses NanoGPT for responses. Provides navigation help and answers questions about the marketplace.
-
-### moderate-comment
-AI moderation for community comments. Filters spam, prohibited content, and maintains discussion quality.
-
-## Environment Variables
-
-```env
-VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
-
-# Edge function secrets (set in Supabase dashboard)
-NANO_GPT_API_KEY=your-nanogpt-key
+```
+GET /api/predictions/markets
 ```
 
-## Development
+### Place Bet
 
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Lint
-npm run lint
+```
+POST /api/predictions/bet
+{
+  "market_id": "sports_xxx",
+  "side": "YES" | "NO",
+  "amount_usd": 10.00,
+  "payout_address": "4xxxxx..."
+}
 ```
 
-## Payment Flow
+### Multi-Bet (Prediction Slip)
 
-1. User clicks "Buy Now" on a listing
-2. Order created with XMR amount calculated from live rate
-3. Checkout page embeds Trocador AnonPay iframe
-4. User pays with any supported crypto (auto-converts to XMR)
-5. Payment confirmed → order status updated
-6. Seller ships to buyer's provided address
+```
+POST /api/predictions/multibet
+{
+  "bets": [
+    {"market_id": "...", "side": "YES", "amount_usd": 5},
+    {"market_id": "...", "side": "NO", "amount_usd": 5}
+  ],
+  "payout_address": "4xxxxx..."
+}
+```
 
-## XMRBazaar Integration
+Returns single deposit address for all legs.
 
-The marketplace features curated listings from [XMRBazaar.com](https://xmrbazaar.com), a Monero-only marketplace. These listings:
+---
 
-- Display a green "XMRBazaar" badge
-- Link directly to XMRBazaar for purchase
-- Include seller ratings from the original platform
-- Cover categories: services, electronics, digital goods, accessories
+## Support
 
-## Adding Partner Listings
+**SimpleX Chat** — End-to-end encrypted, no phone/email required (only contact method)
 
-Partner listings are referral links to vetted merchants. To add a partner:
+No email support. Privacy by default.
 
-1. Create a file in `src/lib/partners/` (e.g., `myPartner.ts`)
-2. Export an array of listings with `referralUrl` pointing to the partner
-3. Import and include in `Browse.tsx` listings array
-4. Set `isPartner: true` and `partnerName` for proper display
+---
 
-## License
+## Security Model
 
-Proprietary - Margin Syndicate Limited
+| Aspect | 0xNull | Polymarket |
+|--------|--------|------------|
+| Operator | Public, accountable | Anonymous smart contract |
+| User Privacy | Invisible (XMR) | Fully traced (on-chain ETH) |
+| Custody | Hours/days (bet window) | Continuous |
+| Attack Surface | One guy you can sue | $9B smart contract honeypot |
+| Verification | View keys | Etherscan |
+
+> "Decentralized surveillance" vs "Accountable operator + invisible users"
+
+---
+
+## Legal
+
+- Platform operates offshore
+- XMR-only, no fiat touchpoint
+- No KYC = no user data to subpoena
+- Operator is public and accountable
+- User responsibility to comply with local laws
+
+---
 
 ## Links
 
-- [0xNull.io](https://0xnull.io)
-- [XMRBazaar](https://xmrbazaar.com)
-- [Trocador](https://trocador.app)
-- [Monero](https://getmonero.org)
+- **Live:** [0xnull.io](https://0xnull.io)
+- **Tor:** .onion mirror available
+- **SimpleX:** Contact via site
+- **XMRBazaar:** [xmrbazaar.com](https://xmrbazaar.com)
+- **Trocador:** [trocador.app](https://trocador.app)
+
+---
+
+## License
+
+Proprietary — Margin Syndicate Limited
+
+---
+
+**Bet Privately. No accounts. No KYC. No limits. Just XMR and outcomes.**
