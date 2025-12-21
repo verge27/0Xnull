@@ -477,12 +477,12 @@ export default function EsportsPredictions() {
                 <TwitchStreamEmbed selectedGame={selectedGame} />
               </div>
               <div className="hidden lg:block w-64 shrink-0">
-                <GameCommunityLinks selectedGame={selectedGame} />
+                <GameCommunityLinks selectedGame={selectedGame} category="esports" />
               </div>
             </div>
             {/* Mobile community links */}
             <div className="lg:hidden mt-4 max-w-4xl mx-auto">
-              <GameCommunityLinks selectedGame={selectedGame} />
+              <GameCommunityLinks selectedGame={selectedGame} category="esports" />
             </div>
           </div>
 
