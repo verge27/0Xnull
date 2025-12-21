@@ -24,6 +24,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
+import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap, HelpCircle, Info, ExternalLink } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -496,10 +497,19 @@ export default function StarcraftPredictions() {
             </Link>
           </div>
 
-          {/* Twitch Stream - SC2 specific */}
+          {/* Twitch Stream + Community Links */}
           <div className="mb-6">
-            <div className="max-w-4xl mx-auto">
-              <TwitchStreamEmbed selectedGame="sc2" />
+            <div className="flex gap-4 max-w-6xl mx-auto">
+              <div className="flex-1 max-w-4xl">
+                <TwitchStreamEmbed selectedGame="sc2" />
+              </div>
+              <div className="hidden lg:block w-64 shrink-0">
+                <GameCommunityLinks selectedGame="starcraft-2" />
+              </div>
+            </div>
+            {/* Mobile community links */}
+            <div className="lg:hidden mt-4 max-w-4xl mx-auto">
+              <GameCommunityLinks selectedGame="starcraft-2" />
             </div>
           </div>
 

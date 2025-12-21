@@ -13,14 +13,17 @@ interface CommunityLink {
 
 interface GameCommunity {
   game: string;
+  category?: 'esports' | 'sports' | 'crypto';
   label: string;
   icon: string;
   links: CommunityLink[];
 }
 
 const GAME_COMMUNITIES: GameCommunity[] = [
+  // Esports
   {
     game: 'csgo',
+    category: 'esports',
     label: 'Counter-Strike 2',
     icon: '🔫',
     links: [
@@ -30,6 +33,7 @@ const GAME_COMMUNITIES: GameCommunity[] = [
   },
   {
     game: 'dota2',
+    category: 'esports',
     label: 'Dota 2',
     icon: '🏰',
     links: [
@@ -39,6 +43,7 @@ const GAME_COMMUNITIES: GameCommunity[] = [
   },
   {
     game: 'lol',
+    category: 'esports',
     label: 'League of Legends',
     icon: '⚔️',
     links: [
@@ -48,6 +53,7 @@ const GAME_COMMUNITIES: GameCommunity[] = [
   },
   {
     game: 'starcraft-2',
+    category: 'esports',
     label: 'StarCraft II',
     icon: '🌌',
     links: [
@@ -58,11 +64,83 @@ const GAME_COMMUNITIES: GameCommunity[] = [
   },
   {
     game: 'valorant',
+    category: 'esports',
     label: 'Valorant',
     icon: '🎯',
     links: [
       { type: 'discord', name: 'Discord', url: 'https://discord.gg/valorant' },
       { type: 'reddit', name: 'r/VALORANT', url: 'https://reddit.com/r/VALORANT' },
+    ],
+  },
+  // Sports
+  {
+    game: 'football',
+    category: 'sports',
+    label: 'Football/Soccer',
+    icon: '⚽',
+    links: [
+      { type: 'reddit', name: 'r/soccer', url: 'https://reddit.com/r/soccer' },
+      { type: 'reddit', name: 'r/football', url: 'https://reddit.com/r/football' },
+    ],
+  },
+  {
+    game: 'basketball',
+    category: 'sports',
+    label: 'Basketball',
+    icon: '🏀',
+    links: [
+      { type: 'reddit', name: 'r/nba', url: 'https://reddit.com/r/nba' },
+      { type: 'reddit', name: 'r/basketball', url: 'https://reddit.com/r/basketball' },
+    ],
+  },
+  {
+    game: 'mma',
+    category: 'sports',
+    label: 'MMA/UFC',
+    icon: '🥊',
+    links: [
+      { type: 'reddit', name: 'r/MMA', url: 'https://reddit.com/r/MMA' },
+      { type: 'reddit', name: 'r/ufc', url: 'https://reddit.com/r/ufc' },
+    ],
+  },
+  {
+    game: 'tennis',
+    category: 'sports',
+    label: 'Tennis',
+    icon: '🎾',
+    links: [
+      { type: 'reddit', name: 'r/tennis', url: 'https://reddit.com/r/tennis' },
+    ],
+  },
+  // Crypto
+  {
+    game: 'bitcoin',
+    category: 'crypto',
+    label: 'Bitcoin',
+    icon: '₿',
+    links: [
+      { type: 'reddit', name: 'r/Bitcoin', url: 'https://reddit.com/r/Bitcoin' },
+      { type: 'reddit', name: 'r/CryptoCurrency', url: 'https://reddit.com/r/CryptoCurrency' },
+    ],
+  },
+  {
+    game: 'monero',
+    category: 'crypto',
+    label: 'Monero',
+    icon: '🔒',
+    links: [
+      { type: 'reddit', name: 'r/Monero', url: 'https://reddit.com/r/Monero' },
+      { type: 'forum', name: 'Monero.town', url: 'https://monero.town' },
+    ],
+  },
+  {
+    game: 'trading',
+    category: 'crypto',
+    label: 'Trading',
+    icon: '📈',
+    links: [
+      { type: 'reddit', name: 'r/CryptoMarkets', url: 'https://reddit.com/r/CryptoMarkets' },
+      { type: 'reddit', name: 'r/BitcoinMarkets', url: 'https://reddit.com/r/BitcoinMarkets' },
     ],
   },
 ];
@@ -91,15 +169,25 @@ const getLinkColor = (type: CommunityLink['type']) => {
 
 interface GameCommunityLinksProps {
   selectedGame?: string;
+  category?: 'esports' | 'sports' | 'crypto';
 }
 
-export function GameCommunityLinks({ selectedGame }: GameCommunityLinksProps) {
+export function GameCommunityLinks({ selectedGame, category }: GameCommunityLinksProps) {
   const [isOpen, setIsOpen] = useState(true);
 
-  // Filter communities based on selected game
-  const displayCommunities = selectedGame && selectedGame !== 'all'
-    ? GAME_COMMUNITIES.filter(c => c.game === selectedGame || c.game.includes(selectedGame))
-    : GAME_COMMUNITIES;
+  // Filter communities based on category first, then selected game
+  let displayCommunities = GAME_COMMUNITIES;
+  
+  if (category) {
+    displayCommunities = displayCommunities.filter(c => c.category === category);
+  }
+  
+  if (selectedGame && selectedGame !== 'all') {
+    const filtered = displayCommunities.filter(c => c.game === selectedGame || c.game.includes(selectedGame));
+    if (filtered.length > 0) {
+      displayCommunities = filtered;
+    }
+  }
 
   if (displayCommunities.length === 0) return null;
 

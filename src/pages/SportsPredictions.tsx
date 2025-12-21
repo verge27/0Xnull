@@ -28,6 +28,7 @@ import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
+import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -455,9 +456,9 @@ export default function SportsPredictions() {
             </div>
           </div>
 
-          {/* Video Highlights */}
-          <div className="mb-6">
-            <Card className="bg-card/80 backdrop-blur-sm">
+          {/* Video Highlights + Community Links */}
+          <div className="mb-6 flex gap-4">
+            <Card className="bg-card/80 backdrop-blur-sm flex-1">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Tv className="w-5 h-5 text-primary" />
@@ -504,6 +505,13 @@ export default function SportsPredictions() {
                 )}
               </CardContent>
             </Card>
+            <div className="hidden lg:block w-64 shrink-0">
+              <GameCommunityLinks category="sports" />
+            </div>
+          </div>
+          {/* Mobile community links */}
+          <div className="lg:hidden mb-6">
+            <GameCommunityLinks category="sports" />
           </div>
 
           {/* Category Pills */}
