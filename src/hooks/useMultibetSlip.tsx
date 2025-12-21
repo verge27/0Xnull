@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { api, MultibetLegRequest, MultibetSlip, MultibetListItem } from '@/services/api';
+import { toast } from 'sonner';
+import { playErrorSound } from '@/lib/sounds';
 
 export interface BetSlipItem {
   id: string; // local id for UI
@@ -297,6 +299,47 @@ export function useMultibetSlip() {
     ));
   }, []);
 
+  // Check for resolved markets in the current bet slip and remove them with a warning
+  const checkAndRemoveResolvedMarkets = useCallback(async () => {
+    if (items.length === 0) return;
+
+    const resolvedMarkets: string[] = [];
+
+    // Check each market's status
+    await Promise.all(
+      items.map(async (item) => {
+        try {
+          const market = await api.getPredictionMarket(item.marketId);
+          // If market is resolved, mark it for removal
+          if (market.resolved === 1 || market.outcome !== null) {
+            resolvedMarkets.push(item.marketId);
+          }
+        } catch (error) {
+          // Ignore errors - market might not exist anymore
+          console.warn(`Could not check market ${item.marketId}:`, error);
+        }
+      })
+    );
+
+    if (resolvedMarkets.length > 0) {
+      // Remove resolved markets from the slip
+      const removedTitles = items
+        .filter(i => resolvedMarkets.includes(i.marketId))
+        .map(i => i.marketTitle);
+
+      setItems(prev => prev.filter(i => !resolvedMarkets.includes(i.marketId)));
+      
+      playErrorSound();
+      toast.warning(
+        `${resolvedMarkets.length} market${resolvedMarkets.length > 1 ? 's' : ''} removed`,
+        {
+          description: `The following market${resolvedMarkets.length > 1 ? 's have' : ' has'} been resolved: ${removedTitles.slice(0, 3).join(', ')}${removedTitles.length > 3 ? ` and ${removedTitles.length - 3} more` : ''}`,
+          duration: 6000,
+        }
+      );
+    }
+  }, [items]);
+
   return {
     items,
     isOpen,
@@ -320,5 +363,6 @@ export function useMultibetSlip() {
     updatePayoutAddress,
     savedSlips,
     cleanupOldSlips,
+    checkAndRemoveResolvedMarkets,
   };
 }

@@ -17,7 +17,9 @@ import {
   Wallet,
   Copy,
   ExternalLink,
-  Trash2
+  Trash2,
+  Timer,
+  AlertTriangle
 } from 'lucide-react';
 import { api, type MultibetSlip } from '@/services/api';
 import { toast } from 'sonner';
@@ -31,6 +33,49 @@ import {
 } from '@/components/ui/dialog';
 
 const SLIPS_STORAGE_KEY = 'multibet_slips';
+const EXPIRY_MINUTES = 60;
+
+// Helper to calculate time remaining
+const getTimeRemaining = (createdAt: number): { minutes: number; seconds: number; expired: boolean } => {
+  const expiresAt = createdAt + EXPIRY_MINUTES * 60 * 1000;
+  const remaining = Math.max(0, expiresAt - Date.now());
+  const totalSeconds = Math.floor(remaining / 1000);
+  return {
+    minutes: Math.floor(totalSeconds / 60),
+    seconds: totalSeconds % 60,
+    expired: remaining === 0,
+  };
+};
+
+// Timer component for awaiting deposit slips
+function SlipTimer({ createdAt }: { createdAt: number }) {
+  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(createdAt));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(getTimeRemaining(createdAt));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [createdAt]);
+
+  if (timeRemaining.expired) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-red-500">
+        <AlertTriangle className="w-3 h-3" />
+        Expired
+      </span>
+    );
+  }
+
+  const isExpiringSoon = timeRemaining.minutes < 5;
+
+  return (
+    <span className={`flex items-center gap-1 text-xs ${isExpiringSoon ? 'text-orange-500 animate-pulse' : 'text-muted-foreground'}`}>
+      <Timer className="w-3 h-3" />
+      {timeRemaining.minutes}:{timeRemaining.seconds.toString().padStart(2, '0')}
+    </span>
+  );
+}
 
 export default function MySlips() {
   const [slips, setSlips] = useState<MultibetSlip[]>([]);
@@ -215,8 +260,13 @@ export default function MySlips() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {getStatusBadge(slip.status)}
-                        <span className="text-sm text-muted-foreground font-mono">
-                          {slip.slip_id}
+                        {slip.status === 'awaiting_deposit' && slip.created_at && (
+                          <SlipTimer createdAt={slip.created_at} />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground font-mono hidden sm:inline">
+                          {slip.slip_id.slice(0, 8)}...
                         </span>
                       </div>
                       <div className="flex items-center gap-2">

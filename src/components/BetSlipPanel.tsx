@@ -48,6 +48,7 @@ interface BetSlipPanelProps {
   activeSlip?: ActiveSlip | null;
   onViewActiveSlip?: () => void;
   awaitingDepositCount?: number;
+  onCheckResolvedMarkets?: () => Promise<void>;
 }
 
 export function BetSlipPanel({
@@ -68,6 +69,7 @@ export function BetSlipPanel({
   activeSlip,
   onViewActiveSlip,
   awaitingDepositCount = 0,
+  onCheckResolvedMarkets,
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -76,6 +78,18 @@ export function BetSlipPanel({
   const [timeLeft, setTimeLeft] = useState<number>(EXPIRY_MINUTES * 60);
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   const hasExpiredRef = useRef(false);
+  const hasCheckedMarketsRef = useRef(false);
+
+  // Check for resolved markets when panel opens
+  useEffect(() => {
+    if (isOpen && items.length > 0 && onCheckResolvedMarkets && !hasCheckedMarketsRef.current) {
+      hasCheckedMarketsRef.current = true;
+      onCheckResolvedMarkets();
+    }
+    if (!isOpen) {
+      hasCheckedMarketsRef.current = false;
+    }
+  }, [isOpen, items.length, onCheckResolvedMarkets]);
 
   const potentialPayout = calculateTotalPotentialPayout();
   const potentialProfit = potentialPayout - totalUsd;
@@ -298,10 +312,16 @@ export function BetSlipPanel({
             <Button
               onClick={onViewActiveSlip}
               variant="secondary"
-              className="h-12 px-4 gap-2 shadow-lg bg-amber-500 hover:bg-amber-600 text-white border-0 relative"
+              className={`h-12 px-4 gap-2 shadow-lg border-0 relative ${
+                isExpiringSoon 
+                  ? 'bg-orange-500 hover:bg-orange-600 animate-pulse' 
+                  : 'bg-amber-500 hover:bg-amber-600'
+              } text-white`}
             >
               <Eye className="w-4 h-4" />
-              <span className="font-medium">View Active Slip</span>
+              <span className="font-medium">
+                {slipCreatedAt ? formatTime(timeLeft) : 'View Slip'}
+              </span>
               {awaitingDepositCount > 0 && (
                 <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-background">
                   {awaitingDepositCount}
