@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 
 const SLIPS_STORAGE_KEY = 'multibet_slips';
+const ACTIVE_SLIP_KEY = 'multibet_active_slip';
 const EXPIRY_MINUTES = 60;
 
 // Helper to calculate time remaining
@@ -92,11 +93,31 @@ export default function MySlips() {
   const loadSlips = async () => {
     setLoading(true);
     try {
-      // Load from localStorage
+      // Load from localStorage - saved slips
       const stored = localStorage.getItem(SLIPS_STORAGE_KEY);
+      let localSlips: MultibetSlip[] = [];
       if (stored) {
-        const localSlips: MultibetSlip[] = JSON.parse(stored);
-        
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          localSlips = parsed;
+        }
+      }
+      
+      // Also load active slip that may not be in saved slips yet
+      const activeStored = localStorage.getItem(ACTIVE_SLIP_KEY);
+      if (activeStored) {
+        try {
+          const activeSlip: MultibetSlip = JSON.parse(activeStored);
+          // Check if it's already in localSlips
+          if (activeSlip && activeSlip.slip_id && !localSlips.find(s => s.slip_id === activeSlip.slip_id)) {
+            localSlips = [activeSlip, ...localSlips];
+          }
+        } catch {
+          // ignore parse errors
+        }
+      }
+      
+      if (localSlips.length > 0) {
         // Refresh status for each slip
         const refreshedSlips = await Promise.all(
           localSlips.map(async (slip) => {
@@ -110,7 +131,18 @@ export default function MySlips() {
         );
         
         setSlips(refreshedSlips);
-        localStorage.setItem(SLIPS_STORAGE_KEY, JSON.stringify(refreshedSlips));
+        // Save back to localStorage (excluding active slip which is stored separately)
+        const slipsWithoutActive = refreshedSlips.filter(s => {
+          const activeData = localStorage.getItem(ACTIVE_SLIP_KEY);
+          if (!activeData) return true;
+          try {
+            const active = JSON.parse(activeData);
+            return s.slip_id !== active.slip_id;
+          } catch {
+            return true;
+          }
+        });
+        localStorage.setItem(SLIPS_STORAGE_KEY, JSON.stringify(slipsWithoutActive));
       }
     } catch (error) {
       console.error('Error loading slips:', error);
