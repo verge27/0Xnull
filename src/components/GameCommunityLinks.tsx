@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Users, MessageCircle, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CommunityLink {
   type: 'reddit' | 'forum';
@@ -187,12 +187,34 @@ const GAME_KEY_MAP: Record<string, string> = {
   'dota': 'dota2',
 };
 
+// Export helper to get discord community for a game
+export function getDiscordCommunityForGame(gameKey: string | undefined, category?: 'esports' | 'sports' | 'crypto') {
+  if (!gameKey || gameKey === 'all') return null;
+  
+  const normalizedGame = GAME_KEY_MAP[gameKey] || gameKey;
+  let communities = GAME_COMMUNITIES;
+  
+  if (category) {
+    communities = communities.filter((c) => c.category === category);
+  }
+  
+  const matched = communities.find(
+    (c) => c.game === normalizedGame || c.game.includes(normalizedGame) || normalizedGame.includes(c.game)
+  );
+  
+  if (matched?.discordServerId) {
+    return {
+      label: matched.label,
+      discordServerId: matched.discordServerId,
+      discordInvite: matched.discordInvite,
+    };
+  }
+  
+  return null;
+}
+
 export function GameCommunityLinks({ selectedGame, category }: GameCommunityLinksProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [discordOpen, setDiscordOpen] = useState(true);
-  const [discordLoaded, setDiscordLoaded] = useState(false);
-  const [discordTimedOut, setDiscordTimedOut] = useState(false);
-  const [delayComplete, setDelayComplete] = useState(false);
 
   // Normalize selected game key
   const normalizedGame = selectedGame ? (GAME_KEY_MAP[selectedGame] || selectedGame) : selectedGame;
@@ -204,116 +226,21 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
     displayCommunities = displayCommunities.filter((c) => c.category === category);
   }
 
-  // Find community matching the selected game - only show Discord if we have an exact match
-  let discordCommunity: GameCommunity | undefined;
-  let hasExactMatch = false;
-
+  // Find community matching the selected game
   if (normalizedGame && normalizedGame !== 'all') {
     const matchedCommunity = displayCommunities.find(
       (c) => c.game === normalizedGame || c.game.includes(normalizedGame) || normalizedGame.includes(c.game)
     );
-    if (matchedCommunity && matchedCommunity.discordServerId) {
-      discordCommunity = matchedCommunity;
+    if (matchedCommunity) {
       displayCommunities = [matchedCommunity];
-      hasExactMatch = true;
     }
   }
-
-  // Hide Discord embed if no exact game match (user preference: "Hide embed if unknown")
-
-  const discordSrc = useMemo(() => {
-    if (!discordCommunity?.discordServerId) return null;
-    return `https://discord.com/widget?id=${discordCommunity.discordServerId}&theme=dark`;
-  }, [discordCommunity?.discordServerId]);
-
-  // 10 second delay before loading Discord embed
-  useEffect(() => {
-    setDelayComplete(false);
-    const delayTimer = window.setTimeout(() => setDelayComplete(true), 10000);
-    return () => window.clearTimeout(delayTimer);
-  }, [discordSrc]);
-
-  // Reset + timeout guard so we don't show an infinite spinner
-  useEffect(() => {
-    setDiscordLoaded(false);
-    setDiscordTimedOut(false);
-  }, [discordSrc]);
-
-  useEffect(() => {
-    if (!discordSrc || !discordOpen || discordLoaded || !delayComplete) return;
-
-    const t = window.setTimeout(() => setDiscordTimedOut(true), 6500);
-    return () => window.clearTimeout(t);
-  }, [discordSrc, discordOpen, discordLoaded, delayComplete]);
 
   if (displayCommunities.length === 0) return null;
 
   return (
     <div className="space-y-3">
-      {/* Discord Widget Embed - only shown when we have an exact game match */}
-      {hasExactMatch && discordCommunity?.discordServerId && (
-        <Collapsible open={discordOpen} onOpenChange={setDiscordOpen}>
-          <Card className="bg-card/80 backdrop-blur-sm border-[#5865F2]/30">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="pb-2 cursor-pointer hover:bg-[#5865F2]/10 transition-colors rounded-t-lg">
-                <CardTitle className="text-sm font-medium flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-[#5865F2]" />
-                    <span className="text-[#5865F2]">Discord</span>
-                    <span className="text-xs text-muted-foreground">• {discordCommunity.label}</span>
-                  </span>
-                  {discordOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </CardTitle>
-              </CardHeader>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <CardContent className="pt-0">
-                {discordSrc && delayComplete && !discordTimedOut ? (
-                  <iframe
-                    src={discordSrc}
-                    width="100%"
-                    height="300"
-                    frameBorder="0"
-                    sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                    className="rounded-lg"
-                    title={`${discordCommunity.label} Discord`}
-                    onLoad={() => {
-                      setDiscordLoaded(true);
-                      setDiscordTimedOut(false);
-                    }}
-                  />
-                ) : discordSrc && !delayComplete ? (
-                  <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center">
-                    <p className="text-muted-foreground">Loading Discord community...</p>
-                  </div>
-                ) : (
-                  <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm">
-                    <p className="text-foreground">Discord embed unavailable.</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      This usually happens when the server has its Discord "Server Widget" disabled.
-                    </p>
-                  </div>
-                )}
-
-                {discordCommunity.discordInvite && (
-                  <a
-                    href={discordCommunity.discordInvite}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 flex items-center justify-center gap-1 text-xs text-[#5865F2] hover:underline"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Open in Discord
-                  </a>
-                )}
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-      )}
-
-      {/* Other Community Links */}
+      {/* Community Links */}
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <Card className="bg-card/80 backdrop-blur-sm border-border/50">
           <CollapsibleTrigger asChild>

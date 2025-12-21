@@ -25,8 +25,8 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed, type StreamInfo } from '@/components/TwitchStreamEmbed';
-import { TwitchChatEmbed } from '@/components/TwitchChatEmbed';
-import { GameCommunityLinks } from '@/components/GameCommunityLinks';
+import { ChatPanel } from '@/components/ChatPanel';
+import { GameCommunityLinks, getDiscordCommunityForGame } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -483,19 +483,22 @@ export default function EsportsPredictions() {
                   onStreamChange={setActiveStream}
                 />
               </div>
-              <div className="hidden lg:block w-64 shrink-0 space-y-3">
-                <TwitchChatEmbed 
-                  channel={activeStream?.channel || null}
-                  channelName={activeStream?.channelName}
-                />
-                <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
+              {/* Desktop sidebar with scroll */}
+              <div className="hidden lg:block w-72 shrink-0">
+                <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto space-y-3 pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                  <ChatPanel 
+                    streamInfo={activeStream}
+                    discordCommunity={getDiscordCommunityForGame(livestreamGame || undefined, 'esports')}
+                  />
+                  <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
+                </div>
               </div>
             </div>
             {/* Mobile community links */}
             <div className="lg:hidden mt-4 max-w-4xl mx-auto space-y-3">
-              <TwitchChatEmbed 
-                channel={activeStream?.channel || null}
-                channelName={activeStream?.channelName}
+              <ChatPanel 
+                streamInfo={activeStream}
+                discordCommunity={getDiscordCommunityForGame(livestreamGame || undefined, 'esports')}
               />
               <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" />
             </div>
