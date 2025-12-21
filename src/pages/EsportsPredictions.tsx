@@ -1051,6 +1051,8 @@ export default function EsportsPredictions() {
           return slip;
         }}
         isCheckingOut={betSlip.isCheckingOut}
+        activeSlip={betSlip.activeSlip}
+        onViewActiveSlip={() => setMultibetDepositOpen(true)}
       />
 
       {/* Multibet Deposit Modal */}

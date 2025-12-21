@@ -714,6 +714,8 @@ export default function CombatSports() {
           }
           return slip;
         }}
+        activeSlip={betSlip.activeSlip}
+        onViewActiveSlip={() => setMultibetDepositOpen(true)}
       />
 
       {betSlip.activeSlip && (
