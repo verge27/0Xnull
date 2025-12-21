@@ -177,9 +177,22 @@ interface GameCommunityLinksProps {
   category?: 'esports' | 'sports' | 'crypto';
 }
 
+// Map alternative game keys to our community keys
+const GAME_KEY_MAP: Record<string, string> = {
+  'sc2': 'starcraft-2',
+  'starcraft': 'starcraft-2',
+  'cs2': 'csgo',
+  'counterstrike': 'csgo',
+  'league': 'lol',
+  'dota': 'dota2',
+};
+
 export function GameCommunityLinks({ selectedGame, category }: GameCommunityLinksProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [discordOpen, setDiscordOpen] = useState(true);
+
+  // Normalize selected game key
+  const normalizedGame = selectedGame ? (GAME_KEY_MAP[selectedGame] || selectedGame) : selectedGame;
 
   // Filter communities based on category first, then selected game
   let displayCommunities = GAME_COMMUNITIES;
@@ -188,17 +201,25 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
     displayCommunities = displayCommunities.filter(c => c.category === category);
   }
   
-  if (selectedGame && selectedGame !== 'all') {
-    const filtered = displayCommunities.filter(c => c.game === selectedGame || c.game.includes(selectedGame));
-    if (filtered.length > 0) {
-      displayCommunities = filtered;
+  // Find community matching the selected game
+  let discordCommunity: GameCommunity | undefined;
+  
+  if (normalizedGame && normalizedGame !== 'all') {
+    const matchedCommunity = displayCommunities.find(
+      c => c.game === normalizedGame || c.game.includes(normalizedGame) || normalizedGame.includes(c.game)
+    );
+    if (matchedCommunity) {
+      discordCommunity = matchedCommunity;
+      displayCommunities = [matchedCommunity];
     }
+  }
+  
+  // If no specific game selected, use first community with Discord
+  if (!discordCommunity) {
+    discordCommunity = displayCommunities.find(c => c.discordServerId);
   }
 
   if (displayCommunities.length === 0) return null;
-
-  // Get the first community with a Discord server for the embed
-  const discordCommunity = displayCommunities.find(c => c.discordServerId);
 
   return (
     <div className="space-y-3">
