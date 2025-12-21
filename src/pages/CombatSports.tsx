@@ -14,9 +14,13 @@ import { useSportsEvents, type SportsEvent } from '@/hooks/useSportsEvents';
 import { useSportsMatches, getSportLabel, type SportsMatch } from '@/hooks/useSportsCategories';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { api, type PredictionMarket } from '@/services/api';
 import { supabase } from '@/integrations/supabase/client';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
@@ -59,6 +63,10 @@ export default function CombatSports() {
   
   const [depositModalOpen, setDepositModalOpen] = useState(false);
   const [currentBetData, setCurrentBetData] = useState<PlaceBetResponse | null>(null);
+  
+  // Multibet slip
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   // Team selection dialog
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: SportsMatch | null }>({
@@ -480,6 +488,13 @@ export default function CombatSports() {
                               </p>
                             </div>
                           )}
+                          <div className="mt-3 pt-3 border-t flex justify-end">
+                            <AddToSlipButton
+                              marketId={market.market_id}
+                              marketTitle={market.title}
+                              onAdd={(id, title, side, amount) => betSlip.addToBetSlip(id, title, side, amount)}
+                            />
+                          </div>
                         </CardContent>
                       </Card>
                     );
@@ -667,6 +682,38 @@ export default function CombatSports() {
           betData={currentBetData}
           onCheckStatus={checkBetStatus}
           onConfirmed={() => fetchMarkets()}
+        />
+      )}
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+        }}
+      />
+
+      {betSlip.activeSlip && (
+        <MultibetDepositModal
+          open={multibetDepositOpen}
+          onOpenChange={setMultibetDepositOpen}
+          slip={betSlip.activeSlip}
+          onCheckStatus={betSlip.checkSlipStatus}
+          onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+          onConfirmed={() => {
+            betSlip.clearBetSlip();
+            fetchMarkets();
+          }}
         />
       )}
     </div>
