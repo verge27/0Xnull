@@ -68,6 +68,26 @@ export const ESPORTS_GAMES = [
   { key: 'mlbb', name: 'Mobile Legends', icon: '📲', category: 'moba' },
 ] as const;
 
+export const GAME_DOWNLOAD_URLS: Record<string, string> = {
+  'csgo': 'https://store.steampowered.com/app/730/CounterStrike_2/',
+  'cs2': 'https://store.steampowered.com/app/730/CounterStrike_2/',
+  'dota2': 'https://store.steampowered.com/app/570/Dota_2/',
+  'lol': 'https://www.leagueoflegends.com/',
+  'lol-wild-rift': 'https://wildrift.leagueoflegends.com/',
+  'valorant': 'https://playvalorant.com/',
+  'starcraft-2': 'https://starcraft2.blizzard.com/',
+  'starcraft-brood-war': 'https://starcraft2.blizzard.com/',
+  'ow': 'https://overwatch.blizzard.com/',
+  'rl': 'https://www.rocketleague.com/',
+  'apex': 'https://www.ea.com/games/apex-legends',
+  'r6siege': 'https://www.ubisoft.com/game/rainbow-six/siege',
+  'pubg': 'https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/',
+  'cod': 'https://www.callofduty.com/',
+  'fifa': 'https://www.ea.com/games/ea-sports-fc',
+  'tekken8': 'https://store.steampowered.com/app/1778820/TEKKEN_8/',
+  'sf6': 'https://store.steampowered.com/app/1364780/Street_Fighter_6/',
+};
+
 export const ESPORTS_CATEGORIES = [
   { key: 'fps', name: 'FPS', icon: '🔫' },
   { key: 'moba', name: 'MOBA', icon: '🎮' },
@@ -209,4 +229,8 @@ export function getCategoryLabel(category: string): string {
 export function getCategoryIcon(category: string): string {
   const found = ESPORTS_CATEGORIES.find(c => c.key === category);
   return found?.icon || '🎮';
+}
+
+export function getGameDownloadUrl(game: string): string | null {
+  return GAME_DOWNLOAD_URLS[game] || null;
 }

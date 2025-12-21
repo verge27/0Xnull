@@ -25,9 +25,10 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap, HelpCircle, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap, HelpCircle, Info, ExternalLink } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Radio } from 'lucide-react';
+import { GAME_DOWNLOAD_URLS } from '@/hooks/useEsportsEvents';
 
 
 interface SC2Event {
@@ -448,6 +449,16 @@ export default function StarcraftPredictions() {
               <p className="text-muted-foreground mt-1">Bet on pro SC2 matches with Monero. No KYC. Instant payouts.</p>
             </div>
             <div className="flex items-center gap-2">
+              <a
+                href={GAME_DOWNLOAD_URLS['starcraft-2']}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Play SC2
+                </Button>
+              </a>
               <Link to="/esports-predictions">
                 <Button variant="outline" size="sm">
                   <Swords className="w-4 h-4 mr-2" />
