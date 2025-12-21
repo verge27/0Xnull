@@ -101,8 +101,8 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
   const hasDiscord = !!discordSrc && !discordError;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-card/80 backdrop-blur-sm border-purple-500/30">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <Card className="bg-card/80 border-purple-500/30">
         <CollapsibleTrigger asChild>
           <CardHeader className="pb-2 cursor-pointer hover:bg-purple-500/10 transition-colors rounded-t-lg">
             <CardTitle className="text-sm font-medium flex items-center justify-between">
@@ -161,7 +161,7 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
                       width="100%"
                       height="300"
                       frameBorder="0"
-                      className="rounded-lg"
+                      className="rounded-lg pointer-events-auto"
                       title={`${streamInfo.channelName || streamInfo.channel} - Twitch Chat`}
                     />
                   ) : twitchChatSrc && !delayComplete ? (
@@ -181,7 +181,7 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
                       height="300"
                       frameBorder="0"
                       sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                      className="rounded-lg"
+                      className="rounded-lg pointer-events-auto"
                       title={`${discordCommunity?.label} Discord`}
                       onLoad={handleDiscordLoad}
                     />
