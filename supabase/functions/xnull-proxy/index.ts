@@ -118,9 +118,12 @@ serve(async (req) => {
 
     console.log(`Proxying ${req.method} to: ${targetUrl.toString()}`);
 
-    // Use longer timeout for bet placement (wallet creation can be slow)
+    // Use longer timeout for wallet/bet creation operations (can be slow)
     const isBetRequest = targetPath.includes('/api/predictions/bet');
-    const timeoutMs = isBetRequest ? 60000 : 30000; // 60s for bets, 30s for others
+    const isMultibetRequest = targetPath.includes('/api/multibets');
+    const isWalletRequest = targetPath.includes('/api/token');
+    const isSlowRequest = isBetRequest || isMultibetRequest || isWalletRequest;
+    const timeoutMs = isSlowRequest ? 90000 : 30000; // 90s for slow requests, 30s for others
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -132,10 +135,14 @@ serve(async (req) => {
       clearTimeout(timeoutId);
       if (e instanceof Error && e.name === 'AbortError') {
         console.error(`Request timeout after ${timeoutMs}ms for ${targetPath}`);
+        let errorMessage = 'Request timed out. Please try again.';
+        if (isBetRequest) {
+          errorMessage = 'Bet placement is taking longer than expected. The backend may be creating your wallet. Please try again in a moment.';
+        } else if (isMultibetRequest) {
+          errorMessage = 'Multibet creation is taking longer than expected. Please try again in a moment.';
+        }
         return new Response(JSON.stringify({ 
-          error: isBetRequest 
-            ? 'Bet placement is taking longer than expected. The backend may be creating your wallet. Please try again in a moment.'
-            : 'Request timed out. Please try again.',
+          error: errorMessage,
           timeout: true 
         }), {
           status: 504,
