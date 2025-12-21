@@ -96,17 +96,27 @@ export function BetSlipPanel({
 
   // Check if there's an active slip awaiting deposit to show countdown
   const hasActiveAwaitingSlip = activeSlip && activeSlip.status === 'awaiting_deposit';
-  const slipCreatedAt = activeSlip?.created_at;
+
+  const toMs = (value: unknown): number | null => {
+    if (value == null) return null;
+    const n = typeof value === 'string' ? Number(value) : (value as number);
+    if (typeof n !== 'number' || !Number.isFinite(n)) return null;
+    // seconds -> ms
+    if (n > 0 && n < 1_000_000_000_000) return n * 1000;
+    return n;
+  };
+
+  const slipCreatedAtMs = toMs(activeSlip?.created_at);
 
   // Update countdown timer - only when there's an active slip awaiting deposit
   useEffect(() => {
-    if (!hasActiveAwaitingSlip || !slipCreatedAt) {
+    if (!hasActiveAwaitingSlip || !slipCreatedAtMs) {
       setTimeLeft(EXPIRY_MINUTES * 60);
       hasExpiredRef.current = false;
       return;
     }
 
-    const expiresAt = slipCreatedAt + EXPIRY_MINUTES * 60 * 1000;
+    const expiresAt = slipCreatedAtMs + EXPIRY_MINUTES * 60 * 1000;
 
     const updateTimer = () => {
       const now = Date.now();
@@ -128,7 +138,7 @@ export function BetSlipPanel({
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [hasActiveAwaitingSlip, slipCreatedAt, onClear]);
+  }, [hasActiveAwaitingSlip, slipCreatedAtMs, onClear]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -320,7 +330,7 @@ export function BetSlipPanel({
             >
               <Eye className="w-4 h-4" />
               <span className="font-medium">
-                {slipCreatedAt ? formatTime(timeLeft) : 'View Slip'}
+                {slipCreatedAtMs ? formatTime(timeLeft) : 'View Slip'}
               </span>
               {awaitingDepositCount > 0 && (
                 <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-background">
@@ -370,10 +380,10 @@ export function BetSlipPanel({
               </div>
             </SheetTitle>
             {/* Expiry Timer - only show when there's an active slip awaiting deposit with valid created_at */}
-            {hasActiveAwaitingSlip && slipCreatedAt && (
+            {hasActiveAwaitingSlip && slipCreatedAtMs && (
               <div className={`flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium mt-2 ${
-                isExpiringSoon 
-                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse' 
+                isExpiringSoon
+                  ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse'
                   : 'bg-muted text-muted-foreground'
               }`}>
                 <Timer className="w-3 h-3" />
