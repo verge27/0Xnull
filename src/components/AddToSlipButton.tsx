@@ -18,7 +18,9 @@ const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
 interface AddToSlipButtonProps {
   marketId: string;
   marketTitle: string;
-  onAdd: (marketId: string, title: string, side: 'YES' | 'NO', amount: number) => void;
+  yesPool?: number;
+  noPool?: number;
+  onAdd: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number) => void;
   onOpenSlip?: () => void;
   defaultAmount?: number;
   variant?: 'icon' | 'full' | 'compact';
@@ -28,6 +30,8 @@ interface AddToSlipButtonProps {
 export function AddToSlipButton({
   marketId,
   marketTitle,
+  yesPool = 0,
+  noPool = 0,
   onAdd,
   onOpenSlip,
   defaultAmount = 5,
@@ -37,7 +41,7 @@ export function AddToSlipButton({
   const [open, setOpen] = useState(false);
 
   const handleAdd = (side: 'YES' | 'NO', amount: number = defaultAmount) => {
-    onAdd(marketId, marketTitle, side, amount);
+    onAdd(marketId, marketTitle, side, amount, yesPool, noPool);
     toast.success(
       <div className="flex items-center justify-between gap-3">
         <span>Added ${amount} {side} bet</span>

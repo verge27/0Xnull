@@ -334,6 +334,10 @@ const Slap = () => {
           onUpdateAmount={betSlip.updateAmount}
           onClear={betSlip.clearBetSlip}
           onReorder={betSlip.reorderItems}
+          onUndo={betSlip.undoRemove}
+          lastRemoved={betSlip.lastRemoved}
+          calculatePotentialPayout={betSlip.calculatePotentialPayout}
+          calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
           onCheckout={async (payoutAddress) => {
             const slip = await betSlip.checkout(payoutAddress);
             if (slip) {

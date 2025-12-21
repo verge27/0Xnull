@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { api, MultibetLegRequest, MultibetSlip, MultibetListItem } from '@/services/api';
 
 export interface BetSlipItem {
@@ -7,10 +7,13 @@ export interface BetSlipItem {
   marketTitle: string;
   side: 'YES' | 'NO';
   amount: number;
+  yesPool: number;
+  noPool: number;
 }
 
 const STORAGE_KEY = 'multibet_slip';
 const SLIPS_STORAGE_KEY = 'multibet_slips';
+const UNDO_TIMEOUT = 5000; // 5 seconds to undo
 
 export function useMultibetSlip() {
   const [items, setItems] = useState<BetSlipItem[]>([]);
@@ -18,6 +21,8 @@ export function useMultibetSlip() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [activeSlip, setActiveSlip] = useState<MultibetSlip | null>(null);
   const [savedSlips, setSavedSlips] = useState<MultibetSlip[]>([]);
+  const [lastRemoved, setLastRemoved] = useState<{ item: BetSlipItem; index: number } | null>(null);
+  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -45,19 +50,30 @@ export function useMultibetSlip() {
     localStorage.setItem(SLIPS_STORAGE_KEY, JSON.stringify(savedSlips));
   }, [savedSlips]);
 
+  // Clear undo timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const addToBetSlip = useCallback((
     marketId: string,
     marketTitle: string,
     side: 'YES' | 'NO',
-    amount: number = 5
+    amount: number = 5,
+    yesPool: number = 0,
+    noPool: number = 0
   ) => {
     setItems(prev => {
       // Check if same market+side already exists
       const existing = prev.find(i => i.marketId === marketId && i.side === side);
       if (existing) {
-        // Update amount
+        // Update amount and pools
         return prev.map(i => 
-          i.id === existing.id ? { ...i, amount: i.amount + amount } : i
+          i.id === existing.id ? { ...i, amount: i.amount + amount, yesPool, noPool } : i
         );
       }
       // Add new item
@@ -67,13 +83,61 @@ export function useMultibetSlip() {
         marketTitle,
         side,
         amount,
+        yesPool,
+        noPool,
       }];
     });
     setIsOpen(true);
   }, []);
 
   const removeFromBetSlip = useCallback((id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+    setItems(prev => {
+      const index = prev.findIndex(i => i.id === id);
+      if (index === -1) return prev;
+      
+      const item = prev[index];
+      setLastRemoved({ item, index });
+      
+      // Clear any existing timeout
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+      
+      // Set timeout to clear undo state
+      undoTimeoutRef.current = setTimeout(() => {
+        setLastRemoved(null);
+      }, UNDO_TIMEOUT);
+      
+      return prev.filter(i => i.id !== id);
+    });
+  }, []);
+
+  const undoRemove = useCallback(() => {
+    if (!lastRemoved) return;
+    
+    // Clear timeout
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      undoTimeoutRef.current = null;
+    }
+    
+    setItems(prev => {
+      const newItems = [...prev];
+      // Insert at original position or at end if position is out of bounds
+      const insertIndex = Math.min(lastRemoved.index, newItems.length);
+      newItems.splice(insertIndex, 0, lastRemoved.item);
+      return newItems;
+    });
+    
+    setLastRemoved(null);
+  }, [lastRemoved]);
+
+  const clearLastRemoved = useCallback(() => {
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      undoTimeoutRef.current = null;
+    }
+    setLastRemoved(null);
   }, []);
 
   const updateAmount = useCallback((id: string, amount: number) => {
@@ -88,9 +152,52 @@ export function useMultibetSlip() {
   const clearBetSlip = useCallback(() => {
     setItems([]);
     setActiveSlip(null);
+    setLastRemoved(null);
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      undoTimeoutRef.current = null;
+    }
   }, []);
 
   const totalUsd = items.reduce((sum, i) => sum + i.amount, 0);
+
+  // Calculate potential payout for a single bet
+  const calculatePotentialPayout = useCallback((item: BetSlipItem): number => {
+    const totalPool = item.yesPool + item.noPool + item.amount;
+    const winningPool = item.side === 'YES' 
+      ? item.yesPool + item.amount 
+      : item.noPool + item.amount;
+    
+    if (winningPool === 0) return item.amount * 2; // Default 2x if no pool data
+    
+    // Pari-mutuel payout: (your stake / winning pool) * total pool
+    const payout = (item.amount / winningPool) * totalPool;
+    return payout;
+  }, []);
+
+  // Calculate combined odds for all bets (simplified parlay calculation)
+  const calculateTotalPotentialPayout = useCallback((): number => {
+    if (items.length === 0) return 0;
+    
+    // For multibet, multiply individual odds together
+    let combinedMultiplier = 1;
+    
+    for (const item of items) {
+      const totalPool = item.yesPool + item.noPool + item.amount;
+      const winningPool = item.side === 'YES' 
+        ? item.yesPool + item.amount 
+        : item.noPool + item.amount;
+      
+      if (winningPool === 0) {
+        combinedMultiplier *= 2; // Default 2x
+      } else {
+        const individualMultiplier = totalPool / winningPool;
+        combinedMultiplier *= individualMultiplier;
+      }
+    }
+    
+    return totalUsd * combinedMultiplier;
+  }, [items, totalUsd]);
 
   const checkout = useCallback(async (payoutAddress?: string) => {
     if (items.length === 0) return null;
@@ -145,10 +252,15 @@ export function useMultibetSlip() {
     setIsOpen,
     addToBetSlip,
     removeFromBetSlip,
+    undoRemove,
+    lastRemoved,
+    clearLastRemoved,
     updateAmount,
     reorderItems,
     clearBetSlip,
     totalUsd,
+    calculatePotentialPayout,
+    calculateTotalPotentialPayout,
     checkout,
     isCheckingOut,
     activeSlip,

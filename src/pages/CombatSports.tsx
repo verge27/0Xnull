@@ -492,7 +492,9 @@ export default function CombatSports() {
                             <AddToSlipButton
                               marketId={market.market_id}
                               marketTitle={market.title}
-                              onAdd={(id, title, side, amount) => betSlip.addToBetSlip(id, title, side, amount)}
+                              yesPool={market.yes_pool_xmr || 0}
+                              noPool={market.no_pool_xmr || 0}
+                              onAdd={betSlip.addToBetSlip}
                               onOpenSlip={() => betSlip.setIsOpen(true)}
                             />
                           </div>
@@ -695,7 +697,11 @@ export default function CombatSports() {
         onUpdateAmount={betSlip.updateAmount}
         onClear={betSlip.clearBetSlip}
         onReorder={betSlip.reorderItems}
+        onUndo={betSlip.undoRemove}
+        lastRemoved={betSlip.lastRemoved}
         totalUsd={betSlip.totalUsd}
+        calculatePotentialPayout={betSlip.calculatePotentialPayout}
+        calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
         isCheckingOut={betSlip.isCheckingOut}
         onCheckout={async (payoutAddress) => {
           const slip = await betSlip.checkout(payoutAddress);
