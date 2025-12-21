@@ -126,6 +126,10 @@ export const Navbar = () => {
                     <Bitcoin className="w-5 h-5 text-orange-500" />
                     <span>Crypto</span>
                   </Link>
+                  <Link to="/my-slips" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span>My Slips</span>
+                  </Link>
 
                   {/* AI */}
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI</div>
@@ -199,12 +203,16 @@ export const Navbar = () => {
                   <Link to="/predictions/sports/combat" className="cursor-pointer">Combat</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/predictions" className="cursor-pointer">Crypto Markets</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link to="/predictions" className="cursor-pointer">Crypto Markets</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/my-slips" className="cursor-pointer">My Slips</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
             {/* AI Dropdown */}
             <DropdownMenu>
