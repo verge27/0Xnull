@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
@@ -17,6 +18,7 @@ import { toast } from 'sonner';
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
+  const betSlip = useMultibetSlip();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -301,6 +303,21 @@ export const Navbar = () => {
 
             {/* Token Balance Badge */}
             <TokenBadge />
+
+            {/* Bet Slip Counter */}
+            {betSlip.items.length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => betSlip.setIsOpen(true)}
+              >
+                <Receipt className="w-4 h-4" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary">
+                  {betSlip.items.length}
+                </Badge>
+              </Button>
+            )}
 
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative">
