@@ -47,6 +47,7 @@ interface BetSlipPanelProps {
   isCheckingOut: boolean;
   activeSlip?: ActiveSlip | null;
   onViewActiveSlip?: () => void;
+  awaitingDepositCount?: number;
 }
 
 export function BetSlipPanel({
@@ -66,6 +67,7 @@ export function BetSlipPanel({
   isCheckingOut,
   activeSlip,
   onViewActiveSlip,
+  awaitingDepositCount = 0,
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -296,10 +298,15 @@ export function BetSlipPanel({
             <Button
               onClick={onViewActiveSlip}
               variant="secondary"
-              className="h-12 px-4 gap-2 shadow-lg bg-amber-500 hover:bg-amber-600 text-white border-0"
+              className="h-12 px-4 gap-2 shadow-lg bg-amber-500 hover:bg-amber-600 text-white border-0 relative"
             >
               <Eye className="w-4 h-4" />
               <span className="font-medium">View Active Slip</span>
+              {awaitingDepositCount > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-background">
+                  {awaitingDepositCount}
+                </span>
+              )}
             </Button>
           )}
           
