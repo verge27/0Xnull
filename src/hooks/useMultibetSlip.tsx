@@ -19,6 +19,19 @@ const ACTIVE_SLIP_KEY = 'multibet_active_slip';
 const UNDO_TIMEOUT = 5000; // 5 seconds to undo
 const EXPIRY_MS = 60 * 60 * 1000; // 60 minutes
 
+const normalizeCreatedAtMs = (createdAt: unknown): number | null => {
+  if (typeof createdAt !== 'number' || !Number.isFinite(createdAt)) return null;
+  // If timestamp looks like seconds, convert to ms
+  if (createdAt > 0 && createdAt < 1_000_000_000_000) return createdAt * 1000;
+  return createdAt;
+};
+
+const normalizeSlip = (slip: any): MultibetSlip | null => {
+  if (!slip || typeof slip !== 'object') return null;
+  const normalizedCreatedAt = normalizeCreatedAtMs(slip.created_at) ?? Date.now();
+  return { ...(slip as MultibetSlip), created_at: normalizedCreatedAt };
+};
+
 export function useMultibetSlip() {
   const [items, setItems] = useState<BetSlipItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -62,9 +75,15 @@ export function useMultibetSlip() {
       try {
         const storedActiveSlip = localStorage.getItem(ACTIVE_SLIP_KEY);
         if (storedActiveSlip) {
-          const slip = JSON.parse(storedActiveSlip);
+          const parsed = JSON.parse(storedActiveSlip);
+          const slip = normalizeSlip(parsed);
+          if (!slip) {
+            localStorage.removeItem(ACTIVE_SLIP_KEY);
+            return;
+          }
+
           // Check if slip has expired (60 minutes from creation)
-          if (slip && slip.created_at && Date.now() - slip.created_at < EXPIRY_MS) {
+          if (Date.now() - (slip.created_at ?? Date.now()) < EXPIRY_MS) {
             setActiveSlip(slip);
           } else {
             // Clear expired slip
@@ -76,12 +95,10 @@ export function useMultibetSlip() {
       }
     };
 
-    // Use requestAnimationFrame to batch the updates
-    requestAnimationFrame(() => {
-      loadFromStorage();
-      loadSlips();
-      loadActiveSlip();
-    });
+    // Load initial state (React 18 batches state updates inside effects)
+    loadFromStorage();
+    loadSlips();
+    loadActiveSlip();
   }, []);
 
   // Save to localStorage when items change
@@ -254,7 +271,7 @@ export function useMultibetSlip() {
 
   const checkout = useCallback(async (payoutAddress?: string) => {
     if (items.length === 0) return null;
-    
+
     setIsCheckingOut(true);
     try {
       const legs: MultibetLegRequest[] = items.map(item => ({
@@ -263,7 +280,10 @@ export function useMultibetSlip() {
         amount_usd: item.amount,
       }));
 
-      const slip = await api.createMultibet(legs, payoutAddress);
+      const created = await api.createMultibet(legs, payoutAddress);
+      const slip = normalizeSlip(created);
+      if (!slip) return null;
+
       setActiveSlip(slip);
       setSavedSlips(prev => [...prev, slip]);
       return slip;
