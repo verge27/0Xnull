@@ -202,6 +202,7 @@ export default function PredictionsHub() {
         activeSlip={betSlip.activeSlip}
         onViewActiveSlip={() => setMultibetDepositOpen(true)}
         awaitingDepositCount={betSlip.savedSlips.filter(s => s.status === 'awaiting_deposit').length}
+        onCheckResolvedMarkets={betSlip.checkAndRemoveResolvedMarkets}
       />
 
       <MultibetDepositModal
