@@ -140,8 +140,9 @@ print(bet["amount_xmr"])`}
 
         {/* API Reference */}
         <Tabs defaultValue="predictions" className="mb-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="predictions">Predictions</TabsTrigger>
+            <TabsTrigger value="multibets">Multibets</TabsTrigger>
             <TabsTrigger value="sports">Sports</TabsTrigger>
             <TabsTrigger value="esports">Esports</TabsTrigger>
           </TabsList>
@@ -349,7 +350,164 @@ print(bet["amount_xmr"])`}
             </Card>
           </TabsContent>
 
-          {/* Sports API */}
+          {/* Multibets API */}
+          <TabsContent value="multibets" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Multibet API
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Place multiple bets in a single transaction. One deposit address, multiple market positions.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Create Multibet */}
+                <div>
+                  <h3 className="font-semibold mb-2">Create a Multibet Slip</h3>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/multibets/create</code>
+                  <CodeBlock
+                    language="json"
+                    className="mt-3"
+                    code={`// Request
+{
+  "legs": [
+    {
+      "market_id": "sports_abc123_lakers",
+      "side": "YES",
+      "amount_usd": 10
+    },
+    {
+      "market_id": "sports_def456_celtics",
+      "side": "NO",
+      "amount_usd": 15
+    }
+  ],
+  "payout_address": "4..."  // Optional, can set later
+}
+
+// Response
+{
+  "slip_id": "slip_fe5aaed8ca0b2e1b",
+  "xmr_address": "82TRJM2...",
+  "total_amount_usd": 25.0,
+  "total_amount_xmr": 0.054207593,
+  "status": "awaiting_deposit",
+  "legs": [
+    {
+      "leg_id": "leg_5bc748d95c3f1549",
+      "market_id": "sports_abc123_lakers",
+      "side": "YES",
+      "amount_usd": 10.0,
+      "amount_xmr": 0.021683037,
+      "outcome": null,
+      "payout_xmr": null
+    }
+  ],
+  "view_key": "0cb6a1ba..."
+}`}
+                  />
+                </div>
+
+                {/* Check Status */}
+                <div>
+                  <h3 className="font-semibold mb-2">Check Slip Status</h3>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">GET /api/multibets/{'{slip_id}'}</code>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Returns the same structure as create, with updated status and outcomes.
+                  </p>
+                </div>
+
+                {/* Status Values */}
+                <div>
+                  <h3 className="font-semibold mb-3">Status Values</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Description</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell><code>awaiting_deposit</code></TableCell>
+                        <TableCell>Waiting for user to send XMR</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code>confirmed</code></TableCell>
+                        <TableCell>Deposit received, bets active</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code>resolved</code></TableCell>
+                        <TableCell>All markets resolved, payout ready</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code>paid</code></TableCell>
+                        <TableCell>Winnings sent to payout address</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Other Endpoints */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Other Endpoints</h3>
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/multibets/{'{slip_id}'}/payout-address</code>
+                      <span className="text-muted-foreground">— Update payout address</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/multibets/</code>
+                      <span className="text-muted-foreground">— List all slips (optional: ?status=confirmed&limit=50)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Limits */}
+                <div>
+                  <h3 className="font-semibold mb-3">Limits</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Constraint</TableHead>
+                        <TableHead>Value</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Min legs per slip</TableCell>
+                        <TableCell>1</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Max legs per slip</TableCell>
+                        <TableCell>20</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Min amount per leg</TableCell>
+                        <TableCell>$0.50</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Same market both sides</TableCell>
+                        <TableCell>Allowed (hedging)</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Key Difference */}
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">Key Difference from Single Bets</h3>
+                  <p className="text-sm text-muted-foreground">
+                    With multibets, you get <strong>one deposit address</strong> for all legs instead of one per bet.
+                    Send the total XMR amount once to confirm all bets in the slip.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="sports" className="space-y-4">
             <Card>
               <CardHeader>

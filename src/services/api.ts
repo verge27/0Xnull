@@ -191,6 +191,43 @@ export interface PayoutEntry {
   resolved_at: number;
 }
 
+// Multibet types
+export interface MultibetLegRequest {
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_usd: number;
+}
+
+export interface MultibetLeg {
+  leg_id: string;
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_usd: number;
+  amount_xmr: number;
+  outcome: 'YES' | 'NO' | null;
+  payout_xmr: number | null;
+}
+
+export interface MultibetSlip {
+  slip_id: string;
+  xmr_address: string;
+  total_amount_usd: number;
+  total_amount_xmr: number;
+  status: 'awaiting_deposit' | 'confirmed' | 'resolved' | 'paid';
+  legs: MultibetLeg[];
+  view_key: string;
+  payout_address?: string;
+  created_at?: number;
+}
+
+export interface MultibetListItem {
+  slip_id: string;
+  total_amount_usd: number;
+  total_amount_xmr: number;
+  status: 'awaiting_deposit' | 'confirmed' | 'resolved' | 'paid';
+  created_at: number;
+}
+
 export interface CreateMarketRequest {
   market_id: string;
   title: string;
@@ -357,5 +394,36 @@ export const api = {
     } catch {
       return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, created_at: 0 };
     }
+  },
+
+  // Multibet APIs
+  async createMultibet(legs: MultibetLegRequest[], payoutAddress?: string): Promise<MultibetSlip> {
+    return proxyRequest<MultibetSlip>('/api/multibets/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        legs,
+        payout_address: payoutAddress,
+      }),
+    }, 90000);
+  },
+
+  async getMultibetSlip(slipId: string): Promise<MultibetSlip> {
+    return proxyRequest<MultibetSlip>(`/api/multibets/${slipId}`);
+  },
+
+  async updateMultibetPayoutAddress(slipId: string, payoutAddress: string): Promise<{ status: string; payout_address: string }> {
+    return proxyRequest<{ status: string; payout_address: string }>(`/api/multibets/${slipId}/payout-address`, {
+      method: 'POST',
+      body: JSON.stringify({ payout_address: payoutAddress }),
+    });
+  },
+
+  async listMultibetSlips(status?: string, limit?: number): Promise<{ slips: MultibetListItem[]; count: number }> {
+    let path = '/api/multibets/';
+    const params: string[] = [];
+    if (status) params.push(`status=${status}`);
+    if (limit) params.push(`limit=${limit}`);
+    if (params.length) path += `?${params.join('&')}`;
+    return proxyRequest<{ slips: MultibetListItem[]; count: number }>(path);
   },
 };
