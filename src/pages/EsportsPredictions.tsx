@@ -25,6 +25,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
+import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -469,10 +470,19 @@ export default function EsportsPredictions() {
             </Link>
           </div>
 
-          {/* Twitch Stream - Full width at top */}
+          {/* Twitch Stream + Community Links */}
           <div className="mb-6">
-            <div className="max-w-4xl mx-auto">
-              <TwitchStreamEmbed selectedGame={selectedGame} />
+            <div className="flex gap-4 max-w-6xl mx-auto">
+              <div className="flex-1 max-w-4xl">
+                <TwitchStreamEmbed selectedGame={selectedGame} />
+              </div>
+              <div className="hidden lg:block w-64 shrink-0">
+                <GameCommunityLinks selectedGame={selectedGame} />
+              </div>
+            </div>
+            {/* Mobile community links */}
+            <div className="lg:hidden mt-4 max-w-4xl mx-auto">
+              <GameCommunityLinks selectedGame={selectedGame} />
             </div>
           </div>
 
