@@ -204,23 +204,22 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
     displayCommunities = displayCommunities.filter((c) => c.category === category);
   }
 
-  // Find community matching the selected game
+  // Find community matching the selected game - only show Discord if we have an exact match
   let discordCommunity: GameCommunity | undefined;
+  let hasExactMatch = false;
 
   if (normalizedGame && normalizedGame !== 'all') {
     const matchedCommunity = displayCommunities.find(
       (c) => c.game === normalizedGame || c.game.includes(normalizedGame) || normalizedGame.includes(c.game)
     );
-    if (matchedCommunity) {
+    if (matchedCommunity && matchedCommunity.discordServerId) {
       discordCommunity = matchedCommunity;
       displayCommunities = [matchedCommunity];
+      hasExactMatch = true;
     }
   }
 
-  // If no specific game selected, use first community with Discord
-  if (!discordCommunity) {
-    discordCommunity = displayCommunities.find((c) => c.discordServerId);
-  }
+  // Hide Discord embed if no exact game match (user preference: "Hide embed if unknown")
 
   const discordSrc = useMemo(() => {
     if (!discordCommunity?.discordServerId) return null;
@@ -251,8 +250,8 @@ export function GameCommunityLinks({ selectedGame, category }: GameCommunityLink
 
   return (
     <div className="space-y-3">
-      {/* Discord Widget Embed */}
-      {discordCommunity?.discordServerId && (
+      {/* Discord Widget Embed - only shown when we have an exact game match */}
+      {hasExactMatch && discordCommunity?.discordServerId && (
         <Collapsible open={discordOpen} onOpenChange={setDiscordOpen}>
           <Card className="bg-card/80 backdrop-blur-sm border-[#5865F2]/30">
             <CollapsibleTrigger asChild>
