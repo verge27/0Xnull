@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GAME_DOWNLOAD_URLS } from '@/hooks/useEsportsEvents';
 
-interface StreamInfo {
+export interface StreamInfo {
   channel: string | null;
   channelName?: string;
   title?: string;
@@ -19,6 +19,7 @@ interface StreamInfo {
 interface TwitchStreamEmbedProps {
   selectedGame: string;
   onActiveGameChange?: (gameSlug: string | null) => void;
+  onStreamChange?: (streamInfo: StreamInfo | null) => void;
 }
 
 const GAME_FILTERS = [
@@ -75,7 +76,7 @@ const GAME_NAME_TO_SLUG: Record<string, string> = {
   'Apex Legends': 'apex',
 };
 
-export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChange }: TwitchStreamEmbedProps) {
+export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChange, onStreamChange }: TwitchStreamEmbedProps) {
   const [locationInfo, setLocationInfo] = useState<{
     hostname: string;
     host: string;
@@ -87,7 +88,7 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState(initialGame || 'all');
 
-  // Report active game to parent when stream info changes
+  // Report active game and stream info to parent when stream info changes
   useEffect(() => {
     if (onActiveGameChange) {
       if (streamInfo?.gameName) {
@@ -97,7 +98,10 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
         onActiveGameChange(null);
       }
     }
-  }, [streamInfo?.gameName, onActiveGameChange]);
+    if (onStreamChange) {
+      onStreamChange(streamInfo);
+    }
+  }, [streamInfo, onActiveGameChange, onStreamChange]);
 
   // Capture location info on mount
   useEffect(() => {
