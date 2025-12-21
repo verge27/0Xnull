@@ -12,15 +12,28 @@ const DiscordIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Reddit icon
+const RedditIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+  </svg>
+);
+
 interface DiscordCommunity {
   label: string;
   discordServerId: string;
   discordInvite?: string;
 }
 
+interface RedditCommunity {
+  name: string;
+  url: string;
+}
+
 interface ChatPanelProps {
   streamInfo: StreamInfo | null;
   discordCommunity?: DiscordCommunity | null;
+  redditCommunity?: RedditCommunity | null;
 }
 
 type ChatSource = 'twitch' | 'discord';
@@ -29,7 +42,7 @@ const MIN_HEIGHT = 250;
 const MAX_HEIGHT = 600;
 const DEFAULT_HEIGHT = 400;
 
-export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
+export function ChatPanel({ streamInfo, discordCommunity, redditCommunity }: ChatPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [activeSource, setActiveSource] = useState<ChatSource>('twitch');
   const [locationInfo, setLocationInfo] = useState<{ hostname: string; host: string } | null>(null);
@@ -137,157 +150,173 @@ export function ChatPanel({ streamInfo, discordCommunity }: ChatPanelProps) {
   const hasDiscord = !!discordSrc && !discordError;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-card/80 border-purple-500/30">
-        <CollapsibleTrigger asChild>
-          <CardHeader className="pb-2 cursor-pointer hover:bg-purple-500/10 transition-colors rounded-t-lg">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-purple-400" />
-                <span className="text-purple-400">Live Chat</span>
-              </span>
-              {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </CardTitle>
-          </CardHeader>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          <CardContent className="pt-0 space-y-2">
-            {/* Toggle buttons */}
-            <div className="flex gap-1">
-              <Button
-                variant={activeSource === 'twitch' ? 'default' : 'outline'}
-                size="sm"
-                className={`flex-1 h-7 text-xs ${
-                  activeSource === 'twitch' 
-                    ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                    : 'border-purple-500/30 hover:border-purple-500/60'
-                }`}
-                onClick={() => setActiveSource('twitch')}
-                disabled={!hasTwitch}
-              >
-                <svg className="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
-                </svg>
-                Twitch
-              </Button>
-              <Button
-                variant={activeSource === 'discord' ? 'default' : 'outline'}
-                size="sm"
-                className={`flex-1 h-7 text-xs ${
-                  activeSource === 'discord' 
-                    ? 'bg-[#5865F2] hover:bg-[#4752C4] text-white' 
-                    : 'border-[#5865F2]/30 hover:border-[#5865F2]/60'
-                }`}
-                onClick={() => setActiveSource('discord')}
-                disabled={!hasDiscord}
-              >
-                <DiscordIcon className="w-3.5 h-3.5 mr-1" />
-                Discord
-              </Button>
-            </div>
-
-            {/* Chat content - resizable */}
-            <div 
-              ref={containerRef}
-              className="relative"
-              style={{ height: chatHeight }}
-            >
-              {activeSource === 'twitch' && (
-                <>
-                  {twitchChatSrc && delayComplete ? (
-                    <iframe
-                      src={twitchChatSrc}
-                      width="100%"
-                      height={chatHeight}
-                      frameBorder="0"
-                      className="rounded-lg pointer-events-auto"
-                      title={`${streamInfo.channelName || streamInfo.channel} - Twitch Chat`}
-                    />
-                  ) : twitchChatSrc && !delayComplete ? (
-                    <div 
-                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
-                      style={{ height: chatHeight }}
-                    >
-                      <p className="text-muted-foreground">Loading Twitch chat...</p>
-                    </div>
-                  ) : null}
-                </>
-              )}
-
-              {activeSource === 'discord' && (
-                <>
-                  {discordSrc && delayComplete && !discordError ? (
-                    <iframe
-                      src={discordSrc}
-                      width="100%"
-                      height={chatHeight}
-                      frameBorder="0"
-                      sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                      className="rounded-lg pointer-events-auto"
-                      title={`${discordCommunity?.label} Discord`}
-                      onLoad={handleDiscordLoad}
-                    />
-                  ) : discordSrc && !delayComplete ? (
-                    <div 
-                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
-                      style={{ height: chatHeight }}
-                    >
-                      <p className="text-muted-foreground">Loading Discord community...</p>
-                    </div>
-                  ) : discordError ? (
-                    <div 
-                      className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm flex flex-col items-center justify-center"
-                      style={{ height: chatHeight }}
-                    >
-                      <p className="text-foreground">Discord embed unavailable</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Server widget may be disabled
-                      </p>
-                    </div>
-                  ) : null}
-                </>
-              )}
-
-              {/* Resize handle */}
-              <div
-                onMouseDown={handleResizeStart}
-                className={`absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize bg-gradient-to-t from-card/80 to-transparent hover:from-purple-500/20 transition-colors ${
-                  isResizing ? 'from-purple-500/30' : ''
-                }`}
-              >
-                <GripHorizontal className="w-4 h-4 text-muted-foreground/50" />
+    <div className="space-y-2">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <Card className="bg-card/80 border-purple-500/30">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="pb-2 cursor-pointer hover:bg-purple-500/10 transition-colors rounded-t-lg">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-purple-400" />
+                  <span className="text-purple-400">Live Chat</span>
+                </span>
+                {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent className="pt-0 space-y-2">
+              {/* Toggle buttons */}
+              <div className="flex gap-1">
+                <Button
+                  variant={activeSource === 'twitch' ? 'default' : 'outline'}
+                  size="sm"
+                  className={`flex-1 h-7 text-xs ${
+                    activeSource === 'twitch' 
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                      : 'border-purple-500/30 hover:border-purple-500/60'
+                  }`}
+                  onClick={() => setActiveSource('twitch')}
+                  disabled={!hasTwitch}
+                >
+                  <svg className="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                  </svg>
+                  Twitch
+                </Button>
+                <Button
+                  variant={activeSource === 'discord' ? 'default' : 'outline'}
+                  size="sm"
+                  className={`flex-1 h-7 text-xs ${
+                    activeSource === 'discord' 
+                      ? 'bg-[#5865F2] hover:bg-[#4752C4] text-white' 
+                      : 'border-[#5865F2]/30 hover:border-[#5865F2]/60'
+                  }`}
+                  onClick={() => setActiveSource('discord')}
+                  disabled={!hasDiscord}
+                >
+                  <DiscordIcon className="w-3.5 h-3.5 mr-1" />
+                  Discord
+                </Button>
               </div>
-            </div>
 
-            {/* External links */}
-            <div className="flex gap-2 justify-center">
-              {activeSource === 'twitch' && streamInfo.channel && (
-                <a
-                  href={`https://www.twitch.tv/popout/${streamInfo.channel}/chat`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-purple-400 hover:underline"
+              {/* Chat content - resizable */}
+              <div 
+                ref={containerRef}
+                className="relative"
+                style={{ height: chatHeight }}
+              >
+                {activeSource === 'twitch' && (
+                  <>
+                    {twitchChatSrc && delayComplete ? (
+                      <iframe
+                        src={twitchChatSrc}
+                        width="100%"
+                        height={chatHeight}
+                        frameBorder="0"
+                        className="rounded-lg pointer-events-auto"
+                        title={`${streamInfo.channelName || streamInfo.channel} - Twitch Chat`}
+                      />
+                    ) : twitchChatSrc && !delayComplete ? (
+                      <div 
+                        className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
+                        style={{ height: chatHeight }}
+                      >
+                        <p className="text-muted-foreground">Loading Twitch chat...</p>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+
+                {activeSource === 'discord' && (
+                  <>
+                    {discordSrc && delayComplete && !discordError ? (
+                      <iframe
+                        src={discordSrc}
+                        width="100%"
+                        height={chatHeight}
+                        frameBorder="0"
+                        sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                        className="rounded-lg pointer-events-auto"
+                        title={`${discordCommunity?.label} Discord`}
+                        onLoad={handleDiscordLoad}
+                      />
+                    ) : discordSrc && !delayComplete ? (
+                      <div 
+                        className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm text-center flex items-center justify-center"
+                        style={{ height: chatHeight }}
+                      >
+                        <p className="text-muted-foreground">Loading Discord community...</p>
+                      </div>
+                    ) : discordError ? (
+                      <div 
+                        className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm flex flex-col items-center justify-center"
+                        style={{ height: chatHeight }}
+                      >
+                        <p className="text-foreground">Discord embed unavailable</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Server widget may be disabled
+                        </p>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+
+                {/* Resize handle */}
+                <div
+                  onMouseDown={handleResizeStart}
+                  className={`absolute bottom-0 left-0 right-0 h-3 flex items-center justify-center cursor-ns-resize bg-gradient-to-t from-card/80 to-transparent hover:from-purple-500/20 transition-colors ${
+                    isResizing ? 'from-purple-500/30' : ''
+                  }`}
                 >
-                  <ExternalLink className="w-3 h-3" />
-                  Open in New Window
-                </a>
-              )}
-              {activeSource === 'discord' && discordCommunity?.discordInvite && (
-                <a
-                  href={discordCommunity.discordInvite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-[#5865F2] hover:underline"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Open in Discord
-                </a>
-              )}
-            </div>
-          </CardContent>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+                  <GripHorizontal className="w-4 h-4 text-muted-foreground/50" />
+                </div>
+              </div>
+
+              {/* External links */}
+              <div className="flex gap-2 justify-center">
+                {activeSource === 'twitch' && streamInfo.channel && (
+                  <a
+                    href={`https://www.twitch.tv/popout/${streamInfo.channel}/chat`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-purple-400 hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Open in New Window
+                  </a>
+                )}
+                {activeSource === 'discord' && discordCommunity?.discordInvite && (
+                  <a
+                    href={discordCommunity.discordInvite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-[#5865F2] hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Open in Discord
+                  </a>
+                )}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      {/* Reddit community link - prominent below chat */}
+      {redditCommunity && (
+        <a
+          href={redditCommunity.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF4500]/10 border border-[#FF4500]/30 hover:bg-[#FF4500]/20 transition-colors"
+        >
+          <RedditIcon className="w-4 h-4 text-[#FF4500]" />
+          <span className="text-sm font-medium text-[#FF4500]">{redditCommunity.name}</span>
+          <ExternalLink className="w-3 h-3 text-[#FF4500]/70 ml-auto" />
+        </a>
+      )}
+    </div>
   );
 }
