@@ -13,7 +13,9 @@ export interface BetSlipItem {
 
 const STORAGE_KEY = 'multibet_slip';
 const SLIPS_STORAGE_KEY = 'multibet_slips';
+const ACTIVE_SLIP_KEY = 'multibet_active_slip';
 const UNDO_TIMEOUT = 5000; // 5 seconds to undo
+const EXPIRY_MS = 60 * 60 * 1000; // 60 minutes
 
 export function useMultibetSlip() {
   const [items, setItems] = useState<BetSlipItem[]>([]);
@@ -35,6 +37,18 @@ export function useMultibetSlip() {
       if (storedSlips) {
         setSavedSlips(JSON.parse(storedSlips));
       }
+      // Restore active slip if it exists and hasn't expired
+      const storedActiveSlip = localStorage.getItem(ACTIVE_SLIP_KEY);
+      if (storedActiveSlip) {
+        const slip = JSON.parse(storedActiveSlip);
+        // Check if slip has expired (60 minutes from creation)
+        if (slip.created_at && Date.now() - slip.created_at < EXPIRY_MS) {
+          setActiveSlip(slip);
+        } else {
+          // Clear expired slip
+          localStorage.removeItem(ACTIVE_SLIP_KEY);
+        }
+      }
     } catch {
       // ignore
     }
@@ -49,6 +63,15 @@ export function useMultibetSlip() {
   useEffect(() => {
     localStorage.setItem(SLIPS_STORAGE_KEY, JSON.stringify(savedSlips));
   }, [savedSlips]);
+
+  // Save active slip to localStorage when it changes
+  useEffect(() => {
+    if (activeSlip) {
+      localStorage.setItem(ACTIVE_SLIP_KEY, JSON.stringify(activeSlip));
+    } else {
+      localStorage.removeItem(ACTIVE_SLIP_KEY);
+    }
+  }, [activeSlip]);
 
   // Clear undo timeout on unmount
   useEffect(() => {

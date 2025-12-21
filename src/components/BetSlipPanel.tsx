@@ -342,8 +342,8 @@ export function BetSlipPanel({
                 )}
               </div>
             </SheetTitle>
-            {/* Expiry Timer - only show when there's an active slip awaiting deposit */}
-            {hasActiveAwaitingSlip && (
+            {/* Expiry Timer - only show when there's an active slip awaiting deposit with valid created_at */}
+            {hasActiveAwaitingSlip && slipCreatedAt && (
               <div className={`flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium mt-2 ${
                 isExpiringSoon 
                   ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse' 
