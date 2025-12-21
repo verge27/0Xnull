@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
@@ -108,6 +112,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function CryptoPredictions() {
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
   const { isAdmin } = useIsAdmin();
+  
+  // Multibet slip
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -636,7 +644,7 @@ export default function CryptoPredictions() {
                               }}
                             >
                               <TrendingUp className="w-4 h-4 mr-1" />
-                              Bet YES
+                              YES
                             </Button>
                             <Button
                               className="flex-1 bg-red-600 hover:bg-red-700"
@@ -647,8 +655,14 @@ export default function CryptoPredictions() {
                               }}
                             >
                               <TrendingDown className="w-4 h-4 mr-1" />
-                              Bet NO
+                              NO
                             </Button>
+                            <AddToSlipButton
+                              marketId={market.market_id}
+                              marketTitle={market.title}
+                              onAdd={betSlip.addToBetSlip}
+                              variant="icon"
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -870,6 +884,38 @@ export default function CryptoPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={handleBetConfirmed}
+      />
+
+      {/* Bet Slip Panel */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        totalUsd={betSlip.totalUsd}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+          return slip;
+        }}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      {/* Multibet Deposit Modal */}
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+          toast.success('All bets confirmed!');
+        }}
       />
       
       <Footer />

@@ -27,8 +27,9 @@ import { TeamLogo } from '@/components/TeamLogo';
 import { SportsCategoryPills } from '@/components/SportsCategoryPills';
 import { SportsLeagueSelect } from '@/components/SportsLeagueSelect';
 import { SportsMatchCard } from '@/components/SportsMatchCard';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Plus } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -656,14 +657,12 @@ export default function SportsPredictions() {
                                 >
                                   Place Bet
                                 </Button>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => betSlip.addToBetSlip(market.market_id, market.title, 'YES', 5)}
-                                  title="Add to bet slip"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </Button>
+                                <AddToSlipButton
+                                  marketId={market.market_id}
+                                  marketTitle={market.title}
+                                  onAdd={betSlip.addToBetSlip}
+                                  variant="icon"
+                                />
                               </div>
                             )}
                           </div>

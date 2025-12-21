@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import esportsBackground from '@/assets/esports-background.jpg';
 import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
@@ -18,20 +19,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Radio } from 'lucide-react';
 
 export default function EsportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { events, liveEvents, loading: eventsLoading, fetchEvents, fetchLiveEvents, createEsportsMarket } = useEsportsEvents();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  
+  // Multibet slip
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -688,7 +695,7 @@ export default function EsportsPredictions() {
                               }}
                             >
                               <TrendingUp className="w-4 h-4 mr-1" />
-                              Bet YES
+                              YES
                             </Button>
                             <Button 
                               className="flex-1 bg-red-600 hover:bg-red-700"
@@ -699,8 +706,14 @@ export default function EsportsPredictions() {
                               }}
                             >
                               <TrendingDown className="w-4 h-4 mr-1" />
-                              Bet NO
+                              NO
                             </Button>
+                            <AddToSlipButton
+                              marketId={market.market_id}
+                              marketTitle={market.title}
+                              onAdd={betSlip.addToBetSlip}
+                              variant="icon"
+                            />
                           </div>
                           
                           {marketBets.length > 0 && (
@@ -1008,6 +1021,38 @@ export default function EsportsPredictions() {
           onCheckStatus={checkBetStatus}
         />
       )}
+
+      {/* Bet Slip Panel */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        totalUsd={betSlip.totalUsd}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+          return slip;
+        }}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      {/* Multibet Deposit Modal */}
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+          toast.success('All bets confirmed!');
+        }}
+      />
     </div>
   );
 }
