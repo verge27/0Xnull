@@ -81,6 +81,7 @@ function SlipTimer({ createdAt }: { createdAt: number }) {
 export default function MySlips() {
   const [slips, setSlips] = useState<MultibetSlip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState<MultibetSlip | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [payoutAddress, setPayoutAddress] = useState('');
@@ -92,30 +93,42 @@ export default function MySlips() {
 
   const loadSlips = async () => {
     setLoading(true);
+    setRefreshing(true);
     try {
       // Load from localStorage - saved slips
       const stored = localStorage.getItem(SLIPS_STORAGE_KEY);
       let localSlips: MultibetSlip[] = [];
+      
+      console.log('[MySlips] Loading slips from localStorage...');
+      console.log('[MySlips] SLIPS_STORAGE_KEY data:', stored);
+      
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           localSlips = parsed;
+          console.log('[MySlips] Found saved slips:', localSlips.length);
         }
       }
       
       // Also load active slip that may not be in saved slips yet
       const activeStored = localStorage.getItem(ACTIVE_SLIP_KEY);
+      console.log('[MySlips] ACTIVE_SLIP_KEY data:', activeStored);
+      
       if (activeStored) {
         try {
           const activeSlip: MultibetSlip = JSON.parse(activeStored);
+          console.log('[MySlips] Found active slip:', activeSlip?.slip_id);
           // Check if it's already in localSlips
           if (activeSlip && activeSlip.slip_id && !localSlips.find(s => s.slip_id === activeSlip.slip_id)) {
             localSlips = [activeSlip, ...localSlips];
+            console.log('[MySlips] Added active slip to list');
           }
-        } catch {
-          // ignore parse errors
+        } catch (e) {
+          console.error('[MySlips] Error parsing active slip:', e);
         }
       }
+      
+      console.log('[MySlips] Total slips to display:', localSlips.length);
       
       if (localSlips.length > 0) {
         // Refresh status for each slip
@@ -143,11 +156,14 @@ export default function MySlips() {
           }
         });
         localStorage.setItem(SLIPS_STORAGE_KEY, JSON.stringify(slipsWithoutActive));
+      } else {
+        setSlips([]);
       }
     } catch (error) {
       console.error('Error loading slips:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -250,9 +266,9 @@ export default function MySlips() {
               </h1>
               <p className="text-muted-foreground mt-1">Track your multibet slips</p>
             </div>
-            <Button variant="outline" size="sm" onClick={loadSlips} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh All
+            <Button variant="outline" size="sm" onClick={loadSlips} disabled={refreshing}>
+              <RefreshCw className={`w-4 h-4 mr-2 transition-transform duration-500 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh All'}
             </Button>
           </div>
 
