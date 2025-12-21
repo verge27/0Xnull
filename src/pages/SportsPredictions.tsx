@@ -661,6 +661,7 @@ export default function SportsPredictions() {
                                   marketId={market.market_id}
                                   marketTitle={market.title}
                                   onAdd={betSlip.addToBetSlip}
+                                  onOpenSlip={() => betSlip.setIsOpen(true)}
                                   variant="icon"
                                 />
                               </div>

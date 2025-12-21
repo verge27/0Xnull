@@ -737,6 +737,7 @@ export default function StarcraftPredictions() {
                                 marketId={market.market_id}
                                 marketTitle={market.title}
                                 onAdd={betSlip.addToBetSlip}
+                                onOpenSlip={() => betSlip.setIsOpen(true)}
                               />
                             </div>
                           )}

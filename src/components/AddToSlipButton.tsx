@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, TrendingDown, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, ChevronDown, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuPortal,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
@@ -20,6 +19,7 @@ interface AddToSlipButtonProps {
   marketId: string;
   marketTitle: string;
   onAdd: (marketId: string, title: string, side: 'YES' | 'NO', amount: number) => void;
+  onOpenSlip?: () => void;
   defaultAmount?: number;
   variant?: 'icon' | 'full' | 'compact';
   className?: string;
@@ -29,6 +29,7 @@ export function AddToSlipButton({
   marketId,
   marketTitle,
   onAdd,
+  onOpenSlip,
   defaultAmount = 5,
   variant = 'icon',
   className = '',
@@ -37,7 +38,25 @@ export function AddToSlipButton({
 
   const handleAdd = (side: 'YES' | 'NO', amount: number = defaultAmount) => {
     onAdd(marketId, marketTitle, side, amount);
-    toast.success(`Added $${amount} ${side} bet to slip`);
+    toast.success(
+      <div className="flex items-center justify-between gap-3">
+        <span>Added ${amount} {side} bet</span>
+        {onOpenSlip && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs gap-1"
+            onClick={() => {
+              onOpenSlip();
+              toast.dismiss();
+            }}
+          >
+            <ShoppingCart className="w-3 h-3" />
+            View Slip
+          </Button>
+        )}
+      </div>
+    );
     setOpen(false);
   };
 
