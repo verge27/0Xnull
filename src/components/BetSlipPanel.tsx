@@ -17,8 +17,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { BetSlipItem } from '@/hooks/useMultibetSlip';
+import { playErrorSound } from '@/lib/sounds';
 
-// Bet slip expires 60 minutes after creation
+// Bet slip expires 60 minutes after deposit address is created
 const EXPIRY_MINUTES = 60;
 
 interface ActiveSlip {
@@ -26,6 +27,7 @@ interface ActiveSlip {
   status: string;
   xmr_address?: string;
   total_amount_xmr?: number;
+  created_at?: number;
 }
 
 interface BetSlipPanelProps {
@@ -69,26 +71,24 @@ export function BetSlipPanel({
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [slipCreatedAt, setSlipCreatedAt] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(EXPIRY_MINUTES * 60);
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
+  const hasExpiredRef = useRef(false);
 
   const potentialPayout = calculateTotalPotentialPayout();
   const potentialProfit = potentialPayout - totalUsd;
 
-  // Track when the slip was first created (first item added)
-  useEffect(() => {
-    if (items.length > 0 && !slipCreatedAt) {
-      setSlipCreatedAt(Date.now());
-    } else if (items.length === 0) {
-      setSlipCreatedAt(null);
-      setTimeLeft(EXPIRY_MINUTES * 60);
-    }
-  }, [items.length, slipCreatedAt]);
+  // Check if there's an active slip awaiting deposit to show countdown
+  const hasActiveAwaitingSlip = activeSlip && activeSlip.status === 'awaiting_deposit';
+  const slipCreatedAt = activeSlip?.created_at;
 
-  // Update countdown timer
+  // Update countdown timer - only when there's an active slip awaiting deposit
   useEffect(() => {
-    if (!slipCreatedAt || items.length === 0) return;
+    if (!hasActiveAwaitingSlip || !slipCreatedAt) {
+      setTimeLeft(EXPIRY_MINUTES * 60);
+      hasExpiredRef.current = false;
+      return;
+    }
 
     const expiresAt = slipCreatedAt + EXPIRY_MINUTES * 60 * 1000;
 
@@ -96,12 +96,23 @@ export function BetSlipPanel({
       const now = Date.now();
       const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
       setTimeLeft(remaining);
+
+      // Auto-clear when expired
+      if (remaining === 0 && !hasExpiredRef.current) {
+        hasExpiredRef.current = true;
+        playErrorSound();
+        toast.error('Bet slip expired! Clearing slip...', {
+          description: 'Your deposit window has ended. Please create a new bet slip.',
+          duration: 5000,
+        });
+        onClear();
+      }
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [slipCreatedAt, items.length]);
+  }, [hasActiveAwaitingSlip, slipCreatedAt, onClear]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -331,8 +342,8 @@ export function BetSlipPanel({
                 )}
               </div>
             </SheetTitle>
-            {/* Expiry Timer */}
-            {items.length > 0 && slipCreatedAt && (
+            {/* Expiry Timer - only show when there's an active slip awaiting deposit */}
+            {hasActiveAwaitingSlip && (
               <div className={`flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium mt-2 ${
                 isExpiringSoon 
                   ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse' 
