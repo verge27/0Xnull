@@ -84,7 +84,16 @@ export function RecentBetsTicker({ className }: RecentBetsTickerProps) {
     };
   }, [bets.length]);
 
-  if (loading || bets.length === 0) return null;
+  if (loading) return null;
+
+  if (bets.length === 0) {
+    return (
+      <div className={`flex items-center gap-2 px-3 py-1.5 bg-card/60 rounded-lg border border-border/50 text-xs ${className}`}>
+        <Zap className="w-3 h-3 text-muted-foreground shrink-0" />
+        <span className="text-muted-foreground">No recent activity</span>
+      </div>
+    );
+  }
 
   const currentBet = bets[currentIndex];
   if (!currentBet) return null;
