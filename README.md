@@ -81,7 +81,7 @@ Buy and sell physical goods, digital products, and services.
 
 - **No KYC** — Scan QR, send XMR, done
 - **No accounts** — No email, no password, no identity
-- **No geo-blocking** — Works anywhere, including US
+- **No geo-blocking** — Works anywhere
 - **Verifiable** — View keys let you audit pool balances
 - **Low fees** — 0.4% on winnings beats 5-15% vigorish
 
