@@ -43,8 +43,22 @@ export function MultibetDepositModal({
   useEffect(() => {
     if (!slip || status === 'confirmed' || status === 'resolved' || status === 'paid') return;
 
-    const createdAt = new Date(slip.created_at).getTime();
-    const expiresAt = createdAt + EXPIRY_MINUTES * 60 * 1000;
+    const toMs = (value: unknown): number | null => {
+      if (value == null) return null;
+      const n = typeof value === 'string' ? Number(value) : (value as number);
+      if (typeof n !== 'number' || !Number.isFinite(n)) return null;
+      // seconds -> ms
+      if (n > 0 && n < 1_000_000_000_000) return n * 1000;
+      return n;
+    };
+
+    const createdAtMs = toMs((slip as any).created_at);
+    if (!createdAtMs) {
+      setTimeLeft(EXPIRY_MINUTES * 60);
+      return;
+    }
+
+    const expiresAt = createdAtMs + EXPIRY_MINUTES * 60 * 1000;
 
     const updateTimer = () => {
       const now = Date.now();
