@@ -18,6 +18,7 @@ interface StreamInfo {
 
 interface TwitchStreamEmbedProps {
   selectedGame: string;
+  onActiveGameChange?: (gameSlug: string | null) => void;
 }
 
 const GAME_FILTERS = [
@@ -74,7 +75,7 @@ const GAME_NAME_TO_SLUG: Record<string, string> = {
   'Apex Legends': 'apex',
 };
 
-export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmbedProps) {
+export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChange }: TwitchStreamEmbedProps) {
   const [locationInfo, setLocationInfo] = useState<{
     hostname: string;
     host: string;
@@ -85,6 +86,18 @@ export function TwitchStreamEmbed({ selectedGame: initialGame }: TwitchStreamEmb
   const [hidden, setHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState(initialGame || 'all');
+
+  // Report active game to parent when stream info changes
+  useEffect(() => {
+    if (onActiveGameChange) {
+      if (streamInfo?.gameName) {
+        const gameSlug = GAME_NAME_TO_SLUG[streamInfo.gameName] || null;
+        onActiveGameChange(gameSlug);
+      } else {
+        onActiveGameChange(null);
+      }
+    }
+  }, [streamInfo?.gameName, onActiveGameChange]);
 
   // Capture location info on mount
   useEffect(() => {
