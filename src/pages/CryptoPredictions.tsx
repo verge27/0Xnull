@@ -22,6 +22,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
+import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -405,69 +406,78 @@ export default function CryptoPredictions() {
         </div>
 
 
-        {/* Live Markets */}
-        <Collapsible open={tradingFeedOpen} onOpenChange={setTradingFeedOpen} className="mb-6">
-          <Card className="border-primary/20">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Activity className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-lg">Live Markets</CardTitle>
-                    <a
-                      href="https://www.tradingview.com/chart/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label="Open TradingView"
-                      title="Open TradingView"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+        {/* Live Markets + Community Links */}
+        <div className="mb-6 flex gap-4">
+          <Collapsible open={tradingFeedOpen} onOpenChange={setTradingFeedOpen} className="flex-1">
+            <Card className="border-primary/20">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-5 h-5 text-primary" />
+                      <CardTitle className="text-lg">Live Markets</CardTitle>
+                      <a
+                        href="https://www.tradingview.com/chart/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Open TradingView"
+                        title="Open TradingView"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${tradingFeedOpen ? 'rotate-180' : ''}`} />
                   </div>
-                  <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${tradingFeedOpen ? 'rotate-180' : ''}`} />
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
+                </CardHeader>
+              </CollapsibleTrigger>
 
-            <CollapsibleContent>
-              <CardContent className="pt-0">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {TRADING_PAIRS.map((pair) => (
-                    <Button
-                      key={pair.symbol}
-                      variant={selectedPair.symbol === pair.symbol ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedPair(pair)}
-                      className={selectedPair.symbol === pair.symbol ? 'bg-primary text-primary-foreground' : ''}
-                    >
-                      {pair.symbol}
-                    </Button>
-                  ))}
-                </div>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {TRADING_PAIRS.map((pair) => (
+                      <Button
+                        key={pair.symbol}
+                        variant={selectedPair.symbol === pair.symbol ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedPair(pair)}
+                        className={selectedPair.symbol === pair.symbol ? 'bg-primary text-primary-foreground' : ''}
+                      >
+                        {pair.symbol}
+                      </Button>
+                    ))}
+                  </div>
 
-                <div className="rounded-lg overflow-hidden border border-border" style={{ height: '500px' }}>
-                  <iframe
-                    key={selectedPair.tvSymbol}
-                    src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${selectedPair.tvSymbol}&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&showpopupbutton=1&locale=en&utm_source=&utm_medium=widget_new&utm_campaign=chart`}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    allowTransparency
-                    scrolling="no"
-                    allowFullScreen
-                    title={`${selectedPair.symbol} TradingView Chart`}
-                  />
-                </div>
+                  <div className="rounded-lg overflow-hidden border border-border" style={{ height: '500px' }}>
+                    <iframe
+                      key={selectedPair.tvSymbol}
+                      src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${selectedPair.tvSymbol}&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&showpopupbutton=1&locale=en&utm_source=&utm_medium=widget_new&utm_campaign=chart`}
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      allowTransparency
+                      scrolling="no"
+                      allowFullScreen
+                      title={`${selectedPair.symbol} TradingView Chart`}
+                    />
+                  </div>
 
-                <p className="mt-2 text-xs text-muted-foreground text-center">
-                  Powered by TradingView
-                </p>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+                  <p className="mt-2 text-xs text-muted-foreground text-center">
+                    Powered by TradingView
+                  </p>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+          <div className="hidden lg:block w-64 shrink-0">
+            <GameCommunityLinks category="crypto" />
+          </div>
+        </div>
+        {/* Mobile community links */}
+        <div className="lg:hidden mb-6">
+          <GameCommunityLinks category="crypto" />
+        </div>
 
         <Tabs defaultValue="prices" className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-4">
