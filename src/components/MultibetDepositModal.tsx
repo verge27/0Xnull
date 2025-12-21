@@ -18,8 +18,8 @@ interface MultibetDepositModalProps {
   onConfirmed: () => void;
 }
 
-// Default expiry is 30 minutes from creation
-const EXPIRY_MINUTES = 30;
+// Default expiry is 60 minutes from creation
+const EXPIRY_MINUTES = 60;
 
 export function MultibetDepositModal({
   open,
