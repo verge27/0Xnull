@@ -470,10 +470,13 @@ export default function CryptoPredictions() {
         </Collapsible>
 
         <Tabs defaultValue="prices" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
             <TabsTrigger value="prices">Prices</TabsTrigger>
             <TabsTrigger value="markets">Markets</TabsTrigger>
             <TabsTrigger value="my-bets">My Bets</TabsTrigger>
+            <TabsTrigger value="my-slips" asChild>
+              <Link to="/my-slips">My Slips</Link>
+            </TabsTrigger>
           </TabsList>
 
           {/* Prices Tab */}

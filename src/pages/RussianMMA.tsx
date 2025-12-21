@@ -257,10 +257,13 @@ const RussianMMA = () => {
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50">
             <TabsTrigger value="upcoming">Events</TabsTrigger>
             <TabsTrigger value="markets">Markets</TabsTrigger>
             <TabsTrigger value="mybets">My Bets</TabsTrigger>
+            <TabsTrigger value="my-slips" asChild>
+              <Link to="/my-slips">My Slips</Link>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming" className="mt-6">
