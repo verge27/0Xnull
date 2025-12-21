@@ -13,6 +13,9 @@ import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import { ResolutionBadge } from '@/components/ResolutionBadge';
 import { CreateFightMarketDialog } from '@/components/CreateFightMarketDialog';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 
 const Slap = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -21,6 +24,8 @@ const Slap = () => {
   const { data: strikers, isLoading: loadingStrikers } = useSlapStrikers();
   const { data: events, isLoading: loadingEvents } = useSlapEvents();
   const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background relative bg-gradient-to-br from-black via-red-950/20 to-black">
@@ -319,6 +324,35 @@ const Slap = () => {
         </div>
 
         <Footer />
+
+        {/* Multibet Slip */}
+        <BetSlipPanel
+          items={betSlip.items}
+          isOpen={betSlip.isOpen}
+          onOpenChange={betSlip.setIsOpen}
+          onRemove={betSlip.removeFromBetSlip}
+          onUpdateAmount={betSlip.updateAmount}
+          onClear={betSlip.clearBetSlip}
+          onCheckout={async (payoutAddress) => {
+            const slip = await betSlip.checkout(payoutAddress);
+            if (slip) {
+              setMultibetDepositOpen(true);
+            }
+          }}
+          totalUsd={betSlip.totalUsd}
+          isCheckingOut={betSlip.isCheckingOut}
+        />
+
+        <MultibetDepositModal
+          open={multibetDepositOpen}
+          onOpenChange={setMultibetDepositOpen}
+          slip={betSlip.activeSlip}
+          onCheckStatus={betSlip.checkSlipStatus}
+          onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+          onConfirmed={() => {
+            betSlip.clearBetSlip();
+          }}
+        />
       </div>
     </div>
   );

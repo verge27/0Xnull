@@ -7,6 +7,7 @@ import { api, type PredictionMarket } from '@/services/api';
 import cricketBackground from '@/assets/cricket-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { toast } from 'sonner';
@@ -31,6 +35,8 @@ export default function CricketPredictions() {
   const { matches, liveMatches, upcomingMatches, loading: matchesLoading, fetchMatches, createCricketMarket } = useCricketEvents();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -618,6 +624,11 @@ export default function CricketPredictions() {
                                 <TrendingDown className="w-4 h-4 mr-2" />
                                 Bet NO
                               </Button>
+                              <AddToSlipButton
+                                marketId={market.market_id}
+                                marketTitle={market.title}
+                                onAdd={betSlip.addToBetSlip}
+                              />
                             </div>
                           )}
                         </CardContent>
@@ -930,6 +941,36 @@ export default function CricketPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={handleBetConfirmed}
+      />
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+        }}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+          fetchMarkets();
+        }}
       />
     </div>
   );

@@ -13,6 +13,9 @@ import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
 import { ResolutionBadge } from '@/components/ResolutionBadge';
 import { CreateFightMarketDialog } from '@/components/CreateFightMarketDialog';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { fixName, getCountryFlag, Region, regionLabels, getPromotionRegion } from '@/lib/nameFixes';
 import russianMmaBackground from '@/assets/russian-mma-background.jpg';
 
@@ -23,6 +26,8 @@ const RussianMMA = () => {
   const { data: featured, isLoading: loadingFeatured } = useFeaturedFights();
   const { data: events, isLoading: loadingEvents } = useUpcomingEvents(regionFilter);
   const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
 
   // Group promotions by region
   const groupedPromotions = promotions?.reduce((acc, promo) => {
@@ -383,6 +388,35 @@ const RussianMMA = () => {
       </div>
 
       <Footer />
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+        }}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+        }}
+      />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { api, type PredictionMarket } from '@/services/api';
 import starcraftBackground from '@/assets/starcraft-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
@@ -53,6 +57,8 @@ export default function StarcraftPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
 
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [events, setEvents] = useState<SC2Event[]>([]);
@@ -725,6 +731,16 @@ export default function StarcraftPredictions() {
                           {/* Pool Transparency */}
                           <PoolTransparency marketId={market.market_id} className="mt-3" />
                           
+                          {!market.resolved && market.resolution_time > Date.now() / 1000 && (
+                            <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                              <AddToSlipButton
+                                marketId={market.market_id}
+                                marketTitle={market.title}
+                                onAdd={betSlip.addToBetSlip}
+                              />
+                            </div>
+                          )}
+                          
                         </CardContent>
                       </Card>
                     );
@@ -1002,6 +1018,36 @@ export default function StarcraftPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={() => fetchMarkets()}
+      />
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        onCheckout={async (payoutAddress) => {
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+        }}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+      />
+
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+          fetchMarkets();
+        }}
       />
     </div>
   );
