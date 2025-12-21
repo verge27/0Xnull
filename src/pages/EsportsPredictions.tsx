@@ -495,7 +495,7 @@ export default function EsportsPredictions() {
                     redditCommunity={getRedditCommunityForGame(livestreamGame || undefined, 'esports')}
                   />
                   <RecentBetsTicker />
-                  <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit />
+                  <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit defaultOpen={false} />
                 </div>
               </div>
             </div>
@@ -507,7 +507,7 @@ export default function EsportsPredictions() {
                 redditCommunity={getRedditCommunityForGame(livestreamGame || undefined, 'esports')}
               />
               <RecentBetsTicker />
-              <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit />
+              <GameCommunityLinks selectedGame={livestreamGame || undefined} category="esports" hideReddit defaultOpen={false} />
             </div>
           </div>
 
