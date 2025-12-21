@@ -504,12 +504,12 @@ export default function StarcraftPredictions() {
                 <TwitchStreamEmbed selectedGame="sc2" />
               </div>
               <div className="hidden lg:block w-64 shrink-0">
-                <GameCommunityLinks selectedGame="starcraft-2" />
+              <GameCommunityLinks selectedGame="starcraft-2" defaultOpen={false} />
               </div>
             </div>
             {/* Mobile community links */}
             <div className="lg:hidden mt-4 max-w-4xl mx-auto">
-              <GameCommunityLinks selectedGame="starcraft-2" />
+              <GameCommunityLinks selectedGame="starcraft-2" defaultOpen={false} />
             </div>
           </div>
 

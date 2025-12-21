@@ -471,12 +471,12 @@ export default function CryptoPredictions() {
             </Card>
           </Collapsible>
           <div className="hidden lg:block w-64 shrink-0">
-            <GameCommunityLinks category="crypto" />
+            <GameCommunityLinks category="crypto" defaultOpen={false} />
           </div>
         </div>
         {/* Mobile community links */}
         <div className="lg:hidden mb-6">
-          <GameCommunityLinks category="crypto" />
+          <GameCommunityLinks category="crypto" defaultOpen={false} />
         </div>
 
         <Tabs defaultValue="prices" className="space-y-6">

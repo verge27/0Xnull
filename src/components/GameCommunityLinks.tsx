@@ -243,7 +243,7 @@ export function getRedditCommunityForGame(gameKey: string | undefined, category?
   return null;
 }
 
-export function GameCommunityLinks({ selectedGame, category, hideReddit = false, defaultOpen = true }: GameCommunityLinksProps) {
+export function GameCommunityLinks({ selectedGame, category, hideReddit = false, defaultOpen = false }: GameCommunityLinksProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Normalize selected game key
