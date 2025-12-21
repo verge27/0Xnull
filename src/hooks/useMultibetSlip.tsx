@@ -28,30 +28,58 @@ export function useMultibetSlip() {
 
   // Load from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
-      }
-      const storedSlips = localStorage.getItem(SLIPS_STORAGE_KEY);
-      if (storedSlips) {
-        setSavedSlips(JSON.parse(storedSlips));
-      }
-      // Restore active slip if it exists and hasn't expired
-      const storedActiveSlip = localStorage.getItem(ACTIVE_SLIP_KEY);
-      if (storedActiveSlip) {
-        const slip = JSON.parse(storedActiveSlip);
-        // Check if slip has expired (60 minutes from creation)
-        if (slip.created_at && Date.now() - slip.created_at < EXPIRY_MS) {
-          setActiveSlip(slip);
-        } else {
-          // Clear expired slip
-          localStorage.removeItem(ACTIVE_SLIP_KEY);
+    const loadFromStorage = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsedItems = JSON.parse(stored);
+          if (Array.isArray(parsedItems)) {
+            setItems(parsedItems);
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
+    };
+
+    const loadSlips = () => {
+      try {
+        const storedSlips = localStorage.getItem(SLIPS_STORAGE_KEY);
+        if (storedSlips) {
+          const parsedSlips = JSON.parse(storedSlips);
+          if (Array.isArray(parsedSlips)) {
+            setSavedSlips(parsedSlips);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    const loadActiveSlip = () => {
+      try {
+        const storedActiveSlip = localStorage.getItem(ACTIVE_SLIP_KEY);
+        if (storedActiveSlip) {
+          const slip = JSON.parse(storedActiveSlip);
+          // Check if slip has expired (60 minutes from creation)
+          if (slip && slip.created_at && Date.now() - slip.created_at < EXPIRY_MS) {
+            setActiveSlip(slip);
+          } else {
+            // Clear expired slip
+            localStorage.removeItem(ACTIVE_SLIP_KEY);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    // Use requestAnimationFrame to batch the updates
+    requestAnimationFrame(() => {
+      loadFromStorage();
+      loadSlips();
+      loadActiveSlip();
+    });
   }, []);
 
   // Save to localStorage when items change
