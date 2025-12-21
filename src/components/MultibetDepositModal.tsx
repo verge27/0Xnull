@@ -136,21 +136,23 @@ export function MultibetDepositModal({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="space-y-6 py-4">
+        <ScrollArea className="flex-1 overflow-x-hidden">
+          <div className="space-y-6 py-4 pr-2">
             {/* Summary */}
-            <div className="bg-muted/50 rounded-lg p-4">
-              <div className="flex justify-between mb-2">
-                <span className="text-muted-foreground">Legs</span>
-                <span className="font-medium">{slip.legs.length}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-muted-foreground">Total USD</span>
-                <span className="font-medium">${slip.total_amount_usd.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total XMR</span>
-                <span className="font-mono font-medium">{slip.total_amount_xmr.toFixed(6)}</span>
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-4 border border-primary/20">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-background/50 rounded-md p-2">
+                  <p className="text-xs text-muted-foreground mb-1">Legs</p>
+                  <p className="text-lg font-bold text-primary">{slip.legs.length}</p>
+                </div>
+                <div className="bg-background/50 rounded-md p-2">
+                  <p className="text-xs text-muted-foreground mb-1">Total USD</p>
+                  <p className="text-lg font-bold text-emerald-500">${slip.total_amount_usd.toFixed(2)}</p>
+                </div>
+                <div className="bg-background/50 rounded-md p-2">
+                  <p className="text-xs text-muted-foreground mb-1">Total XMR</p>
+                  <p className="text-sm font-bold font-mono text-amber-500">{slip.total_amount_xmr.toFixed(6)}</p>
+                </div>
               </div>
             </div>
 
@@ -158,57 +160,59 @@ export function MultibetDepositModal({
             {!isConfirmed && (
               <div className="space-y-4">
                 <div className="flex justify-center">
-                  <div className="bg-background p-3 rounded-lg border">
-                    <QRCodeSVG value={moneroUri} size={180} />
+                  <div className="bg-white p-3 rounded-lg border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
+                    <QRCodeSVG value={moneroUri} size={150} />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Deposit Address</label>
+                  <label className="text-sm font-medium text-amber-500">Deposit Address</label>
                   <div className="flex gap-2">
                     <Input
                       value={slip.xmr_address}
                       readOnly
-                      className="font-mono text-xs"
+                      className="font-mono text-xs bg-muted/50 border-amber-500/20"
                     />
                     <Button
                       variant="outline"
                       size="icon"
+                      className="border-amber-500/30 hover:bg-amber-500/10"
                       onClick={() => copyToClipboard(slip.xmr_address, 'address')}
                     >
                       {copied === 'address' ? (
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
                       ) : (
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-4 h-4 text-amber-500" />
                       )}
                     </Button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Amount</label>
+                  <label className="text-sm font-medium text-amber-500">Amount</label>
                   <div className="flex gap-2">
                     <Input
                       value={`${slip.total_amount_xmr.toFixed(12)} XMR`}
                       readOnly
-                      className="font-mono"
+                      className="font-mono bg-muted/50 border-amber-500/20"
                     />
                     <Button
                       variant="outline"
                       size="icon"
+                      className="border-amber-500/30 hover:bg-amber-500/10"
                       onClick={() => copyToClipboard(slip.total_amount_xmr.toString(), 'amount')}
                     >
                       {copied === 'amount' ? (
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
                       ) : (
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-4 h-4 text-amber-500" />
                       )}
                     </Button>
                   </div>
                 </div>
 
                 {polling && (
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-center gap-2 text-sm text-amber-500 bg-amber-500/10 rounded-md py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Checking for deposit...
                   </div>
