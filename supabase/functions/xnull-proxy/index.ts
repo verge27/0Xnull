@@ -161,30 +161,53 @@ serve(async (req) => {
     let responseData: string;
     let finalStatus = response.status;
 
-    try {
-      const parsed = JSON.parse(responseText);
-      
-      // Handle "already exists" as a soft success (200) to prevent frontend errors
-      if (response.status === 400 && parsed?.detail?.includes('already exists')) {
-        console.log('Market already exists - returning soft success');
-        responseData = JSON.stringify({ already_exists: true, detail: parsed.detail });
-        finalStatus = 200;
-      } else {
-        responseData = responseText;
-      }
-    } catch {
-      if (!response.ok) {
-        responseData = JSON.stringify({
-          error: responseText || 'Upstream request failed',
-          status: response.status,
-          upstream: true,
-        });
-        if (response.status >= 500) {
-          finalStatus = 502;
-          console.error(`Upstream server error for ${targetPath}: ${response.status} - ${responseText}`);
+    // Check if response looks like HTML error page (502, 503, etc from nginx/upstream)
+    const isHtmlError = responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE') || responseText.includes('<html');
+
+    if (isHtmlError) {
+      // Convert HTML error pages to clean JSON
+      console.error(`Upstream returned HTML error for ${targetPath}: ${response.status}`);
+      responseData = JSON.stringify({
+        error: 'The prediction service is temporarily unavailable. Please try again in a moment.',
+        status: response.status,
+        upstream: true,
+        retry: true,
+      });
+      finalStatus = response.status >= 500 ? 503 : response.status;
+    } else {
+      try {
+        const parsed = JSON.parse(responseText);
+        
+        // Handle "already exists" as a soft success (200) to prevent frontend errors
+        if (response.status === 400 && parsed?.detail?.includes('already exists')) {
+          console.log('Market already exists - returning soft success');
+          responseData = JSON.stringify({ already_exists: true, detail: parsed.detail });
+          finalStatus = 200;
+        } else if (response.status === 400 && parsed?.detail === 'Betting has closed for this market') {
+          // Betting closed - return structured error
+          responseData = JSON.stringify({ 
+            error: 'Betting has closed for this market',
+            betting_closed: true,
+            status: 400 
+          });
+          finalStatus = 400;
+        } else {
+          responseData = responseText;
         }
-      } else {
-        responseData = JSON.stringify({ data: responseText });
+      } catch {
+        if (!response.ok) {
+          responseData = JSON.stringify({
+            error: responseText || 'Upstream request failed',
+            status: response.status,
+            upstream: true,
+          });
+          if (response.status >= 500) {
+            finalStatus = 502;
+            console.error(`Upstream server error for ${targetPath}: ${response.status} - ${responseText}`);
+          }
+        } else {
+          responseData = JSON.stringify({ data: responseText });
+        }
       }
     }
 

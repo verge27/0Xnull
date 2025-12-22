@@ -93,6 +93,10 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
     }
 
     if (!res.ok) {
+      // Handle betting closed specifically
+      if (data?.betting_closed || data?.detail === 'Betting has closed for this market') {
+        throw new Error('BETTING_CLOSED');
+      }
       throw new Error(data?.detail || data?.error || 'Request failed');
     }
 
@@ -163,6 +167,10 @@ export interface PredictionMarket {
   created_at: number;
   pool_address?: string;
   view_key?: string;
+  // Betting cutoff fields
+  commence_time?: number;
+  betting_closes_at?: number;
+  betting_open?: boolean;
 }
 
 export interface PoolInfo {
