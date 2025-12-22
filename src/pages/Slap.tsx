@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HelpCircle, ExternalLink, Calendar, Tv, Youtube, Users, Plus } from 'lucide-react';
+import { HelpCircle, ExternalLink, Calendar, Tv, Youtube, Users, Plus, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 import { useSlapPromotions, useSlapFeatured, useSlapStrikers, useSlapEvents, Striker, SlapEvent, SlapPromotion } from '@/hooks/useSlapFighting';
 import { MyBets } from '@/components/MyBets';
 import { usePredictionBets } from '@/hooks/usePredictionBets';
@@ -16,6 +16,10 @@ import { CreateFightMarketDialog } from '@/components/CreateFightMarketDialog';
 import { BetSlipPanel } from '@/components/BetSlipPanel';
 import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
+import { PoolTransparency } from '@/components/PoolTransparency';
+import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
+import { api, type PredictionMarket } from '@/services/api';
 
 const Slap = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -23,9 +27,41 @@ const Slap = () => {
   const { data: featured, isLoading: loadingFeatured } = useSlapFeatured();
   const { data: strikers, isLoading: loadingStrikers } = useSlapStrikers();
   const { data: events, isLoading: loadingEvents } = useSlapEvents();
-  const { bets, checkBetStatus, submitPayoutAddress } = usePredictionBets();
+  const { bets, checkBetStatus, submitPayoutAddress, getBetsForMarket } = usePredictionBets();
   const betSlip = useMultibetSlip();
   const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
+  
+  // Markets state
+  const [markets, setMarkets] = useState<PredictionMarket[]>([]);
+  const [loadingMarkets, setLoadingMarkets] = useState(false);
+  
+  // Fetch slap/power slap markets
+  const fetchMarkets = async () => {
+    setLoadingMarkets(true);
+    try {
+      const response = await api.getPredictionMarkets();
+      const allMarkets = response.markets || [];
+      // Filter for slap fighting related markets
+      const slapMarkets = allMarkets.filter(m => {
+        const text = `${m.title} ${m.description}`.toLowerCase();
+        return text.includes('slap') || text.includes('power slap') || text.includes('punchdown') ||
+               m.market_id.includes('slap_');
+      });
+      setMarkets(slapMarkets);
+    } catch (e) {
+      console.error('Failed to fetch markets:', e);
+    } finally {
+      setLoadingMarkets(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchMarkets();
+  }, []);
+  
+  // Separate active vs resolved markets
+  const activeMarkets = markets.filter(m => !m.resolved && m.resolution_time > Date.now() / 1000);
+  const resolvedMarkets = markets.filter(m => m.resolved);
 
   return (
     <div className="min-h-screen bg-background relative bg-gradient-to-br from-black via-red-950/20 to-black">
@@ -273,12 +309,100 @@ const Slap = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="markets" className="mt-6">
-              <Card className="border-red-900/30 bg-card/50">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Active markets for Slap Fighting will appear here. Create a market from an upcoming fight to get started!
-                </CardContent>
-              </Card>
+            <TabsContent value="markets" className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Active Markets ({activeMarkets.length})</h2>
+                <Button variant="outline" size="sm" onClick={fetchMarkets} disabled={loadingMarkets}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingMarkets ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+              
+              {loadingMarkets ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-48" />
+                  ))}
+                </div>
+              ) : activeMarkets.length === 0 ? (
+                <Card className="border-red-900/30 bg-card/50">
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    No active slap fighting markets. Create a market from an upcoming fight to get started!
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {activeMarkets.map(market => {
+                    const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                    const yesPercent = totalPool > 0 ? Math.round((market.yes_pool_xmr / totalPool) * 100) : 50;
+                    const noPercent = 100 - yesPercent;
+                    const marketBets = getBetsForMarket(market.market_id);
+                    const bettingOpen = isBettingOpen(market);
+                    
+                    return (
+                      <Card key={market.market_id} className="border-red-900/30 bg-card/50">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-base">{market.title}</CardTitle>
+                            <Badge variant={bettingOpen ? "default" : "secondary"} className={bettingOpen ? "bg-emerald-600" : ""}>
+                              {bettingOpen ? 'Open' : 'Closed'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{market.description}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
+                              <div className="flex items-center justify-center gap-1 mb-1">
+                                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                <span className="text-sm font-medium">YES</span>
+                              </div>
+                              <div className="text-xl font-bold text-emerald-400">{yesPercent}%</div>
+                              <div className="text-xs text-muted-foreground">{market.yes_pool_xmr.toFixed(4)} XMR</div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
+                              <div className="flex items-center justify-center gap-1 mb-1">
+                                <TrendingDown className="w-4 h-4 text-red-500" />
+                                <span className="text-sm font-medium">NO</span>
+                              </div>
+                              <div className="text-xl font-bold text-red-400">{noPercent}%</div>
+                              <div className="text-xs text-muted-foreground">{market.no_pool_xmr.toFixed(4)} XMR</div>
+                            </div>
+                          </div>
+                          
+                          <BettingCountdown
+                            bettingClosesAt={market.betting_closes_at}
+                            bettingOpen={market.betting_open}
+                            resolutionTime={market.resolution_time}
+                            variant="inline"
+                          />
+                          
+                          <PoolTransparency marketId={market.market_id} className="mt-2" />
+                          
+                          {marketBets.length > 0 && (
+                            <div className="p-2 rounded bg-secondary/50 text-xs">
+                              <p className="font-medium">You have {marketBets.length} bet(s) on this market</p>
+                            </div>
+                          )}
+                          
+                          {bettingOpen && (
+                            <div className="flex justify-end pt-2 border-t">
+                              <AddToSlipButton
+                                marketId={market.market_id}
+                                marketTitle={market.title}
+                                yesPool={market.yes_pool_xmr || 0}
+                                noPool={market.no_pool_xmr || 0}
+                                onAdd={betSlip.addToBetSlip}
+                                onOpenSlip={() => betSlip.setIsOpen(true)}
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="mybets" className="mt-6">
