@@ -676,6 +676,7 @@ export default function EsportsPredictions() {
                                   teamB={event.team_b}
                                   liveScores={liveScores}
                                   variant="compact"
+                                  showNoDataHint
                                 />
                               )}
                             </div>
@@ -712,6 +713,14 @@ export default function EsportsPredictions() {
                                   <img src={event.team_b_image} alt={event.team_b} className="w-6 h-6 object-contain" />
                                 ) : null}
                               </div>
+                            </div>
+                          )}
+
+                          {/* "Awaiting data" placeholder for live matches without score yet */}
+                          {isLive && !liveScores[event.event_id || event.id || ''] && (
+                            <div className="flex items-center justify-center gap-2 p-2 mb-3 rounded-lg bg-muted/30 border border-border/50 text-muted-foreground text-sm">
+                              <Clock className="w-4 h-4" />
+                              Score data not yet available
                             </div>
                           )}
 
