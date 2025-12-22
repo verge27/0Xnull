@@ -33,6 +33,7 @@ import { BetSlipFloatingButton } from '@/components/BetSlipFloatingButton';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { LiveScoreBadge, InlineScore } from '@/components/LiveScoreBadge';
+import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -718,10 +719,7 @@ export default function EsportsPredictions() {
 
                           {/* "Awaiting data" placeholder for live matches without score yet */}
                           {isLive && !liveScores[event.event_id || event.id || ''] && (
-                            <div className="flex items-center justify-center gap-2 p-2 mb-3 rounded-lg bg-muted/30 border border-border/50 text-muted-foreground text-sm">
-                              <Clock className="w-4 h-4" />
-                              Score data not yet available
-                            </div>
+                            <PendingDataIndicator type="score" className="mb-3" />
                           )}
 
                           {/* Standard team display (when not showing live score) */}
