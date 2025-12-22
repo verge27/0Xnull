@@ -50,7 +50,7 @@ export interface LiveScores {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
-async function esportsRequest<T>(path: string): Promise<T> {
+async function esportsRequest<T>(path: string, options?: { allowNotFound?: boolean }): Promise<T | null> {
   const proxyUrl = new URL(ESPORTS_API_BASE);
   proxyUrl.searchParams.set('path', `/api/esports${path}`);
   
@@ -59,6 +59,12 @@ async function esportsRequest<T>(path: string): Promise<T> {
   });
   
   const data = await res.json();
+  
+  // Allow 404s for score requests (match in progress, no result yet)
+  if (res.status === 404 && options?.allowNotFound) {
+    return null;
+  }
+  
   if (!res.ok) {
     throw new Error(data.detail || data.error || 'Request failed');
   }
@@ -157,20 +163,17 @@ export function useEsportsEvents() {
     
     await Promise.all(
       eventIds.map(async (eventId, index) => {
-        try {
-          const game = games[index] || 'csgo';
-          const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`);
-          if (result) {
-            newScores[eventId] = {
-              score_a: result.score_a || 0,
-              score_b: result.score_b || 0,
-              last_updated: Date.now(),
-            };
-          }
-        } catch (e) {
-          // Score not available yet - this is normal for in-progress matches
-          console.log(`Score not available for event ${eventId}`);
+        const game = games[index] || 'csgo';
+        // Use allowNotFound since 404 is expected for in-progress matches
+        const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
+        if (result) {
+          newScores[eventId] = {
+            score_a: result.score_a || 0,
+            score_b: result.score_b || 0,
+            last_updated: Date.now(),
+          };
         }
+        // If result is null (404), we just don't update scores - this is expected
       })
     );
     
