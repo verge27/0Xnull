@@ -136,9 +136,10 @@ export default function SportsPredictions() {
     fetchHighlights();
     fetchLeaderboard();
     
+    // Poll at 60 second intervals as recommended
     const interval = setInterval(() => {
       fetchMarkets();
-    }, 30000);
+    }, 60000);
     
     return () => {
       clearInterval(interval);
