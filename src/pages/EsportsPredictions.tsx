@@ -30,8 +30,9 @@ import { GameCommunityLinks, getDiscordCommunityForGame, getRedditCommunityForGa
 import { LiveOddsOverlay } from '@/components/LiveOddsOverlay';
 import { RecentBetsTicker } from '@/components/RecentBetsTicker';
 import { BetSlipFloatingButton } from '@/components/BetSlipFloatingButton';
+import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -417,7 +418,7 @@ export default function EsportsPredictions() {
         }));
 
   const activeMarkets = markets
-    .filter(m => m.resolved === 0)
+    .filter(m => m.resolved === 0 && isBettingOpen(m))
     .sort((a, b) => {
       const poolA = a.yes_pool_xmr + a.no_pool_xmr;
       const poolB = b.yes_pool_xmr + b.no_pool_xmr;
@@ -682,7 +683,7 @@ export default function EsportsPredictions() {
                             
                             {/* Show bet buttons if market exists, otherwise show create market button */}
                             {marketStatus === 'both' ? (
-                              <div className="flex gap-2">
+                              <div className="flex flex-col gap-2">
                                 {(() => {
                                   // Find the existing market for this event
                                   const eventMarket = markets.find(m => 
@@ -691,40 +692,59 @@ export default function EsportsPredictions() {
                                   if (!eventMarket) return null;
                                   
                                   const odds = getOdds(eventMarket);
+                                  const bettingOpen = isBettingOpen(eventMarket);
+                                  
+                                  if (!bettingOpen) {
+                                    return (
+                                      <div className="flex items-center justify-center gap-2 p-2 rounded bg-zinc-800/50 border border-zinc-700">
+                                        <Lock className="w-4 h-4 text-zinc-400" />
+                                        <span className="text-sm text-zinc-400">Betting Closed</span>
+                                      </div>
+                                    );
+                                  }
+                                  
                                   return (
                                     <>
-                                      <Button 
-                                        size="sm"
-                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-xs"
-                                        onClick={() => {
-                                          setSelectedMarket(eventMarket);
-                                          setBetSide('yes');
-                                          setBetDialogOpen(true);
-                                        }}
-                                      >
-                                        <TrendingUp className="w-3 h-3 mr-1" />
-                                        YES {odds.yes}%
-                                      </Button>
-                                      <Button 
-                                        size="sm"
-                                        className="flex-1 bg-red-600 hover:bg-red-700 text-xs"
-                                        onClick={() => {
-                                          setSelectedMarket(eventMarket);
-                                          setBetSide('no');
-                                          setBetDialogOpen(true);
-                                        }}
-                                      >
-                                        <TrendingDown className="w-3 h-3 mr-1" />
-                                        NO {odds.no}%
-                                      </Button>
-                                      <AddToSlipButton
-                                        marketId={eventMarket.market_id}
-                                        marketTitle={eventMarket.title}
-                                        yesPool={eventMarket.yes_pool_xmr || 0}
-                                        noPool={eventMarket.no_pool_xmr || 0}
-                                        onAdd={betSlip.addToBetSlip}
-                                        onOpenSlip={() => betSlip.setIsOpen(true)}
-                                        variant="icon"
+                                      <div className="flex gap-2">
+                                        <Button 
+                                          size="sm"
+                                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-xs"
+                                          onClick={() => {
+                                            setSelectedMarket(eventMarket);
+                                            setBetSide('yes');
+                                            setBetDialogOpen(true);
+                                          }}
+                                        >
+                                          <TrendingUp className="w-3 h-3 mr-1" />
+                                          YES {odds.yes}%
+                                        </Button>
+                                        <Button 
+                                          size="sm"
+                                          className="flex-1 bg-red-600 hover:bg-red-700 text-xs"
+                                          onClick={() => {
+                                            setSelectedMarket(eventMarket);
+                                            setBetSide('no');
+                                            setBetDialogOpen(true);
+                                          }}
+                                        >
+                                          <TrendingDown className="w-3 h-3 mr-1" />
+                                          NO {odds.no}%
+                                        </Button>
+                                        <AddToSlipButton
+                                          marketId={eventMarket.market_id}
+                                          marketTitle={eventMarket.title}
+                                          yesPool={eventMarket.yes_pool_xmr || 0}
+                                          noPool={eventMarket.no_pool_xmr || 0}
+                                          onAdd={betSlip.addToBetSlip}
+                                          onOpenSlip={() => betSlip.setIsOpen(true)}
+                                          variant="icon"
+                                        />
+                                      </div>
+                                      <BettingCountdown 
+                                        bettingClosesAt={eventMarket.betting_closes_at}
+                                        bettingOpen={eventMarket.betting_open}
+                                        resolutionTime={eventMarket.resolution_time}
+                                        variant="inline"
                                       />
                                     </>
                                   );
@@ -804,8 +824,18 @@ export default function EsportsPredictions() {
                             </div>
                           </div>
                           
-                          <div className="text-xs text-muted-foreground mb-4 text-center">
+                          <div className="text-xs text-muted-foreground mb-2 text-center">
                             Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
+                          </div>
+                          
+                          {/* Betting countdown */}
+                          <div className="mb-3 text-center">
+                            <BettingCountdown 
+                              bettingClosesAt={market.betting_closes_at}
+                              bettingOpen={market.betting_open}
+                              resolutionTime={market.resolution_time}
+                              variant="inline"
+                            />
                           </div>
                           
                           {/* Pool Transparency */}
