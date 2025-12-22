@@ -50,25 +50,36 @@ export interface LiveScores {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
-async function esportsRequest<T>(path: string, options?: { allowNotFound?: boolean }): Promise<T | null> {
+async function esportsRequest<T>(
+  path: string,
+  options?: { allowNotFound?: boolean }
+): Promise<T | null> {
   const proxyUrl = new URL(ESPORTS_API_BASE);
   proxyUrl.searchParams.set('path', `/api/esports${path}`);
-  
+
   const res = await fetch(proxyUrl.toString(), {
     headers: { 'Content-Type': 'application/json' },
   });
-  
-  const data = await res.json();
-  
+
+  // Be robust to non-JSON (some upstream/proxy errors can return plain text)
+  let data: any = null;
+  try {
+    data = await res.clone().json();
+  } catch {
+    const text = await res.text().catch(() => '');
+    data = { error: text };
+  }
+
   // Allow 404s for score requests (match in progress, no result yet)
-  if (res.status === 404 && options?.allowNotFound) {
+  if (res.status === 404 && (options?.allowNotFound || data?.detail === 'Match not found')) {
     return null;
   }
-  
+
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Request failed');
+    throw new Error(data?.detail || data?.error || 'Request failed');
   }
-  return data;
+
+  return data as T;
 }
 
 export const ESPORTS_GAMES = [
@@ -160,23 +171,28 @@ export function useEsportsEvents() {
   // Fetch live scores for specific events
   const fetchLiveScores = useCallback(async (eventIds: string[], games: string[]) => {
     const newScores: LiveScores = { ...liveScores };
-    
+
     await Promise.all(
       eventIds.map(async (eventId, index) => {
-        const game = games[index] || 'csgo';
-        // Use allowNotFound since 404 is expected for in-progress matches
-        const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
-        if (result) {
-          newScores[eventId] = {
-            score_a: result.score_a || 0,
-            score_b: result.score_b || 0,
-            last_updated: Date.now(),
-          };
+        try {
+          const game = games[index] || 'csgo';
+          // Use allowNotFound since 404 is expected for in-progress matches
+          const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
+          if (result) {
+            newScores[eventId] = {
+              score_a: result.score_a || 0,
+              score_b: result.score_b || 0,
+              last_updated: Date.now(),
+            };
+          }
+          // If result is null (404), we just don't update scores - this is expected
+        } catch (e) {
+          // Never let one failing score request crash the page/polling loop
+          console.warn('Live score fetch failed:', e);
         }
-        // If result is null (404), we just don't update scores - this is expected
       })
     );
-    
+
     setLiveScores(newScores);
     return newScores;
   }, [liveScores]);
