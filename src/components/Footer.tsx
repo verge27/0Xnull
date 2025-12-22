@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, ExternalLink } from 'lucide-react';
+import { Shield, ExternalLink, Github } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -116,6 +116,15 @@ export const Footer = () => {
             >
               <ExternalLink className="w-3 h-3" />
               KYCNOT.ME
+            </a>
+            <a 
+              href="https://github.com/verge27/0Xnull"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Github className="w-3 h-3" />
+              GitHub
             </a>
             <Link to="/support" className="hover:text-foreground transition-colors">Contact</Link>
           </div>
