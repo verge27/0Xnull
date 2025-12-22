@@ -76,62 +76,10 @@ serve(async (req) => {
       }
     }
 
-    // Esports & Sports result endpoints: return 200 with { found: false } for 404s to prevent error-reporter blank screens
-    // These 404s are expected when a match is live or just finished (no result data yet)
-    const isEsportsResultRequest = req.method === 'GET' && /^\/api\/esports\/result\//.test(targetPath);
-    const isSportsResultRequest = req.method === 'GET' && /^\/api\/sports\/result\//.test(targetPath);
-    if (isEsportsResultRequest || isSportsResultRequest) {
-      const resultType = isEsportsResultRequest ? 'Esports' : 'Sports';
-      const targetUrl = new URL(`${API_BASE}${targetPath}`);
-      url.searchParams.forEach((value, key) => {
-        if (key !== 'path') targetUrl.searchParams.set(key, value);
-      });
-
-      console.log(`${resultType} result check -> ${targetUrl.toString()}`);
-
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        const upstreamRes = await fetch(targetUrl.toString(), { method: 'GET', signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        const text = await upstreamRes.text();
-        let data: any;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { error: text };
-        }
-
-        // 404 "Match not found" is expected - return 200 with found:false
-        if (upstreamRes.status === 404) {
-          console.log(`${resultType} result 404 (expected) for ${targetPath}`);
-          return new Response(JSON.stringify({ found: false, detail: data?.detail || 'Match not found' }), {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        if (!upstreamRes.ok) {
-          return new Response(JSON.stringify({ found: false, error: data?.error || data?.detail || 'Request failed', status: upstreamRes.status }), {
-            status: upstreamRes.status,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // Success - wrap result with found:true
-        return new Response(JSON.stringify({ found: true, result: data }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (e) {
-        console.log(`${resultType} result error: ${e instanceof Error ? e.message : 'unknown'}`);
-        return new Response(JSON.stringify({ found: false, error: 'timeout' }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
+    // NOTE: /api/esports/result/ and /api/sports/result/ endpoints do NOT exist on the 0xNull backend.
+    // Resolution happens server-side via cron (POST /api/predictions/resolve-due).
+    // Frontend should poll /api/predictions/pool/{market_id} to check if a market is resolved.
+    // Removed soft-mode handling for these non-existent endpoints.
 
     // Build target URL with query params (excluding 'path' and 'soft_pool')
     const targetUrl = new URL(`${API_BASE}${targetPath}`);
