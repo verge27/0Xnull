@@ -24,6 +24,7 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
+import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -711,6 +712,9 @@ export default function CryptoPredictions() {
             />
           </TabsContent>
         </Tabs>
+        
+        {/* Closed Markets Section */}
+        <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
       </main>
 
       {/* Bet Dialog */}

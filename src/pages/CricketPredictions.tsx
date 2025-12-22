@@ -25,6 +25,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
+import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Trophy, Gamepad2, ArrowRight, HelpCircle, Info, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -717,6 +718,9 @@ export default function CricketPredictions() {
               />
             </TabsContent>
           </Tabs>
+          
+          {/* Closed Markets Section */}
+          <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
         </main>
 
         <Footer />
