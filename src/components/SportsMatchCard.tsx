@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TeamLogo } from '@/components/TeamLogo';
 import { getSportLabel, formatRelativeTime, type SportsMatch, type SportsOdds } from '@/hooks/useSportsCategories';
+import { PendingDataIndicator } from '@/components/PendingDataIndicator';
+import { BackoffBadge } from '@/components/BackoffBadge';
 import { Clock, Users } from 'lucide-react';
 
 interface SportsMatchCardProps {
@@ -11,9 +13,11 @@ interface SportsMatchCardProps {
   onBetClick: (match: SportsMatch) => void;
   isLive?: boolean;
   hasMarket?: boolean;
+  /** If in backoff, the timestamp when backoff ends */
+  backoffUntil?: number;
 }
 
-export function SportsMatchCard({ match, odds, onBetClick, isLive, hasMarket }: SportsMatchCardProps) {
+export function SportsMatchCard({ match, odds, onBetClick, isLive, hasMarket, backoffUntil }: SportsMatchCardProps) {
   const now = Date.now() / 1000;
   const gameStarted = match.commence_timestamp <= now;
   
@@ -38,6 +42,9 @@ export function SportsMatchCard({ match, odds, onBetClick, isLive, hasMarket }: 
           <div className="flex items-center gap-2">
             {isLive && (
               <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
+            )}
+            {isLive && backoffUntil && backoffUntil > Date.now() && (
+              <BackoffBadge backoffUntil={backoffUntil} />
             )}
             {hasMarket && (
               <Badge variant="secondary" className="text-xs">Active</Badge>

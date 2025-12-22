@@ -36,6 +36,8 @@ import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, A
 import { SportsMarketCard } from '@/components/SportsMarketCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { PendingDataIndicator } from '@/components/PendingDataIndicator';
+import { BackoffBadge } from '@/components/BackoffBadge';
 
 interface VideoHighlight {
   title: string;
@@ -51,7 +53,7 @@ interface VideoHighlight {
 
 export default function SportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
-  const { createSportsMarket, liveScores, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
+  const { createSportsMarket, liveScores, backoffStates, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
   const { categories, loading: categoriesLoading } = useSportsCategories();
   const { matches, loading: matchesLoading, fetchByCategory, fetchBySport, fetchAll } = useSportsMatches();
   const { odds, fetchOdds } = useSportsOdds();
@@ -732,6 +734,7 @@ export default function SportsPredictions() {
                         onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
                         isLive={isLive}
                         hasMarket={marketStatus !== 'none'}
+                        backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
                       />
                     );
                   })}
