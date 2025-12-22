@@ -3,13 +3,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TeamLogo } from '@/components/TeamLogo';
+import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { Clock, TrendingUp, Zap, Users } from 'lucide-react';
 import type { PredictionMarket } from '@/services/api';
 
 interface SportsMarketCardProps {
   market: PredictionMarket;
   onBetClick: (market: PredictionMarket, side: 'yes' | 'no') => void;
-  onAddToSlip?: (marketId: string, title: string, yesPool: number, noPool: number) => void;
+  onAddToSlip?: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number) => void;
+  onOpenSlip?: () => void;
   isLive?: boolean;
   isClosingSoon?: boolean;
 }
@@ -18,6 +20,7 @@ export function SportsMarketCard({
   market, 
   onBetClick, 
   onAddToSlip,
+  onOpenSlip,
   isLive = false,
   isClosingSoon = false
 }: SportsMarketCardProps) {
@@ -148,12 +151,12 @@ export function SportsMarketCard({
         </div>
 
         {/* Quick bet buttons - show on hover */}
-        <div className={`grid grid-cols-2 gap-2 transition-all duration-200 ${
+        <div className={`flex items-center gap-2 transition-all duration-200 ${
           isHovered ? 'opacity-100 max-h-20' : 'opacity-70 max-h-20'
         }`}>
           <Button
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1"
             onClick={(e) => {
               e.stopPropagation();
               onBetClick(market, 'yes');
@@ -165,7 +168,7 @@ export function SportsMarketCard({
           <Button
             size="sm"
             variant="outline"
-            className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+            className="border-red-500/50 text-red-400 hover:bg-red-500/10 flex-1"
             onClick={(e) => {
               e.stopPropagation();
               onBetClick(market, 'no');
@@ -173,6 +176,19 @@ export function SportsMarketCard({
           >
             Bet NO
           </Button>
+          {onAddToSlip && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <AddToSlipButton
+                marketId={market.market_id}
+                marketTitle={market.title}
+                yesPool={market.yes_pool_xmr || 0}
+                noPool={market.no_pool_xmr || 0}
+                onAdd={onAddToSlip}
+                onOpenSlip={onOpenSlip}
+                variant="icon"
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
