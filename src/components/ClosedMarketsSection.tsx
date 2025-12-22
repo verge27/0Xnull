@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lock, RefreshCw, Clock, Bell, Volume2, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { type PredictionMarket, api } from '@/services/api';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
@@ -265,10 +266,7 @@ export function ClosedMarketsSection({ markets, getBetsForMarket, onMarketsUpdat
                     soundEnabled={soundEnabled}
                   />
                 ) : (
-                  <div className="flex items-center justify-center gap-2 p-2 rounded bg-zinc-800/50 border border-zinc-700">
-                    <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
-                    <span className="text-sm text-amber-400">Awaiting Resolution</span>
-                  </div>
+                  <PendingDataIndicator type="result" showLoader className="bg-zinc-800/50 border-zinc-700 text-amber-400" />
                 )}
                 
                 {/* Admin resolution controls */}
