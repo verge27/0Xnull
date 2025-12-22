@@ -1,16 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lock, RefreshCw, Clock } from 'lucide-react';
+import { Lock, RefreshCw, Clock, Bell, Volume2 } from 'lucide-react';
 import { type PredictionMarket } from '@/services/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
-interface ClosedMarketsSectionProps {
-  markets: PredictionMarket[];
-  getBetsForMarket: (marketId: string) => any[];
-}
+// Simple notification sound using Web Audio API
+const playNotificationSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 880; // A5 note
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (e) {
+    console.log('Audio notification not available');
+  }
+};
 
-function ResolutionCountdown({ resolutionTime }: { resolutionTime: number }) {
+function ResolutionCountdown({ resolutionTime, marketTitle, soundEnabled }: { 
+  resolutionTime: number; 
+  marketTitle: string;
+  soundEnabled: boolean;
+}) {
   const [timeLeft, setTimeLeft] = useState('');
+  const [isResolvingSoon, setIsResolvingSoon] = useState(false);
+  const hasNotifiedRef = useRef(false);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -19,7 +45,23 @@ function ResolutionCountdown({ resolutionTime }: { resolutionTime: number }) {
       
       if (diff <= 0) {
         setTimeLeft('Resolving now...');
+        setIsResolvingSoon(true);
         return;
+      }
+      
+      // Check if resolving within 5 minutes
+      const resolvingSoon = diff <= 300;
+      setIsResolvingSoon(resolvingSoon);
+      
+      // Trigger notification when entering 5-minute window
+      if (resolvingSoon && !hasNotifiedRef.current) {
+        hasNotifiedRef.current = true;
+        if (soundEnabled) {
+          playNotificationSound();
+        }
+        toast.info(`⏰ Resolving soon!`, {
+          description: `"${marketTitle}" resolves in less than 5 minutes`,
+        });
       }
       
       if (diff < 60) {
@@ -43,18 +85,27 @@ function ResolutionCountdown({ resolutionTime }: { resolutionTime: number }) {
     const interval = setInterval(updateCountdown, 1000);
     
     return () => clearInterval(interval);
-  }, [resolutionTime]);
+  }, [resolutionTime, marketTitle, soundEnabled]);
 
   const isResolvingNow = timeLeft === 'Resolving now...';
 
   return (
-    <div className={`flex items-center justify-center gap-2 p-2 rounded ${
-      isResolvingNow ? 'bg-amber-900/30 border border-amber-600/50' : 'bg-zinc-800/50 border border-zinc-700'
+    <div className={`flex items-center justify-center gap-2 p-2 rounded transition-all ${
+      isResolvingNow 
+        ? 'bg-amber-900/30 border border-amber-600/50' 
+        : isResolvingSoon 
+          ? 'bg-primary/20 border border-primary/50 animate-pulse' 
+          : 'bg-zinc-800/50 border border-zinc-700'
     }`}>
       {isResolvingNow ? (
         <>
           <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
           <span className="text-sm text-amber-400">{timeLeft}</span>
+        </>
+      ) : isResolvingSoon ? (
+        <>
+          <Bell className="w-4 h-4 text-primary animate-bounce" />
+          <span className="text-sm text-primary font-medium">Resolves in {timeLeft}</span>
         </>
       ) : (
         <>
@@ -66,7 +117,26 @@ function ResolutionCountdown({ resolutionTime }: { resolutionTime: number }) {
   );
 }
 
+interface ClosedMarketsSectionProps {
+  markets: PredictionMarket[];
+  getBetsForMarket: (marketId: string) => any[];
+}
+
 export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarketsSectionProps) {
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    // Load from localStorage
+    return localStorage.getItem('resolution-sound-enabled') !== 'false';
+  });
+
+  const toggleSound = () => {
+    const newValue = !soundEnabled;
+    setSoundEnabled(newValue);
+    localStorage.setItem('resolution-sound-enabled', String(newValue));
+    if (newValue) {
+      playNotificationSound(); // Play a test sound
+    }
+  };
+
   if (markets.length === 0) return null;
 
   const getOdds = (market: PredictionMarket) => {
@@ -80,11 +150,23 @@ export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarket
 
   return (
     <div className="space-y-4 mt-8">
-      <h2 className="text-xl font-semibold flex items-center gap-2">
-        <Lock className="w-5 h-5 text-zinc-400" />
-        Closed Markets ({markets.length})
-        <Badge variant="secondary" className="text-xs">Awaiting Result</Badge>
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Lock className="w-5 h-5 text-zinc-400" />
+          Closed Markets ({markets.length})
+          <Badge variant="secondary" className="text-xs">Awaiting Result</Badge>
+        </h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleSound}
+          className="gap-2"
+          title={soundEnabled ? 'Sound alerts enabled' : 'Sound alerts disabled'}
+        >
+          <Volume2 className={`w-4 h-4 ${soundEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
+          <span className="text-xs">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
+        </Button>
+      </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {markets.map(market => {
           const odds = getOdds(market);
@@ -126,7 +208,11 @@ export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarket
                 </div>
                 
                 {market.resolution_time ? (
-                  <ResolutionCountdown resolutionTime={market.resolution_time} />
+                  <ResolutionCountdown 
+                    resolutionTime={market.resolution_time} 
+                    marketTitle={market.title}
+                    soundEnabled={soundEnabled}
+                  />
                 ) : (
                   <div className="flex items-center justify-center gap-2 p-2 rounded bg-zinc-800/50 border border-zinc-700">
                     <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
