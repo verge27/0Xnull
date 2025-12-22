@@ -2,7 +2,7 @@
 
 **Private Infrastructure for the Permissionless Economy**
 
-**Live Site:** [0xnull.io](https://0xnull.io) | **Tor:** Available via .onion mirror
+**Live Site:** [0xnull.io](https://0xnull.io) | **Tor:** [onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion](http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion)
 
 ## Overview
 
@@ -200,6 +200,8 @@ Returns single deposit address for all legs.
 
 **SimpleX Chat** — End-to-end encrypted, no phone/email required (only contact method)
 
+![SimpleX Support QR](public/images/simplex-support-qr.png)
+
 No email support. Privacy by default.
 
 ---
@@ -231,7 +233,7 @@ No email support. Privacy by default.
 ## Links
 
 - **Live:** [0xnull.io](https://0xnull.io)
-- **Tor:** .onion mirror available
+- **Tor:** [onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion](http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion)
 - **SimpleX:** Contact via site
 - **XMRBazaar:** [xmrbazaar.com](https://xmrbazaar.com)
 - **Trocador:** [trocador.app](https://trocador.app)
