@@ -50,8 +50,11 @@ export function BackoffBadge({ backoffUntil, className }: BackoffBadgeProps) {
             Retry in {timeLeft}
           </Badge>
         </TooltipTrigger>
-        <TooltipContent>
-          <p className="text-xs">Score data unavailable. Retrying automatically.</p>
+        <TooltipContent className="max-w-[250px]">
+          <p className="text-xs">
+            Live score data is temporarily unavailable after multiple failed attempts. 
+            Polling is paused to reduce unnecessary requests. It will resume automatically.
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
