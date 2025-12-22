@@ -47,6 +47,15 @@ export interface LiveScores {
   };
 }
 
+// Backoff tracking for repeated not-found responses
+interface BackoffState {
+  consecutiveNotFound: number;
+  backoffUntil: number; // timestamp when backoff ends
+}
+
+const BACKOFF_THRESHOLD = 3; // pause after 3 consecutive not-found
+const BACKOFF_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
@@ -146,6 +155,7 @@ export function useEsportsEvents() {
   const [error, setError] = useState<string | null>(null);
   const [scoresPollingActive, setScoresPollingActive] = useState(false);
   const scoresIntervalRef = useRef<number | null>(null);
+  const backoffStateRef = useRef<Record<string, BackoffState>>({});
 
   const fetchEvents = useCallback(async (game?: string, category?: string) => {
     setLoading(true);
@@ -179,24 +189,49 @@ export function useEsportsEvents() {
     }
   }, []);
 
-  // Fetch live scores for specific events
+  // Fetch live scores for specific events with backoff for repeated not-found
   const fetchLiveScores = useCallback(async (eventIds: string[], games: string[]) => {
     const newScores: LiveScores = { ...liveScores };
+    const now = Date.now();
 
     await Promise.all(
       eventIds.map(async (eventId, index) => {
+        // Check if this event is in backoff period
+        const backoff = backoffStateRef.current[eventId];
+        if (backoff && backoff.backoffUntil > now) {
+          // Still in backoff - skip this event
+          return;
+        }
+
         try {
           const game = games[index] || 'csgo';
           // Use allowNotFound since 404 is expected for in-progress matches
           const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
+          
           if (result) {
+            // Success - reset backoff state and update scores
+            backoffStateRef.current[eventId] = { consecutiveNotFound: 0, backoffUntil: 0 };
             newScores[eventId] = {
               score_a: result.score_a || 0,
               score_b: result.score_b || 0,
               last_updated: Date.now(),
             };
+          } else {
+            // Not found - increment consecutive count
+            const currentState = backoffStateRef.current[eventId] || { consecutiveNotFound: 0, backoffUntil: 0 };
+            const newCount = currentState.consecutiveNotFound + 1;
+            
+            if (newCount >= BACKOFF_THRESHOLD) {
+              // Enter backoff period
+              backoffStateRef.current[eventId] = {
+                consecutiveNotFound: newCount,
+                backoffUntil: now + BACKOFF_DURATION_MS,
+              };
+              console.log(`Backoff activated for event ${eventId}: pausing for 2 minutes after ${newCount} not-found responses`);
+            } else {
+              backoffStateRef.current[eventId] = { consecutiveNotFound: newCount, backoffUntil: 0 };
+            }
           }
-          // If result is null (404), we just don't update scores - this is expected
         } catch (e) {
           // Never let one failing score request crash the page/polling loop
           console.warn('Live score fetch failed:', e);
