@@ -15,6 +15,8 @@ interface SportsMarketCardProps {
   onOpenSlip?: () => void;
   isLive?: boolean;
   isClosingSoon?: boolean;
+  /** If true, we detected live score data for this match - force-close betting UI */
+  hasLiveScoreData?: boolean;
 }
 
 export function SportsMarketCard({ 
@@ -23,15 +25,17 @@ export function SportsMarketCard({
   onAddToSlip,
   onOpenSlip,
   isLive = false,
-  isClosingSoon = false
+  isClosingSoon = false,
+  hasLiveScoreData = false
 }: SportsMarketCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [bettingClosed, setBettingClosed] = useState(!isBettingOpen(market));
+  // Frontend workaround: if we detect live score data, force-close betting regardless of API flag
+  const [bettingClosed, setBettingClosed] = useState(!isBettingOpen(market) || hasLiveScoreData);
   
-  // Update betting closed state when market data changes
+  // Update betting closed state when market data changes OR when live score data is detected
   useEffect(() => {
-    setBettingClosed(!isBettingOpen(market));
-  }, [market.betting_open, market.betting_closes_at, market.resolution_time]);
+    setBettingClosed(!isBettingOpen(market) || hasLiveScoreData);
+  }, [market.betting_open, market.betting_closes_at, market.resolution_time, hasLiveScoreData]);
   
   const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
   const yesPercent = totalPool > 0 ? Math.round((market.yes_pool_xmr / totalPool) * 100) : 50;

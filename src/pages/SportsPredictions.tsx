@@ -375,6 +375,25 @@ export default function SportsPredictions() {
     return 'none';
   };
 
+  // Extract event ID from market_id (format: sports_{event_id}_{team_slug})
+  const getEventIdFromMarket = (marketId: string): string | null => {
+    const match = marketId.match(/^sports_([^_]+(?:_[^_]+)*?)_[^_]+$/);
+    if (match) return match[1];
+    // Fallback: try to extract middle portion
+    const parts = marketId.split('_');
+    if (parts.length >= 3 && parts[0] === 'sports') {
+      // Event ID is everything between 'sports_' and the last segment
+      return parts.slice(1, -1).join('_');
+    }
+    return null;
+  };
+
+  // Check if a market has live score data (frontend workaround for betting_open API bug)
+  const marketHasLiveScoreData = (marketId: string): boolean => {
+    const eventId = getEventIdFromMarket(marketId);
+    return eventId !== null && liveScores[eventId] !== undefined;
+  };
+
   // Get odds for a match
   const getMatchOdds = (match: SportsMatch) => {
     return odds.find(o => o.event_id === match.event_id);
@@ -618,6 +637,7 @@ export default function SportsPredictions() {
                         key={market.market_id}
                         market={market}
                         isLive={true}
+                        hasLiveScoreData={marketHasLiveScoreData(market.market_id)}
                         onBetClick={(m, side) => {
                           setSelectedMarket(m);
                           setBetSide(side);
@@ -674,6 +694,7 @@ export default function SportsPredictions() {
                           market={market}
                           isLive={isLive}
                           isClosingSoon={isClosing && !isLive}
+                          hasLiveScoreData={marketHasLiveScoreData(market.market_id)}
                           onBetClick={(m, side) => {
                             setSelectedMarket(m);
                             setBetSide(side);
