@@ -293,7 +293,7 @@ export function MultibetDepositModal({
                     <span className="text-amber-600 dark:text-amber-400 font-medium">Checking for deposit...</span>
                   </div>
                   <p className="text-xs text-muted-foreground text-center">
-                    Note: Wallet creation may take up to 90 seconds
+                    Your bets will be confirmed after 1 blockchain confirmation
                   </p>
                 </div>
               )}
