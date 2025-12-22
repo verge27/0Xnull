@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Shield, ExternalLink, Github } from 'lucide-react';
+import { Shield, ExternalLink, Github, MessageSquare } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+
+const SIMPLEX_LINK = 'https://smp18.simplex.im/g#o0awCwkgXWzbKUyPb5Z-hOOWZAoghJl2SfyzOHv4Uas';
+const TOR_ADDRESS = 'onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion';
 
 export const Footer = () => {
   return (
@@ -99,6 +103,36 @@ export const Footer = () => {
                 </Link>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* SimpleX Support Section */}
+        <div className="border-t border-border mt-8 pt-8 flex flex-col items-center text-center">
+          <div className="flex items-center gap-2 mb-3">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <h4 className="font-semibold">Contact Us on SimpleX</h4>
+          </div>
+          <div className="p-3 bg-white rounded-xl mb-3">
+            <QRCodeSVG 
+              value={SIMPLEX_LINK}
+              size={120}
+              level="M"
+              includeMargin={false}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            End-to-end encrypted. No email. Privacy by default.
+          </p>
+          
+          {/* Tor Address */}
+          <div className="text-sm text-muted-foreground">
+            <span className="text-foreground font-medium">Tor:</span>{' '}
+            <a 
+              href={`http://${TOR_ADDRESS}`}
+              className="font-mono text-xs hover:text-foreground transition-colors break-all"
+            >
+              {TOR_ADDRESS}
+            </a>
           </div>
         </div>
 
