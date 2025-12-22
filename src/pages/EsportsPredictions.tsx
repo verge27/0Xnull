@@ -657,7 +657,7 @@ export default function EsportsPredictions() {
                           
                           <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
                           
-                          <div className="flex items-center justify-between gap-2">
+                          <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
                                 {formatGameTime(event.scheduled_at || event.start_timestamp)}
@@ -674,12 +674,64 @@ export default function EsportsPredictions() {
                                 </a>
                               )}
                             </div>
-                            {marketStatus !== 'both' && !isLive && (
+                            
+                            {/* Show bet buttons if market exists, otherwise show create market button */}
+                            {marketStatus === 'both' ? (
+                              <div className="flex gap-2">
+                                {(() => {
+                                  // Find the existing market for this event
+                                  const eventMarket = markets.find(m => 
+                                    m.title.includes(event.team_a) || m.title.includes(event.team_b)
+                                  );
+                                  if (!eventMarket) return null;
+                                  
+                                  const odds = getOdds(eventMarket);
+                                  return (
+                                    <>
+                                      <Button 
+                                        size="sm"
+                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-xs"
+                                        onClick={() => {
+                                          setSelectedMarket(eventMarket);
+                                          setBetSide('yes');
+                                          setBetDialogOpen(true);
+                                        }}
+                                      >
+                                        <TrendingUp className="w-3 h-3 mr-1" />
+                                        YES {odds.yes}%
+                                      </Button>
+                                      <Button 
+                                        size="sm"
+                                        className="flex-1 bg-red-600 hover:bg-red-700 text-xs"
+                                        onClick={() => {
+                                          setSelectedMarket(eventMarket);
+                                          setBetSide('no');
+                                          setBetDialogOpen(true);
+                                        }}
+                                      >
+                                        <TrendingDown className="w-3 h-3 mr-1" />
+                                        NO {odds.no}%
+                                      </Button>
+                                      <AddToSlipButton
+                                        marketId={eventMarket.market_id}
+                                        marketTitle={eventMarket.title}
+                                        yesPool={eventMarket.yes_pool_xmr || 0}
+                                        noPool={eventMarket.no_pool_xmr || 0}
+                                        onAdd={betSlip.addToBetSlip}
+                                        onOpenSlip={() => betSlip.setIsOpen(true)}
+                                        variant="icon"
+                                      />
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                            ) : !isLive && (
                               <Button
                                 size="sm"
+                                className="w-full"
                                 onClick={() => setTeamSelectDialog({ open: true, event })}
                               >
-                                Bet Now
+                                Create Market & Bet
                               </Button>
                             )}
                           </div>
