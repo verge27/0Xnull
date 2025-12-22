@@ -258,7 +258,7 @@ export function BetDepositModal({
               {/* Polling indicator */}
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 {polling && <Loader2 className="w-3 h-3 animate-spin" />}
-                <span>Checking for payment every 10s...</span>
+                <span>Your bet will be confirmed after 1 blockchain confirmation</span>
               </div>
 
               {/* Betting cutoff warning */}
