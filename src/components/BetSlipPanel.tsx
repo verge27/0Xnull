@@ -571,6 +571,11 @@ export function BetSlipPanel({
                 </>
               )}
             </Button>
+            {isCheckingOut && (
+              <p className="text-xs text-amber-500 text-center animate-pulse">
+                This may take up to 90 seconds while we create your wallet...
+              </p>
+            )}
             <p className="text-xs text-muted-foreground text-center">
               <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">↵</kbd> checkout • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">⌘</kbd>+<kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Z</kbd> undo • <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">Esc</kbd> close
             </p>
