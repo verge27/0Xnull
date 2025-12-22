@@ -30,10 +30,19 @@ export interface LiveScores {
   [eventId: string]: SportsScore;
 }
 
+// Backoff tracking for repeated not-found responses
+interface BackoffState {
+  consecutiveNotFound: number;
+  backoffUntil: number; // timestamp when backoff ends
+}
+
+const BACKOFF_THRESHOLD = 3; // pause after 3 consecutive not-found
+const BACKOFF_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
-async function sportsRequest<T>(path: string): Promise<T> {
+async function sportsRequest<T>(path: string, options?: { allowNotFound?: boolean }): Promise<T | null> {
   const proxyUrl = new URL(SPORTS_API_BASE);
   proxyUrl.searchParams.set('path', `/api/sports${path}`);
   
@@ -41,7 +50,30 @@ async function sportsRequest<T>(path: string): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
   });
   
-  const data = await res.json();
+  let data: any = null;
+  try {
+    data = await res.clone().json();
+  } catch {
+    const text = await res.text().catch(() => '');
+    data = { error: text };
+  }
+
+  // Handle the "soft" response format from the proxy for /result endpoints
+  // Proxy returns { found: boolean, result?: T, detail?: string } with HTTP 200
+  if (typeof data?.found === 'boolean') {
+    if (!data.found) {
+      // Expected "not found" - return null gracefully
+      return null;
+    }
+    // Unwrap the actual result
+    return (data.result ?? data) as T;
+  }
+
+  // Legacy handling: Allow 404s for result requests
+  if (res.status === 404 && (options?.allowNotFound || data?.detail === 'Match not found')) {
+    return null;
+  }
+
   if (!res.ok) {
     throw new Error(data.detail || data.error || 'Request failed');
   }
@@ -53,9 +85,11 @@ export function useSportsEvents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [liveScores, setLiveScores] = useState<LiveScores>({});
+  const [backoffStates, setBackoffStates] = useState<Record<string, BackoffState>>({});
   const [pollingActive, setPollingActive] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const backoffStateRef = useRef<Record<string, BackoffState>>({});
 
   const fetchEvents = useCallback(async (sport?: string) => {
     setLoading(true);
@@ -82,14 +116,21 @@ export function useSportsEvents() {
     }
   }, []);
 
-  // Fetch live scores from ESPN (unofficial API)
+  // Fetch live scores from ESPN (unofficial API) with backoff for repeated failures
   const fetchLiveScores = useCallback(async (eventsToFetch: SportsEvent[]) => {
     if (eventsToFetch.length === 0) return;
     
     const scores: LiveScores = {};
+    const now = Date.now();
+    
+    // Filter out events in backoff period
+    const eventsToProcess = eventsToFetch.filter(event => {
+      const backoff = backoffStateRef.current[event.event_id];
+      return !backoff || backoff.backoffUntil <= now;
+    });
     
     // Group events by sport for efficient fetching
-    const sportGroups = eventsToFetch.reduce((acc, event) => {
+    const sportGroups = eventsToProcess.reduce((acc, event) => {
       const sportKey = event.sport_key;
       if (!acc[sportKey]) acc[sportKey] = [];
       acc[sportKey].push(event);
@@ -102,6 +143,9 @@ export function useSportsEvents() {
       'soccer_epl': 'soccer/eng.1',
       'mma_mixed_martial_arts': 'mma/ufc',
     };
+
+    // Track which events got matches
+    const matchedEvents = new Set<string>();
     
     await Promise.allSettled(
       Object.entries(sportGroups).map(async ([sportKey, events]) => {
@@ -132,6 +176,10 @@ export function useSportsEvents() {
             });
             
             if (matchingEspn) {
+              matchedEvents.add(event.event_id);
+              // Reset backoff on success
+              backoffStateRef.current[event.event_id] = { consecutiveNotFound: 0, backoffUntil: 0 };
+              
               const competitors = matchingEspn.competitions?.[0]?.competitors || [];
               const espnScores: { name: string; score: string }[] = competitors.map((c: any) => ({
                 name: c.team?.displayName || c.athlete?.displayName || 'Unknown',
@@ -170,8 +218,27 @@ export function useSportsEvents() {
         }
       })
     );
+
+    // Update backoff state for events that didn't match
+    for (const event of eventsToProcess) {
+      if (!matchedEvents.has(event.event_id)) {
+        const currentState = backoffStateRef.current[event.event_id] || { consecutiveNotFound: 0, backoffUntil: 0 };
+        const newCount = currentState.consecutiveNotFound + 1;
+        
+        if (newCount >= BACKOFF_THRESHOLD) {
+          backoffStateRef.current[event.event_id] = {
+            consecutiveNotFound: newCount,
+            backoffUntil: now + BACKOFF_DURATION_MS,
+          };
+          console.log(`Backoff activated for sports event ${event.event_id}: pausing for 2 minutes after ${newCount} not-found responses`);
+        } else {
+          backoffStateRef.current[event.event_id] = { consecutiveNotFound: newCount, backoffUntil: 0 };
+        }
+      }
+    }
     
     setLiveScores(prev => ({ ...prev, ...scores }));
+    setBackoffStates({ ...backoffStateRef.current });
     setLastUpdated(new Date());
   }, []);
 
@@ -299,6 +366,7 @@ export function useSportsEvents() {
     loading,
     error,
     liveScores,
+    backoffStates,
     pollingActive,
     lastUpdated,
     fetchEvents,
