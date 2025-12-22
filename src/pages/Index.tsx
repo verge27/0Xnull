@@ -22,8 +22,8 @@ const Index = () => {
     },
     {
       icon: BarChart3,
-      title: '0.4% Rake Only',
-      description: 'Lowest fees in the industry. No house edge — you bet against other users.'
+      title: '0.4% Rake on Winnings',
+      description: 'No fee on losses or no-contest. Unopposed bets refunded in full.'
     },
     {
       icon: Lock,
@@ -70,7 +70,7 @@ const Index = () => {
               Scan. Send. Bet.
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              Anonymous prediction markets for sports and esports. XMR only. 0.4% rake. Winners always get paid.
+              Anonymous prediction markets for sports and esports. XMR only. 0.4% rake on winnings only. Unopposed money returned.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/get-started">
