@@ -396,14 +396,14 @@ export default function SportsPredictions() {
   const now = Date.now() / 1000;
   
   // Separate live, closing soon, and regular markets
+  // Live markets = betting closed but not yet resolved (match in progress)
   const liveMarkets = markets.filter(m => {
-    const matchStarted = m.resolution_time - 7200 < now; // Assume 2h before resolution = live
-    return m.resolved === 0 && matchStarted && m.resolution_time > now;
+    return m.resolved === 0 && !isBettingOpen(m) && m.resolution_time > now;
   });
   
   const closingSoonMarkets = markets.filter(m => {
     const hoursLeft = (m.resolution_time - now) / 3600;
-    return m.resolved === 0 && m.resolution_time > now && hoursLeft <= 2 && hoursLeft > 0;
+    return m.resolved === 0 && m.resolution_time > now && isBettingOpen(m) && hoursLeft <= 2 && hoursLeft > 0;
   });
   
   const activeMarkets = markets
@@ -417,7 +417,7 @@ export default function SportsPredictions() {
       return poolB - poolA;
     });
   
-  // Closed markets - not resolved but betting closed
+  // Closed markets - not resolved but betting closed (handled by ClosedMarketsSection)
   const closedMarkets = markets
     .filter(m => m.resolved === 0 && !isBettingOpen(m))
     .sort((a, b) => a.resolution_time - b.resolution_time);
