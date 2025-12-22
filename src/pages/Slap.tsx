@@ -51,7 +51,7 @@ const Slap = () => {
         </section>
 
         {/* How It Works Banner */}
-        <div className="container mb-8">
+        <div className="container mb-8 space-y-3">
           <Link 
             to="/how-betting-works" 
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors bg-muted/50 rounded-lg px-4 py-3"
@@ -59,6 +59,9 @@ const Slap = () => {
             <HelpCircle className="h-4 w-4" />
             <span>New to parimutuel betting? Learn how it works</span>
           </Link>
+          <p className="text-xs text-muted-foreground px-1">
+            0.4% fee on winnings only. Full refunds with no fee on unopposed markets, no-contest, or cancelled events.
+          </p>
         </div>
 
         <div className="container pb-16 space-y-12">
