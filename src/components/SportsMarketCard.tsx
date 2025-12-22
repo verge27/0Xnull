@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TeamLogo } from '@/components/TeamLogo';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
-import { Clock, TrendingUp, Zap, Users } from 'lucide-react';
+import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
+import { Clock, TrendingUp, Zap, Users, Lock } from 'lucide-react';
 import type { PredictionMarket } from '@/services/api';
 
 interface SportsMarketCardProps {
@@ -25,6 +26,12 @@ export function SportsMarketCard({
   isClosingSoon = false
 }: SportsMarketCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [bettingClosed, setBettingClosed] = useState(!isBettingOpen(market));
+  
+  // Update betting closed state when market data changes
+  useEffect(() => {
+    setBettingClosed(!isBettingOpen(market));
+  }, [market.betting_open, market.betting_closes_at, market.resolution_time]);
   
   const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
   const yesPercent = totalPool > 0 ? Math.round((market.yes_pool_xmr / totalPool) * 100) : 50;
@@ -46,24 +53,6 @@ export function SportsMarketCard({
   };
   
   const { teamA, teamB } = parseTeams(market.title);
-  
-  // Calculate countdown
-  const getCountdown = () => {
-    const now = Date.now() / 1000;
-    const remaining = market.resolution_time - now;
-    
-    if (remaining <= 0) return 'Resolving...';
-    
-    const hours = Math.floor(remaining / 3600);
-    const minutes = Math.floor((remaining % 3600) / 60);
-    
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days}d ${hours % 24}h`;
-    }
-    
-    return `${hours}h ${minutes}m`;
-  };
 
   // Determine sport from oracle_asset or market_id
   const getSport = () => {
@@ -72,23 +61,33 @@ export function SportsMarketCard({
     return match ? match[1] : 'soccer';
   };
 
+  const handleBettingClosed = () => {
+    setBettingClosed(true);
+  };
+
   return (
     <Card 
       className={`relative overflow-hidden transition-all duration-200 bg-card/90 backdrop-blur-sm border-border/50 ${
         isHovered ? 'border-primary/50 shadow-lg shadow-primary/10' : ''
-      } ${isLive ? 'ring-2 ring-red-500/50' : ''}`}
+      } ${isLive ? 'ring-2 ring-red-500/50' : ''} ${bettingClosed ? 'opacity-80' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Status badges */}
       <div className="absolute top-2 right-2 flex gap-1 z-10">
+        {bettingClosed && !isLive && (
+          <Badge className="bg-zinc-700 text-zinc-300">
+            <Lock className="w-3 h-3 mr-1" />
+            CLOSED
+          </Badge>
+        )}
         {isLive && (
           <Badge className="bg-red-600 text-white animate-pulse">
             <span className="w-2 h-2 bg-white rounded-full mr-1 animate-ping" />
             LIVE
           </Badge>
         )}
-        {isClosingSoon && !isLive && (
+        {isClosingSoon && !isLive && !bettingClosed && (
           <Badge className="bg-amber-600 text-white">
             <Clock className="w-3 h-3 mr-1" />
             Closing Soon
@@ -144,50 +143,61 @@ export function SportsMarketCard({
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            <span>Closes in {getCountdown()}</span>
-          </div>
+          <BettingCountdown 
+            bettingClosesAt={market.betting_closes_at}
+            bettingOpen={market.betting_open}
+            resolutionTime={market.resolution_time}
+            variant="inline"
+            onBettingClosed={handleBettingClosed}
+          />
         </div>
 
-        {/* Quick bet buttons - show on hover */}
+        {/* Quick bet buttons */}
         <div className={`flex items-center gap-2 transition-all duration-200 ${
           isHovered ? 'opacity-100 max-h-20' : 'opacity-70 max-h-20'
         }`}>
-          <Button
-            size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onBetClick(market, 'yes');
-            }}
-          >
-            <TrendingUp className="w-3 h-3 mr-1" />
-            Bet YES
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-red-500/50 text-red-400 hover:bg-red-500/10 flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onBetClick(market, 'no');
-            }}
-          >
-            Bet NO
-          </Button>
-          {onAddToSlip && (
-            <div onClick={(e) => e.stopPropagation()}>
-              <AddToSlipButton
-                marketId={market.market_id}
-                marketTitle={market.title}
-                yesPool={market.yes_pool_xmr || 0}
-                noPool={market.no_pool_xmr || 0}
-                onAdd={onAddToSlip}
-                onOpenSlip={onOpenSlip}
-                variant="icon"
-              />
+          {bettingClosed ? (
+            <div className="flex-1 text-center py-2 text-sm text-zinc-500">
+              {isLive ? 'Match in Progress' : 'Betting Closed - Awaiting Result'}
             </div>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onBetClick(market, 'yes');
+                }}
+              >
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Bet YES
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 flex-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onBetClick(market, 'no');
+                }}
+              >
+                Bet NO
+              </Button>
+              {onAddToSlip && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <AddToSlipButton
+                    marketId={market.market_id}
+                    marketTitle={market.title}
+                    yesPool={market.yes_pool_xmr || 0}
+                    noPool={market.no_pool_xmr || 0}
+                    onAdd={onAddToSlip}
+                    onOpenSlip={onOpenSlip}
+                    variant="icon"
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </CardContent>

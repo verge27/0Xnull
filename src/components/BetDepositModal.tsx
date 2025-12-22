@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check, Loader2, Clock, CheckCircle, ChevronDown, Shield, Eye } from 'lucide-react';
+import { Copy, Check, Loader2, Clock, CheckCircle, ChevronDown, Shield, Eye, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PlaceBetResponse, BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api } from '@/services/api';
+import { formatBettingClosesAt } from '@/components/BettingCountdown';
 
 interface BetDepositModalProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface BetDepositModalProps {
   betData: PlaceBetResponse | null;
   onCheckStatus: (betId: string) => Promise<BetStatusResponse | null>;
   onConfirmed: () => void;
+  bettingClosesAt?: number;
 }
 
 export function BetDepositModal({
@@ -25,6 +27,7 @@ export function BetDepositModal({
   betData,
   onCheckStatus,
   onConfirmed,
+  bettingClosesAt,
 }: BetDepositModalProps) {
   const [copied, setCopied] = useState<'address' | 'amount' | 'viewKey' | null>(null);
   const [status, setStatus] = useState<string>(betData?.status || 'awaiting_deposit');
@@ -258,6 +261,23 @@ export function BetDepositModal({
                 <span>Checking for payment every 10s...</span>
               </div>
 
+              {/* Betting cutoff warning */}
+              {bettingClosesAt && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium text-amber-500">
+                        Betting closes: {formatBettingClosesAt(bettingClosesAt)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Deposits received AFTER betting closes will be automatically refunded to your payout address with no fee.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Blockchain confirmation info */}
               <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                 <p className="text-xs text-blue-400">
@@ -269,8 +289,8 @@ export function BetDepositModal({
               </div>
 
               {/* Important note */}
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                <p className="text-xs text-amber-500">
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <p className="text-xs text-primary">
                   <strong>Important:</strong> Save your bet ID:{' '}
                   <code className="bg-background px-1 py-0.5 rounded">{betData.bet_id}</code>
                 </p>

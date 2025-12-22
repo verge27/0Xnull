@@ -274,7 +274,12 @@ export default function SportsPredictions() {
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to place bet';
-      toast.error(message);
+      if (message === 'BETTING_CLOSED') {
+        toast.error('Betting has closed for this match. The event has already started.');
+        fetchMarkets(); // Refresh markets to update status
+      } else {
+        toast.error(message);
+      }
     } finally {
       setPlacingBet(false);
       setElapsedSeconds(0);
@@ -1261,6 +1266,7 @@ export default function SportsPredictions() {
           betData={currentBetData}
           onCheckStatus={checkBetStatus}
           onConfirmed={handleBetConfirmed}
+          bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
         />
       )}
 
