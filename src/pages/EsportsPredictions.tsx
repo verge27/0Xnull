@@ -110,10 +110,11 @@ export default function EsportsPredictions() {
     fetchEvents();
     fetchLiveEvents();
     
+    // Poll at 60 second intervals as recommended
     const interval = setInterval(() => {
       fetchMarkets();
       fetchLiveEvents();
-    }, 30000);
+    }, 60000);
     
     return () => {
       clearInterval(interval);
