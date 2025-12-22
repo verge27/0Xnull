@@ -226,11 +226,16 @@ export default function EsportsPredictions() {
     if (success) {
       setNewlyCreatedMarketId(expectedMarketId);
       await fetchMarkets();
-      // Switch to markets tab and scroll to it
+      // Switch to markets tab and scroll to the specific market card
       setActiveTab('markets');
       setTimeout(() => {
-        marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        const marketCard = document.getElementById(`market-card-${expectedMarketId}`);
+        if (marketCard) {
+          marketCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 200);
       // Clear highlight after 5 seconds
       setTimeout(() => {
         setNewlyCreatedMarketId(null);
@@ -768,7 +773,8 @@ export default function EsportsPredictions() {
                     
                     return (
                       <Card 
-                        key={market.market_id} 
+                        key={market.market_id}
+                        id={`market-card-${market.market_id}`}
                         className={`hover:border-primary/50 transition-all duration-300 ${
                           newlyCreatedMarketId === market.market_id 
                             ? 'animate-pulse ring-2 ring-primary shadow-lg shadow-primary/20' 
