@@ -97,6 +97,10 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
       if (data?.betting_closed || data?.detail === 'Betting has closed for this market') {
         throw new Error('BETTING_CLOSED');
       }
+      // Handle wallet/deposit address creation errors
+      if (data?.detail?.includes('Failed to create deposit address') || data?.detail?.includes('Cannot connect to host')) {
+        throw new Error('The betting service is temporarily unavailable. Please try again in a few minutes.');
+      }
       throw new Error(data?.detail || data?.error || 'Request failed');
     }
 
