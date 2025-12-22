@@ -821,7 +821,7 @@ export default function CricketPredictions() {
 
             {/* Refund info */}
             <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
-              <p><strong>Refund Policy:</strong> If no opposing bets by market close, your full stake will be refunded (no fees). Winnings have a 0.4% fee on profits only.</p>
+              <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-result, abandoned, or cancelled match. 0.4% fee on winnings only.</p>
             </div>
             
             {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
