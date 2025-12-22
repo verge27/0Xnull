@@ -287,9 +287,14 @@ export function MultibetDepositModal({
 
               {/* Polling Status */}
               {polling && (
-                <div className="flex items-center justify-center gap-2 text-sm py-2 px-4 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 rounded-lg border border-amber-500/30">
-                  <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">Checking for deposit...</span>
+                <div className="flex flex-col items-center gap-2 text-sm py-2 px-4 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 rounded-lg border border-amber-500/30">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                    <span className="text-amber-600 dark:text-amber-400 font-medium">Checking for deposit...</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Note: Wallet creation may take up to 90 seconds
+                  </p>
                 </div>
               )}
             </div>
