@@ -233,7 +233,8 @@ export function useEsportsEvents() {
 
   const getEventResult = useCallback(async (eventId: string, game: string): Promise<EsportsResult | null> => {
     try {
-      return await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`);
+      // Results can legitimately be missing while a match is live or recently finished.
+      return await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
     } catch (e) {
       console.error('Failed to get event result:', e);
       return null;
