@@ -23,8 +23,9 @@ import { CreateMarketDialog } from '@/components/CreateMarketDialog';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
+import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -267,6 +268,13 @@ export default function CryptoPredictions() {
       return;
     }
     
+    // Check if betting closes soon and warn user
+    if (isBettingClosingSoon(selectedMarket, 5)) {
+      toast.warning('⚠️ Betting closes soon!', {
+        description: 'This market closes in less than 5 minutes. Your deposit may not confirm in time. Monero blocks take ~2 minutes on average.',
+      });
+    }
+    
     setPlacingBet(true);
     setElapsedSeconds(0);
     
@@ -339,7 +347,7 @@ export default function CryptoPredictions() {
     : ORACLE_ASSETS.filter(a => a.category === selectedCategory);
 
   const activeMarkets = markets
-    .filter(m => m.resolved === 0)
+    .filter(m => m.resolved === 0 && isBettingOpen(m))
     .sort((a, b) => {
       const poolA = a.yes_pool_xmr + a.no_pool_xmr;
       const poolB = b.yes_pool_xmr + b.no_pool_xmr;
@@ -347,6 +355,11 @@ export default function CryptoPredictions() {
       if (poolB > 0 && poolA === 0) return 1;
       return poolB - poolA;
     });
+  
+  // Closed markets - not resolved but betting closed
+  const closedMarkets = markets
+    .filter(m => m.resolved === 0 && !isBettingOpen(m))
+    .sort((a, b) => a.resolution_time - b.resolution_time);
 
   return (
     <div className="min-h-screen bg-background relative">

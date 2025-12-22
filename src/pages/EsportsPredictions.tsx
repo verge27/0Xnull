@@ -30,7 +30,7 @@ import { GameCommunityLinks, getDiscordCommunityForGame, getRedditCommunityForGa
 import { LiveOddsOverlay } from '@/components/LiveOddsOverlay';
 import { RecentBetsTicker } from '@/components/RecentBetsTicker';
 import { BetSlipFloatingButton } from '@/components/BetSlipFloatingButton';
-import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
+import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -181,6 +181,13 @@ export default function EsportsPredictions() {
     if (payoutAddress.length < 95) {
       toast.error('Monero address is too short');
       return;
+    }
+    
+    // Check if betting closes soon and warn user
+    if (isBettingClosingSoon(selectedMarket, 5)) {
+      toast.warning('⚠️ Betting closes soon!', {
+        description: 'This market closes in less than 5 minutes. Your deposit may not confirm in time. Monero blocks take ~2 minutes on average.',
+      });
     }
     
     setPlacingBet(true);
@@ -426,6 +433,12 @@ export default function EsportsPredictions() {
       if (poolB > 0 && poolA === 0) return 1;
       return poolB - poolA;
     });
+  
+  // Closed markets - not resolved but betting closed (awaiting result)
+  const closedMarkets = markets
+    .filter(m => m.resolved === 0 && !isBettingOpen(m))
+    .sort((a, b) => a.resolution_time - b.resolution_time);
+    
   const resolvedMarkets = markets
     .filter(m => m.resolved === 1)
     .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
@@ -888,6 +901,72 @@ export default function EsportsPredictions() {
                 </div>
               )}
             </TabsContent>
+
+            {/* Closed Markets Section - Awaiting Result */}
+            {closedMarkets.length > 0 && (
+              <div className="space-y-4 mt-8">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-zinc-400" />
+                  Closed Markets ({closedMarkets.length})
+                  <Badge variant="secondary" className="text-xs">Awaiting Result</Badge>
+                </h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {closedMarkets.map(market => {
+                    const odds = getOdds(market);
+                    const marketBets = getBetsForMarket(market.market_id);
+                    
+                    return (
+                      <Card 
+                        key={market.market_id}
+                        className="opacity-75 border-zinc-700/50"
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-base">{market.title}</CardTitle>
+                              <p className="text-xs text-muted-foreground mt-1">{market.description}</p>
+                            </div>
+                            <Badge className="bg-zinc-700 text-zinc-300">
+                              <Lock className="w-3 h-3 mr-1" />
+                              CLOSED
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex gap-2 mb-4">
+                            <div className="flex-1 p-2 rounded bg-emerald-600/20 border border-emerald-600/30 text-center">
+                              <div className="text-lg font-bold text-emerald-500">{odds.yes}%</div>
+                              <div className="text-xs text-muted-foreground">YES</div>
+                              <div className="text-xs font-mono text-emerald-500/70">{market.yes_pool_xmr.toFixed(4)} XMR</div>
+                            </div>
+                            <div className="flex-1 p-2 rounded bg-red-600/20 border border-red-600/30 text-center">
+                              <div className="text-lg font-bold text-red-500">{odds.no}%</div>
+                              <div className="text-xs text-muted-foreground">NO</div>
+                              <div className="text-xs font-mono text-red-500/70">{market.no_pool_xmr.toFixed(4)} XMR</div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground mb-2 text-center">
+                            Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
+                          </div>
+                          
+                          <div className="flex items-center justify-center gap-2 p-2 rounded bg-zinc-800/50 border border-zinc-700">
+                            <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
+                            <span className="text-sm text-amber-400">Awaiting Resolution</span>
+                          </div>
+                          
+                          {marketBets.length > 0 && (
+                            <div className="mt-3 pt-3 border-t">
+                              <p className="text-xs text-muted-foreground">You have {marketBets.length} bet(s) on this market</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Results Tab */}
             <TabsContent value="results" className="space-y-4">

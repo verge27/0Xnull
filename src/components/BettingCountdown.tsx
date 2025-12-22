@@ -174,3 +174,21 @@ export function isBettingOpen(market: { betting_open?: boolean; betting_closes_a
   const closes = market.betting_closes_at || market.resolution_time || 0;
   return now < closes;
 }
+
+// Helper to check if betting closes within a certain number of minutes
+export function isBettingClosingSoon(market: { betting_open?: boolean; betting_closes_at?: number; resolution_time?: number }, minutes: number = 5): boolean {
+  if (!isBettingOpen(market)) return false;
+  
+  const now = Math.floor(Date.now() / 1000);
+  const closes = market.betting_closes_at || market.resolution_time || 0;
+  const diff = closes - now;
+  
+  return diff > 0 && diff < minutes * 60;
+}
+
+// Helper to show warning toast for bets on markets closing soon
+export function showBettingClosingSoonWarning(toast: (message: string, options?: { description?: string }) => void): void {
+  toast('⚠️ Betting closes soon!', {
+    description: 'This market closes in less than 5 minutes. Your deposit may not confirm in time if sent now. Monero blocks take ~2 minutes on average.',
+  });
+}
