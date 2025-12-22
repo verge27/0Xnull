@@ -30,6 +30,7 @@ import { SportsMatchCard } from '@/components/SportsMatchCard';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
+import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock } from 'lucide-react';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
@@ -1028,6 +1029,9 @@ export default function SportsPredictions() {
               />
             </TabsContent>
           </Tabs>
+          
+          {/* Closed Markets Section */}
+          <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
 
           {/* Scorebat Live Scores */}
           <div className="mt-8">
