@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 
@@ -15,6 +15,11 @@ export interface EsportsEvent {
   start_timestamp?: number;
   scheduled_at?: string | number;
   status?: 'upcoming' | 'live' | 'completed' | 'not_started' | 'running';
+  // Live score data
+  score_a?: number;
+  score_b?: number;
+  games_played?: number;
+  current_game?: number;
 }
 
 export interface EsportsResult {
@@ -30,6 +35,16 @@ export interface EsportsResult {
 export interface EsportsGame {
   key: string;
   name: string;
+}
+
+export interface LiveScores {
+  [eventId: string]: {
+    score_a: number;
+    score_b: number;
+    games_played?: number;
+    current_game?: number;
+    last_updated: number;
+  };
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -98,8 +113,11 @@ export const ESPORTS_CATEGORIES = [
 export function useEsportsEvents() {
   const [events, setEvents] = useState<EsportsEvent[]>([]);
   const [liveEvents, setLiveEvents] = useState<EsportsEvent[]>([]);
+  const [liveScores, setLiveScores] = useState<LiveScores>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [scoresPollingActive, setScoresPollingActive] = useState(false);
+  const scoresIntervalRef = useRef<number | null>(null);
 
   const fetchEvents = useCallback(async (game?: string, category?: string) => {
     setLoading(true);
@@ -126,9 +144,72 @@ export function useEsportsEvents() {
     try {
       const data = await esportsRequest<{ events: EsportsEvent[] }>('/live');
       setLiveEvents(data.events || []);
+      return data.events || [];
     } catch (e) {
       console.error('Failed to fetch live events:', e);
+      return [];
     }
+  }, []);
+
+  // Fetch live scores for specific events
+  const fetchLiveScores = useCallback(async (eventIds: string[], games: string[]) => {
+    const newScores: LiveScores = { ...liveScores };
+    
+    await Promise.all(
+      eventIds.map(async (eventId, index) => {
+        try {
+          const game = games[index] || 'csgo';
+          const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`);
+          if (result) {
+            newScores[eventId] = {
+              score_a: result.score_a || 0,
+              score_b: result.score_b || 0,
+              last_updated: Date.now(),
+            };
+          }
+        } catch (e) {
+          // Score not available yet - this is normal for in-progress matches
+          console.log(`Score not available for event ${eventId}`);
+        }
+      })
+    );
+    
+    setLiveScores(newScores);
+    return newScores;
+  }, [liveScores]);
+
+  // Start polling for live scores
+  const startScoresPolling = useCallback((eventIds: string[], games: string[]) => {
+    if (scoresIntervalRef.current) {
+      clearInterval(scoresIntervalRef.current);
+    }
+    
+    setScoresPollingActive(true);
+    
+    // Fetch immediately
+    fetchLiveScores(eventIds, games);
+    
+    // Then poll every 30 seconds
+    scoresIntervalRef.current = window.setInterval(() => {
+      fetchLiveScores(eventIds, games);
+    }, 30000);
+  }, [fetchLiveScores]);
+
+  const stopScoresPolling = useCallback(() => {
+    if (scoresIntervalRef.current) {
+      clearInterval(scoresIntervalRef.current);
+      scoresIntervalRef.current = null;
+    }
+    setScoresPollingActive(false);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (scoresIntervalRef.current) {
+        clearInterval(scoresIntervalRef.current);
+      }
+    };
   }, []);
 
   const getEventResult = useCallback(async (eventId: string, game: string): Promise<EsportsResult | null> => {
@@ -197,10 +278,15 @@ export function useEsportsEvents() {
   return {
     events,
     liveEvents,
+    liveScores,
     loading,
     error,
+    scoresPollingActive,
     fetchEvents,
     fetchLiveEvents,
+    fetchLiveScores,
+    startScoresPolling,
+    stopScoresPolling,
     getEventResult,
     createEsportsMarket,
   };

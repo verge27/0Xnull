@@ -32,14 +32,25 @@ import { RecentBetsTicker } from '@/components/RecentBetsTicker';
 import { BetSlipFloatingButton } from '@/components/BetSlipFloatingButton';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
+import { LiveScoreBadge, InlineScore } from '@/components/LiveScoreBadge';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function EsportsPredictions() {
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
-  const { events, liveEvents, loading: eventsLoading, fetchEvents, fetchLiveEvents, createEsportsMarket } = useEsportsEvents();
+  const { 
+    events, 
+    liveEvents, 
+    liveScores,
+    loading: eventsLoading, 
+    fetchEvents, 
+    fetchLiveEvents,
+    startScoresPolling,
+    stopScoresPolling,
+    createEsportsMarket 
+  } = useEsportsEvents();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
   
@@ -101,8 +112,24 @@ export default function EsportsPredictions() {
       fetchLiveEvents();
     }, 30000);
     
-    return () => clearInterval(interval);
-  }, [fetchEvents, fetchLiveEvents]);
+    return () => {
+      clearInterval(interval);
+      stopScoresPolling();
+    };
+  }, [fetchEvents, fetchLiveEvents, stopScoresPolling]);
+
+  // Start polling for live scores when we have live events
+  useEffect(() => {
+    if (liveEvents.length > 0) {
+      const eventIds = liveEvents.map(e => e.event_id || e.id || '').filter(Boolean);
+      const games = liveEvents.map(e => e.game);
+      if (eventIds.length > 0) {
+        startScoresPolling(eventIds, games);
+      }
+    } else {
+      stopScoresPolling();
+    }
+  }, [liveEvents, startScoresPolling, stopScoresPolling]);
 
   const fetchMarkets = async () => {
     setLoading(true);
@@ -643,7 +670,13 @@ export default function EsportsPredictions() {
                                 {getGameLabel(event.game)}
                               </Badge>
                               {isLive && (
-                                <Badge className="bg-red-600 text-xs animate-pulse">LIVE</Badge>
+                                <LiveScoreBadge
+                                  eventId={event.event_id || event.id || ''}
+                                  teamA={event.team_a}
+                                  teamB={event.team_b}
+                                  liveScores={liveScores}
+                                  variant="compact"
+                                />
                               )}
                             </div>
                             {marketStatus === 'both' && (
@@ -651,29 +684,63 @@ export default function EsportsPredictions() {
                             )}
                           </div>
                           
-                          <div className="flex items-center justify-between gap-2 mb-3">
-                            <div className="flex items-center gap-2 flex-1">
-                              {event.team_a_image ? (
-                                <img src={event.team_a_image} alt={event.team_a} className="w-8 h-8 object-contain" />
-                              ) : (
-                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
-                                  {event.team_a.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
-                              <span className="font-medium text-sm truncate">{event.team_a}</span>
+                          {/* Live score display for running matches */}
+                          {isLive && liveScores[event.event_id || event.id || ''] && (
+                            <div className="flex items-center justify-center gap-3 p-2 mb-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                              <div className="flex items-center gap-2 flex-1 justify-end">
+                                {event.team_a_image ? (
+                                  <img src={event.team_a_image} alt={event.team_a} className="w-6 h-6 object-contain" />
+                                ) : null}
+                                <span className={`font-medium text-sm ${liveScores[event.event_id || event.id || '']?.score_a > liveScores[event.event_id || event.id || '']?.score_b ? 'text-emerald-400' : ''}`}>
+                                  {event.team_a}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className={`text-2xl font-bold font-mono ${liveScores[event.event_id || event.id || '']?.score_a > liveScores[event.event_id || event.id || '']?.score_b ? 'text-emerald-400' : 'text-foreground'}`}>
+                                  {liveScores[event.event_id || event.id || '']?.score_a}
+                                </span>
+                                <span className="text-lg text-muted-foreground">:</span>
+                                <span className={`text-2xl font-bold font-mono ${liveScores[event.event_id || event.id || '']?.score_b > liveScores[event.event_id || event.id || '']?.score_a ? 'text-emerald-400' : 'text-foreground'}`}>
+                                  {liveScores[event.event_id || event.id || '']?.score_b}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className={`font-medium text-sm ${liveScores[event.event_id || event.id || '']?.score_b > liveScores[event.event_id || event.id || '']?.score_a ? 'text-emerald-400' : ''}`}>
+                                  {event.team_b}
+                                </span>
+                                {event.team_b_image ? (
+                                  <img src={event.team_b_image} alt={event.team_b} className="w-6 h-6 object-contain" />
+                                ) : null}
+                              </div>
                             </div>
-                            <span className="text-muted-foreground font-bold">VS</span>
-                            <div className="flex items-center gap-2 flex-1 justify-end">
-                              <span className="font-medium text-sm truncate">{event.team_b}</span>
-                              {event.team_b_image ? (
-                                <img src={event.team_b_image} alt={event.team_b} className="w-8 h-8 object-contain" />
-                              ) : (
-                                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
-                                  {event.team_b.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
+                          )}
+
+                          {/* Standard team display (when not showing live score) */}
+                          {(!isLive || !liveScores[event.event_id || event.id || '']) && (
+                            <div className="flex items-center justify-between gap-2 mb-3">
+                              <div className="flex items-center gap-2 flex-1">
+                                {event.team_a_image ? (
+                                  <img src={event.team_a_image} alt={event.team_a} className="w-8 h-8 object-contain" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                    {event.team_a.substring(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                                <span className="font-medium text-sm truncate">{event.team_a}</span>
+                              </div>
+                              <span className="text-muted-foreground font-bold">VS</span>
+                              <div className="flex items-center gap-2 flex-1 justify-end">
+                                <span className="font-medium text-sm truncate">{event.team_b}</span>
+                                {event.team_b_image ? (
+                                  <img src={event.team_b_image} alt={event.team_b} className="w-8 h-8 object-contain" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold">
+                                    {event.team_b.substring(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                           
                           <p className="text-xs text-muted-foreground mb-2 truncate">{event.tournament}</p>
                           
