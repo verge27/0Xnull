@@ -200,9 +200,11 @@ Returns single deposit address for all legs.
 
 **SimpleX Chat** — End-to-end encrypted, no phone/email required (only contact method)
 
-![SimpleX Support QR](public/images/simplex-support-qr.png)
+<p align="center">
+  <img src="public/images/simplex-support-qr.png" alt="SimpleX Support QR" width="200" />
+</p>
 
-No email support. Privacy by default.
+<p align="center">No email support. Privacy by default.</p>
 
 ---
 
