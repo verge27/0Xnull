@@ -265,7 +265,25 @@ export default function EsportsPredictions() {
     return <Badge className="bg-green-600"><Clock className="w-3 h-3 mr-1" /> Open</Badge>;
   };
 
-  const formatGameTime = (timestamp: number) => {
+  const formatGameTime = (timestamp?: number | string) => {
+    // Handle ISO string (scheduled_at from API)
+    if (typeof timestamp === 'string') {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return 'TBD';
+      }
+      return date.toLocaleString('en-GB', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'UTC',
+      }) + ' UTC';
+    }
+    
+    // Handle Unix timestamp (number)
     if (!timestamp || isNaN(timestamp) || timestamp <= 0) {
       return 'TBD';
     }
@@ -642,7 +660,7 @@ export default function EsportsPredictions() {
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                {formatGameTime(event.start_timestamp)}
+                                {formatGameTime(event.scheduled_at || event.start_timestamp)}
                               </span>
                               {getGameDownloadUrl(event.game) && (
                                 <a
