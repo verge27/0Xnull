@@ -602,6 +602,8 @@ export default function SportsPredictions() {
                           setBetSide(side);
                           setBetDialogOpen(true);
                         }}
+                        onAddToSlip={betSlip.addToBetSlip}
+                        onOpenSlip={() => betSlip.setIsOpen(true)}
                       />
                     ))}
                   </div>
@@ -656,6 +658,8 @@ export default function SportsPredictions() {
                             setBetSide(side);
                             setBetDialogOpen(true);
                           }}
+                          onAddToSlip={betSlip.addToBetSlip}
+                          onOpenSlip={() => betSlip.setIsOpen(true)}
                         />
                       );
                     })}
