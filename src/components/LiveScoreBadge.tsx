@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Activity, Radio } from 'lucide-react';
+import { Activity, Radio, Clock } from 'lucide-react';
 import { type LiveScores } from '@/hooks/useEsportsEvents';
 
 interface LiveScoreBadgeProps {
@@ -8,6 +8,8 @@ interface LiveScoreBadgeProps {
   teamB: string;
   liveScores: LiveScores;
   variant?: 'compact' | 'full';
+  /** When true and no score yet, show "Awaiting data" instead of just LIVE */
+  showNoDataHint?: boolean;
 }
 
 export function LiveScoreBadge({ 
@@ -15,11 +17,27 @@ export function LiveScoreBadge({
   teamA, 
   teamB, 
   liveScores, 
-  variant = 'compact' 
+  variant = 'compact',
+  showNoDataHint = false,
 }: LiveScoreBadgeProps) {
   const score = liveScores[eventId];
   
   if (!score) {
+    // Show a helpful "awaiting data" hint when requested
+    if (showNoDataHint) {
+      return (
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="border-red-500/50 text-red-400 animate-pulse gap-1">
+            <Radio className="w-3 h-3" />
+            LIVE
+          </Badge>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="w-3 h-3" />
+            Awaiting data
+          </span>
+        </div>
+      );
+    }
     return (
       <Badge variant="outline" className="border-red-500/50 text-red-400 animate-pulse gap-1">
         <Radio className="w-3 h-3" />
