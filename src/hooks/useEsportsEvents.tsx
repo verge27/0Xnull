@@ -70,7 +70,18 @@ async function esportsRequest<T>(
     data = { error: text };
   }
 
-  // Allow 404s for score requests (match in progress, no result yet)
+  // Handle the new "soft" response format from the proxy for /result endpoints
+  // Proxy returns { found: boolean, result?: T, detail?: string } with HTTP 200
+  if (typeof data?.found === 'boolean') {
+    if (!data.found) {
+      // Expected "not found" - return null gracefully
+      return null;
+    }
+    // Unwrap the actual result
+    return (data.result ?? data) as T;
+  }
+
+  // Legacy handling: Allow 404s for score requests (match in progress, no result yet)
   if (res.status === 404 && (options?.allowNotFound || data?.detail === 'Match not found')) {
     return null;
   }
