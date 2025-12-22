@@ -107,14 +107,9 @@ export function useSportsEvents() {
     }
   }, []);
 
-  const getEventResult = useCallback(async (eventId: string): Promise<SportsScore | null> => {
-    try {
-      return await sportsRequest<SportsScore>(`/result/${eventId}`);
-    } catch (e) {
-      console.error('Failed to get event result:', e);
-      return null;
-    }
-  }, []);
+  // NOTE: getEventResult removed - /api/sports/result/{id} does not exist.
+  // Resolution is handled server-side by 0xNull's cron job (POST /api/predictions/resolve-due).
+  // To check if a market is resolved, poll /api/predictions/pool/{market_id} instead.
 
   // Fetch live scores from ESPN (unofficial API) with backoff for repeated failures
   const fetchLiveScores = useCallback(async (eventsToFetch: SportsEvent[]) => {
@@ -370,7 +365,6 @@ export function useSportsEvents() {
     pollingActive,
     lastUpdated,
     fetchEvents,
-    getEventResult,
     fetchLiveScores,
     startLiveScorePolling,
     stopLiveScorePolling,

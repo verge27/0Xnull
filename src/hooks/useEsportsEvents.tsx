@@ -190,78 +190,21 @@ export function useEsportsEvents() {
     }
   }, []);
 
-  // Fetch live scores for specific events with backoff for repeated not-found
-  const fetchLiveScores = useCallback(async (eventIds: string[], games: string[]) => {
-    const newScores: LiveScores = { ...liveScores };
-    const now = Date.now();
-
-    await Promise.all(
-      eventIds.map(async (eventId, index) => {
-        // Check if this event is in backoff period
-        const backoff = backoffStateRef.current[eventId];
-        if (backoff && backoff.backoffUntil > now) {
-          // Still in backoff - skip this event
-          return;
-        }
-
-        try {
-          const game = games[index] || 'csgo';
-          // Use allowNotFound since 404 is expected for in-progress matches
-          const result = await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
-          
-          if (result) {
-            // Success - reset backoff state and update scores
-            backoffStateRef.current[eventId] = { consecutiveNotFound: 0, backoffUntil: 0 };
-            newScores[eventId] = {
-              score_a: result.score_a || 0,
-              score_b: result.score_b || 0,
-              last_updated: Date.now(),
-            };
-          } else {
-            // Not found - increment consecutive count
-            const currentState = backoffStateRef.current[eventId] || { consecutiveNotFound: 0, backoffUntil: 0 };
-            const newCount = currentState.consecutiveNotFound + 1;
-            
-            if (newCount >= BACKOFF_THRESHOLD) {
-              // Enter backoff period
-              backoffStateRef.current[eventId] = {
-                consecutiveNotFound: newCount,
-                backoffUntil: now + BACKOFF_DURATION_MS,
-              };
-              console.log(`Backoff activated for event ${eventId}: pausing for 2 minutes after ${newCount} not-found responses`);
-            } else {
-              backoffStateRef.current[eventId] = { consecutiveNotFound: newCount, backoffUntil: 0 };
-            }
-          }
-        } catch (e) {
-          // Never let one failing score request crash the page/polling loop
-          console.warn('Live score fetch failed:', e);
-        }
-      })
-    );
-
-    setLiveScores(newScores);
-    // Expose backoff states to UI
-    setBackoffStates({ ...backoffStateRef.current });
-    return newScores;
+  // NOTE: Live score polling removed - the /api/esports/result/ endpoint does not exist.
+  // Resolution happens server-side via 0xNull's cron job (POST /api/predictions/resolve-due).
+  // To check if a market is resolved, poll /api/predictions/pool/{market_id} instead.
+  
+  // Stub functions kept for API compatibility but they no-op
+  const fetchLiveScores = useCallback(async (_eventIds: string[], _games: string[]) => {
+    // Endpoint doesn't exist - live scores not available for esports from this API
+    console.log('fetchLiveScores: esports result endpoint does not exist, skipping');
+    return liveScores;
   }, [liveScores]);
 
-  // Start polling for live scores
-  const startScoresPolling = useCallback((eventIds: string[], games: string[]) => {
-    if (scoresIntervalRef.current) {
-      clearInterval(scoresIntervalRef.current);
-    }
-    
-    setScoresPollingActive(true);
-    
-    // Fetch immediately
-    fetchLiveScores(eventIds, games);
-    
-    // Then poll every 30 seconds
-    scoresIntervalRef.current = window.setInterval(() => {
-      fetchLiveScores(eventIds, games);
-    }, 30000);
-  }, [fetchLiveScores]);
+  const startScoresPolling = useCallback((_eventIds: string[], _games: string[]) => {
+    // No-op: endpoint doesn't exist
+    console.log('startScoresPolling: esports result endpoint does not exist, polling disabled');
+  }, []);
 
   const stopScoresPolling = useCallback(() => {
     if (scoresIntervalRef.current) {
@@ -280,15 +223,8 @@ export function useEsportsEvents() {
     };
   }, []);
 
-  const getEventResult = useCallback(async (eventId: string, game: string): Promise<EsportsResult | null> => {
-    try {
-      // Results can legitimately be missing while a match is live or recently finished.
-      return await esportsRequest<EsportsResult>(`/result/${eventId}?game=${game}`, { allowNotFound: true });
-    } catch (e) {
-      console.error('Failed to get event result:', e);
-      return null;
-    }
-  }, []);
+  // NOTE: getEventResult removed - /api/esports/result/{id} does not exist.
+  // Resolution is handled server-side by 0xNull's cron job.
 
   const createEsportsMarket = useCallback(async (
     event: EsportsEvent,
@@ -357,7 +293,6 @@ export function useEsportsEvents() {
     fetchLiveScores,
     startScoresPolling,
     stopScoresPolling,
-    getEventResult,
     createEsportsMarket,
   };
 }
