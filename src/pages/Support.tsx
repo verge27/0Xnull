@@ -1,8 +1,7 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MessageSquare, Shield, ExternalLink } from 'lucide-react';
+import { MessageSquare, Shield } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const SIMPLEX_LINK = 'https://smp18.simplex.im/g#o0awCwkgXWzbKUyPb5Z-hOOWZAoghJl2SfyzOHv4Uas';
@@ -37,8 +36,8 @@ const Support = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  For real-time, private support, join our SimpleX group. Scan the QR code or tap the link below.
+                <p className="text-muted-foreground text-center">
+                  For real-time, private support, join our SimpleX group. Scan the QR code below.
                 </p>
                 
                 {/* QR Code */}
@@ -53,19 +52,8 @@ const Support = () => {
                   </div>
                 </div>
                 
-                <Button asChild className="w-full">
-                  <a 
-                    href={SIMPLEX_LINK}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Open in SimpleX
-                  </a>
-                </Button>
-                
-                <p className="text-xs text-muted-foreground text-center">
-                  SimpleX is a privacy-focused messenger with no user IDs
+                <p className="text-sm text-muted-foreground text-center">
+                  No email support. Privacy by default.
                 </p>
               </CardContent>
             </Card>
