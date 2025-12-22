@@ -971,7 +971,7 @@ export default function EsportsPredictions() {
             </TabsContent>
 
             {/* Closed Markets Section */}
-            <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
+            <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} onMarketsUpdate={fetchMarkets} />
 
             {/* Results Tab */}
             <TabsContent value="results" className="space-y-4">

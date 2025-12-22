@@ -1031,7 +1031,7 @@ export default function SportsPredictions() {
           </Tabs>
           
           {/* Closed Markets Section */}
-          <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
+          <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} onMarketsUpdate={fetchMarkets} />
 
           {/* Scorebat Live Scores */}
           <div className="mt-8">
