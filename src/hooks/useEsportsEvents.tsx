@@ -151,6 +151,7 @@ export function useEsportsEvents() {
   const [events, setEvents] = useState<EsportsEvent[]>([]);
   const [liveEvents, setLiveEvents] = useState<EsportsEvent[]>([]);
   const [liveScores, setLiveScores] = useState<LiveScores>({});
+  const [backoffStates, setBackoffStates] = useState<Record<string, BackoffState>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scoresPollingActive, setScoresPollingActive] = useState(false);
@@ -240,6 +241,8 @@ export function useEsportsEvents() {
     );
 
     setLiveScores(newScores);
+    // Expose backoff states to UI
+    setBackoffStates({ ...backoffStateRef.current });
     return newScores;
   }, [liveScores]);
 
@@ -345,6 +348,7 @@ export function useEsportsEvents() {
     events,
     liveEvents,
     liveScores,
+    backoffStates,
     loading,
     error,
     scoresPollingActive,

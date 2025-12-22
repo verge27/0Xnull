@@ -34,6 +34,7 @@ import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/compone
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { LiveScoreBadge, InlineScore } from '@/components/LiveScoreBadge';
 import { PendingDataIndicator } from '@/components/PendingDataIndicator';
+import { BackoffBadge } from '@/components/BackoffBadge';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -45,6 +46,7 @@ export default function EsportsPredictions() {
     events, 
     liveEvents, 
     liveScores,
+    backoffStates,
     loading: eventsLoading, 
     fetchEvents, 
     fetchLiveEvents,
@@ -719,7 +721,15 @@ export default function EsportsPredictions() {
 
                           {/* "Awaiting data" placeholder for live matches without score yet */}
                           {isLive && !liveScores[event.event_id || event.id || ''] && (
-                            <PendingDataIndicator type="score" className="mb-3" />
+                            <div className="flex items-center justify-center gap-2 mb-3">
+                              <PendingDataIndicator type="score" className="flex-1" />
+                              {/* Show backoff badge if in backoff mode */}
+                              {backoffStates[event.event_id || event.id || '']?.backoffUntil > Date.now() && (
+                                <BackoffBadge 
+                                  backoffUntil={backoffStates[event.event_id || event.id || ''].backoffUntil} 
+                                />
+                              )}
+                            </div>
                           )}
 
                           {/* Standard team display (when not showing live score) */}
