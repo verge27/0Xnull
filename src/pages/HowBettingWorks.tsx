@@ -65,7 +65,7 @@ export default function HowBettingWorks() {
                 <li>All bets go into a shared pool</li>
                 <li>Odds are determined by the ratio of money on each side</li>
                 <li>Winners split the total pool proportionally to their stake</li>
-                <li>The house takes a flat <strong className="text-foreground">0.4% fee</strong>, not a spread</li>
+                <li>The house takes a flat <strong className="text-foreground">0.4% fee on winnings only</strong> — no fee on losses, refunds, or no-contest</li>
               </ul>
             </CardContent>
           </Card>
@@ -322,11 +322,13 @@ export default function HowBettingWorks() {
           {/* Edge Case */}
           <Card>
             <CardHeader>
-              <CardTitle>Edge Case: One-Sided Market</CardTitle>
+              <CardTitle>Edge Case: Refunds & No-Contest</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">What if only one side has bets?</p>
+              <p className="text-muted-foreground">There are two scenarios where you get a full refund with <strong className="text-foreground">zero fees</strong>:</p>
+              
               <div className="p-4 rounded-lg bg-muted/50">
+                <p className="text-sm font-semibold text-foreground mb-2">1. One-Sided Market (Unopposed)</p>
                 <p className="text-sm text-muted-foreground">
                   <strong className="text-foreground">Example:</strong> "Will Reynor beat Scarlett?"
                 </p>
@@ -334,9 +336,23 @@ export default function HowBettingWorks() {
                   <li>YES Pool: $500</li>
                   <li>NO Pool: $0</li>
                 </ul>
+                <p className="text-sm text-muted-foreground mt-2">
+                  If only one side has bets, all bettors get their full money back. <strong className="text-foreground">No fee applies</strong> — it's a complete refund.
+                </p>
               </div>
+
+              <div className="p-4 rounded-lg bg-muted/50">
+                <p className="text-sm font-semibold text-foreground mb-2">2. No-Contest / Draw / Cancelled Event</p>
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Example:</strong> A fight ends in a No Contest, a match is postponed, or an event is cancelled.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  All bettors on both sides receive a <strong className="text-foreground">full refund with zero fees</strong>. Your stake is returned in full.
+                </p>
+              </div>
+
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Resolution:</strong> If only one side has bets (unopposed market), all bettors get their full money back. <strong className="text-foreground">No fee applies</strong> — it's a complete refund. This is why markets need liquidity on both sides to be interesting.
+                <strong className="text-foreground">Bottom line:</strong> You only pay the 0.4% fee when you <em>win</em>. Losses, refunds, and no-contest scenarios are completely fee-free.
               </p>
             </CardContent>
           </Card>
