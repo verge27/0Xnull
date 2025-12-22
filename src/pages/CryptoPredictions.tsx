@@ -714,7 +714,7 @@ export default function CryptoPredictions() {
         </Tabs>
         
         {/* Closed Markets Section */}
-        <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} />
+        <ClosedMarketsSection markets={closedMarkets} getBetsForMarket={getBetsForMarket} onMarketsUpdate={fetchMarkets} />
       </main>
 
       {/* Bet Dialog */}

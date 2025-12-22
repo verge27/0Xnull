@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lock, RefreshCw, Clock, Bell, Volume2 } from 'lucide-react';
-import { type PredictionMarket } from '@/services/api';
+import { Lock, RefreshCw, Clock, Bell, Volume2, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { type PredictionMarket, api } from '@/services/api';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 // Simple notification sound using Web Audio API
 const playNotificationSound = () => {
@@ -120,21 +121,55 @@ function ResolutionCountdown({ resolutionTime, marketTitle, soundEnabled }: {
 interface ClosedMarketsSectionProps {
   markets: PredictionMarket[];
   getBetsForMarket: (marketId: string) => any[];
+  onMarketsUpdate?: () => void;
 }
 
-export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarketsSectionProps) {
+export function ClosedMarketsSection({ markets, getBetsForMarket, onMarketsUpdate }: ClosedMarketsSectionProps) {
+  const { isAdmin } = useIsAdmin();
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    // Load from localStorage
     return localStorage.getItem('resolution-sound-enabled') !== 'false';
   });
+  const [resolvingMarket, setResolvingMarket] = useState<string | null>(null);
 
   const toggleSound = () => {
     const newValue = !soundEnabled;
     setSoundEnabled(newValue);
     localStorage.setItem('resolution-sound-enabled', String(newValue));
     if (newValue) {
-      playNotificationSound(); // Play a test sound
+      playNotificationSound();
     }
+  };
+
+  const handleResolve = async (marketId: string, outcome: 'YES' | 'NO') => {
+    setResolvingMarket(marketId);
+    try {
+      const result = await api.resolveMarket(marketId, outcome);
+      if (result.success) {
+        toast.success(`Market resolved as ${outcome}`);
+        onMarketsUpdate?.();
+      } else {
+        toast.error(result.message || 'Failed to resolve market');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to resolve market';
+      toast.error(message);
+    } finally {
+      setResolvingMarket(null);
+    }
+  };
+
+  // Calculate how long past resolution time
+  const getOverdueStatus = (market: PredictionMarket) => {
+    const now = Math.floor(Date.now() / 1000);
+    const overdueSeconds = now - market.resolution_time;
+    if (overdueSeconds <= 0) return null;
+    
+    const hours = Math.floor(overdueSeconds / 3600);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return { text: `${days}d overdue`, severity: 'high' as const };
+    if (hours > 2) return { text: `${hours}h overdue`, severity: 'medium' as const };
+    return { text: 'Just passed', severity: 'low' as const };
   };
 
   if (markets.length === 0) return null;
@@ -171,11 +206,12 @@ export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarket
         {markets.map(market => {
           const odds = getOdds(market);
           const marketBets = getBetsForMarket(market.market_id);
+          const overdueStatus = getOverdueStatus(market);
           
           return (
             <Card 
               key={market.market_id}
-              className="opacity-75 border-zinc-700/50"
+              className={`opacity-75 border-zinc-700/50 ${overdueStatus?.severity === 'high' ? 'border-amber-600/50' : ''}`}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
@@ -183,10 +219,25 @@ export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarket
                     <CardTitle className="text-base">{market.title}</CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">{market.description}</p>
                   </div>
-                  <Badge className="bg-zinc-700 text-zinc-300">
-                    <Lock className="w-3 h-3 mr-1" />
-                    CLOSED
-                  </Badge>
+                  <div className="flex flex-col gap-1 items-end">
+                    <Badge className="bg-zinc-700 text-zinc-300">
+                      <Lock className="w-3 h-3 mr-1" />
+                      CLOSED
+                    </Badge>
+                    {overdueStatus && (
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${
+                          overdueStatus.severity === 'high' ? 'border-amber-500 text-amber-500' :
+                          overdueStatus.severity === 'medium' ? 'border-yellow-500 text-yellow-500' :
+                          'border-zinc-500 text-zinc-400'
+                        }`}
+                      >
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {overdueStatus.text}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -217,6 +268,43 @@ export function ClosedMarketsSection({ markets, getBetsForMarket }: ClosedMarket
                   <div className="flex items-center justify-center gap-2 p-2 rounded bg-zinc-800/50 border border-zinc-700">
                     <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
                     <span className="text-sm text-amber-400">Awaiting Resolution</span>
+                  </div>
+                )}
+                
+                {/* Admin resolution controls */}
+                {isAdmin && overdueStatus && (
+                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                    <p className="text-xs text-muted-foreground mb-2 text-center">Admin: Resolve Market</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 border-emerald-600 text-emerald-500 hover:bg-emerald-600/20"
+                        onClick={() => handleResolve(market.market_id, 'YES')}
+                        disabled={resolvingMarket === market.market_id}
+                      >
+                        {resolvingMarket === market.market_id ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                        )}
+                        YES Won
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 border-red-600 text-red-500 hover:bg-red-600/20"
+                        onClick={() => handleResolve(market.market_id, 'NO')}
+                        disabled={resolvingMarket === market.market_id}
+                      >
+                        {resolvingMarket === market.market_id ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <XCircle className="w-3 h-3 mr-1" />
+                        )}
+                        NO Won
+                      </Button>
+                    </div>
                   </div>
                 )}
                 
