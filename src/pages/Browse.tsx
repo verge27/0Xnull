@@ -308,7 +308,7 @@ const Browse = () => {
             <Link to="/get-started">
               <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-orange">
                 <Rocket className="w-5 h-5" />
-                Get Started
+                Start Selling & Buying
               </Button>
             </Link>
             <Button 
@@ -320,7 +320,7 @@ const Browse = () => {
               }}
             >
               <ShoppingBag className="w-5 h-5" />
-              Browse Marketplace
+              Browse Products & Services
             </Button>
           </div>
         </div>
