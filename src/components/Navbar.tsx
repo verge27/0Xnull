@@ -467,19 +467,6 @@ export const Navbar = () => {
               </>
             )}
 
-            {/* Get Started - Only show on marketplace pages for unauthenticated users */}
-            {!isAuthenticated && (location.pathname.startsWith('/browse') || 
-              location.pathname.startsWith('/listing') || 
-              location.pathname.startsWith('/wishlist') || 
-              location.pathname.startsWith('/checkout') ||
-              location.pathname.startsWith('/sell') ||
-              location.pathname.startsWith('/orders')) && (
-              <Link to="/auth">
-                <Button variant="default" size="sm" className="hidden sm:inline-flex">
-                  Get Started
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
       </div>
