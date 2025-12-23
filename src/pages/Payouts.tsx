@@ -46,13 +46,33 @@ export default function Payouts() {
     fetchPayouts();
   }, []);
 
-  // Calculate totals - define helper first for consistent logic
-  const isRefundPayout = (p: PayoutEntry) => {
-    if (p.payout_type === 'refund') return true;
-    if (p.market_id !== 'multibet' && p.side !== p.outcome) return true;
-    if (Math.abs(p.stake_xmr - p.payout_xmr) < 0.0001) return true;
+  // Helper to normalize side/outcome values for comparison
+  const normalizeSide = (side: string | undefined): string => {
+    if (!side) return '';
+    const s = side.toLowerCase().trim();
+    if (s === 'yes' || s === 'true' || s === '1') return 'yes';
+    if (s === 'no' || s === 'false' || s === '0') return 'no';
+    return s;
+  };
+
+  // Detect refunds: explicit refund type OR side doesn't match outcome (user lost but got money back)
+  const isRefund = (payout: PayoutEntry) => {
+    // Explicit refund from API
+    if (payout.payout_type === 'refund') return true;
+    
+    // For single bets: if side doesn't match outcome, it's a refund (market was cancelled/voided)
+    // Only check this if both side and outcome exist
+    if (payout.market_id !== 'multibet' && payout.side && payout.outcome) {
+      const normalizedSide = normalizeSide(payout.side);
+      const normalizedOutcome = normalizeSide(payout.outcome);
+      if (normalizedSide !== normalizedOutcome) return true;
+    }
+    
     return false;
   };
+  
+  // Calculate totals
+  const isRefundPayout = isRefund; // Use same logic
   
   const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
   const winPayouts = payouts.filter(p => !isRefundPayout(p) && (p.payout_type === 'win' || p.payout_type === 'multibet_win'));
@@ -60,18 +80,6 @@ export default function Payouts() {
   const multibetPayouts = payouts.filter(p => p.market_id === 'multibet');
 
   const isMultibet = (payout: PayoutEntry) => payout.market_id === 'multibet';
-  
-  // Detect refunds: either API says refund, OR stake equals payout (money returned, not profit)
-  // Also detect side !== outcome cases where user didn't actually win
-  const isRefund = (payout: PayoutEntry) => {
-    // Explicit refund from API
-    if (payout.payout_type === 'refund') return true;
-    // If side doesn't match outcome and it's not a multibet, it's likely a refund
-    if (payout.market_id !== 'multibet' && payout.side !== payout.outcome) return true;
-    // If stake equals payout exactly (no profit), treat as refund
-    if (Math.abs(payout.stake_xmr - payout.payout_xmr) < 0.0001) return true;
-    return false;
-  };
   
   const isWin = (payout: PayoutEntry) => {
     if (isRefund(payout)) return false;
