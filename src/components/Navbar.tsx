@@ -330,8 +330,8 @@ export const Navbar = () => {
               </Button>
             )}
 
-            {/* Marketplace indicator + Wishlist - Only show on marketplace pages */}
-            {(location.pathname.startsWith('/browse') || 
+            {/* Marketplace indicator + Wishlist - Only show on marketplace pages when authenticated */}
+            {isAuthenticated && (location.pathname.startsWith('/browse') || 
               location.pathname.startsWith('/listing') || 
               location.pathname.startsWith('/wishlist') || 
               location.pathname.startsWith('/checkout') ||
