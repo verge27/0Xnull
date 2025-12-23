@@ -419,6 +419,45 @@ export type Database = {
           },
         ]
       }
+      market_resolution_logs: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          event_winner: string | null
+          id: string
+          market_id: string
+          no_pool_xmr: number | null
+          oracle_type: string
+          outcome: string
+          resolved_by: string | null
+          yes_pool_xmr: number | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          event_winner?: string | null
+          id?: string
+          market_id: string
+          no_pool_xmr?: number | null
+          oracle_type: string
+          outcome: string
+          resolved_by?: string | null
+          yes_pool_xmr?: number | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          event_winner?: string | null
+          id?: string
+          market_id?: string
+          no_pool_xmr?: number | null
+          oracle_type?: string
+          outcome?: string
+          resolved_by?: string | null
+          yes_pool_xmr?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
