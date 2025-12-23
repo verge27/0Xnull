@@ -483,93 +483,226 @@ export default function Payouts() {
           ) : (
             <>
               <div className="space-y-3">
-                {paginatedPayouts.map(payout => (
-                <Card 
-                  key={payout.bet_id} 
-                  className={isWin(payout) 
-                    ? 'border-emerald-600/30 bg-emerald-950/10' 
-                    : 'border-blue-600/30 bg-blue-950/10'
-                  }
-                >
-                  <CardContent className="py-4">
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                      {/* Market Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            {isWin(payout) ? 'Winner' : 'Refund'}
-                          </Badge>
-                          {payout.side && payout.side !== 'MULTI' && (
-                            <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
-                              {payout.side}
+                {(() => {
+                  // Group consecutive expanded legs from same slip by original bet_id
+                  const groups: { slipId: string | null; items: typeof paginatedPayouts }[] = [];
+                  
+                  paginatedPayouts.forEach((payout) => {
+                    const isExpandedLeg = (payout as any)._isExpandedLeg;
+                    // Extract original bet_id (before _legX suffix)
+                    const originalBetId = isExpandedLeg 
+                      ? payout.bet_id.replace(/_leg\d+$/, '') 
+                      : null;
+                    
+                    const lastGroup = groups[groups.length - 1];
+                    
+                    if (isExpandedLeg && lastGroup?.slipId === originalBetId) {
+                      // Add to existing group
+                      lastGroup.items.push(payout);
+                    } else {
+                      // Start new group
+                      groups.push({
+                        slipId: originalBetId,
+                        items: [payout],
+                      });
+                    }
+                  });
+                  
+                  return groups.map((group, groupIdx) => {
+                    const isSlipGroup = group.slipId !== null && group.items.length > 1;
+                    const firstItem = group.items[0] as any;
+                    const totalLegs = firstItem._totalLegs || group.items.length;
+                    const winsCount = firstItem._winsCount || 0;
+                    
+                    if (isSlipGroup) {
+                      // Render grouped slip legs
+                      return (
+                        <div 
+                          key={`group-${groupIdx}`}
+                          className="rounded-lg border-2 border-purple-500/40 bg-purple-950/10 overflow-hidden"
+                        >
+                          {/* Slip header */}
+                          <div className="px-4 py-2 bg-purple-900/30 border-b border-purple-500/30 flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-purple-400" />
+                            <span className="text-sm font-medium text-purple-300">
+                              {totalLegs}-Leg Slip
+                            </span>
+                            <Badge variant="outline" className="text-xs border-purple-500/50 text-purple-300">
+                              {winsCount}/{totalLegs} won
                             </Badge>
-                          )}
-                          {payout.outcome && payout.outcome !== 'MULTI' && (
-                            <Badge variant="outline" className="text-xs">
-                              Outcome: {payout.outcome}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <p className="font-medium truncate">{payout.title}</p>
-                        {payout.description && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {payout.description}
-                          </p>
-                        )}
-                        
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatDate(payout.resolved_at)}
-                        </p>
-                      </div>
-
-                      {/* Amounts */}
-                      <div className="flex items-center gap-4 md:gap-6">
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">Stake</p>
-                          <p className="font-mono text-sm">{payout.stake_xmr.toFixed(4)} XMR</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">Payout</p>
-                          <p className="font-mono text-sm">
-                            {payout.payout_xmr.toFixed(4)} XMR
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">Profit/Loss</p>
-                          {(() => {
-                            const profit = payout.payout_xmr - payout.stake_xmr;
-                            const isProfit = profit > 0.00001;
-                            const isLoss = profit < -0.00001;
-                            return (
-                              <p className={`font-mono text-sm font-bold ${isProfit ? 'text-emerald-400' : isLoss ? 'text-red-400' : 'text-muted-foreground'}`}>
-                                {isProfit ? '+' : ''}{profit.toFixed(4)} XMR
+                          </div>
+                          
+                          {/* Individual legs */}
+                          <div className="divide-y divide-purple-500/20">
+                            {group.items.map((payout, legIdx) => (
+                              <div 
+                                key={payout.bet_id}
+                                className={cn(
+                                  "px-4 py-3",
+                                  isWin(payout) ? 'bg-emerald-950/20' : 'bg-blue-950/20'
+                                )}
+                              >
+                                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                                  {/* Market Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                      <Badge className={cn(
+                                        "text-xs",
+                                        isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'
+                                      )}>
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                        {isWin(payout) ? 'Won' : 'Refund'}
+                                      </Badge>
+                                      <span className="text-xs text-muted-foreground">
+                                        Leg {legIdx + 1} of {totalLegs}
+                                      </span>
+                                    </div>
+                                    <p className="font-medium truncate">{payout.title}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Slip totals footer */}
+                          <div className="px-4 py-3 bg-purple-900/20 border-t border-purple-500/30 flex flex-col md:flex-row md:items-center gap-4">
+                            <div className="flex-1">
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(firstItem.resolved_at)}
                               </p>
-                            );
-                          })()}
+                            </div>
+                            <div className="flex items-center gap-4 md:gap-6">
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Total Stake</p>
+                                <p className="font-mono text-sm">{firstItem.stake_xmr.toFixed(4)} XMR</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Total Payout</p>
+                                <p className="font-mono text-sm">{firstItem.payout_xmr.toFixed(4)} XMR</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Profit/Loss</p>
+                                {(() => {
+                                  const profit = firstItem.payout_xmr - firstItem.stake_xmr;
+                                  const isProfit = profit > 0.00001;
+                                  const isLoss = profit < -0.00001;
+                                  return (
+                                    <p className={`font-mono text-sm font-bold ${isProfit ? 'text-emerald-400' : isLoss ? 'text-red-400' : 'text-muted-foreground'}`}>
+                                      {isProfit ? '+' : ''}{profit.toFixed(4)} XMR
+                                    </p>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                            <a
+                              href={`${XMR_EXPLORER_URL}/${firstItem.tx_hash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30"
+                            >
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Transaction ID</p>
+                                <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
+                                  {truncateTxid(firstItem.tx_hash)}
+                                </p>
+                              </div>
+                              <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+                            </a>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Transaction Link */}
-                      <a
-                        href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30"
+                      );
+                    }
+                    
+                    // Render single items (non-grouped)
+                    return group.items.map(payout => (
+                      <Card 
+                        key={payout.bet_id} 
+                        className={isWin(payout) 
+                          ? 'border-emerald-600/30 bg-emerald-950/10' 
+                          : 'border-blue-600/30 bg-blue-950/10'
+                        }
                       >
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">Transaction ID</p>
-                          <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
-                            {truncateTxid(payout.tx_hash)}
-                          </p>
-                        </div>
-                        <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        <CardContent className="py-4">
+                          <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            {/* Market Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  {isWin(payout) ? 'Winner' : 'Refund'}
+                                </Badge>
+                                {payout.side && payout.side !== 'MULTI' && (
+                                  <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                                    {payout.side}
+                                  </Badge>
+                                )}
+                                {payout.outcome && payout.outcome !== 'MULTI' && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Outcome: {payout.outcome}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <p className="font-medium truncate">{payout.title}</p>
+                              {payout.description && !(payout as any)._isExpandedLeg && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {payout.description}
+                                </p>
+                              )}
+                              
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {formatDate(payout.resolved_at)}
+                              </p>
+                            </div>
+
+                            {/* Amounts */}
+                            <div className="flex items-center gap-4 md:gap-6">
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Stake</p>
+                                <p className="font-mono text-sm">{payout.stake_xmr.toFixed(4)} XMR</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Payout</p>
+                                <p className="font-mono text-sm">
+                                  {payout.payout_xmr.toFixed(4)} XMR
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Profit/Loss</p>
+                                {(() => {
+                                  const profit = payout.payout_xmr - payout.stake_xmr;
+                                  const isProfit = profit > 0.00001;
+                                  const isLoss = profit < -0.00001;
+                                  return (
+                                    <p className={`font-mono text-sm font-bold ${isProfit ? 'text-emerald-400' : isLoss ? 'text-red-400' : 'text-muted-foreground'}`}>
+                                      {isProfit ? '+' : ''}{profit.toFixed(4)} XMR
+                                    </p>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+
+                            {/* Transaction Link */}
+                            <a
+                              href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30"
+                            >
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Transaction ID</p>
+                                <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
+                                  {truncateTxid(payout.tx_hash)}
+                                </p>
+                              </div>
+                              <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+                            </a>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ));
+                  });
+                })()}
               </div>
               
               {/* Pagination Controls */}
