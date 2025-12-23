@@ -97,7 +97,7 @@ export default function CricketPredictions() {
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
-      const { markets: apiMarkets } = await api.getPredictionMarkets();
+      const { markets: apiMarkets } = await api.getPredictionMarkets(true);
       const cricketMarkets = apiMarkets.filter(m => m.oracle_type === 'cricket');
 
       // Filter out blocked markets
