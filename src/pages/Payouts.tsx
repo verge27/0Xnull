@@ -94,7 +94,7 @@ export default function Payouts() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-emerald-950/20 border-emerald-600/30">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -114,9 +114,23 @@ export default function Payouts() {
               <div className="flex items-center gap-3">
                 <Trophy className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Winner Payouts</p>
+                  <p className="text-sm text-muted-foreground">Single Bet Wins</p>
                   <p className="text-2xl font-bold">
-                    {winPayouts.length}
+                    {winPayouts.filter(p => p.market_id !== 'multibet').length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-purple-950/20 border-purple-600/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <Layers className="w-8 h-8 text-purple-400" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Multibet Wins</p>
+                  <p className="text-2xl font-bold text-purple-400">
+                    {multibetPayouts.length}
                   </p>
                 </div>
               </div>
