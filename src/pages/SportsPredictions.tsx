@@ -31,6 +31,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
+import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock } from 'lucide-react';
 import { SportsMarketCard } from '@/components/SportsMarketCard';

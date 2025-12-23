@@ -25,6 +25,7 @@ import { PoolTransparency } from '@/components/PoolTransparency';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
+import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -362,6 +363,11 @@ export default function CryptoPredictions() {
     .filter(m => m.resolved === 0 && !isBettingOpen(m))
     .sort((a, b) => a.resolution_time - b.resolution_time);
 
+  // Resolved markets
+  const resolvedMarkets = markets
+    .filter(m => m.resolved !== 0)
+    .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Background Image */}
@@ -494,9 +500,10 @@ export default function CryptoPredictions() {
         </div>
 
         <Tabs defaultValue="prices" className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-4">
+          <TabsList className="grid w-full max-w-2xl grid-cols-5">
             <TabsTrigger value="prices">Prices</TabsTrigger>
             <TabsTrigger value="markets">Markets</TabsTrigger>
+            <TabsTrigger value="results">Results</TabsTrigger>
             <TabsTrigger value="my-bets">My Bets</TabsTrigger>
             <TabsTrigger value="my-slips" asChild>
               <Link to="/my-slips">My Slips</Link>
@@ -710,6 +717,22 @@ export default function CryptoPredictions() {
               onStatusUpdate={checkBetStatus} 
               onPayoutSubmit={submitPayoutAddress}
             />
+          </TabsContent>
+
+          {/* Results Tab */}
+          <TabsContent value="results" className="space-y-4">
+            <ResolvedMarketsSection 
+              markets={resolvedMarkets} 
+              getBetsForMarket={getBetsForMarket} 
+            />
+            {resolvedMarkets.length === 0 && (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">No resolved markets yet.</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
         

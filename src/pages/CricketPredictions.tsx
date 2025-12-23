@@ -26,6 +26,7 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
+import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Trophy, Gamepad2, ArrowRight, HelpCircle, Info, Lock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -662,50 +663,17 @@ export default function CricketPredictions() {
 
             {/* Results Tab */}
             <TabsContent value="results" className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <CheckCircle className="w-5 h-5" />
-                Resolved Markets ({resolvedMarkets.length})
-              </h2>
-              
-              {resolvedMarkets.length === 0 ? (
+              <ResolvedMarketsSection 
+                markets={resolvedMarkets} 
+                getBetsForMarket={getBetsForMarket} 
+              />
+              {resolvedMarkets.length === 0 && (
                 <Card className="text-center py-12">
                   <CardContent>
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-muted-foreground">No resolved markets yet.</p>
                   </CardContent>
                 </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {resolvedMarkets.map(market => {
-                    const odds = getOdds(market);
-                    
-                    return (
-                      <Card key={market.market_id} className="opacity-75">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-base">{market.title}</CardTitle>
-                            {getStatusBadge(market)}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex gap-2">
-                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'YES' ? 'bg-emerald-600/30' : 'bg-muted'}`}>
-                              <div className="text-lg font-bold">{odds.yes}%</div>
-                              <div className="text-xs text-muted-foreground">YES</div>
-                            </div>
-                            <div className={`flex-1 p-2 rounded text-center ${market.outcome === 'NO' ? 'bg-red-600/30' : 'bg-muted'}`}>
-                              <div className="text-lg font-bold">{odds.no}%</div>
-                              <div className="text-xs text-muted-foreground">NO</div>
-                            </div>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Pool: {(market.yes_pool_xmr + market.no_pool_xmr).toFixed(4)} XMR
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
               )}
             </TabsContent>
 
