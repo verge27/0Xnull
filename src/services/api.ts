@@ -193,11 +193,11 @@ export interface PayoutEntry {
   market_id: string;
   title: string;
   description: string;
-  side: 'YES' | 'NO';
-  outcome: 'YES' | 'NO';
+  side: 'YES' | 'NO' | 'MULTI';
+  outcome: 'YES' | 'NO' | 'MULTI';
   stake_xmr: number;
   payout_xmr: number;
-  payout_type: 'win' | 'refund';
+  payout_type: 'win' | 'refund' | 'multibet_win';
   payout_address: string;
   tx_hash: string;
   resolved_at: number;
