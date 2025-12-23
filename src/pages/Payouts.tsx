@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter } from 'lucide-react';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, type PayoutEntry } from '@/services/api';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
@@ -17,6 +17,8 @@ export default function Payouts() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'single' | 'multibet' | 'refund'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchPayouts = async () => {
     setRefreshing(true);
@@ -61,6 +63,19 @@ export default function Payouts() {
         return true;
     }
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPayouts.length / ITEMS_PER_PAGE);
+  const paginatedPayouts = filteredPayouts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to page 1 when filter changes
+  const handleFilterChange = (newFilter: typeof filter) => {
+    setFilter(newFilter);
+    setCurrentPage(1);
+  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
@@ -181,14 +196,14 @@ export default function Payouts() {
               <Button
                 variant={filter === 'all' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilter('all')}
+                onClick={() => handleFilterChange('all')}
               >
                 All
               </Button>
               <Button
                 variant={filter === 'single' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilter('single')}
+                onClick={() => handleFilterChange('single')}
                 className={filter === 'single' ? '' : 'hover:border-primary/50'}
               >
                 <Trophy className="w-3 h-3 mr-1" />
@@ -197,7 +212,7 @@ export default function Payouts() {
               <Button
                 variant={filter === 'multibet' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilter('multibet')}
+                onClick={() => handleFilterChange('multibet')}
                 className={filter === 'multibet' ? 'bg-purple-600 hover:bg-purple-700' : 'hover:border-purple-500/50'}
               >
                 <Layers className="w-3 h-3 mr-1" />
@@ -206,7 +221,7 @@ export default function Payouts() {
               <Button
                 variant={filter === 'refund' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFilter('refund')}
+                onClick={() => handleFilterChange('refund')}
                 className={filter === 'refund' ? 'bg-blue-600 hover:bg-blue-700' : 'hover:border-blue-500/50'}
               >
                 <RefreshCw className="w-3 h-3 mr-1" />
@@ -269,14 +284,15 @@ export default function Payouts() {
                 <p className="text-muted-foreground mb-4">
                   No payouts match the selected filter.
                 </p>
-                <Button variant="outline" onClick={() => setFilter('all')}>
+                <Button variant="outline" onClick={() => handleFilterChange('all')}>
                   Show All Payouts
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {filteredPayouts.map(payout => (
+            <>
+              <div className="space-y-3">
+                {paginatedPayouts.map(payout => (
                 <Card 
                   key={payout.bet_id} 
                   className={isMultibet(payout)
@@ -359,7 +375,60 @@ export default function Payouts() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+              </div>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => {
+                        // Show first, last, and pages around current
+                        return page === 1 || 
+                               page === totalPages || 
+                               Math.abs(page - currentPage) <= 1;
+                      })
+                      .map((page, idx, arr) => (
+                        <span key={page} className="flex items-center">
+                          {idx > 0 && arr[idx - 1] !== page - 1 && (
+                            <span className="px-1 text-muted-foreground">...</span>
+                          )}
+                          <Button
+                            variant={currentPage === page ? 'default' : 'outline'}
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        </span>
+                      ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                  
+                  <span className="text-sm text-muted-foreground ml-2">
+                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredPayouts.length)} of {filteredPayouts.length}
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
