@@ -199,7 +199,7 @@ export default function CryptoPredictions() {
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
-      const { markets: apiMarkets } = await api.getPredictionMarkets();
+      const { markets: apiMarkets } = await api.getPredictionMarkets(true);
       const priceMarkets = apiMarkets.filter(m => m.oracle_type === 'price');
 
       // Filter out blocked markets
