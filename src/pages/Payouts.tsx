@@ -5,37 +5,28 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Clock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw } from 'lucide-react';
+import { api, type PayoutEntry } from '@/services/api';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
 
-interface MarketPayout {
-  id: string;
-  market_id: string;
-  position_id: string;
-  amount: number;
-  txid: string | null;
-  created_at: string;
-}
-
 export default function Payouts() {
-  const [payouts, setPayouts] = useState<MarketPayout[]>([]);
+  const [payouts, setPayouts] = useState<PayoutEntry[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPayouts = async () => {
     setRefreshing(true);
+    setError(null);
     try {
-      const { data, error } = await supabase
-        .from('market_payouts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPayouts(data || []);
+      const data = await api.getPredictionPayouts();
+      setPayouts(data.payouts || []);
+      setTotal(data.total || 0);
     } catch (e) {
       console.error('Failed to fetch payouts:', e);
+      setError('Failed to load payouts');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -47,13 +38,12 @@ export default function Payouts() {
   }, []);
 
   // Calculate totals
-  const completedPayouts = payouts.filter(p => p.txid);
-  const pendingPayouts = payouts.filter(p => !p.txid);
-  const totalPaidOut = completedPayouts.reduce((sum, p) => sum + p.amount, 0);
-  const pendingAmount = pendingPayouts.reduce((sum, p) => sum + p.amount, 0);
+  const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
+  const winPayouts = payouts.filter(p => p.payout_type === 'win');
+  const refundPayouts = payouts.filter(p => p.payout_type === 'refund');
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
     return date.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
@@ -66,11 +56,6 @@ export default function Payouts() {
   const truncateTxid = (txid: string) => {
     if (txid.length <= 20) return txid;
     return `${txid.slice(0, 10)}...${txid.slice(-10)}`;
-  };
-
-  const truncateId = (id: string) => {
-    if (id.length <= 16) return id;
-    return `${id.slice(0, 8)}...${id.slice(-8)}`;
   };
 
   return (
@@ -120,28 +105,28 @@ export default function Payouts() {
             </CardContent>
           </Card>
 
-          <Card className="bg-amber-950/20 border-amber-600/30">
+          <Card className="bg-primary/10 border-primary/30">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Clock className="w-8 h-8 text-amber-400" />
+                <Trophy className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Payouts</p>
-                  <p className="text-2xl font-bold text-amber-400 font-mono">
-                    {pendingAmount.toFixed(4)} XMR
+                  <p className="text-sm text-muted-foreground">Winner Payouts</p>
+                  <p className="text-2xl font-bold">
+                    {winPayouts.length}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-primary/10 border-primary/30">
+          <Card className="bg-blue-950/20 border-blue-600/30">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Trophy className="w-8 h-8 text-primary" />
+                <RefreshCw className="w-8 h-8 text-blue-400" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Transactions</p>
-                  <p className="text-2xl font-bold">
-                    {payouts.length}
+                  <p className="text-sm text-muted-foreground">Refunds</p>
+                  <p className="text-2xl font-bold text-blue-400">
+                    {refundPayouts.length}
                   </p>
                 </div>
               </div>
@@ -161,6 +146,15 @@ export default function Payouts() {
               <CardContent className="py-12 text-center">
                 <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">Loading payouts...</p>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Card className="border-destructive/50">
+              <CardContent className="py-12 text-center">
+                <p className="text-destructive mb-4">{error}</p>
+                <Button variant="outline" onClick={fetchPayouts}>
+                  Try Again
+                </Button>
               </CardContent>
             </Card>
           ) : payouts.length === 0 ? (
@@ -197,10 +191,10 @@ export default function Payouts() {
             <div className="space-y-3">
               {payouts.map(payout => (
                 <Card 
-                  key={payout.id} 
-                  className={payout.txid 
+                  key={payout.bet_id} 
+                  className={payout.payout_type === 'win' 
                     ? 'border-emerald-600/30 bg-emerald-950/10' 
-                    : 'border-amber-600/30 bg-amber-950/10'
+                    : 'border-blue-600/30 bg-blue-950/10'
                   }
                 >
                   <CardContent className="py-4">
@@ -208,58 +202,55 @@ export default function Payouts() {
                       {/* Market Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge className={payout.txid ? 'bg-emerald-600' : 'bg-amber-600'}>
-                            {payout.txid ? (
-                              <>
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Paid
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="w-3 h-3 mr-1" />
-                                Pending
-                              </>
-                            )}
+                          <Badge className={payout.payout_type === 'win' ? 'bg-emerald-600' : 'bg-blue-600'}>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            {payout.payout_type === 'win' ? 'Winner' : 'Refund'}
+                          </Badge>
+                          <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                            {payout.side}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Outcome: {payout.outcome}
                           </Badge>
                         </div>
-                        <p className="font-mono text-sm text-muted-foreground truncate">
-                          Market: {truncateId(payout.market_id)}
+                        <p className="font-medium truncate">{payout.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {payout.description}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {formatDate(payout.created_at)}
+                          {formatDate(payout.resolved_at)}
                         </p>
                       </div>
 
-                      {/* Amount */}
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Payout Amount</p>
-                        <p className="font-mono text-lg font-bold text-emerald-400">
-                          {payout.amount.toFixed(4)} XMR
-                        </p>
+                      {/* Amounts */}
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Stake</p>
+                          <p className="font-mono text-sm">{payout.stake_xmr.toFixed(4)} XMR</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Payout</p>
+                          <p className="font-mono text-lg font-bold text-emerald-400">
+                            {payout.payout_xmr.toFixed(4)} XMR
+                          </p>
+                        </div>
                       </div>
 
                       {/* Transaction Link */}
-                      {payout.txid ? (
-                        <a
-                          href={`${XMR_EXPLORER_URL}/${payout.txid}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 transition-colors group"
-                        >
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">Transaction ID</p>
-                            <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
-                              {truncateTxid(payout.txid)}
-                            </p>
-                          </div>
-                          <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
-                        </a>
-                      ) : (
-                        <div className="px-4 py-2 rounded-lg bg-amber-600/20 border border-amber-600/30">
-                          <p className="text-xs text-muted-foreground">Status</p>
-                          <p className="text-sm text-amber-400">Awaiting TX</p>
+                      <a
+                        href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 transition-colors group"
+                      >
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Transaction ID</p>
+                          <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
+                            {truncateTxid(payout.tx_hash)}
+                          </p>
                         </div>
-                      )}
+                        <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+                      </a>
                     </div>
                   </CardContent>
                 </Card>
