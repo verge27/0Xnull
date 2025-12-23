@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers } from 'lucide-react';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter } from 'lucide-react';
 import { api, type PayoutEntry } from '@/services/api';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
@@ -16,6 +16,7 @@ export default function Payouts() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'single' | 'multibet' | 'refund'>('all');
 
   const fetchPayouts = async () => {
     setRefreshing(true);
@@ -45,6 +46,21 @@ export default function Payouts() {
 
   const isMultibet = (payout: PayoutEntry) => payout.market_id === 'multibet';
   const isWin = (payout: PayoutEntry) => payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
+  const isSingleWin = (payout: PayoutEntry) => payout.payout_type === 'win' && payout.market_id !== 'multibet';
+
+  // Filter payouts based on selected filter
+  const filteredPayouts = payouts.filter(payout => {
+    switch (filter) {
+      case 'single':
+        return isSingleWin(payout);
+      case 'multibet':
+        return isMultibet(payout);
+      case 'refund':
+        return payout.payout_type === 'refund';
+      default:
+        return true;
+    }
+  });
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
@@ -154,10 +170,50 @@ export default function Payouts() {
 
         {/* Payouts List */}
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <CheckCircle className="w-5 h-5 text-emerald-400" />
-            All Payouts ({payouts.length})
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              {filter === 'all' ? 'All Payouts' : filter === 'single' ? 'Single Bet Wins' : filter === 'multibet' ? 'Multibet Wins' : 'Refunds'} ({filteredPayouts.length})
+            </h2>
+            
+            <div className="flex items-center gap-2 flex-wrap">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={filter === 'single' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('single')}
+                className={filter === 'single' ? '' : 'hover:border-primary/50'}
+              >
+                <Trophy className="w-3 h-3 mr-1" />
+                Single Wins
+              </Button>
+              <Button
+                variant={filter === 'multibet' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('multibet')}
+                className={filter === 'multibet' ? 'bg-purple-600 hover:bg-purple-700' : 'hover:border-purple-500/50'}
+              >
+                <Layers className="w-3 h-3 mr-1" />
+                Multibets
+              </Button>
+              <Button
+                variant={filter === 'refund' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('refund')}
+                className={filter === 'refund' ? 'bg-blue-600 hover:bg-blue-700' : 'hover:border-blue-500/50'}
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Refunds
+              </Button>
+            </div>
+          </div>
           
           {loading ? (
             <Card className="border-dashed">
@@ -205,9 +261,22 @@ export default function Payouts() {
                 </div>
               </CardContent>
             </Card>
+          ) : filteredPayouts.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="py-12 text-center">
+                <Filter className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Matching Payouts</h3>
+                <p className="text-muted-foreground mb-4">
+                  No payouts match the selected filter.
+                </p>
+                <Button variant="outline" onClick={() => setFilter('all')}>
+                  Show All Payouts
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-3">
-              {payouts.map(payout => (
+              {filteredPayouts.map(payout => (
                 <Card 
                   key={payout.bet_id} 
                   className={isMultibet(payout)
