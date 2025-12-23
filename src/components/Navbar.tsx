@@ -308,12 +308,6 @@ export const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/get-started" className="hidden sm:block">
-              <Button variant="outline" size="sm" className="gap-1 border-primary/50 bg-primary/10 hover:bg-primary/20">
-                <Rocket className="w-4 h-4" />
-                <span className="hidden lg:inline">Get Started</span>
-              </Button>
-            </Link>
 
             {/* Token Balance Badge - Only show when authenticated */}
             {isAuthenticated && <TokenBadge />}
@@ -336,23 +330,29 @@ export const Navbar = () => {
               </Button>
             )}
 
-            {/* Wishlist - Only show on marketplace pages */}
+            {/* Marketplace indicator + Wishlist - Only show on marketplace pages */}
             {(location.pathname.startsWith('/browse') || 
               location.pathname.startsWith('/listing') || 
               location.pathname.startsWith('/wishlist') || 
               location.pathname.startsWith('/checkout') ||
               location.pathname.startsWith('/sell') ||
               location.pathname.startsWith('/orders')) && (
-              <Link to="/wishlist">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Heart className="w-4 h-4" />
-                  {wishlistCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                      {wishlistCount}
-                    </Badge>
-                  )}
-                </Button>
-              </Link>
+              <div className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs bg-primary/10 border-primary/30 text-primary hidden sm:inline-flex">
+                  <ShoppingBag className="w-3 h-3 mr-1" />
+                  Marketplace
+                </Badge>
+                <Link to="/wishlist">
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Heart className="w-4 h-4" />
+                    {wishlistCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {wishlistCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </Link>
+              </div>
             )}
             
             {isAuthenticated && (
