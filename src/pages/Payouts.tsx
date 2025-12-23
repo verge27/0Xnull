@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter, ChevronLeft, ChevronRight, CalendarIcon, X } from 'lucide-react';
 import { api, type PayoutEntry } from '@/services/api';
+import { cn } from '@/lib/utils';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
 
@@ -18,6 +22,8 @@ export default function Payouts() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'single' | 'multibet' | 'refund'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const ITEMS_PER_PAGE = 10;
 
   const fetchPayouts = async () => {
@@ -50,18 +56,28 @@ export default function Payouts() {
   const isWin = (payout: PayoutEntry) => payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
   const isSingleWin = (payout: PayoutEntry) => payout.payout_type === 'win' && payout.market_id !== 'multibet';
 
-  // Filter payouts based on selected filter
+  // Filter payouts based on selected filter and date range
   const filteredPayouts = payouts.filter(payout => {
+    // Type filter
+    let matchesType = true;
     switch (filter) {
       case 'single':
-        return isSingleWin(payout);
+        matchesType = isSingleWin(payout);
+        break;
       case 'multibet':
-        return isMultibet(payout);
+        matchesType = isMultibet(payout);
+        break;
       case 'refund':
-        return payout.payout_type === 'refund';
-      default:
-        return true;
+        matchesType = payout.payout_type === 'refund';
+        break;
     }
+    
+    // Date filter
+    const payoutDate = new Date(payout.resolved_at * 1000);
+    const matchesStartDate = !startDate || payoutDate >= startDate;
+    const matchesEndDate = !endDate || payoutDate <= new Date(endDate.getTime() + 86400000 - 1); // End of day
+    
+    return matchesType && matchesStartDate && matchesEndDate;
   });
 
   // Pagination
@@ -74,6 +90,21 @@ export default function Payouts() {
   // Reset to page 1 when filter changes
   const handleFilterChange = (newFilter: typeof filter) => {
     setFilter(newFilter);
+    setCurrentPage(1);
+  };
+
+  const handleDateChange = (type: 'start' | 'end', date: Date | undefined) => {
+    if (type === 'start') {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
+    setCurrentPage(1);
+  };
+
+  const clearDateFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
     setCurrentPage(1);
   };
 
@@ -229,7 +260,75 @@ export default function Payouts() {
               </Button>
             </div>
           </div>
-          
+
+          {/* Date Range Filter */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Date Range:</span>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !startDate && "text-muted-foreground"
+                  )}
+                >
+                  {startDate ? format(startDate, "PP") : "Start date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => handleDateChange('start', date)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <span className="text-muted-foreground">to</span>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground"
+                  )}
+                >
+                  {endDate ? format(endDate, "PP") : "End date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={(date) => handleDateChange('end', date)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            
+            {(startDate || endDate) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearDateFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Clear
+              </Button>
+            )}
+          </div>
+
           {loading ? (
             <Card className="border-dashed">
               <CardContent className="py-12 text-center">
