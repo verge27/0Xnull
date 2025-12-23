@@ -62,6 +62,7 @@ export default function EsportsPredictions() {
   const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
+  const [fetchedResolvedMarkets, setFetchedResolvedMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMarket, setSelectedMarket] = useState<PredictionMarket | null>(null);
   const [betDialogOpen, setBetDialogOpen] = useState(false);
@@ -145,11 +146,16 @@ export default function EsportsPredictions() {
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
-      const { markets: apiMarkets } = await api.getPredictionMarkets();
+      // Fetch all markets including resolved ones for the Results section
+      const { markets: apiMarkets } = await api.getPredictionMarkets(true);
       const esportsMarkets = apiMarkets.filter(m => m.oracle_type === 'esports');
 
       // Filter out blocked markets
       const unblockedMarkets = esportsMarkets.filter(m => !blockedIds.has(m.market_id));
+
+      // Separate resolved vs unresolved markets
+      const resolved = unblockedMarkets.filter(m => m.resolved);
+      const unresolved = unblockedMarkets.filter(m => !m.resolved);
 
       const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
         new Promise<T>((resolve, reject) => {
@@ -186,8 +192,12 @@ export default function EsportsPredictions() {
         return valid;
       };
 
-      const validMarkets = await validatePools(unblockedMarkets);
+      // Only validate unresolved markets (resolved markets already have final state)
+      const validMarkets = await validatePools(unresolved);
       setMarkets(validMarkets);
+      
+      // Set resolved markets directly (they don't need pool validation)
+      setFetchedResolvedMarkets(resolved);
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');
@@ -471,8 +481,8 @@ export default function EsportsPredictions() {
     .filter(m => m.resolved === 0 && !isBettingOpen(m))
     .sort((a, b) => a.resolution_time - b.resolution_time);
     
-  const resolvedMarkets = markets
-    .filter(m => m.resolved === 1)
+  // Use fetched resolved markets from API (with include_resolved=true)
+  const resolvedMarkets = fetchedResolvedMarkets
     .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (
