@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,6 +7,21 @@ const corsHeaders = {
 };
 
 const API_BASE = 'https://api.0xnull.io/api';
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+interface ResolutionLog {
+  market_id: string;
+  oracle_type: string;
+  outcome: string;
+  event_id: string | null;
+  event_winner: string | null;
+  yes_pool_xmr: number;
+  no_pool_xmr: number;
+  resolved_by: string;
+}
 
 interface PredictionMarket {
   market_id: string;
@@ -332,12 +348,25 @@ serve(async (req) => {
     let failed = 0;
     let noResult = 0;
     const resolvedMarkets: string[] = [];
+    const resolutionLogs: ResolutionLog[] = [];
     
     for (const market of overdueMarkets) {
       // Skip markets with no bets (no one to pay out)
       if (market.yes_pool_xmr === 0 && market.no_pool_xmr === 0) {
         console.log(`Skipping ${market.market_id} - no bets placed`);
         continue;
+      }
+      
+      const eventId = extractEventIdFromMarketId(market.market_id);
+      let eventWinner: string | null = null;
+      
+      // Get event winner for logging
+      if (market.oracle_type === 'esports' && eventId) {
+        const event = esportsResults.get(eventId);
+        eventWinner = event?.winner || null;
+      } else if (market.oracle_type === 'sports' && eventId) {
+        const score = sportsScores.get(eventId);
+        eventWinner = score?.winner || null;
       }
       
       const outcome = determineWinner(market, esportsResults, sportsScores);
@@ -352,8 +381,33 @@ serve(async (req) => {
       if (success) {
         resolved++;
         resolvedMarkets.push(`${market.market_id} -> ${outcome}`);
+        
+        // Add to resolution logs
+        resolutionLogs.push({
+          market_id: market.market_id,
+          oracle_type: market.oracle_type,
+          outcome,
+          event_id: eventId,
+          event_winner: eventWinner,
+          yes_pool_xmr: market.yes_pool_xmr,
+          no_pool_xmr: market.no_pool_xmr,
+          resolved_by: 'auto-resolve-cron',
+        });
       } else {
         failed++;
+      }
+    }
+    
+    // Insert resolution logs to database
+    if (resolutionLogs.length > 0) {
+      const { error: logError } = await supabase
+        .from('market_resolution_logs')
+        .insert(resolutionLogs);
+      
+      if (logError) {
+        console.error('Failed to insert resolution logs:', logError);
+      } else {
+        console.log(`Logged ${resolutionLogs.length} resolutions to database`);
       }
     }
     
