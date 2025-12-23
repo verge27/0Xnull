@@ -57,8 +57,5 @@ verify_jwt = false
 [functions.pluto-epg]
 verify_jwt = false
 
-[functions.auto-resolve-markets]
-verify_jwt = false
-
 [functions.pk-register]
 verify_jwt = false
