@@ -267,10 +267,18 @@ export default function MySlips() {
               </h1>
               <p className="text-muted-foreground mt-1">Track your multibet slips</p>
             </div>
-            <Button variant="outline" size="sm" onClick={loadSlips} disabled={refreshing}>
-              <RefreshCw className={`w-4 h-4 mr-2 transition-transform duration-500 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Refreshing...' : 'Refresh All'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link to="/payouts">
+                <Button variant="outline" size="sm">
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Payout History
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" onClick={loadSlips} disabled={refreshing}>
+                <RefreshCw className={`w-4 h-4 mr-2 transition-transform duration-500 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh All'}
+              </Button>
+            </div>
           </div>
 
           {/* Slips List */}
