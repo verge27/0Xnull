@@ -314,8 +314,8 @@ export const Navbar = () => {
               </Button>
             </Link>
 
-            {/* Token Balance Badge */}
-            <TokenBadge />
+            {/* Token Balance Badge - Only show when authenticated */}
+            {isAuthenticated && <TokenBadge />}
 
             {/* Bet Slip Counter */}
             {betSlip.items.length > 0 && (
