@@ -72,41 +72,59 @@ export default function Payouts() {
     return payout.payout_type === 'refund';
   };
   
-  // Calculate totals
-  const isRefundPayout = isRefund; // Use same logic
-  
+  // Expand multibets into individual leg entries
+  const expandedPayouts = payouts.flatMap(payout => {
+    if (payout.market_id === 'multibet') {
+      // Split multibet into individual legs
+      const legs = payout.title.split(',').map(t => t.trim()).filter(Boolean);
+      const legCount = legs.length;
+      const stakePerLeg = payout.stake_xmr / legCount;
+      const payoutPerLeg = payout.payout_xmr / legCount;
+      
+      return legs.map((legTitle, idx) => ({
+        ...payout,
+        bet_id: `${payout.bet_id}_leg${idx}`,
+        market_id: `multibet_leg_${idx}`, // Mark as expanded leg
+        title: legTitle,
+        description: '', // Clear multibet description
+        stake_xmr: stakePerLeg,
+        payout_xmr: payoutPerLeg,
+        // Keep original payout_type for win/refund detection
+      }));
+    }
+    return [payout];
+  });
+
+  // Calculate totals (use original payouts to avoid double-counting)
   const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
   
-  // isWin: trust outcome over payout_type - if side matches outcome and it's not a multibet, it's a win
+  // isWin: trust outcome over payout_type - if side matches outcome, it's a win
   const isWin = (payout: PayoutEntry) => {
     if (isRefund(payout)) return false;
-    // For single bets: if side matches outcome, it's a win regardless of payout_type
-    if (payout.market_id !== 'multibet' && payout.side && payout.outcome) {
+    // For expanded legs and single bets
+    if (payout.side && payout.outcome) {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
       if (normalizedSide === normalizedOutcome) return true;
     }
-    // Fall back to payout_type for multibets
+    // Fall back to payout_type
     return payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
   };
   
-  const winPayouts = payouts.filter(p => isWin(p));
-  const refundPayouts = payouts.filter(p => isRefundPayout(p));
-  const multibetPayouts = payouts.filter(p => p.market_id === 'multibet');
-
-  const isMultibet = (payout: PayoutEntry) => payout.market_id === 'multibet';
-  const isSingleWin = (payout: PayoutEntry) => isWin(payout) && payout.market_id !== 'multibet';
+  const winPayouts = expandedPayouts.filter(p => isWin(p));
+  const refundPayouts = expandedPayouts.filter(p => isRefund(p));
 
   // Filter payouts based on selected filter and date range
-  const filteredPayouts = payouts.filter(payout => {
+  const filteredPayouts = expandedPayouts.filter(payout => {
     // Type filter
     let matchesType = true;
     switch (filter) {
       case 'single':
-        matchesType = isSingleWin(payout);
+        matchesType = isWin(payout);
         break;
       case 'multibet':
-        matchesType = isMultibet(payout);
+        // No longer used - fall through to all
+        matchesType = true;
         break;
       case 'refund':
         matchesType = isRefund(payout);
@@ -231,9 +249,9 @@ export default function Payouts() {
               <div className="flex items-center gap-3">
                 <Layers className="w-8 h-8 text-purple-400" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Multibet Wins</p>
+                  <p className="text-sm text-muted-foreground">Total Bets</p>
                   <p className="text-2xl font-bold text-purple-400">
-                    {multibetPayouts.length}
+                    {expandedPayouts.length}
                   </p>
                 </div>
               </div>
@@ -260,7 +278,7 @@ export default function Payouts() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
-              {filter === 'all' ? 'All Payouts' : filter === 'single' ? 'Single Bet Wins' : filter === 'multibet' ? 'Multibet Wins' : 'Refunds'} ({filteredPayouts.length})
+              {filter === 'all' ? 'All Payouts' : filter === 'single' ? 'Wins' : 'Refunds'} ({filteredPayouts.length})
             </h2>
             
             <div className="flex items-center gap-2 flex-wrap">
@@ -279,16 +297,7 @@ export default function Payouts() {
                 className={filter === 'single' ? '' : 'hover:border-primary/50'}
               >
                 <Trophy className="w-3 h-3 mr-1" />
-                Single Wins
-              </Button>
-              <Button
-                variant={filter === 'multibet' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleFilterChange('multibet')}
-                className={filter === 'multibet' ? 'bg-purple-600 hover:bg-purple-700' : 'hover:border-purple-500/50'}
-              >
-                <Layers className="w-3 h-3 mr-1" />
-                Multibets
+                Wins
               </Button>
               <Button
                 variant={filter === 'refund' ? 'default' : 'outline'}
@@ -435,11 +444,9 @@ export default function Payouts() {
                 {paginatedPayouts.map(payout => (
                 <Card 
                   key={payout.bet_id} 
-                  className={isMultibet(payout)
-                    ? 'border-purple-600/30 bg-purple-950/10'
-                    : isWin(payout) 
-                      ? 'border-emerald-600/30 bg-emerald-950/10' 
-                      : 'border-blue-600/30 bg-blue-950/10'
+                  className={isWin(payout) 
+                    ? 'border-emerald-600/30 bg-emerald-950/10' 
+                    : 'border-blue-600/30 bg-blue-950/10'
                   }
                 >
                   <CardContent className="py-4">
@@ -447,77 +454,27 @@ export default function Payouts() {
                       {/* Market Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          {isMultibet(payout) ? (
-                            <>
-                              <Badge className="bg-purple-600">
-                                <Layers className="w-3 h-3 mr-1" />
-                                Multibet
-                              </Badge>
-                              {/* Show if it's a partial refund situation */}
-                              {payout.payout_type === 'refund' && (
-                                <Badge className="bg-blue-600 text-xs">
-                                  <RefreshCw className="w-3 h-3 mr-1" />
-                                  Partial Refund
-                                </Badge>
-                              )}
-                            </>
-                          ) : (
-                            <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              {isWin(payout) ? 'Winner' : 'Refund'}
+                          <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            {isWin(payout) ? 'Winner' : 'Refund'}
+                          </Badge>
+                          {payout.side && payout.side !== 'MULTI' && (
+                            <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                              {payout.side}
                             </Badge>
                           )}
-                          {!isMultibet(payout) && (
-                            <>
-                              <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
-                                {payout.side}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                Outcome: {payout.outcome}
-                              </Badge>
-                            </>
+                          {payout.outcome && payout.outcome !== 'MULTI' && (
+                            <Badge variant="outline" className="text-xs">
+                              Outcome: {payout.outcome}
+                            </Badge>
                           )}
                         </div>
                         
-                        {/* For multibets, show individual leg breakdown */}
-                        {isMultibet(payout) ? (
-                          <div className="space-y-1">
-                            {payout.title.split(',').map((leg, idx) => {
-                              const legTitle = leg.trim();
-                              // Try to detect if this leg was refunded based on description
-                              const desc = (payout.description || '').toLowerCase();
-                              // Check if description mentions this leg being refunded
-                              const isLegRefund = desc.includes('refund') && 
-                                (desc.includes(legTitle.toLowerCase().slice(0, 20)) || 
-                                 (idx === payout.title.split(',').length - 1 && desc.includes('leg') && desc.includes(`${idx + 1}`)));
-                              
-                              return (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground">Leg {idx + 1}:</span>
-                                  <span className="text-sm font-medium truncate flex-1">{legTitle}</span>
-                                  {/* If payout_type is refund and stake equals payout, all legs likely refunded */}
-                                  {payout.payout_type === 'refund' ? (
-                                    <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600/50 text-blue-400">
-                                      <RefreshCw className="w-2 h-2 mr-1" />
-                                      Refund
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="outline" className="text-xs bg-emerald-600/20 border-emerald-600/50 text-emerald-400">
-                                      <CheckCircle className="w-2 h-2 mr-1" />
-                                      Win
-                                    </Badge>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <>
-                            <p className="font-medium truncate">{payout.title}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {payout.description}
-                            </p>
-                          </>
+                        <p className="font-medium truncate">{payout.title}</p>
+                        {payout.description && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {payout.description}
+                          </p>
                         )}
                         
                         <p className="text-xs text-muted-foreground mt-1">
@@ -533,7 +490,7 @@ export default function Payouts() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Payout</p>
-                          <p className={`font-mono text-lg font-bold ${isMultibet(payout) ? 'text-purple-400' : 'text-emerald-400'}`}>
+                          <p className="font-mono text-lg font-bold text-emerald-400">
                             {payout.payout_xmr.toFixed(4)} XMR
                           </p>
                         </div>
@@ -544,19 +501,15 @@ export default function Payouts() {
                         href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group ${
-                          isMultibet(payout) 
-                            ? 'bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/30'
-                            : 'bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30'
-                        }`}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30"
                       >
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Transaction ID</p>
-                          <p className={`font-mono text-sm ${isMultibet(payout) ? 'text-purple-400 group-hover:text-purple-300' : 'text-emerald-400 group-hover:text-emerald-300'}`}>
+                          <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
                             {truncateTxid(payout.tx_hash)}
                           </p>
                         </div>
-                        <ExternalLink className={`w-4 h-4 ${isMultibet(payout) ? 'text-purple-400 group-hover:text-purple-300' : 'text-emerald-400 group-hover:text-emerald-300'}`} />
+                        <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
                       </a>
                     </div>
                   </CardContent>
