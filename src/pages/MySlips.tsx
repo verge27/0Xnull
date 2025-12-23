@@ -287,7 +287,10 @@ export default function MySlips() {
                 <p className="text-muted-foreground mb-4">
                   Create a multibet by adding predictions to your slip
                 </p>
-                <div className="flex gap-3 justify-center">
+                <div className="flex gap-3 justify-center flex-wrap">
+                  <Link to="/esports-predictions">
+                    <Button variant="outline">Esports Markets</Button>
+                  </Link>
                   <Link to="/sports-predictions">
                     <Button variant="outline">Sports Markets</Button>
                   </Link>
