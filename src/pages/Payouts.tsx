@@ -448,10 +448,19 @@ export default function Payouts() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           {isMultibet(payout) ? (
-                            <Badge className="bg-purple-600">
-                              <Layers className="w-3 h-3 mr-1" />
-                              Multibet
-                            </Badge>
+                            <>
+                              <Badge className="bg-purple-600">
+                                <Layers className="w-3 h-3 mr-1" />
+                                Multibet
+                              </Badge>
+                              {/* Show if it's a partial refund situation */}
+                              {payout.payout_type === 'refund' && (
+                                <Badge className="bg-blue-600 text-xs">
+                                  <RefreshCw className="w-3 h-3 mr-1" />
+                                  Partial Refund
+                                </Badge>
+                              )}
+                            </>
                           ) : (
                             <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
                               <CheckCircle className="w-3 h-3 mr-1" />
@@ -469,10 +478,48 @@ export default function Payouts() {
                             </>
                           )}
                         </div>
-                        <p className="font-medium truncate">{payout.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {payout.description}
-                        </p>
+                        
+                        {/* For multibets, show individual leg breakdown */}
+                        {isMultibet(payout) ? (
+                          <div className="space-y-1">
+                            {payout.title.split(',').map((leg, idx) => {
+                              const legTitle = leg.trim();
+                              // Try to detect if this leg was refunded based on description
+                              const desc = (payout.description || '').toLowerCase();
+                              // Check if description mentions this leg being refunded
+                              const isLegRefund = desc.includes('refund') && 
+                                (desc.includes(legTitle.toLowerCase().slice(0, 20)) || 
+                                 (idx === payout.title.split(',').length - 1 && desc.includes('leg') && desc.includes(`${idx + 1}`)));
+                              
+                              return (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">Leg {idx + 1}:</span>
+                                  <span className="text-sm font-medium truncate flex-1">{legTitle}</span>
+                                  {/* If payout_type is refund and stake equals payout, all legs likely refunded */}
+                                  {payout.payout_type === 'refund' ? (
+                                    <Badge variant="outline" className="text-xs bg-blue-600/20 border-blue-600/50 text-blue-400">
+                                      <RefreshCw className="w-2 h-2 mr-1" />
+                                      Refund
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs bg-emerald-600/20 border-emerald-600/50 text-emerald-400">
+                                      <CheckCircle className="w-2 h-2 mr-1" />
+                                      Win
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <>
+                            <p className="font-medium truncate">{payout.title}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {payout.description}
+                            </p>
+                          </>
+                        )}
+                        
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatDate(payout.resolved_at)}
                         </p>
