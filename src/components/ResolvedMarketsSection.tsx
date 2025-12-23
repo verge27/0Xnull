@@ -1,12 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Wallet, Clock, Trophy, Banknote } from 'lucide-react';
+import { CheckCircle, XCircle, Wallet, Clock, Trophy, Banknote, ExternalLink } from 'lucide-react';
 import { type PredictionMarket } from '@/services/api';
+
+interface UserBet {
+  side: string;
+  status?: string;
+  payout_tx_hash?: string;
+  payout_xmr?: number;
+}
 
 interface ResolvedMarketsSectionProps {
   markets: PredictionMarket[];
-  getBetsForMarket: (marketId: string) => any[];
+  getBetsForMarket: (marketId: string) => UserBet[];
 }
+
+const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
 
 export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMarketsSectionProps) {
   if (markets.length === 0) return null;
@@ -32,22 +41,52 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
     });
   };
 
-  // Determine payout status based on market data
-  const getPayoutStatus = (market: PredictionMarket) => {
-    // If market has payout_txid or payout_status fields from API
+  // Determine payout status based on user's bets for this market
+  const getPayoutStatus = (market: PredictionMarket, marketBets: UserBet[]) => {
+    // Check if any user bets have been paid out with tx hash
+    const paidBets = marketBets.filter(bet => bet.status === 'paid' && bet.payout_tx_hash);
+    if (paidBets.length > 0) {
+      return { 
+        status: 'paid', 
+        label: 'Paid Out', 
+        icon: Wallet, 
+        color: 'bg-emerald-600',
+        txids: paidBets.map(b => b.payout_tx_hash).filter(Boolean) as string[]
+      };
+    }
+    
+    // Check if any bets are won but awaiting payout
+    const wonBets = marketBets.filter(bet => bet.status === 'won');
+    if (wonBets.length > 0) {
+      return { status: 'pending', label: 'Payout Pending', icon: Clock, color: 'bg-amber-600', txids: [] };
+    }
+    
+    // Check if market has payout_txid or payout_status fields from API
     if ((market as any).payout_status === 'paid' || (market as any).payout_txid) {
-      return { status: 'paid', label: 'Paid Out', icon: Wallet, color: 'bg-emerald-600' };
+      return { 
+        status: 'paid', 
+        label: 'Paid Out', 
+        icon: Wallet, 
+        color: 'bg-emerald-600',
+        txids: (market as any).payout_txid ? [(market as any).payout_txid] : []
+      };
     }
     if ((market as any).payout_status === 'pending') {
-      return { status: 'pending', label: 'Payout Pending', icon: Clock, color: 'bg-amber-600' };
+      return { status: 'pending', label: 'Payout Pending', icon: Clock, color: 'bg-amber-600', txids: [] };
     }
+    
     // Default: assume processing if recently resolved
     const resolvedRecently = market.resolution_time && 
       (Date.now() / 1000 - market.resolution_time) < 3600; // Within 1 hour
     if (resolvedRecently) {
-      return { status: 'processing', label: 'Processing', icon: Clock, color: 'bg-blue-600' };
+      return { status: 'processing', label: 'Processing', icon: Clock, color: 'bg-blue-600', txids: [] };
     }
-    return { status: 'complete', label: 'Complete', icon: CheckCircle, color: 'bg-zinc-600' };
+    return { status: 'complete', label: 'Complete', icon: CheckCircle, color: 'bg-zinc-600', txids: [] };
+  };
+
+  const truncateTxid = (txid: string) => {
+    if (txid.length <= 16) return txid;
+    return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
   };
 
   return (
@@ -63,7 +102,7 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
         {markets.map(market => {
           const odds = getOdds(market);
           const marketBets = getBetsForMarket(market.market_id);
-          const payoutInfo = getPayoutStatus(market);
+          const payoutInfo = getPayoutStatus(market, marketBets);
           const PayoutIcon = payoutInfo.icon;
           const isWinner = market.outcome === 'YES';
           
@@ -122,6 +161,24 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
                   )}
                 </div>
 
+                {/* Payout Transaction IDs */}
+                {payoutInfo.txids.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {payoutInfo.txids.map((txid, idx) => (
+                      <a
+                        key={idx}
+                        href={`${XMR_EXPLORER_URL}/${txid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-mono"
+                      >
+                        <span>TX: {truncateTxid(txid)}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
                 {/* Resolution Date */}
                 <div className="text-xs text-muted-foreground mt-2 text-center">
                   Resolved: {formatResolutionDate(market.resolution_time)}
@@ -137,12 +194,32 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
                       const betWon = bet.side?.toUpperCase() === market.outcome;
                       return (
                         <div key={i} className="flex items-center justify-between mt-1">
-                          <Badge variant={bet.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
-                            {bet.side}
-                          </Badge>
-                          <span className={`text-xs font-medium ${betWon ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {betWon ? '✓ Won' : '✗ Lost'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={bet.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                              {bet.side}
+                            </Badge>
+                            {bet.payout_xmr && bet.payout_xmr > 0 && (
+                              <span className="text-xs font-mono text-emerald-400">
+                                +{bet.payout_xmr.toFixed(4)} XMR
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-medium ${betWon ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {betWon ? '✓ Won' : '✗ Lost'}
+                            </span>
+                            {bet.payout_tx_hash && (
+                              <a
+                                href={`${XMR_EXPLORER_URL}/${bet.payout_tx_hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-emerald-400 hover:text-emerald-300"
+                                title="View payout transaction"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
