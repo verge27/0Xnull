@@ -73,44 +73,45 @@ export default function Payouts() {
   };
   
   // Expand multibets into individual leg entries
+  // NOTE: API only provides TOTAL stake/payout for the slip, not per-leg breakdown
   const expandedPayouts = payouts.flatMap(payout => {
     if (payout.market_id === 'multibet') {
       // Leg names are in description (comma-separated questions like "Will Team X win?, Will Team Y win?")
-      // Title contains "Multibet Slip (X/Y won)" - not useful for leg names
       const description = payout.description || '';
       
-      // Split by "?, " or ", " to get individual leg questions
+      // Split by "?, " to get individual leg questions
       let legs = description.split(/\?,\s*/).map(t => t.trim()).filter(Boolean);
       
-      // If no legs found in description, try title as fallback
-      if (legs.length === 0) {
-        legs = payout.title.split(',').map(t => t.trim()).filter(Boolean);
-      }
+      // Handle "(+N more)" suffix - remove it from legs
+      legs = legs.filter(leg => !leg.match(/^\(\+\d+\s*more\)$/i));
       
-      // If still no legs or just "Multibet Slip" title, return as single entry with cleaner title
-      if (legs.length === 0 || (legs.length === 1 && legs[0].toLowerCase().includes('multibet'))) {
+      // If no legs found, show as single entry
+      if (legs.length === 0) {
         return [{
           ...payout,
           title: payout.description || payout.title,
         }];
       }
       
-      const legCount = legs.length;
-      const stakePerLeg = payout.stake_xmr / legCount;
-      const payoutPerLeg = payout.payout_xmr / legCount;
-      
-      // Parse "(X/Y won)" from title to determine which legs won
+      // Parse "(X/Y won)" from title to determine win/refund counts
       const wonMatch = payout.title.match(/\((\d+)\/(\d+)\s*won\)/i);
-      const winsCount = wonMatch ? parseInt(wonMatch[1]) : legCount;
-      const totalLegs = wonMatch ? parseInt(wonMatch[2]) : legCount;
-      const refundsCount = totalLegs - winsCount;
+      const winsCount = wonMatch ? parseInt(wonMatch[1]) : legs.length;
+      const totalLegs = wonMatch ? parseInt(wonMatch[2]) : legs.length;
+      
+      // If there are more legs in the title than in description, we're missing some
+      const missingLegs = totalLegs - legs.length;
+      if (missingLegs > 0) {
+        for (let i = 0; i < missingLegs; i++) {
+          legs.push(`Unknown bet #${legs.length + 1}`);
+        }
+      }
       
       return legs.map((legTitle, idx) => {
         // Add question mark back if it was stripped
-        const fullTitle = legTitle.endsWith('?') ? legTitle : `${legTitle}?`;
+        const fullTitle = legTitle.endsWith('?') ? legTitle : 
+                          legTitle.startsWith('Unknown') ? legTitle : `${legTitle}?`;
         
-        // Determine if this leg is a win or refund
-        // If we have X wins out of Y, first X legs are wins, rest are refunds
+        // Determine if this leg is a win or refund (first X are wins, rest are refunds)
         const isLegWin = idx < winsCount;
         
         return {
@@ -118,12 +119,18 @@ export default function Payouts() {
           bet_id: `${payout.bet_id}_leg${idx}`,
           market_id: `expanded_leg_${idx}`,
           title: fullTitle,
-          description: '',
-          stake_xmr: stakePerLeg,
-          payout_xmr: isLegWin ? payoutPerLeg : stakePerLeg, // Refunds get stake back
+          description: `Part of ${totalLegs}-leg slip`,
+          // Use TOTAL amounts - we don't have per-leg breakdown from API
+          stake_xmr: payout.stake_xmr,
+          payout_xmr: payout.payout_xmr,
           payout_type: isLegWin ? ('win' as const) : ('refund' as const),
-          side: 'YES' as const, // Assume YES for display
+          side: 'YES' as const,
           outcome: isLegWin ? ('YES' as const) : ('NO' as const),
+          // Add custom field to indicate this is an expanded leg
+          _isExpandedLeg: true,
+          _legIndex: idx,
+          _totalLegs: totalLegs,
+          _winsCount: winsCount,
         };
       });
     }
@@ -518,16 +525,29 @@ export default function Payouts() {
                       </div>
 
                       {/* Amounts */}
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-4 md:gap-6">
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Stake</p>
                           <p className="font-mono text-sm">{payout.stake_xmr.toFixed(4)} XMR</p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Payout</p>
-                          <p className="font-mono text-lg font-bold text-emerald-400">
+                          <p className="font-mono text-sm">
                             {payout.payout_xmr.toFixed(4)} XMR
                           </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Profit/Loss</p>
+                          {(() => {
+                            const profit = payout.payout_xmr - payout.stake_xmr;
+                            const isProfit = profit > 0.00001;
+                            const isLoss = profit < -0.00001;
+                            return (
+                              <p className={`font-mono text-sm font-bold ${isProfit ? 'text-emerald-400' : isLoss ? 'text-red-400' : 'text-muted-foreground'}`}>
+                                {isProfit ? '+' : ''}{profit.toFixed(4)} XMR
+                              </p>
+                            );
+                          })()}
                         </div>
                       </div>
 
