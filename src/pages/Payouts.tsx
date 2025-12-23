@@ -55,20 +55,21 @@ export default function Payouts() {
     return s;
   };
 
-  // Detect refunds: explicit refund type OR side doesn't match outcome (user lost but got money back)
+  // Detect refunds: Trust outcome over payout_type
+  // If side matches outcome = WIN, if side doesn't match outcome = REFUND
   const isRefund = (payout: PayoutEntry) => {
-    // Explicit refund from API
-    if (payout.payout_type === 'refund') return true;
-    
-    // For single bets: if side doesn't match outcome, it's a refund (market was cancelled/voided)
-    // Only check this if both side and outcome exist
+    // For single bets: trust side vs outcome comparison
     if (payout.market_id !== 'multibet' && payout.side && payout.outcome) {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
-      if (normalizedSide !== normalizedOutcome) return true;
+      // If side matches outcome, it's a WIN (not refund), regardless of payout_type
+      if (normalizedSide === normalizedOutcome) return false;
+      // If side doesn't match outcome, it's a REFUND
+      return true;
     }
     
-    return false;
+    // For multibets or missing data, fall back to payout_type
+    return payout.payout_type === 'refund';
   };
   
   // Calculate totals
