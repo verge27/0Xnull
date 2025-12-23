@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw } from 'lucide-react';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers } from 'lucide-react';
 import { api, type PayoutEntry } from '@/services/api';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
@@ -39,8 +39,12 @@ export default function Payouts() {
 
   // Calculate totals
   const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
-  const winPayouts = payouts.filter(p => p.payout_type === 'win');
+  const winPayouts = payouts.filter(p => p.payout_type === 'win' || p.payout_type === 'multibet_win');
   const refundPayouts = payouts.filter(p => p.payout_type === 'refund');
+  const multibetPayouts = payouts.filter(p => p.market_id === 'multibet');
+
+  const isMultibet = (payout: PayoutEntry) => payout.market_id === 'multibet';
+  const isWin = (payout: PayoutEntry) => payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
@@ -192,26 +196,39 @@ export default function Payouts() {
               {payouts.map(payout => (
                 <Card 
                   key={payout.bet_id} 
-                  className={payout.payout_type === 'win' 
-                    ? 'border-emerald-600/30 bg-emerald-950/10' 
-                    : 'border-blue-600/30 bg-blue-950/10'
+                  className={isMultibet(payout)
+                    ? 'border-purple-600/30 bg-purple-950/10'
+                    : isWin(payout) 
+                      ? 'border-emerald-600/30 bg-emerald-950/10' 
+                      : 'border-blue-600/30 bg-blue-950/10'
                   }
                 >
                   <CardContent className="py-4">
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       {/* Market Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge className={payout.payout_type === 'win' ? 'bg-emerald-600' : 'bg-blue-600'}>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            {payout.payout_type === 'win' ? 'Winner' : 'Refund'}
-                          </Badge>
-                          <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
-                            {payout.side}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            Outcome: {payout.outcome}
-                          </Badge>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          {isMultibet(payout) ? (
+                            <Badge className="bg-purple-600">
+                              <Layers className="w-3 h-3 mr-1" />
+                              Multibet
+                            </Badge>
+                          ) : (
+                            <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              {isWin(payout) ? 'Winner' : 'Refund'}
+                            </Badge>
+                          )}
+                          {!isMultibet(payout) && (
+                            <>
+                              <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                                {payout.side}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Outcome: {payout.outcome}
+                              </Badge>
+                            </>
+                          )}
                         </div>
                         <p className="font-medium truncate">{payout.title}</p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -230,7 +247,7 @@ export default function Payouts() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Payout</p>
-                          <p className="font-mono text-lg font-bold text-emerald-400">
+                          <p className={`font-mono text-lg font-bold ${isMultibet(payout) ? 'text-purple-400' : 'text-emerald-400'}`}>
                             {payout.payout_xmr.toFixed(4)} XMR
                           </p>
                         </div>
@@ -241,15 +258,19 @@ export default function Payouts() {
                         href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 transition-colors group"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group ${
+                          isMultibet(payout) 
+                            ? 'bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/30'
+                            : 'bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30'
+                        }`}
                       >
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Transaction ID</p>
-                          <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
+                          <p className={`font-mono text-sm ${isMultibet(payout) ? 'text-purple-400 group-hover:text-purple-300' : 'text-emerald-400 group-hover:text-emerald-300'}`}>
                             {truncateTxid(payout.tx_hash)}
                           </p>
                         </div>
-                        <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+                        <ExternalLink className={`w-4 h-4 ${isMultibet(payout) ? 'text-purple-400 group-hover:text-purple-300' : 'text-emerald-400 group-hover:text-emerald-300'}`} />
                       </a>
                     </div>
                   </CardContent>
