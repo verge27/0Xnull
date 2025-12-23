@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ export const Navbar = () => {
   const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
   const betSlip = useMultibetSlip();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -335,16 +336,24 @@ export const Navbar = () => {
               </Button>
             )}
 
-            <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative">
-                <Heart className="w-4 h-4" />
-                {wishlistCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {wishlistCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+            {/* Wishlist - Only show on marketplace pages */}
+            {(location.pathname.startsWith('/browse') || 
+              location.pathname.startsWith('/listing') || 
+              location.pathname.startsWith('/wishlist') || 
+              location.pathname.startsWith('/checkout') ||
+              location.pathname.startsWith('/sell') ||
+              location.pathname.startsWith('/orders')) && (
+              <Link to="/wishlist">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Heart className="w-4 h-4" />
+                  {wishlistCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {wishlistCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            )}
             
             {isAuthenticated && (
               <>
