@@ -76,16 +76,25 @@ export default function Payouts() {
   const isRefundPayout = isRefund; // Use same logic
   
   const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
-  const winPayouts = payouts.filter(p => !isRefundPayout(p) && (p.payout_type === 'win' || p.payout_type === 'multibet_win'));
+  
+  // isWin: trust outcome over payout_type - if side matches outcome and it's not a multibet, it's a win
+  const isWin = (payout: PayoutEntry) => {
+    if (isRefund(payout)) return false;
+    // For single bets: if side matches outcome, it's a win regardless of payout_type
+    if (payout.market_id !== 'multibet' && payout.side && payout.outcome) {
+      const normalizedSide = normalizeSide(payout.side);
+      const normalizedOutcome = normalizeSide(payout.outcome);
+      if (normalizedSide === normalizedOutcome) return true;
+    }
+    // Fall back to payout_type for multibets
+    return payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
+  };
+  
+  const winPayouts = payouts.filter(p => isWin(p));
   const refundPayouts = payouts.filter(p => isRefundPayout(p));
   const multibetPayouts = payouts.filter(p => p.market_id === 'multibet');
 
   const isMultibet = (payout: PayoutEntry) => payout.market_id === 'multibet';
-  
-  const isWin = (payout: PayoutEntry) => {
-    if (isRefund(payout)) return false;
-    return payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
-  };
   const isSingleWin = (payout: PayoutEntry) => isWin(payout) && payout.market_id !== 'multibet';
 
   // Filter payouts based on selected filter and date range
