@@ -55,6 +55,7 @@ import CombatSports from "./pages/CombatSports";
 import GetStarted from "./pages/GetStarted";
 import ApiDocs from "./pages/ApiDocs";
 import MySlips from "./pages/MySlips";
+import Payouts from "./pages/Payouts";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +112,7 @@ const App = () => (
                   
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />
                   <Route path="/my-slips" element={<MySlips />} />
+                  <Route path="/payouts" element={<Payouts />} />
                   {/* AI */}
                   <Route path="/ai" element={<AIHub />} />
                   <Route path="/voice" element={<Voice />} />

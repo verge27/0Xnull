@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -133,6 +133,10 @@ export const Navbar = () => {
                     <Receipt className="w-5 h-5 text-primary" />
                     <span>My Slips</span>
                   </Link>
+                  <Link to="/payouts" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Wallet className="w-5 h-5 text-emerald-500" />
+                    <span>Payout History</span>
+                  </Link>
                   {betSlip.items.length > 0 && (
                     <button
                       onClick={() => {
@@ -226,6 +230,9 @@ export const Navbar = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/my-slips" className="cursor-pointer">My Slips</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/payouts" className="cursor-pointer">Payout History</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
