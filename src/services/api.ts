@@ -54,8 +54,60 @@ export const TIER_CONFIG = {
   ultra: { maxChars: 5000, requiresToken: true }
 } as const;
 
+// Sleep utility for retry delays
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Check if a path is a wallet/deposit creation operation that should be retried
+const isWalletOperation = (path: string): boolean => {
+  return path.includes('/api/predictions/bet') || 
+         path.includes('/api/multibets') || 
+         path.includes('/api/token');
+};
+
+// Check if an error is retryable (wallet creation failures)
+const isRetryableError = (error: Error): boolean => {
+  const message = error.message.toLowerCase();
+  return message.includes('failed to create deposit') ||
+         message.includes('cannot connect to host') ||
+         message.includes('temporarily unavailable') ||
+         message.includes('502') ||
+         message.includes('503') ||
+         message.includes('service unavailable');
+};
+
 // Helper to make requests - adapts for Tor vs clearnet
+// Includes automatic retry for wallet creation failures
 async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutMs = 8000): Promise<T> {
+  const shouldRetry = isWalletOperation(path);
+  const maxRetries = shouldRetry ? 2 : 1; // 1 retry = 2 total attempts
+  const retryDelayMs = 5000; // 5 seconds between retries
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await doProxyRequest<T>(path, options, timeoutMs);
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      
+      // Only retry if it's a retryable error and we have retries left
+      if (attempt < maxRetries && isRetryableError(lastError)) {
+        console.log(`Wallet operation failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs/1000}s...`);
+        await sleep(retryDelayMs);
+        continue;
+      }
+      
+      // Don't retry non-retryable errors or if we're out of retries
+      throw lastError;
+    }
+  }
+
+  // This should never be reached, but TypeScript needs it
+  throw lastError || new Error('Request failed');
+}
+
+// Core request implementation
+async function doProxyRequest<T>(path: string, options: RequestInit = {}, timeoutMs = 8000): Promise<T> {
   const isOnion = isTorBrowser();
 
   let url: string;
@@ -97,9 +149,13 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
       if (data?.betting_closed || data?.detail === 'Betting has closed for this market') {
         throw new Error('BETTING_CLOSED');
       }
-      // Handle wallet/deposit address creation errors
+      // Handle wallet/deposit address creation errors (will be retried by wrapper)
       if (data?.detail?.includes('Failed to create deposit address') || data?.detail?.includes('Cannot connect to host')) {
-        throw new Error('The betting service is temporarily unavailable. Please try again in a few minutes.');
+        throw new Error('Wallet creation temporarily unavailable');
+      }
+      // Handle 502/503 errors
+      if (res.status === 502 || res.status === 503) {
+        throw new Error(`Service temporarily unavailable (${res.status})`);
       }
       throw new Error(data?.detail || data?.error || 'Request failed');
     }
