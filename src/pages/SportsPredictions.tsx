@@ -424,6 +424,8 @@ export default function SportsPredictions() {
     return odds.find(o => o.event_id === match.event_id);
   };
 
+  const now = Date.now() / 1000;
+
   // Sort matches - by date when viewing "All", by priority sports when filtered
   // Filter out matches that have already started (live) for the Upcoming tab
   const upcomingMatches = matches.filter(m => m.commence_timestamp > now);
@@ -441,8 +443,6 @@ export default function SportsPredictions() {
     if (bPriority !== -1) return 1;
     return Number(a.commence_timestamp) - Number(b.commence_timestamp);
   });
-
-  const now = Date.now() / 1000;
   
   // Separate live, closing soon, and regular markets
   // Live markets = betting closed but not yet resolved (match in progress)
