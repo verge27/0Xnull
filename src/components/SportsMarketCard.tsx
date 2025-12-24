@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TeamLogo } from '@/components/TeamLogo';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
-import { Clock, TrendingUp, Zap, Users, Lock } from 'lucide-react';
+import { getMarketStatus, type SportsScore, type MarketStatus } from '@/hooks/useMarketStatus';
+import { Clock, TrendingUp, Zap, Users, Lock, Radio } from 'lucide-react';
 import type { PredictionMarket } from '@/services/api';
 
 interface SportsMarketCardProps {
@@ -17,6 +18,8 @@ interface SportsMarketCardProps {
   isClosingSoon?: boolean;
   /** If true, we detected live score data for this match - force-close betting UI */
   hasLiveScoreData?: boolean;
+  /** Live score data from Sports API for enhanced status detection */
+  liveScoreData?: SportsScore | null;
 }
 
 export function SportsMarketCard({ 
@@ -26,16 +29,23 @@ export function SportsMarketCard({
   onOpenSlip,
   isLive = false,
   isClosingSoon = false,
-  hasLiveScoreData = false
+  hasLiveScoreData = false,
+  liveScoreData = null
 }: SportsMarketCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  // Frontend workaround: if we detect live score data, force-close betting regardless of API flag
-  const [bettingClosed, setBettingClosed] = useState(!isBettingOpen(market) || hasLiveScoreData);
+  
+  // Use the centralized market status detection with all 3 layers
+  const marketStatus: MarketStatus = useMemo(() => {
+    return getMarketStatus(market, liveScoreData, null);
+  }, [market, liveScoreData]);
+  
+  // Combine old detection with new - bettingClosed is true if any layer says so
+  const [bettingClosed, setBettingClosed] = useState(marketStatus.isClosed || hasLiveScoreData);
   
   // Update betting closed state when market data changes OR when live score data is detected
   useEffect(() => {
-    setBettingClosed(!isBettingOpen(market) || hasLiveScoreData);
-  }, [market.betting_open, market.betting_closes_at, market.resolution_time, hasLiveScoreData]);
+    setBettingClosed(marketStatus.isClosed || hasLiveScoreData);
+  }, [marketStatus.isClosed, hasLiveScoreData]);
   
   const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
   const yesPercent = totalPool > 0 ? Math.round((market.yes_pool_xmr / totalPool) * 100) : 50;
@@ -79,19 +89,19 @@ export function SportsMarketCard({
     >
       {/* Status badges */}
       <div className="absolute top-2 right-2 flex gap-1 z-10">
-        {bettingClosed && !isLive && (
+        {bettingClosed && !isLive && marketStatus.reason !== 'live_scores' && (
           <Badge className="bg-zinc-700 text-zinc-300">
             <Lock className="w-3 h-3 mr-1" />
             CLOSED
           </Badge>
         )}
-        {isLive && (
+        {(isLive || marketStatus.reason === 'live_scores') && (
           <Badge className="bg-red-600 text-white animate-pulse">
-            <span className="w-2 h-2 bg-white rounded-full mr-1 animate-ping" />
-            LIVE
+            <Radio className="w-3 h-3 mr-1 animate-pulse" />
+            {marketStatus.displayText === 'Match Finished' ? 'FINISHED' : 'LIVE'}
           </Badge>
         )}
-        {isClosingSoon && !isLive && !bettingClosed && (
+        {isClosingSoon && !isLive && !bettingClosed && marketStatus.reason !== 'live_scores' && (
           <Badge className="bg-amber-600 text-white">
             <Clock className="w-3 h-3 mr-1" />
             Closing Soon
@@ -162,7 +172,8 @@ export function SportsMarketCard({
         }`}>
           {bettingClosed ? (
             <div className="flex-1 text-center py-2 text-sm text-zinc-500">
-              {isLive ? 'Match in Progress' : 'Betting Closed - Awaiting Result'}
+              {marketStatus.reason === 'live_scores' ? marketStatus.displayText : 
+               isLive ? 'Match in Progress' : 'Betting Closed - Awaiting Result'}
             </div>
           ) : (
             <>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye } from 'lucide-react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import { BetSlipItem } from '@/hooks/useMultibetSlip';
 import { playErrorSound } from '@/lib/sounds';
+import { validateBetSlip, isBettingClosedError } from '@/hooks/useMarketStatus';
 
 // Bet slip expires 60 minutes after deposit address is created
 const EXPIRY_MINUTES = 60;
@@ -237,6 +238,33 @@ export function BetSlipPanel({
       }
     }
 
+    // Pre-flight validation: Check if any markets are closed
+    const validation = validateBetSlip(
+      items.map(item => ({
+        marketId: item.marketId,
+        marketTitle: item.marketTitle,
+        bettingClosesAt: item.bettingClosesAt,
+        bettingOpen: item.bettingOpen,
+        resolved: item.resolved,
+        outcome: item.outcome,
+      }))
+    );
+
+    if (!validation.valid) {
+      playErrorSound();
+      toast.error('Some markets are now closed', {
+        description: validation.errors.slice(0, 3).join('\n') + (validation.errors.length > 3 ? `\n...and ${validation.errors.length - 3} more` : ''),
+      });
+      // Remove closed legs from slip
+      for (const closedId of validation.closedMarketIds) {
+        const closedItem = items.find(i => i.marketId === closedId);
+        if (closedItem) {
+          onRemove(closedItem.id);
+        }
+      }
+      return;
+    }
+
     // Validate payout address is required
     if (!payoutAddress.trim()) {
       toast.error('Payout address is required');
@@ -255,9 +283,21 @@ export function BetSlipPanel({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create multibet';
-      toast.error(message);
+      // Handle betting closed errors from backend
+      if (isBettingClosedError(error)) {
+        playErrorSound();
+        toast.error('Some markets have closed', {
+          description: 'One or more matches have started. Refreshing...',
+        });
+        // Trigger a refresh via the onCheckResolvedMarkets callback if available
+        if (onCheckResolvedMarkets) {
+          await onCheckResolvedMarkets();
+        }
+      } else {
+        toast.error(message);
+      }
     }
-  }, [items, payoutAddress, onCheckout]);
+  }, [items, payoutAddress, onCheckout, onRemove, onCheckResolvedMarkets]);
 
   // Calculate individual odds for display
   const getOddsDisplay = (item: BetSlipItem): string => {
