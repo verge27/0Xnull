@@ -59,3 +59,6 @@ verify_jwt = false
 
 [functions.pk-register]
 verify_jwt = false
+
+[functions.cleanup-empty-markets]
+verify_jwt = false
