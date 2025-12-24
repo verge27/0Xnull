@@ -163,8 +163,8 @@ export function validateBetSlip(
   const now = Math.floor(Date.now() / 1000);
 
   for (const item of items) {
-    // Check resolved
-    if (item.resolved === 1 || item.outcome !== null) {
+    // Check resolved - must explicitly check for truthy outcome value since undefined !== null
+    if (item.resolved === 1 || (item.outcome !== null && item.outcome !== undefined)) {
       errors.push(`${item.marketTitle}: Market Resolved`);
       closedMarketIds.push(item.marketId);
       continue;
