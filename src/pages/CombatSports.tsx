@@ -688,6 +688,8 @@ export default function CombatSports() {
           betData={currentBetData}
           onCheckStatus={checkBetStatus}
           onConfirmed={() => fetchMarkets()}
+          marketTitle={selectedMarket?.title}
+          bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
         />
       )}
 

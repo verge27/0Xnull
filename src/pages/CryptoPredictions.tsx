@@ -946,6 +946,8 @@ export default function CryptoPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={handleBetConfirmed}
+        marketTitle={selectedMarket?.title}
+        bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
       />
 
       {/* Bet Slip Panel */}

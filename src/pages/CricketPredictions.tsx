@@ -933,6 +933,8 @@ export default function CricketPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={handleBetConfirmed}
+        marketTitle={selectedMarket?.title}
+        bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
       />
 
       {/* Multibet Slip */}

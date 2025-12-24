@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import type { PlaceBetResponse, BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api } from '@/services/api';
 import { formatBettingClosesAt } from '@/components/BettingCountdown';
+import { extractSportInfo, parseMatchupFromTitle } from '@/lib/sportLabels';
 
 interface BetDepositModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface BetDepositModalProps {
   onCheckStatus: (betId: string) => Promise<BetStatusResponse | null>;
   onConfirmed: () => void;
   bettingClosesAt?: number;
+  marketTitle?: string; // Optional: for displaying full match context
 }
 
 export function BetDepositModal({
@@ -28,6 +30,7 @@ export function BetDepositModal({
   onCheckStatus,
   onConfirmed,
   bettingClosesAt,
+  marketTitle,
 }: BetDepositModalProps) {
   const [copied, setCopied] = useState<'address' | 'amount' | 'viewKey' | null>(null);
   const [status, setStatus] = useState<string>(betData?.status || 'awaiting_deposit');
@@ -151,24 +154,43 @@ export function BetDepositModal({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Bet summary */}
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-            <div>
-              <p className="text-sm font-medium">
-                Bet on{' '}
-                <Badge className={betData.side === 'YES' ? 'bg-emerald-600' : 'bg-red-600'}>
-                  {betData.side}
-                </Badge>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                ${betData.amount_usd.toFixed(2)} USD
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="font-mono font-bold">{betData.amount_xmr.toFixed(6)} XMR</p>
-              <p className="text-xs text-muted-foreground">
-                @ ${betData.xmr_price.toFixed(2)}/XMR
-              </p>
+          {/* Bet summary with full match context */}
+          <div className="p-3 bg-muted/50 rounded-lg space-y-2">
+            {/* Sport/League and Match context */}
+            {betData.market_id && (() => {
+              const sportInfo = extractSportInfo(betData.market_id);
+              const title = marketTitle || '';
+              const { matchup } = parseMatchupFromTitle(title);
+              return (
+                <div className="border-b border-border/50 pb-2 mb-2">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
+                  </p>
+                  {matchup && (
+                    <p className="text-sm font-medium">{matchup}</p>
+                  )}
+                </div>
+              );
+            })()}
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">
+                  Bet on{' '}
+                  <Badge className={betData.side === 'YES' ? 'bg-emerald-600' : 'bg-red-600'}>
+                    {betData.side}
+                  </Badge>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ${betData.amount_usd.toFixed(2)} USD
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-mono font-bold">{betData.amount_xmr.toFixed(6)} XMR</p>
+                <p className="text-xs text-muted-foreground">
+                  @ ${betData.xmr_price.toFixed(2)}/XMR
+                </p>
+              </div>
             </div>
           </div>
 
