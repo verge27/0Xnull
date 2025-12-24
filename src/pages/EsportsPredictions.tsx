@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import esportsBackground from '@/assets/esports-background.jpg';
 import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, getGameDownloadUrl, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
@@ -57,6 +58,10 @@ export default function EsportsPredictions() {
   } = useEsportsEvents();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  
+  // Voucher support
+  const { voucher: savedVoucher } = useVoucher();
+  useVoucherFromUrl();
   
   // Multibet slip
   const betSlip = useMultibetSlip();
@@ -252,6 +257,7 @@ export default function EsportsPredictions() {
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
+        voucher_code: savedVoucher || undefined,
       });
       
       storeBet(response);

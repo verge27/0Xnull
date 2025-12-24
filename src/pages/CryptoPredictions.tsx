@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,6 +117,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function CryptoPredictions() {
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
   const { isAdmin } = useIsAdmin();
+  
+  // Voucher support
+  const { voucher: savedVoucher } = useVoucher();
+  useVoucherFromUrl();
   
   // Multibet slip
   const betSlip = useMultibetSlip();
@@ -286,6 +291,7 @@ export default function CryptoPredictions() {
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
+        voucher_code: savedVoucher || undefined,
       });
       
       storeBet(response);
