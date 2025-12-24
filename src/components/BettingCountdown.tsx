@@ -6,6 +6,7 @@ interface BettingCountdownProps {
   bettingClosesAt?: number;
   bettingOpen?: boolean;
   resolutionTime?: number;
+  commenceTime?: number;  // Match start time - betting should close when match starts
   variant?: 'badge' | 'inline' | 'full';
   onBettingClosed?: () => void;
 }
@@ -14,6 +15,7 @@ export function BettingCountdown({
   bettingClosesAt, 
   bettingOpen,
   resolutionTime,
+  commenceTime,
   variant = 'inline',
   onBettingClosed
 }: BettingCountdownProps) {
@@ -24,8 +26,8 @@ export function BettingCountdown({
   useEffect(() => {
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
-      // Use betting_closes_at if available, otherwise fall back to resolution_time
-      const closes = bettingClosesAt || resolutionTime || 0;
+      // Priority: betting_closes_at > commence_time > resolution_time
+      const closes = bettingClosesAt || commenceTime || resolutionTime || 0;
       const diff = closes - now;
       
       // Check if betting is already marked as closed by the API
@@ -65,7 +67,7 @@ export function BettingCountdown({
     const interval = setInterval(updateCountdown, 1000);
     
     return () => clearInterval(interval);
-  }, [bettingClosesAt, bettingOpen, resolutionTime, onBettingClosed]);
+  }, [bettingClosesAt, bettingOpen, resolutionTime, commenceTime, onBettingClosed]);
 
   if (variant === 'badge') {
     if (isClosed) {
@@ -164,23 +166,27 @@ export function formatBettingClosesAt(timestamp: number): string {
 }
 
 // Helper to check if betting is open
-export function isBettingOpen(market: { betting_open?: boolean; betting_closes_at?: number; resolution_time?: number }): boolean {
-  // If API provides betting_open, use it
+export function isBettingOpen(market: { betting_open?: boolean; betting_closes_at?: number; resolution_time?: number; commence_time?: number }): boolean {
+  // If API provides betting_open, use it (most reliable)
   if (typeof market.betting_open === 'boolean') {
     return market.betting_open;
   }
+  
   // Otherwise calculate from timestamps
   const now = Math.floor(Date.now() / 1000);
-  const closes = market.betting_closes_at || market.resolution_time || 0;
+  
+  // Priority: betting_closes_at > commence_time > resolution_time
+  // commence_time is the match start time - betting should close when match starts
+  const closes = market.betting_closes_at || market.commence_time || market.resolution_time || 0;
   return now < closes;
 }
 
 // Helper to check if betting closes within a certain number of minutes
-export function isBettingClosingSoon(market: { betting_open?: boolean; betting_closes_at?: number; resolution_time?: number }, minutes: number = 5): boolean {
+export function isBettingClosingSoon(market: { betting_open?: boolean; betting_closes_at?: number; resolution_time?: number; commence_time?: number }, minutes: number = 5): boolean {
   if (!isBettingOpen(market)) return false;
   
   const now = Math.floor(Date.now() / 1000);
-  const closes = market.betting_closes_at || market.resolution_time || 0;
+  const closes = market.betting_closes_at || market.commence_time || market.resolution_time || 0;
   const diff = closes - now;
   
   return diff > 0 && diff < minutes * 60;

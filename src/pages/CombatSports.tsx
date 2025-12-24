@@ -552,6 +552,7 @@ export default function CombatSports() {
                               bettingClosesAt={market.betting_closes_at}
                               bettingOpen={market.betting_open}
                               resolutionTime={market.resolution_time}
+                              commenceTime={market.commence_time}
                               variant="badge"
                             />
                           </div>
@@ -727,6 +728,7 @@ export default function CombatSports() {
                 bettingClosesAt={selectedMarket.betting_closes_at}
                 bettingOpen={selectedMarket.betting_open}
                 resolutionTime={selectedMarket.resolution_time}
+                commenceTime={selectedMarket.commence_time}
                 variant="full"
                 onBettingClosed={() => {
                   toast.error('Betting has closed for this market');
