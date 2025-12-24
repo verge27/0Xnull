@@ -21,6 +21,7 @@ import { playErrorSound } from '@/lib/sounds';
 import { validateBetSlip, isBettingClosedError } from '@/hooks/useMarketStatus';
 import { useBetSlipValidation, formatCountdown } from '@/hooks/useBetSlipValidation';
 import { VoucherInput, FeeComparison } from '@/components/VoucherInput';
+import { extractSportInfo, parseMatchupFromTitle } from '@/lib/sportLabels';
 
 // Bet slip expires 60 minutes after deposit address is created
 const EXPIRY_MINUTES = 60;
@@ -552,9 +553,21 @@ export function BetSlipPanel({
                             {!itemIsClosed && <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />}
                             {itemIsClosed && <XCircle className="w-4 h-4 text-destructive shrink-0" />}
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium truncate ${itemIsClosed ? 'line-through text-muted-foreground' : ''}`}>
-                                {item.marketTitle}
-                              </p>
+                              {/* Sport/League context */}
+                              {(() => {
+                                const sportInfo = extractSportInfo(item.marketId);
+                                const { matchup } = parseMatchupFromTitle(item.marketTitle);
+                                return (
+                                  <>
+                                    <p className="text-[10px] text-muted-foreground mb-0.5">
+                                      {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
+                                    </p>
+                                    <p className={`text-sm font-medium truncate ${itemIsClosed ? 'line-through text-muted-foreground' : ''}`}>
+                                      {matchup}
+                                    </p>
+                                  </>
+                                );
+                              })()}
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <Badge 
                                   variant={item.side === 'YES' ? 'default' : 'destructive'}

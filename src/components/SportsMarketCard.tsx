@@ -8,6 +8,7 @@ import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
 import { getMarketStatus, type SportsScore, type MarketStatus } from '@/hooks/useMarketStatus';
 import { Clock, TrendingUp, Zap, Users, Lock, Radio } from 'lucide-react';
 import type { PredictionMarket } from '@/services/api';
+import { extractSportInfo, parseMatchupFromTitle } from '@/lib/sportLabels';
 
 interface SportsMarketCardProps {
   market: PredictionMarket;
@@ -51,28 +52,14 @@ export function SportsMarketCard({
   const yesPercent = totalPool > 0 ? Math.round((market.yes_pool_xmr / totalPool) * 100) : 50;
   const noPercent = 100 - yesPercent;
   
-  // Parse team names from market title (formats: "Team A wins vs Team B" or "Will Team A win?")
-  const parseTeams = (title: string) => {
-    // Format: "Team A wins vs Team B"
-    const winsVsMatch = title.match(/(.+?)\s+wins\s+vs\s+(.+)/i);
-    if (winsVsMatch) {
-      return { teamA: winsVsMatch[1].trim(), teamB: winsVsMatch[2].trim() };
-    }
-    // Format: "Will Team A win?"
-    const willWinMatch = title.match(/Will\s+(.+?)\s+win\??/i);
-    if (willWinMatch) {
-      return { teamA: willWinMatch[1].trim(), teamB: '' };
-    }
-    return { teamA: title, teamB: '' };
-  };
-  
-  const { teamA, teamB } = parseTeams(market.title);
+  // Parse team names and sport info from market
+  const { teamA, teamB } = parseMatchupFromTitle(market.title);
+  const sportInfo = extractSportInfo(market.market_id);
 
   // Determine sport from oracle_asset or market_id
   const getSport = () => {
     if (market.oracle_asset) return market.oracle_asset;
-    const match = market.market_id.match(/^sports_([^_]+)/);
-    return match ? match[1] : 'soccer';
+    return sportInfo.sport || 'soccer';
   };
 
   const handleBettingClosed = () => {
@@ -110,6 +97,13 @@ export function SportsMarketCard({
       </div>
 
       <CardContent className="p-4">
+        {/* Sport/League badge */}
+        <div className="mb-3">
+          <Badge variant="outline" className="text-xs border-primary/30 text-primary/80">
+            {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
+          </Badge>
+        </div>
+
         {/* Teams display */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 flex-1">

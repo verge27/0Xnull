@@ -1333,6 +1333,7 @@ export default function SportsPredictions() {
           onCheckStatus={checkBetStatus}
           onConfirmed={handleBetConfirmed}
           bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
+          marketTitle={selectedMarket?.title}
         />
       )}
 

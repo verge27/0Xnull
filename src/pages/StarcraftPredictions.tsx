@@ -1045,6 +1045,8 @@ export default function StarcraftPredictions() {
         betData={currentBetData}
         onCheckStatus={checkBetStatus}
         onConfirmed={() => fetchMarkets()}
+        marketTitle={selectedMarket?.title}
+        bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
       />
 
       {/* Multibet Slip */}

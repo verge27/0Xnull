@@ -1288,6 +1288,8 @@ export default function EsportsPredictions() {
           betData={currentBetData}
           onConfirmed={handleBetConfirmed}
           onCheckStatus={checkBetStatus}
+          marketTitle={selectedMarket?.title}
+          bettingClosesAt={selectedMarket?.betting_closes_at || selectedMarket?.resolution_time}
         />
       )}
 
