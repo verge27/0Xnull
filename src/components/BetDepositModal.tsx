@@ -268,14 +268,6 @@ export function BetDepositModal({
                 </p>
               </div>
 
-              {/* Timer and status */}
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Expires in:</span>
-                </div>
-                <span className="font-mono font-medium text-orange-500">{timeLeft}</span>
-              </div>
 
               {/* Polling indicator */}
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
