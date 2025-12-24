@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye, AlertTriangle } from 'lucide-react';
+import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye, AlertTriangle, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { BetSlipItem } from '@/hooks/useMultibetSlip';
 import { playErrorSound } from '@/lib/sounds';
 import { validateBetSlip, isBettingClosedError } from '@/hooks/useMarketStatus';
+import { useBetSlipValidation, formatCountdown } from '@/hooks/useBetSlipValidation';
 
 // Bet slip expires 60 minutes after deposit address is created
 const EXPIRY_MINUTES = 60;
@@ -80,6 +81,25 @@ export function BetSlipPanel({
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   const hasExpiredRef = useRef(false);
   const hasCheckedMarketsRef = useRef(false);
+
+  // Use the bet slip validation hook for continuous validation
+  const {
+    validCount,
+    invalidCount,
+    closingSoonCount,
+    closingSoonItems,
+    closedItems,
+    removeAllClosed,
+    isClosingSoon,
+    isClosed,
+    getTimeUntilClose,
+    validate,
+  } = useBetSlipValidation({
+    items,
+    onRemoveItem: onRemove,
+    isOpen,
+    enabled: true,
+  });
 
   // Check for resolved markets when panel opens
   useEffect(() => {
@@ -419,6 +439,43 @@ export function BetSlipPanel({
                 )}
               </div>
             </SheetTitle>
+            
+            {/* Validation Status Indicator */}
+            {items.length > 0 && (invalidCount > 0 || closingSoonCount > 0) && (
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="flex items-center gap-2 text-xs">
+                  {invalidCount > 0 ? (
+                    <Badge variant="destructive" className="gap-1">
+                      <XCircle className="w-3 h-3" />
+                      {validCount}/{items.length} valid
+                    </Badge>
+                  ) : (
+                    <Badge variant="default" className="gap-1 bg-emerald-600">
+                      <CheckCircle className="w-3 h-3" />
+                      All valid
+                    </Badge>
+                  )}
+                  {closingSoonCount > 0 && invalidCount === 0 && (
+                    <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-500">
+                      <Clock className="w-3 h-3 animate-pulse" />
+                      {closingSoonCount} closing soon
+                    </Badge>
+                  )}
+                </div>
+                {invalidCount > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs border-destructive/50 text-destructive hover:bg-destructive/10"
+                    onClick={removeAllClosed}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Remove {invalidCount}
+                  </Button>
+                )}
+              </div>
+            )}
+            
             {/* Expiry Timer - only show when there's an active slip awaiting deposit with valid created_at */}
             {hasActiveAwaitingSlip && slipCreatedAtMs && (
               <div className={`flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium mt-2 ${
@@ -465,28 +522,36 @@ export function BetSlipPanel({
                   {items.map((item, index) => {
                     const itemPayout = calculatePotentialPayout(item);
                     const itemOdds = getOddsDisplay(item);
+                    const itemIsClosed = isClosed(item);
+                    const itemIsClosingSoon = isClosingSoon(item);
+                    const timeUntilClose = getTimeUntilClose(item);
                     
                     return (
                       <div
                         key={item.id}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, index)}
+                        draggable={!itemIsClosed}
+                        onDragStart={(e) => !itemIsClosed && handleDragStart(e, index)}
                         onDragEnd={handleDragEnd}
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, index)}
-                        className={`bg-muted/50 rounded-lg p-3 space-y-2 cursor-grab active:cursor-grabbing transition-all ${
-                          dragOverIndex === index ? 'border-2 border-primary border-dashed' : 'border-2 border-transparent'
-                        } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                        className={`rounded-lg p-3 space-y-2 transition-all ${
+                          itemIsClosed 
+                            ? 'bg-destructive/10 border-2 border-destructive/30 opacity-70' 
+                            : itemIsClosingSoon
+                              ? 'bg-amber-500/10 border-2 border-amber-500/30'
+                              : 'bg-muted/50 border-2 border-transparent cursor-grab active:cursor-grabbing'
+                        } ${dragOverIndex === index ? 'border-primary border-dashed' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                            {!itemIsClosed && <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />}
+                            {itemIsClosed && <XCircle className="w-4 h-4 text-destructive shrink-0" />}
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
+                              <p className={`text-sm font-medium truncate ${itemIsClosed ? 'line-through text-muted-foreground' : ''}`}>
                                 {item.marketTitle}
                               </p>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <Badge 
                                   variant={item.side === 'YES' ? 'default' : 'destructive'}
                                 >
@@ -495,6 +560,22 @@ export function BetSlipPanel({
                                 <span className="text-xs text-muted-foreground font-mono">
                                   {itemOdds}
                                 </span>
+                                {/* Closed indicator */}
+                                {itemIsClosed && (
+                                  <Badge variant="destructive" className="text-[10px] py-0 h-4">
+                                    CLOSED
+                                  </Badge>
+                                )}
+                                {/* Closing soon indicator with countdown */}
+                                {itemIsClosingSoon && !itemIsClosed && timeUntilClose && (
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-[10px] py-0 h-4 border-amber-500/50 text-amber-500 animate-pulse gap-1"
+                                  >
+                                    <Clock className="w-2.5 h-2.5" />
+                                    {formatCountdown(timeUntilClose)}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>

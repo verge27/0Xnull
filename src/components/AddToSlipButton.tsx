@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, TrendingDown, ChevronDown, ShoppingCart } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, ChevronDown, ShoppingCart, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { isAddingClosingSoonItem, formatCountdown } from '@/hooks/useBetSlipValidation';
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
 
@@ -20,11 +21,12 @@ interface AddToSlipButtonProps {
   marketTitle: string;
   yesPool?: number;
   noPool?: number;
-  onAdd: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number) => void;
+  onAdd: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number, bettingClosesAt?: number) => void;
   onOpenSlip?: () => void;
   defaultAmount?: number;
   variant?: 'icon' | 'full' | 'compact';
   className?: string;
+  bettingClosesAt?: number;
 }
 
 export function AddToSlipButton({
@@ -37,30 +39,49 @@ export function AddToSlipButton({
   defaultAmount = 5,
   variant = 'icon',
   className = '',
+  bettingClosesAt,
 }: AddToSlipButtonProps) {
   const [open, setOpen] = useState(false);
 
   const handleAdd = (side: 'YES' | 'NO', amount: number = defaultAmount) => {
-    onAdd(marketId, marketTitle, side, amount, yesPool, noPool);
-    toast.success(
-      <div className="flex items-center justify-between gap-3">
-        <span>Added ${amount} {side} bet</span>
-        {onOpenSlip && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 text-xs gap-1"
-            onClick={() => {
-              onOpenSlip();
-              toast.dismiss();
-            }}
-          >
-            <ShoppingCart className="w-3 h-3" />
-            View Slip
-          </Button>
-        )}
-      </div>
-    );
+    const isClosingSoon = isAddingClosingSoonItem(bettingClosesAt);
+    
+    onAdd(marketId, marketTitle, side, amount, yesPool, noPool, bettingClosesAt);
+    
+    // Show warning if closing soon
+    if (isClosingSoon && bettingClosesAt) {
+      const timeUntilClose = (bettingClosesAt * 1000) - Date.now();
+      toast.warning(
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          <span>Closes in {formatCountdown(timeUntilClose)}</span>
+        </div>,
+        {
+          description: 'This market closes soon. Place your bet quickly!',
+          duration: 5000,
+        }
+      );
+    } else {
+      toast.success(
+        <div className="flex items-center justify-between gap-3">
+          <span>Added ${amount} {side} bet</span>
+          {onOpenSlip && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs gap-1"
+              onClick={() => {
+                onOpenSlip();
+                toast.dismiss();
+              }}
+            >
+              <ShoppingCart className="w-3 h-3" />
+              View Slip
+            </Button>
+          )}
+        </div>
+      );
+    }
     setOpen(false);
   };
 

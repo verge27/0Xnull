@@ -150,7 +150,14 @@ export function useMultibetSlip() {
       if (existing) {
         // Update amount and pools
         return prev.map(i => 
-          i.id === existing.id ? { ...i, amount: i.amount + amount, yesPool, noPool, bettingClosesAt, bettingOpen } : i
+          i.id === existing.id ? { 
+            ...i, 
+            amount: i.amount + amount, 
+            yesPool, 
+            noPool, 
+            bettingClosesAt: bettingClosesAt ?? i.bettingClosesAt, 
+            bettingOpen: bettingOpen ?? i.bettingOpen 
+          } : i
         );
       }
       // Add new item
