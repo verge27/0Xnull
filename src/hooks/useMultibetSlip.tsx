@@ -11,6 +11,11 @@ export interface BetSlipItem {
   amount: number;
   yesPool: number;
   noPool: number;
+  // Optional fields for betting status validation
+  bettingClosesAt?: number;
+  bettingOpen?: boolean;
+  resolved?: number;
+  outcome?: string | null;
 }
 
 const STORAGE_KEY = 'multibet_slip';
@@ -135,7 +140,9 @@ export function useMultibetSlip() {
     side: 'YES' | 'NO',
     amount: number = 5,
     yesPool: number = 0,
-    noPool: number = 0
+    noPool: number = 0,
+    bettingClosesAt?: number,
+    bettingOpen?: boolean
   ) => {
     setItems(prev => {
       // Check if same market+side already exists
@@ -143,7 +150,7 @@ export function useMultibetSlip() {
       if (existing) {
         // Update amount and pools
         return prev.map(i => 
-          i.id === existing.id ? { ...i, amount: i.amount + amount, yesPool, noPool } : i
+          i.id === existing.id ? { ...i, amount: i.amount + amount, yesPool, noPool, bettingClosesAt, bettingOpen } : i
         );
       }
       // Add new item
@@ -155,6 +162,8 @@ export function useMultibetSlip() {
         amount,
         yesPool,
         noPool,
+        bettingClosesAt,
+        bettingOpen,
       }];
     });
     setIsOpen(true);

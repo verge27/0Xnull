@@ -226,6 +226,16 @@ export default function EsportsPredictions() {
       return;
     }
     
+    // Pre-flight check: Verify betting is still open before submitting
+    if (!isBettingOpen(selectedMarket)) {
+      toast.error('Betting has closed for this match', {
+        description: 'The event has already started or betting window has ended.',
+      });
+      fetchMarkets(); // Refresh markets to update status
+      setBetDialogOpen(false);
+      return;
+    }
+    
     // Check if betting closes soon and warn user
     if (isBettingClosingSoon(selectedMarket, 5)) {
       toast.warning('⚠️ Betting closes soon!', {
@@ -254,7 +264,19 @@ export default function EsportsPredictions() {
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to place bet';
-      toast.error(message);
+      // Handle betting closed errors from backend
+      if (message === 'BETTING_CLOSED' || 
+          message.toLowerCase().includes('betting closed') || 
+          message.toLowerCase().includes('betting has closed') ||
+          message.toLowerCase().includes('already resolved')) {
+        toast.error('Betting has closed for this match', {
+          description: 'The event has already started. Refreshing markets...',
+        });
+        fetchMarkets(); // Refresh markets to update status
+        setBetDialogOpen(false);
+      } else {
+        toast.error(message);
+      }
     } finally {
       setPlacingBet(false);
       setElapsedSeconds(0);
