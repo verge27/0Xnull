@@ -817,7 +817,7 @@ export default function SportsPredictions() {
                         <CardContent className="space-y-3">
                           {/* Live Score Display */}
                           {score && score.scores && score.scores.length >= 2 ? (
-                            <div className="flex items-center justify-center gap-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <div className="relative flex items-center justify-center gap-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                               <div className="text-center">
                                 <div className={`text-2xl font-bold font-mono ${homeNum > awayNum ? 'text-emerald-400' : 'text-foreground'}`}>
                                   {homeScore}
@@ -832,7 +832,7 @@ export default function SportsPredictions() {
                                 <div className="text-xs text-muted-foreground mt-1 max-w-20 truncate">{score.away_team}</div>
                               </div>
                               {score.statusDetail && (
-                                <Badge variant="outline" className="absolute top-2 right-2 text-[10px]">
+                                <Badge variant="outline" className="absolute top-1 right-1 text-[10px]">
                                   {score.statusDetail}
                                 </Badge>
                               )}
