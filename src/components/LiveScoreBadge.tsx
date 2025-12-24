@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
-import { Activity, Radio, Clock } from 'lucide-react';
+import { Activity, Radio, Clock, Info } from 'lucide-react';
 import { type LiveScores } from '@/hooks/useEsportsEvents';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface LiveScoreBadgeProps {
   eventId: string;
@@ -10,6 +11,8 @@ interface LiveScoreBadgeProps {
   variant?: 'compact' | 'full';
   /** When true and no score yet, show "Awaiting data" instead of just LIVE */
   showNoDataHint?: boolean;
+  /** When true, show info icon explaining score delay */
+  showScoreDelayHint?: boolean;
 }
 
 export function LiveScoreBadge({ 
@@ -19,6 +22,7 @@ export function LiveScoreBadge({
   liveScores, 
   variant = 'compact',
   showNoDataHint = false,
+  showScoreDelayHint = false,
 }: LiveScoreBadgeProps) {
   const score = liveScores[eventId];
   
@@ -27,10 +31,22 @@ export function LiveScoreBadge({
     if (showNoDataHint) {
       return (
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="border-red-500/50 text-red-400 animate-pulse gap-1">
-            <Radio className="w-3 h-3" />
-            LIVE
-          </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="border-red-500/50 text-red-400 animate-pulse gap-1 cursor-help">
+                  <Radio className="w-3 h-3" />
+                  LIVE
+                  {showScoreDelayHint && <Info className="w-3 h-3 ml-0.5 opacity-70" />}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px]">
+                <p className="text-xs">
+                  Live scores update every few seconds. "Score in Xm" means polling is paused after failed attempts and will resume automatically.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="w-3 h-3" />
             Awaiting data
