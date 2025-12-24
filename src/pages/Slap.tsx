@@ -76,8 +76,18 @@ const Slap = () => {
       <div className="relative z-10">
         <Navbar />
         
+        {/* Back to Combat Navigation */}
+        <div className="container pt-6">
+          <Link 
+            to="/predictions/sports/combat" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to Combat Sports
+          </Link>
+        </div>
+
         {/* Hero Section */}
-        <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-visible">
+        <section className="relative pt-8 pb-20 md:pt-12 md:pb-32 overflow-visible">
           <div className="absolute inset-0 bg-gradient-to-b from-red-900/30 via-transparent to-transparent" />
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">

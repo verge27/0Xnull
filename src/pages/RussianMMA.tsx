@@ -43,11 +43,18 @@ const RussianMMA = () => {
     try {
       const response = await api.getPredictionMarkets();
       const allMarkets = response.markets || [];
-      // Filter for fight/MMA related markets (by title/description keywords)
+      // Filter for fight/MMA related markets (exclude eSports)
       const fightMarkets = allMarkets.filter(m => {
         const text = `${m.title} ${m.description}`.toLowerCase();
+        // Exclude eSports keywords
+        const isEsports = text.includes('esports') || text.includes('e-sports') || 
+                          text.includes('dota') || text.includes('league of legends') ||
+                          text.includes('counter-strike') || text.includes('cs2') || text.includes('csgo') ||
+                          text.includes('valorant') || text.includes('overwatch') || text.includes('starcraft');
+        if (isEsports) return false;
+        
         return text.includes('mma') || text.includes('fight') || text.includes('ufc') || 
-               text.includes('vs') || text.includes('bout') || text.includes('knockout') ||
+               text.includes('bout') || text.includes('knockout') ||
                text.includes('submission') || m.market_id.includes('fight_');
       });
       setMarkets(fightMarkets);
@@ -95,8 +102,18 @@ const RussianMMA = () => {
       <div className="relative z-10">
         <Navbar />
         
+        {/* Back to Combat Navigation */}
+        <div className="container pt-6">
+          <Link 
+            to="/predictions/sports/combat" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to Combat Sports
+          </Link>
+        </div>
+
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32 overflow-hidden">
+        <section className="relative py-12 md:py-20 overflow-hidden">
           <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-red-500 via-red-400 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl">
