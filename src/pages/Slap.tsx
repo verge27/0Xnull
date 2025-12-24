@@ -160,17 +160,124 @@ const Slap = () => {
               <Tv className="h-5 w-5 text-red-500" />
               Watch Power Slap
             </h3>
-            <a 
-              href="https://rumble.com/c/powerslap" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" size="sm" className="gap-2 border-green-900/50 hover:border-green-600/50">
-                <Tv className="h-4 w-4 text-green-500" />
-                Rumble
-                <ExternalLink className="h-3 w-3" />
-              </Button>
-            </a>
+            <div className="flex gap-2 flex-wrap">
+              <a 
+                href="https://www.youtube.com/@powerslap" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-red-900/50 hover:border-red-600/50">
+                  <Youtube className="h-4 w-4 text-red-500" />
+                  YouTube Channel
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
+              <a 
+                href="https://rumble.com/c/powerslap" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="gap-2 border-green-900/50 hover:border-green-600/50">
+                  <Tv className="h-4 w-4 text-green-500" />
+                  Rumble
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
+            </div>
+          </section>
+
+          {/* Power Slap YouTube Channel Feed */}
+          <section>
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <Youtube className="h-6 w-6 text-red-500" />
+              Power Slap Channel
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Featured Video 1 - Latest Full Fight */}
+              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
+                <a 
+                  href="https://www.youtube.com/@powerslap/videos" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
+                    <iframe
+                      src="https://www.youtube.com/embed?listType=user_uploads&list=powerslap"
+                      title="Power Slap Latest Videos"
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium text-foreground group-hover:text-red-400 transition-colors">
+                      Latest Uploads
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Watch the newest Power Slap content
+                    </p>
+                  </CardContent>
+                </a>
+              </Card>
+
+              {/* Full Fights Playlist */}
+              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
+                <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
+                  <iframe
+                    src="https://www.youtube.com/embed/videoseries?list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY"
+                    title="Power Slap Full Fights"
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <CardContent className="p-3">
+                  <p className="text-sm font-medium text-foreground">
+                    Full Fight Replays
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Complete fights playlist
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* KO Highlights */}
+              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
+                <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
+                  <iframe
+                    src="https://www.youtube.com/embed/videoseries?list=PLDfuNaQqaYQfxXNz-RLXCl0FkLPPrdzXG"
+                    title="Power Slap Knockouts"
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <CardContent className="p-3">
+                  <p className="text-sm font-medium text-foreground">
+                    KO Highlights
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Best knockouts compilation
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Subscribe CTA */}
+            <div className="mt-4">
+              <a 
+                href="https://www.youtube.com/@powerslap?sub_confirmation=1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="gap-2 border-red-600/50 hover:bg-red-600/20 text-red-400">
+                  <Youtube className="h-4 w-4" />
+                  Subscribe to Power Slap
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </a>
+            </div>
           </section>
 
           {/* Featured Section */}
