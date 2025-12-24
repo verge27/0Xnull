@@ -285,7 +285,7 @@ export function useMultibetSlip() {
     return totalUsd * combinedMultiplier;
   }, [items, totalUsd]);
 
-  const checkout = useCallback(async (payoutAddress?: string) => {
+  const checkout = useCallback(async (payoutAddress?: string, voucherCode?: string) => {
     if (items.length === 0) return null;
 
     setIsCheckingOut(true);
@@ -296,7 +296,7 @@ export function useMultibetSlip() {
         amount_usd: item.amount,
       }));
 
-      const created = await api.createMultibet(legs, payoutAddress);
+      const created = await api.createMultibet(legs, payoutAddress, voucherCode);
       const slip = normalizeSlip(created);
       if (!slip) return null;
 

@@ -20,6 +20,7 @@ import { BetSlipItem } from '@/hooks/useMultibetSlip';
 import { playErrorSound } from '@/lib/sounds';
 import { validateBetSlip, isBettingClosedError } from '@/hooks/useMarketStatus';
 import { useBetSlipValidation, formatCountdown } from '@/hooks/useBetSlipValidation';
+import { VoucherInput, FeeComparison } from '@/components/VoucherInput';
 
 // Bet slip expires 60 minutes after deposit address is created
 const EXPIRY_MINUTES = 60;
@@ -45,12 +46,13 @@ interface BetSlipPanelProps {
   totalUsd: number;
   calculatePotentialPayout: (item: BetSlipItem) => number;
   calculateTotalPotentialPayout: () => number;
-  onCheckout: (payoutAddress?: string) => Promise<any>;
+  onCheckout: (payoutAddress?: string, voucherCode?: string) => Promise<any>;
   isCheckingOut: boolean;
   activeSlip?: ActiveSlip | null;
   onViewActiveSlip?: () => void;
   awaitingDepositCount?: number;
   onCheckResolvedMarkets?: () => Promise<void>;
+  initialVoucherCode?: string | null;
 }
 
 export function BetSlipPanel({
@@ -72,8 +74,10 @@ export function BetSlipPanel({
   onViewActiveSlip,
   awaitingDepositCount = 0,
   onCheckResolvedMarkets,
+  initialVoucherCode,
 }: BetSlipPanelProps) {
   const [payoutAddress, setPayoutAddress] = useState('');
+  const [voucherCode, setVoucherCode] = useState<string | null>(initialVoucherCode || null);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -297,7 +301,7 @@ export function BetSlipPanel({
     }
 
     try {
-      const slip = await onCheckout(payoutAddress || undefined);
+      const slip = await onCheckout(payoutAddress || undefined, voucherCode || undefined);
       if (slip) {
         toast.success('Multibet slip created!');
       }
@@ -317,7 +321,7 @@ export function BetSlipPanel({
         toast.error(message);
       }
     }
-  }, [items, payoutAddress, onCheckout, onRemove, onCheckResolvedMarkets]);
+  }, [items, payoutAddress, voucherCode, onCheckout, onRemove, onCheckResolvedMarkets]);
 
   // Calculate individual odds for display
   const getOddsDisplay = (item: BetSlipItem): string => {
@@ -645,6 +649,15 @@ export function BetSlipPanel({
                     Required to receive your winnings
                   </p>
                 </div>
+
+                {/* Voucher Input */}
+                <VoucherInput 
+                  onVoucherValidated={setVoucherCode}
+                  compact={false}
+                />
+
+                {/* Fee Comparison */}
+                <FeeComparison voucherApplied={!!voucherCode} />
 
                 {/* Summary Section */}
                 <div className="bg-muted/50 rounded-lg p-3 space-y-2">

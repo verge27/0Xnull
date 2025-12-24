@@ -171,12 +171,43 @@ async function doProxyRequest<T>(path: string, options: RequestInit = {}, timeou
   }
 }
 
+// Voucher types
+export interface VoucherValidationResponse {
+  valid: boolean;
+  code: string;
+  influencer?: string;
+  user_benefit?: string;
+  effective_fee?: string;
+}
+
+export interface VoucherStats {
+  code: string;
+  influencer: string;
+  active: boolean;
+  stats: {
+    unique_users: number;
+    total_bets: number;
+    total_volume_xmr: number;
+    total_influencer_earnings: number;
+    total_user_rebates: number;
+  };
+}
+
+export interface VoucherLeaderboardEntry {
+  code: string;
+  influencer: string;
+  volume_xmr: number;
+  earnings_xmr: number;
+  users: number;
+}
+
 // Prediction market types
 export interface PredictionBetRequest {
   market_id: string;
   side: 'YES' | 'NO';
   amount_usd: number;
   payout_address: string;
+  voucher_code?: string;
 }
 
 export interface PredictionBetResponse {
@@ -264,6 +295,12 @@ export interface MultibetLegRequest {
   market_id: string;
   side: 'YES' | 'NO';
   amount_usd: number;
+}
+
+export interface MultibetCreateRequest {
+  legs: MultibetLegRequest[];
+  payout_address?: string;
+  voucher_code?: string;
 }
 
 export interface MultibetLeg {
@@ -472,13 +509,27 @@ export const api = {
     }
   },
 
+  // Voucher APIs
+  async validateVoucher(code: string): Promise<VoucherValidationResponse> {
+    return proxyRequest<VoucherValidationResponse>(`/api/vouchers/validate/${encodeURIComponent(code.toUpperCase())}`);
+  },
+
+  async getVoucherStats(code: string): Promise<VoucherStats> {
+    return proxyRequest<VoucherStats>(`/api/vouchers/stats/${encodeURIComponent(code.toUpperCase())}`);
+  },
+
+  async getVoucherLeaderboard(): Promise<{ leaderboard: VoucherLeaderboardEntry[] }> {
+    return proxyRequest<{ leaderboard: VoucherLeaderboardEntry[] }>('/api/vouchers/leaderboard');
+  },
+
   // Multibet APIs
-  async createMultibet(legs: MultibetLegRequest[], payoutAddress?: string): Promise<MultibetSlip> {
+  async createMultibet(legs: MultibetLegRequest[], payoutAddress?: string, voucherCode?: string): Promise<MultibetSlip> {
     return proxyRequest<MultibetSlip>('/api/multibets/create', {
       method: 'POST',
       body: JSON.stringify({
         legs,
         payout_address: payoutAddress,
+        voucher_code: voucherCode,
       }),
     }, 90000);
   },

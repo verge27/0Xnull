@@ -8,6 +8,7 @@ import { useSportsEvents, getSportLabel as getLegacySportLabel, getSportEmoji, t
 import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -60,6 +61,10 @@ export default function SportsPredictions() {
   const { odds, fetchOdds } = useSportsOdds();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
+  const { voucher: savedVoucher } = useVoucher();
+  
+  // Handle voucher from URL params
+  useVoucherFromUrl();
   
   // Multibet slip
   const betSlip = useMultibetSlip();
@@ -285,6 +290,7 @@ export default function SportsPredictions() {
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
+        voucher_code: savedVoucher || undefined,
       });
       
       storeBet(response);
