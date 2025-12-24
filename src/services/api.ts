@@ -278,6 +278,14 @@ export interface PoolInfo {
   created_at: number;
 }
 
+export interface PayoutLeg {
+  market_id: string;
+  title: string;
+  side: 'YES' | 'NO';
+  outcome: 'won' | 'lost' | 'refund';
+  payout_xmr: number;
+}
+
 export interface PayoutEntry {
   bet_id: string;
   market_id: string;
@@ -291,6 +299,8 @@ export interface PayoutEntry {
   payout_address: string;
   tx_hash: string;
   resolved_at: number;
+  // Optional structured leg data for multibets
+  legs?: PayoutLeg[];
 }
 
 // Multibet types
