@@ -534,6 +534,7 @@ export default function CombatSports() {
                                 <div className="text-xs text-muted-foreground">{market.no_pool_xmr.toFixed(4)} XMR</div>
                               </div>
                             </div>
+                            <PoolTransparency marketId={market.market_id} className="mt-3" />
                           </CardContent>
                         </Card>
                       );
@@ -619,6 +620,7 @@ export default function CombatSports() {
                               </p>
                             </div>
                           )}
+                          <PoolTransparency marketId={market.market_id} className="mt-3" />
                           <div className="mt-3 pt-3 border-t flex justify-end">
                             <AddToSlipButton
                               marketId={market.market_id}
