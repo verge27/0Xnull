@@ -79,11 +79,20 @@ export default function Payouts() {
       // Leg names are in description (comma-separated questions like "Will Team X win?, Will Team Y win?")
       const description = payout.description || '';
       
+      // Parse "(X/Y won)" from title to determine win/refund counts
+      const wonMatch = payout.title.match(/\((\d+)\/(\d+)\s*won\)/i);
+      const winsCount = wonMatch ? parseInt(wonMatch[1]) : 0;
+      const totalLegs = wonMatch ? parseInt(wonMatch[2]) : 0;
+      
       // Split by "?, " to get individual leg questions
       let legs = description.split(/\?,\s*/).map(t => t.trim()).filter(Boolean);
       
-      // Handle "(+N more)" suffix - remove it from legs
-      legs = legs.filter(leg => !leg.match(/^\(\+\d+\s*more\)$/i));
+      // Handle "(+N more)" suffix embedded in last leg - extract and remove it
+      // e.g. "Will Team Shadowkek win? (+1 more)" -> "Will Team Shadowkek win"
+      legs = legs.map(leg => {
+        const suffixMatch = leg.match(/^(.+?)\s*\(\+\d+\s*more\)$/i);
+        return suffixMatch ? suffixMatch[1].trim() : leg;
+      }).filter(leg => !leg.match(/^\(\+\d+\s*more\)$/i)); // Remove standalone suffix entries
       
       // If no legs found, show as single entry
       if (legs.length === 0) {
@@ -93,25 +102,22 @@ export default function Payouts() {
         }];
       }
       
-      // Parse "(X/Y won)" from title to determine win/refund counts
-      const wonMatch = payout.title.match(/\((\d+)\/(\d+)\s*won\)/i);
-      const winsCount = wonMatch ? parseInt(wonMatch[1]) : legs.length;
-      const totalLegs = wonMatch ? parseInt(wonMatch[2]) : legs.length;
-      
-      // If there are more legs in the title than in description, we're missing some
-      const missingLegs = totalLegs - legs.length;
-      if (missingLegs > 0) {
-        for (let i = 0; i < missingLegs; i++) {
-          legs.push(`Unknown bet #${legs.length + 1}`);
+      // If totalLegs is known and we have fewer legs than expected, pad with numbered placeholders
+      // But only if we actually have a mismatch (description was truncated)
+      const expectedLegs = totalLegs > 0 ? totalLegs : legs.length;
+      if (legs.length < expectedLegs) {
+        for (let i = legs.length; i < expectedLegs; i++) {
+          legs.push(`Bet leg #${i + 1}`);
         }
       }
       
       return legs.map((legTitle, idx) => {
-        // Add question mark back if it was stripped
+        // Add question mark back if it was stripped during splitting
         const fullTitle = legTitle.endsWith('?') ? legTitle : 
-                          legTitle.startsWith('Unknown') ? legTitle : `${legTitle}?`;
+                          legTitle.startsWith('Bet leg #') ? legTitle : `${legTitle}?`;
         
-        // Determine if this leg is a win or refund (first X are wins, rest are refunds)
+        // Determine if this leg is a win or refund based on position
+        // Note: This is a heuristic since we don't have per-leg outcome data
         const isLegWin = idx < winsCount;
         
         return {
@@ -119,7 +125,7 @@ export default function Payouts() {
           bet_id: `${payout.bet_id}_leg${idx}`,
           market_id: `expanded_leg_${idx}`,
           title: fullTitle,
-          description: `Part of ${totalLegs}-leg slip`,
+          description: `Leg ${idx + 1} of ${expectedLegs}`,
           // Use TOTAL amounts - we don't have per-leg breakdown from API
           stake_xmr: payout.stake_xmr,
           payout_xmr: payout.payout_xmr,
@@ -129,7 +135,7 @@ export default function Payouts() {
           // Add custom field to indicate this is an expanded leg
           _isExpandedLeg: true,
           _legIndex: idx,
-          _totalLegs: totalLegs,
+          _totalLegs: expectedLegs,
           _winsCount: winsCount,
         };
       });
