@@ -114,7 +114,37 @@ export default function CombatSports() {
       });
 
       const unblockedMarkets = combatMarkets.filter(m => !blockedIds.has(m.market_id));
-      setMarkets(unblockedMarkets);
+      
+      // Build a lookup from event_id to commence_timestamp for enriching markets
+      const matchCommenceMap = new Map<string, number>();
+      matches.forEach(m => {
+        if (COMBAT_SPORTS.includes(m.sport)) {
+          matchCommenceMap.set(m.event_id, Number(m.commence_timestamp));
+        }
+      });
+      
+      // Enrich markets with commence_time from matches if not present
+      // Market IDs are formatted as: sports_{event_id}_{team_slug}
+      const enrichedMarkets = unblockedMarkets.map(m => {
+        if (m.commence_time || m.betting_closes_at) return m;
+        
+        // Extract event_id from market_id
+        const parts = m.market_id.split('_');
+        if (parts.length >= 2 && parts[0] === 'sports') {
+          const eventId = parts[1];
+          const commenceTime = matchCommenceMap.get(eventId);
+          if (commenceTime) {
+            return {
+              ...m,
+              commence_time: commenceTime,
+              betting_closes_at: commenceTime,
+            };
+          }
+        }
+        return m;
+      });
+      
+      setMarkets(enrichedMarkets);
     } catch (error) {
       console.error('Error fetching markets:', error);
       toast.error('Failed to load markets');

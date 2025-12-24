@@ -158,10 +158,42 @@ export default function EsportsPredictions() {
 
       // Filter out blocked markets
       const unblockedMarkets = esportsMarkets.filter(m => !blockedIds.has(m.market_id));
+      
+      // Build a lookup from event_id to start_time for enriching markets
+      // Combine events and liveEvents for comprehensive coverage
+      const eventStartMap = new Map<string, number>();
+      [...events, ...liveEvents].forEach(e => {
+        const eventId = e.event_id || e.id || '';
+        const startTime = e.start_time ? Math.floor(new Date(e.start_time).getTime() / 1000) : 0;
+        if (eventId && startTime) {
+          eventStartMap.set(eventId, startTime);
+        }
+      });
+      
+      // Enrich markets with commence_time from events if not present
+      // Market IDs are formatted as: esports_{event_id}_{team_slug}
+      const enrichedMarkets = unblockedMarkets.map(m => {
+        if (m.commence_time || m.betting_closes_at) return m;
+        
+        // Extract event_id from market_id
+        const parts = m.market_id.split('_');
+        if (parts.length >= 2 && parts[0] === 'esports') {
+          const eventId = parts[1];
+          const commenceTime = eventStartMap.get(eventId);
+          if (commenceTime) {
+            return {
+              ...m,
+              commence_time: commenceTime,
+              betting_closes_at: commenceTime,
+            };
+          }
+        }
+        return m;
+      });
 
       // Separate resolved vs unresolved markets
-      const resolved = unblockedMarkets.filter(m => m.resolved);
-      const unresolved = unblockedMarkets.filter(m => !m.resolved);
+      const resolved = enrichedMarkets.filter(m => m.resolved);
+      const unresolved = enrichedMarkets.filter(m => !m.resolved);
 
       const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
         new Promise<T>((resolve, reject) => {
