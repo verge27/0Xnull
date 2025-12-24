@@ -184,12 +184,15 @@ export interface VoucherStats {
   code: string;
   influencer: string;
   active: boolean;
+  created_at?: number;
   stats: {
     unique_users: number;
     total_bets: number;
     total_volume_xmr: number;
+    total_wins_xmr: number;
     total_influencer_earnings: number;
     total_user_rebates: number;
+    pending_payout: number;
   };
 }
 
