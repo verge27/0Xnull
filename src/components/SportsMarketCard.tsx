@@ -6,6 +6,7 @@ import { TeamLogo } from '@/components/TeamLogo';
 import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
 import { getMarketStatus, type SportsScore, type MarketStatus } from '@/hooks/useMarketStatus';
+import { PoolTransparency } from '@/components/PoolTransparency';
 import { Clock, TrendingUp, Zap, Users, Lock, Radio } from 'lucide-react';
 import type { PredictionMarket } from '@/services/api';
 import { extractSportInfo, parseMatchupFromTitle } from '@/lib/sportLabels';
@@ -160,6 +161,9 @@ export function SportsMarketCard({
             onBettingClosed={handleBettingClosed}
           />
         </div>
+
+        {/* Pool Transparency for verification */}
+        <PoolTransparency marketId={market.market_id} className="mb-3" />
 
         {/* Quick bet buttons */}
         <div className={`flex items-center gap-2 transition-all duration-200 ${
