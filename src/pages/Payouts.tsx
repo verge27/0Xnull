@@ -76,7 +76,29 @@ export default function Payouts() {
   // NOTE: API only provides TOTAL stake/payout for the slip, not per-leg breakdown
   const expandedPayouts = payouts.flatMap(payout => {
     if (payout.market_id === 'multibet') {
-      // Leg names are in description (comma-separated questions like "Will Team X win?, Will Team Y win?")
+      // If backend provides structured legs array, use it directly
+      if (payout.legs && payout.legs.length > 0) {
+        return payout.legs.map((leg, idx) => ({
+          ...payout,
+          bet_id: `${payout.bet_id}_leg${idx}`,
+          market_id: leg.market_id,
+          title: leg.title,
+          description: `Leg ${idx + 1} of ${payout.legs!.length}`,
+          stake_xmr: payout.stake_xmr,
+          payout_xmr: payout.payout_xmr,
+          payout_type: leg.outcome === 'won' ? ('win' as const) : ('refund' as const),
+          side: leg.side,
+          outcome: leg.outcome === 'won' ? leg.side : (leg.side === 'YES' ? 'NO' : 'YES') as 'YES' | 'NO',
+          _isExpandedLeg: true,
+          _legIndex: idx,
+          _totalLegs: payout.legs!.length,
+          _winsCount: payout.legs!.filter(l => l.outcome === 'won').length,
+          _legSide: leg.side,
+          _legOutcome: leg.outcome,
+        }));
+      }
+      
+      // Fallback: Parse from description string (legacy format)
       const description = payout.description || '';
       
       // Parse "(X/Y won)" from title to determine win/refund counts
@@ -88,11 +110,10 @@ export default function Payouts() {
       let legs = description.split(/\?,\s*/).map(t => t.trim()).filter(Boolean);
       
       // Handle "(+N more)" suffix embedded in last leg - extract and remove it
-      // e.g. "Will Team Shadowkek win? (+1 more)" -> "Will Team Shadowkek win"
       legs = legs.map(leg => {
         const suffixMatch = leg.match(/^(.+?)\s*\(\+\d+\s*more\)$/i);
         return suffixMatch ? suffixMatch[1].trim() : leg;
-      }).filter(leg => !leg.match(/^\(\+\d+\s*more\)$/i)); // Remove standalone suffix entries
+      }).filter(leg => !leg.match(/^\(\+\d+\s*more\)$/i));
       
       // If no legs found, show as single entry
       if (legs.length === 0) {
@@ -103,7 +124,6 @@ export default function Payouts() {
       }
       
       // If totalLegs is known and we have fewer legs than expected, pad with numbered placeholders
-      // But only if we actually have a mismatch (description was truncated)
       const expectedLegs = totalLegs > 0 ? totalLegs : legs.length;
       if (legs.length < expectedLegs) {
         for (let i = legs.length; i < expectedLegs; i++) {
@@ -112,12 +132,11 @@ export default function Payouts() {
       }
       
       return legs.map((legTitle, idx) => {
-        // Add question mark back if it was stripped during splitting
         const fullTitle = legTitle.endsWith('?') ? legTitle : 
                           legTitle.startsWith('Bet leg #') ? legTitle : `${legTitle}?`;
         
         // Determine if this leg is a win or refund based on position
-        // Note: This is a heuristic since we don't have per-leg outcome data
+        // Note: This is a heuristic since we don't have per-leg outcome data in legacy format
         const isLegWin = idx < winsCount;
         
         return {
@@ -126,17 +145,18 @@ export default function Payouts() {
           market_id: `expanded_leg_${idx}`,
           title: fullTitle,
           description: `Leg ${idx + 1} of ${expectedLegs}`,
-          // Use TOTAL amounts - we don't have per-leg breakdown from API
           stake_xmr: payout.stake_xmr,
           payout_xmr: payout.payout_xmr,
           payout_type: isLegWin ? ('win' as const) : ('refund' as const),
-          side: 'YES' as const,
+          // Don't show misleading side for legacy format - use MULTI to indicate unknown
+          side: 'MULTI' as const,
           outcome: isLegWin ? ('YES' as const) : ('NO' as const),
-          // Add custom field to indicate this is an expanded leg
           _isExpandedLeg: true,
           _legIndex: idx,
           _totalLegs: expectedLegs,
           _winsCount: winsCount,
+          _legSide: null, // Unknown in legacy format
+          _legOutcome: isLegWin ? 'won' : 'lost',
         };
       });
     }
@@ -540,34 +560,52 @@ export default function Payouts() {
                           
                           {/* Individual legs */}
                           <div className="divide-y divide-purple-500/20">
-                            {group.items.map((payout, legIdx) => (
-                              <div 
-                                key={payout.bet_id}
-                                className={cn(
-                                  "px-4 py-3",
-                                  isWin(payout) ? 'bg-emerald-950/20' : 'bg-blue-950/20'
-                                )}
-                              >
-                                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                                  {/* Market Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                      <Badge className={cn(
-                                        "text-xs",
-                                        isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'
-                                      )}>
-                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                        {isWin(payout) ? 'Won' : 'Refund'}
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        Leg {legIdx + 1} of {totalLegs}
-                                      </span>
+                            {group.items.map((payout, legIdx) => {
+                              const legSide = (payout as any)._legSide;
+                              const legOutcome = (payout as any)._legOutcome;
+                              const isLegWon = legOutcome === 'won' || isWin(payout);
+                              
+                              return (
+                                <div 
+                                  key={payout.bet_id}
+                                  className={cn(
+                                    "px-4 py-3",
+                                    isLegWon ? 'bg-emerald-950/20' : 'bg-blue-950/20'
+                                  )}
+                                >
+                                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                                    {/* Market Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <Badge className={cn(
+                                          "text-xs",
+                                          isLegWon ? 'bg-emerald-600' : 'bg-blue-600'
+                                        )}>
+                                          <CheckCircle className="w-3 h-3 mr-1" />
+                                          {isLegWon ? 'Won' : 'Refund'}
+                                        </Badge>
+                                        {/* Show actual side if available */}
+                                        {legSide && (
+                                          <Badge 
+                                            variant="outline" 
+                                            className={cn(
+                                              "text-xs",
+                                              legSide === 'YES' ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'
+                                            )}
+                                          >
+                                            {legSide}
+                                          </Badge>
+                                        )}
+                                        <span className="text-xs text-muted-foreground">
+                                          Leg {legIdx + 1} of {totalLegs}
+                                        </span>
+                                      </div>
+                                      <p className="font-medium truncate">{payout.title}</p>
                                     </div>
-                                    <p className="font-medium truncate">{payout.title}</p>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                           
                           {/* Slip totals footer */}
