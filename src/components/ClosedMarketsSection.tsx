@@ -37,9 +37,6 @@ function ResolutionCountdown({ resolutionTime, marketTitle, soundEnabled }: {
   soundEnabled: boolean;
 }) {
   const [timeLeft, setTimeLeft] = useState('');
-  const [isResolvingSoon, setIsResolvingSoon] = useState(false);
-  const hasNotifiedRef = useRef(false);
-
   useEffect(() => {
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
@@ -47,23 +44,7 @@ function ResolutionCountdown({ resolutionTime, marketTitle, soundEnabled }: {
       
       if (diff <= 0) {
         setTimeLeft('Resolving now...');
-        setIsResolvingSoon(true);
         return;
-      }
-      
-      // Check if resolving within 5 minutes
-      const resolvingSoon = diff <= 300;
-      setIsResolvingSoon(resolvingSoon);
-      
-      // Trigger notification when entering 5-minute window
-      if (resolvingSoon && !hasNotifiedRef.current) {
-        hasNotifiedRef.current = true;
-        if (soundEnabled) {
-          playNotificationSound();
-        }
-        toast.info(`⏰ Resolving soon!`, {
-          description: `"${marketTitle}" resolves in less than 5 minutes`,
-        });
       }
       
       if (diff < 60) {
@@ -95,19 +76,12 @@ function ResolutionCountdown({ resolutionTime, marketTitle, soundEnabled }: {
     <div className={`flex items-center justify-center gap-2 p-2 rounded transition-all ${
       isResolvingNow 
         ? 'bg-amber-900/30 border border-amber-600/50' 
-        : isResolvingSoon 
-          ? 'bg-primary/20 border border-primary/50 animate-pulse' 
-          : 'bg-zinc-800/50 border border-zinc-700'
+        : 'bg-zinc-800/50 border border-zinc-700'
     }`}>
       {isResolvingNow ? (
         <>
           <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
           <span className="text-sm text-amber-400">{timeLeft}</span>
-        </>
-      ) : isResolvingSoon ? (
-        <>
-          <Bell className="w-4 h-4 text-primary animate-bounce" />
-          <span className="text-sm text-primary font-medium">Resolves in {timeLeft}</span>
         </>
       ) : (
         <>
