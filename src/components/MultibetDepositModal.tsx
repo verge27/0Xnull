@@ -192,21 +192,6 @@ export function MultibetDepositModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-3 p-4">
-          {/* Countdown Timer */}
-          {!isConfirmed && (
-            <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg border ${
-              isExpired 
-                ? 'bg-destructive/10 border-destructive/30 text-destructive' 
-                : isExpiringSoon 
-                  ? 'bg-orange-500/10 border-orange-500/30 text-orange-500 animate-pulse' 
-                  : 'bg-primary/5 border-primary/20 text-primary'
-            }`}>
-              <Timer className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {isExpired ? 'Address Expired' : `Expires in ${formatTime(timeLeft)}`}
-              </span>
-            </div>
-          )}
 
           {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-2">
