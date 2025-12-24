@@ -443,8 +443,10 @@ export default function SportsPredictions() {
   
   // Separate live, closing soon, and regular markets
   // Live markets = betting closed but not yet resolved (match in progress)
+  // Only show live markets that have actual bets (pool > 0)
   const liveMarkets = markets.filter(m => {
-    return m.resolved === 0 && !isBettingOpen(m) && m.resolution_time > now;
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    return m.resolved === 0 && !isBettingOpen(m) && m.resolution_time > now && hasPool;
   });
   
   const closingSoonMarkets = markets.filter(m => {
@@ -464,8 +466,12 @@ export default function SportsPredictions() {
     });
   
   // Closed markets - not resolved but betting closed (handled by ClosedMarketsSection)
+  // Only show closed markets that have actual bets (pool > 0) - empty markets shouldn't clutter the view
   const closedMarkets = markets
-    .filter(m => m.resolved === 0 && !isBettingOpen(m))
+    .filter(m => {
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      return m.resolved === 0 && !isBettingOpen(m) && hasPool;
+    })
     .sort((a, b) => a.resolution_time - b.resolution_time);
   
   // Filter markets based on selected filter

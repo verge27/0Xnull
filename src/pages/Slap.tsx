@@ -60,8 +60,13 @@ const Slap = () => {
   }, []);
   
   // Separate active vs resolved markets
+  // Active: not resolved, betting still possible (before resolution time)
   const activeMarkets = markets.filter(m => !m.resolved && m.resolution_time > Date.now() / 1000);
-  const resolvedMarkets = markets.filter(m => m.resolved);
+  // Resolved: only show markets that had actual betting activity (pool > 0)
+  const resolvedMarkets = markets.filter(m => {
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    return m.resolved && hasPool;
+  });
 
   return (
     <div className="min-h-screen bg-background relative bg-gradient-to-br from-black via-red-950/20 to-black">

@@ -63,8 +63,13 @@ const RussianMMA = () => {
   }, []);
   
   // Separate active vs resolved markets
+  // Active: not resolved, betting still possible (before resolution time)
   const activeMarkets = markets.filter(m => !m.resolved && m.resolution_time > Date.now() / 1000);
-  const resolvedMarkets = markets.filter(m => m.resolved);
+  // Resolved: only show markets that had actual betting activity (pool > 0)
+  const resolvedMarkets = markets.filter(m => {
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    return m.resolved && hasPool;
+  });
 
   // Group promotions by region
   const groupedPromotions = promotions?.reduce((acc, promo) => {

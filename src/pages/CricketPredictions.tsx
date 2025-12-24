@@ -297,12 +297,20 @@ export default function CricketPredictions() {
     });
   
   // Closed markets - not resolved but betting closed
+  // Only show closed markets that have actual bets (pool > 0)
   const closedMarkets = markets
-    .filter(m => m.resolved === 0 && !isBettingOpen(m))
+    .filter(m => {
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      return m.resolved === 0 && !isBettingOpen(m) && hasPool;
+    })
     .sort((a, b) => a.resolution_time - b.resolution_time);
     
+  // Only show resolved markets that had betting activity
   const resolvedMarkets = markets
-    .filter(m => m.resolved === 1)
+    .filter(m => {
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      return m.resolved === 1 && hasPool;
+    })
     .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (
