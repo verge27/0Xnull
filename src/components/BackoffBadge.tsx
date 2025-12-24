@@ -47,7 +47,7 @@ export function BackoffBadge({ backoffUntil, className }: BackoffBadgeProps) {
             className={`border-amber-500/50 text-amber-400 gap-1 text-xs ${className}`}
           >
             <Pause className="w-3 h-3" />
-            Retry in {timeLeft}
+            Score in {timeLeft}
           </Badge>
         </TooltipTrigger>
         <TooltipContent className="max-w-[250px]">
