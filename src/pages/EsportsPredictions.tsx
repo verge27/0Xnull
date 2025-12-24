@@ -1124,6 +1124,21 @@ export default function EsportsPredictions() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Betting countdown */}
+            {selectedMarket && (
+              <BettingCountdown 
+                bettingClosesAt={selectedMarket.betting_closes_at}
+                bettingOpen={selectedMarket.betting_open}
+                resolutionTime={selectedMarket.resolution_time}
+                variant="full"
+                onBettingClosed={() => {
+                  toast.error('Betting has closed for this market');
+                  setBetDialogOpen(false);
+                  fetchMarkets();
+                }}
+              />
+            )}
+            
             <div className="flex gap-2">
               <Button
                 variant={betSide === 'yes' ? 'default' : 'outline'}
@@ -1273,14 +1288,14 @@ export default function EsportsPredictions() {
             <Button 
               className="w-full" 
               onClick={handlePlaceBet}
-              disabled={placingBet || !betAmountUsd || !payoutAddress}
+              disabled={placingBet || !betAmountUsd || !payoutAddress || (selectedMarket && !isBettingOpen(selectedMarket))}
             >
               {placingBet ? (
                 <span className="flex items-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   Creating Bet... ({elapsedSeconds}s)
                 </span>
-              ) : 'Place Bet'}
+              ) : (selectedMarket && !isBettingOpen(selectedMarket)) ? 'Betting Closed' : 'Place Bet'}
             </Button>
           </div>
         </DialogContent>

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Swords, ChevronRight, HelpCircle, ArrowRight, RefreshCw, Clock, CheckCircle, XCircle, Trophy, TrendingUp, TrendingDown, Calendar, Users } from 'lucide-react';
+import { Swords, ChevronRight, HelpCircle, ArrowRight, RefreshCw, Clock, CheckCircle, XCircle, Trophy, TrendingUp, TrendingDown, Calendar, Users, Lock, Activity } from 'lucide-react';
 import { useSportsEvents, type SportsEvent } from '@/hooks/useSportsEvents';
 import { useSportsMatches, getSportLabel, type SportsMatch } from '@/hooks/useSportsCategories';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
@@ -24,6 +24,7 @@ import { AddToSlipButton } from '@/components/AddToSlipButton';
 import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
+import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { toast } from 'sonner';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
@@ -223,6 +224,27 @@ export default function CombatSports() {
       toast.error('Please enter a valid Monero address');
       return;
     }
+    if (payoutAddress.length < 95) {
+      toast.error('Monero address is too short');
+      return;
+    }
+    
+    // Pre-flight check: Verify betting is still open before submitting
+    if (!isBettingOpen(selectedMarket)) {
+      toast.error('Betting has closed for this match', {
+        description: 'The event has already started or betting window has ended.',
+      });
+      fetchMarkets(); // Refresh markets to update status
+      setBetDialogOpen(false);
+      return;
+    }
+    
+    // Check if betting closes soon and warn user
+    if (isBettingClosingSoon(selectedMarket, 5)) {
+      toast.warning('⚠️ Betting closes soon!', {
+        description: 'This market closes in less than 5 minutes. Your deposit may not confirm in time. Monero blocks take ~2 minutes on average.',
+      });
+    }
     
     setPlacingBet(true);
     try {
@@ -242,22 +264,41 @@ export default function CombatSports() {
       
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to place bet');
+      const message = error instanceof Error ? error.message : 'Failed to place bet';
+      // Handle betting closed errors from backend
+      if (message === 'BETTING_CLOSED' || 
+          message.toLowerCase().includes('betting closed') || 
+          message.toLowerCase().includes('betting has closed') ||
+          message.toLowerCase().includes('already resolved')) {
+        toast.error('Betting has closed for this match', {
+          description: 'The event has already started. Refreshing markets...',
+        });
+        fetchMarkets(); // Refresh markets to update status
+        setBetDialogOpen(false);
+      } else {
+        toast.error(message);
+      }
     } finally {
       setPlacingBet(false);
     }
   };
 
   const now = Date.now() / 1000;
-  // Only show active/closed markets that have bets OR are still open for betting
+  
+  // Live markets = betting closed but not yet resolved (match in progress)
+  // Only show live markets that have actual bets (pool > 0)
+  const liveMarkets = markets.filter(m => {
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    return m.resolved === 0 && !isBettingOpen(m) && m.resolution_time > now && hasPool;
+  });
+  
+  // Active markets = betting still open
   const activeMarkets = markets.filter(m => {
     if (m.resolved !== 0) return false;
-    if (m.resolution_time <= now) return false; // Past resolution time
-    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
-    const isBettingStillOpen = m.resolution_time > now; // Simplified - betting open if before resolution
-    // Show if betting is open OR if there are actual bets
-    return isBettingStillOpen || hasPool;
+    if (m.resolution_time <= now) return false;
+    return isBettingOpen(m);
   });
+  
   // Only show resolved markets that had betting activity
   const resolvedMarkets = markets.filter(m => {
     const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
@@ -430,6 +471,47 @@ export default function CombatSports() {
 
             {/* Markets Tab */}
             <TabsContent value="markets" ref={marketsRef} className="space-y-4">
+              {/* Live Now Section */}
+              {liveMarkets.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                    <Activity className="w-5 h-5 text-red-500" />
+                    Live Now ({liveMarkets.length})
+                    <Badge className="bg-red-600 animate-pulse">LIVE</Badge>
+                  </h2>
+                  <div className="grid gap-4">
+                    {liveMarkets.map((market) => {
+                      const odds = getOdds(market);
+                      return (
+                        <Card key={market.market_id} className="border-red-500/50 bg-red-500/5">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-center justify-between">
+                              <Badge className="bg-red-600"><Lock className="w-3 h-3 mr-1" /> Betting Closed</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                Fight in progress
+                              </span>
+                            </div>
+                            <CardTitle className="text-lg">{market.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                                <div className="text-xl font-bold text-emerald-500">{odds.yes}%</div>
+                                <div className="text-xs text-muted-foreground">{market.yes_pool_xmr.toFixed(4)} XMR</div>
+                              </div>
+                              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                                <div className="text-xl font-bold text-red-500">{odds.no}%</div>
+                                <div className="text-xs text-muted-foreground">{market.no_pool_xmr.toFixed(4)} XMR</div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
                 Open Markets ({activeMarkets.length})
@@ -466,9 +548,12 @@ export default function CombatSports() {
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
                             {getStatusBadge(market)}
-                            <span className="text-xs text-muted-foreground">
-                              Resolves: {new Date(market.resolution_time * 1000).toLocaleDateString()}
-                            </span>
+                            <BettingCountdown 
+                              bettingClosesAt={market.betting_closes_at}
+                              bettingOpen={market.betting_open}
+                              resolutionTime={market.resolution_time}
+                              variant="badge"
+                            />
                           </div>
                           <CardTitle className="text-lg">{market.title}</CardTitle>
                           <p className="text-sm text-muted-foreground">{market.description}</p>
@@ -637,6 +722,19 @@ export default function CombatSports() {
           </DialogHeader>
           {selectedMarket && (
             <div className="space-y-4">
+              {/* Betting countdown */}
+              <BettingCountdown 
+                bettingClosesAt={selectedMarket.betting_closes_at}
+                bettingOpen={selectedMarket.betting_open}
+                resolutionTime={selectedMarket.resolution_time}
+                variant="full"
+                onBettingClosed={() => {
+                  toast.error('Betting has closed for this market');
+                  setBetDialogOpen(false);
+                  fetchMarkets();
+                }}
+              />
+              
               <PoolTransparency marketId={selectedMarket.market_id} />
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -681,11 +779,11 @@ export default function CombatSports() {
               </div>
               <Button 
                 onClick={handlePlaceBet} 
-                disabled={placingBet}
+                disabled={placingBet || !isBettingOpen(selectedMarket)}
                 className="w-full bg-red-600 hover:bg-red-700"
               >
                 {placingBet ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                Place Bet
+                {!isBettingOpen(selectedMarket) ? 'Betting Closed' : 'Place Bet'}
               </Button>
             </div>
           )}
