@@ -125,3 +125,40 @@ export const playErrorSound = (withVibration = true) => {
     console.warn('Could not play error sound:', e);
   }
 };
+
+// Play a subtle warning sound (for closing soon / market closed alerts)
+export const playWarningSound = (withVibration = true) => {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    // Two-tone warning beep
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440, now); // A4
+    oscillator.frequency.setValueAtTime(349.23, now + 0.15); // F4 (descending = warning)
+    oscillator.frequency.setValueAtTime(440, now + 0.3); // A4
+
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.2, now + 0.02);
+    gainNode.gain.setValueAtTime(0.2, now + 0.15);
+    gainNode.gain.linearRampToValueAtTime(0.15, now + 0.17);
+    gainNode.gain.setValueAtTime(0.15, now + 0.3);
+    gainNode.gain.linearRampToValueAtTime(0, now + 0.45);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.45);
+
+    // Vibrate on mobile - short warning pattern
+    if (withVibration) {
+      triggerVibration([100, 50, 100]); // Warning pattern
+    }
+  } catch (e) {
+    console.warn('Could not play warning sound:', e);
+  }
+};

@@ -12,7 +12,7 @@ import type { PredictionMarket } from '@/services/api';
 interface SportsMarketCardProps {
   market: PredictionMarket;
   onBetClick: (market: PredictionMarket, side: 'yes' | 'no') => void;
-  onAddToSlip?: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number) => void;
+  onAddToSlip?: (marketId: string, title: string, side: 'YES' | 'NO', amount: number, yesPool: number, noPool: number, bettingClosesAt?: number) => void;
   onOpenSlip?: () => void;
   isLive?: boolean;
   isClosingSoon?: boolean;
@@ -209,6 +209,7 @@ export function SportsMarketCard({
                     onAdd={onAddToSlip}
                     onOpenSlip={onOpenSlip}
                     variant="icon"
+                    bettingClosesAt={market.betting_closes_at}
                   />
                 </div>
               )}
