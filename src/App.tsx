@@ -56,6 +56,8 @@ import GetStarted from "./pages/GetStarted";
 import ApiDocs from "./pages/ApiDocs";
 import MySlips from "./pages/MySlips";
 import Payouts from "./pages/Payouts";
+import Influencer from "./pages/Influencer";
+import InfluencerDashboard from "./pages/InfluencerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +142,10 @@ const App = () => (
                   <Route path="/tor-guide" element={<TorGuide />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
+                  
+                  {/* Influencer */}
+                  <Route path="/influencer" element={<Influencer />} />
+                  <Route path="/influencer/:code" element={<InfluencerDashboard />} />
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
