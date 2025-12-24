@@ -193,75 +193,86 @@ const Slap = () => {
               Power Slap Channel
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Featured Video 1 - Latest Full Fight */}
-              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
-                <a 
-                  href="https://www.youtube.com/@powerslap/videos" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
-                    <iframe
-                      src="https://www.youtube.com/embed?listType=user_uploads&list=powerslap"
-                      title="Power Slap Latest Videos"
-                      className="absolute inset-0 w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
+              {/* Latest Videos */}
+              <a 
+                href="https://www.youtube.com/@powerslap/videos" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all h-full">
+                  <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="mb-2 bg-red-600/80 rounded-full p-3 inline-block group-hover:scale-110 transition-transform">
+                        <Youtube className="h-8 w-8 text-white" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Click to watch</p>
+                    </div>
                   </div>
                   <CardContent className="p-3">
                     <p className="text-sm font-medium text-foreground group-hover:text-red-400 transition-colors">
                       Latest Uploads
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Watch the newest Power Slap content
+                      Newest Power Slap content
                     </p>
                   </CardContent>
-                </a>
-              </Card>
+                </Card>
+              </a>
 
               {/* Full Fights Playlist */}
-              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
-                <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
-                  <iframe
-                    src="https://www.youtube.com/embed/videoseries?list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY"
-                    title="Power Slap Full Fights"
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                <CardContent className="p-3">
-                  <p className="text-sm font-medium text-foreground">
-                    Full Fight Replays
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Complete fights playlist
-                  </p>
-                </CardContent>
-              </Card>
+              <a 
+                href="https://www.youtube.com/playlist?list=PLDfuNaQqaYQerRiI0k6TP_cIednJLayEY" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all h-full">
+                  <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="mb-2 bg-red-600/80 rounded-full p-3 inline-block group-hover:scale-110 transition-transform">
+                        <Youtube className="h-8 w-8 text-white" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Click to watch</p>
+                    </div>
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium text-foreground group-hover:text-red-400 transition-colors">
+                      Full Fight Replays
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Complete fights playlist
+                    </p>
+                  </CardContent>
+                </Card>
+              </a>
 
               {/* KO Highlights */}
-              <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all group">
-                <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black">
-                  <iframe
-                    src="https://www.youtube.com/embed/videoseries?list=PLDfuNaQqaYQfxXNz-RLXCl0FkLPPrdzXG"
-                    title="Power Slap Knockouts"
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                <CardContent className="p-3">
-                  <p className="text-sm font-medium text-foreground">
-                    KO Highlights
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Best knockouts compilation
-                  </p>
-                </CardContent>
-              </Card>
+              <a 
+                href="https://www.youtube.com/playlist?list=PLDfuNaQqaYQfxXNz-RLXCl0FkLPPrdzXG" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <Card className="overflow-hidden border-red-900/30 bg-card/50 hover:border-red-600/50 transition-all h-full">
+                  <div className="aspect-video relative bg-gradient-to-br from-black via-red-950/50 to-black flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="mb-2 bg-red-600/80 rounded-full p-3 inline-block group-hover:scale-110 transition-transform">
+                        <Youtube className="h-8 w-8 text-white" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Click to watch</p>
+                    </div>
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium text-foreground group-hover:text-red-400 transition-colors">
+                      KO Highlights
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Best knockouts compilation
+                    </p>
+                  </CardContent>
+                </Card>
+              </a>
             </div>
             
             {/* Subscribe CTA */}
