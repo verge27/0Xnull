@@ -414,8 +414,15 @@ export default function StarcraftPredictions() {
     default: { border: 'border-cyan-500/30', bg: 'from-cyan-950/30', accent: 'text-cyan-400' },
   };
 
+  const now = Date.now() / 1000;
   const activeMarkets = markets
-    .filter(m => m.resolved === 0)
+    .filter(m => {
+      // Only show unresolved markets that are still open for betting OR have actual bets
+      if (m.resolved !== 0) return false;
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      const isBettingStillOpen = m.resolution_time > now;
+      return isBettingStillOpen || hasPool;
+    })
     .sort((a, b) => {
       const poolA = a.yes_pool_xmr + a.no_pool_xmr;
       const poolB = b.yes_pool_xmr + b.no_pool_xmr;
@@ -423,8 +430,12 @@ export default function StarcraftPredictions() {
       if (poolB > 0 && poolA === 0) return 1;
       return poolB - poolA;
     });
+  // Only show resolved markets that had betting activity
   const resolvedMarkets = markets
-    .filter(m => m.resolved === 1)
+    .filter(m => {
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      return m.resolved === 1 && hasPool;
+    })
     .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (

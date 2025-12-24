@@ -249,8 +249,20 @@ export default function CombatSports() {
   };
 
   const now = Date.now() / 1000;
-  const activeMarkets = markets.filter(m => m.resolved === 0 && m.resolution_time > now);
-  const resolvedMarkets = markets.filter(m => m.resolved === 1);
+  // Only show active/closed markets that have bets OR are still open for betting
+  const activeMarkets = markets.filter(m => {
+    if (m.resolved !== 0) return false;
+    if (m.resolution_time <= now) return false; // Past resolution time
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    const isBettingStillOpen = m.resolution_time > now; // Simplified - betting open if before resolution
+    // Show if betting is open OR if there are actual bets
+    return isBettingStillOpen || hasPool;
+  });
+  // Only show resolved markets that had betting activity
+  const resolvedMarkets = markets.filter(m => {
+    const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+    return m.resolved === 1 && hasPool;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

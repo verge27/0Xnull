@@ -506,12 +506,18 @@ export default function EsportsPredictions() {
     });
   
   // Closed markets - not resolved but betting closed (awaiting result)
+  // Only show closed markets that have actual bets (pool > 0)
   const closedMarkets = markets
-    .filter(m => m.resolved === 0 && !isBettingOpen(m))
+    .filter(m => {
+      const hasPool = m.yes_pool_xmr + m.no_pool_xmr > 0;
+      return m.resolved === 0 && !isBettingOpen(m) && hasPool;
+    })
     .sort((a, b) => a.resolution_time - b.resolution_time);
     
   // Use fetched resolved markets from API (with include_resolved=true)
+  // Only show resolved markets that had actual betting activity (pool > 0)
   const resolvedMarkets = fetchedResolvedMarkets
+    .filter(m => m.yes_pool_xmr + m.no_pool_xmr > 0)
     .sort((a, b) => (b.yes_pool_xmr + b.no_pool_xmr) - (a.yes_pool_xmr + a.no_pool_xmr));
 
   return (
