@@ -425,7 +425,10 @@ export default function SportsPredictions() {
   };
 
   // Sort matches - by date when viewing "All", by priority sports when filtered
-  const sortedMatches = [...matches].sort((a, b) => {
+  // Filter out matches that have already started (live) for the Upcoming tab
+  const upcomingMatches = matches.filter(m => m.commence_timestamp > now);
+  
+  const sortedMatches = [...upcomingMatches].sort((a, b) => {
     // When viewing all categories, sort purely by date
     if (!selectedCategory) {
       return Number(a.commence_timestamp) - Number(b.commence_timestamp);
