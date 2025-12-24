@@ -565,6 +565,15 @@ export default function SportsPredictions() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <TabsList className="w-full max-w-3xl flex overflow-x-auto gap-1 mb-4 justify-start md:justify-center">
               <TabsTrigger value="markets" className="shrink-0">Markets</TabsTrigger>
+              <TabsTrigger value="live" className="shrink-0 relative">
+                Live Now
+                {liveMarkets.length > 0 && (
+                  <span className="ml-1.5 relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="upcoming" className="shrink-0">Upcoming</TabsTrigger>
               <TabsTrigger value="highlights" className="shrink-0">Highlights</TabsTrigger>
               <TabsTrigger value="results" className="shrink-0">Results</TabsTrigger>
@@ -742,6 +751,134 @@ export default function SportsPredictions() {
                   </div>
                 )}
               </div>
+            </TabsContent>
+
+            {/* Live Now Tab */}
+            <TabsContent value="live" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                  Live Now
+                  <Badge variant="secondary">{liveMarkets.length}</Badge>
+                </h2>
+                {pollingActive && lastUpdated && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Radio className="w-3 h-3 text-red-400 animate-pulse" />
+                    Updated {Math.round((Date.now() - lastUpdated.getTime()) / 1000)}s ago
+                  </div>
+                )}
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                Matches currently in progress with live score updates. Betting is closed for these events.
+              </p>
+
+              {liveMarkets.length === 0 ? (
+                <Card className="text-center py-12 bg-card/80">
+                  <CardContent>
+                    <Radio className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-2">No live matches right now</p>
+                    <p className="text-xs text-muted-foreground">Check back during game times to see live scores</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {liveMarkets.map((market) => {
+                    const eventId = getEventIdFromMarket(market.market_id);
+                    const score = eventId ? liveScores[eventId] : null;
+                    const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
+                    const marketOdds = getOdds(market);
+                    
+                    // Extract scores from the scores array
+                    const homeScore = score?.scores?.find(s => s.name === score.home_team)?.score ?? '—';
+                    const awayScore = score?.scores?.find(s => s.name === score.away_team)?.score ?? '—';
+                    const homeNum = parseInt(homeScore) || 0;
+                    const awayNum = parseInt(awayScore) || 0;
+                    
+                    return (
+                      <Card 
+                        key={market.market_id} 
+                        className="bg-card/80 backdrop-blur-sm border-red-500/30 overflow-hidden"
+                        data-market-id={market.market_id}
+                      >
+                        <div className="h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500 animate-pulse" />
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-lg leading-tight">{market.title}</CardTitle>
+                            <Badge className="bg-red-600 text-white animate-pulse gap-1 shrink-0">
+                              <Radio className="w-3 h-3" />
+                              LIVE
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {/* Live Score Display */}
+                          {score && score.scores && score.scores.length >= 2 ? (
+                            <div className="flex items-center justify-center gap-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                              <div className="text-center">
+                                <div className={`text-2xl font-bold font-mono ${homeNum > awayNum ? 'text-emerald-400' : 'text-foreground'}`}>
+                                  {homeScore}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1 max-w-20 truncate">{score.home_team}</div>
+                              </div>
+                              <div className="text-muted-foreground text-xl">-</div>
+                              <div className="text-center">
+                                <div className={`text-2xl font-bold font-mono ${awayNum > homeNum ? 'text-emerald-400' : 'text-foreground'}`}>
+                                  {awayScore}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1 max-w-20 truncate">{score.away_team}</div>
+                              </div>
+                              {score.statusDetail && (
+                                <Badge variant="outline" className="absolute top-2 right-2 text-[10px]">
+                                  {score.statusDetail}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+                              <Clock className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Awaiting live score...</span>
+                            </div>
+                          )}
+                          
+                          {/* Pool Info */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-emerald-400">YES: {marketOdds.yes}%</span>
+                              <span className="text-red-400">NO: {marketOdds.no}%</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-muted overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400" 
+                                style={{ width: `${marketOdds.yes}%` }}
+                              />
+                            </div>
+                            <div className="text-center text-xs text-muted-foreground">
+                              Total Pool: {totalPool.toFixed(4)} XMR
+                              {xmrUsdRate && (
+                                <span className="ml-1">(${(totalPool * xmrUsdRate).toFixed(2)})</span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Pool Transparency Button */}
+                          <PoolTransparency marketId={market.market_id} />
+                          
+                          <div className="text-center">
+                            <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-400">
+                              <Lock className="w-3 h-3 mr-1" />
+                              Betting Closed
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             {/* Upcoming Events Tab */}
