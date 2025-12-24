@@ -346,6 +346,8 @@ export interface CreateMarketRequest {
   oracle_value: number;
   oracle_value_2?: number;
   resolution_time: number;
+  betting_closes_at?: number;  // When betting should close (match start time)
+  commence_time?: number;      // Match start time for display
 }
 
 export const api = {

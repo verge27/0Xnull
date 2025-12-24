@@ -379,6 +379,7 @@ const Slap = () => {
                             bettingClosesAt={market.betting_closes_at}
                             bettingOpen={market.betting_open}
                             resolutionTime={market.resolution_time}
+                            commenceTime={market.commence_time}
                             variant="inline"
                           />
                           

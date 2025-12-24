@@ -888,6 +888,7 @@ export default function EsportsPredictions() {
                                         bettingClosesAt={eventMarket.betting_closes_at}
                                         bettingOpen={eventMarket.betting_open}
                                         resolutionTime={eventMarket.resolution_time}
+                                        commenceTime={eventMarket.commence_time}
                                         variant="inline"
                                       />
                                     </>
@@ -978,6 +979,7 @@ export default function EsportsPredictions() {
                               bettingClosesAt={market.betting_closes_at}
                               bettingOpen={market.betting_open}
                               resolutionTime={market.resolution_time}
+                              commenceTime={market.commence_time}
                               variant="inline"
                             />
                           </div>
@@ -1130,6 +1132,7 @@ export default function EsportsPredictions() {
                 bettingClosesAt={selectedMarket.betting_closes_at}
                 bettingOpen={selectedMarket.betting_open}
                 resolutionTime={selectedMarket.resolution_time}
+                commenceTime={selectedMarket.commence_time}
                 variant="full"
                 onBettingClosed={() => {
                   toast.error('Betting has closed for this market');

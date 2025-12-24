@@ -155,6 +155,7 @@ export function SportsMarketCard({
             bettingClosesAt={market.betting_closes_at}
             bettingOpen={market.betting_open}
             resolutionTime={market.resolution_time}
+            commenceTime={market.commence_time}
             variant="inline"
             onBettingClosed={handleBettingClosed}
           />

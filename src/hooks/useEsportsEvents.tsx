@@ -239,20 +239,23 @@ export function useEsportsEvents() {
       const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
       const marketId = `esports_${eventId}_${teamSlug}`;
       
-      // Get resolution time from various possible timestamp formats
-      let resolutionTime: number;
+      // Get match start time from various possible timestamp formats
+      let matchStartTime: number;
       if (typeof event.start_timestamp === 'number' && event.start_timestamp > 0) {
-        resolutionTime = event.start_timestamp + 14400; // +4 hours
+        matchStartTime = event.start_timestamp;
       } else if (typeof event.scheduled_at === 'number' && event.scheduled_at > 0) {
-        resolutionTime = event.scheduled_at + 14400;
+        matchStartTime = event.scheduled_at;
       } else if (typeof event.scheduled_at === 'string') {
-        resolutionTime = Math.floor(new Date(event.scheduled_at).getTime() / 1000) + 14400;
+        matchStartTime = Math.floor(new Date(event.scheduled_at).getTime() / 1000);
       } else if (typeof event.start_time === 'string') {
-        resolutionTime = Math.floor(new Date(event.start_time).getTime() / 1000) + 14400;
+        matchStartTime = Math.floor(new Date(event.start_time).getTime() / 1000);
       } else {
         // Default: 24 hours from now
-        resolutionTime = Math.floor(Date.now() / 1000) + 86400;
+        matchStartTime = Math.floor(Date.now() / 1000) + 86400;
       }
+      
+      // Resolution time is 4 hours after match start (for result)
+      const resolutionTime = matchStartTime + 14400;
       
       const gameName = getGameLabel(event.game);
       
@@ -265,6 +268,8 @@ export function useEsportsEvents() {
         oracle_condition: selectedTeam,
         oracle_value: 0,
         resolution_time: resolutionTime,
+        betting_closes_at: matchStartTime,  // Betting closes when match starts
+        commence_time: matchStartTime,       // Match start time for display
       });
       
       toast.success(`Market created for ${selectedTeam}`);

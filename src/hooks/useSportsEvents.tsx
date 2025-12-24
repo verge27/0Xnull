@@ -283,8 +283,11 @@ export function useSportsEvents() {
       const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
       const marketId = `sports_${event.event_id}_${teamSlug}`;
       
+      // Match start time (betting closes when match starts)
+      const matchStartTime = event.commence_timestamp;
+      
       // Resolution time = commence time + 4 hours (for game to complete)
-      const resolutionTime = event.commence_timestamp + 14400;
+      const resolutionTime = matchStartTime + 14400;
       
       const sportLabel = getSportLabel(event.sport);
       
@@ -297,6 +300,8 @@ export function useSportsEvents() {
         oracle_condition: selectedTeam, // Team name for resolution
         oracle_value: 0,
         resolution_time: resolutionTime,
+        betting_closes_at: matchStartTime,  // Betting closes when match starts
+        commence_time: matchStartTime,       // Match start time for display
       });
       
       toast.success(`Market created for ${selectedTeam}`);
