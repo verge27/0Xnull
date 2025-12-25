@@ -102,6 +102,11 @@ export const Footer = () => {
                   eSIM
                 </Link>
               </li>
+              <li>
+                <Link to="/vpn-resources" className="text-muted-foreground hover:text-foreground transition-colors">
+                  VPN
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
