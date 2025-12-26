@@ -518,11 +518,19 @@ export default function EsportsPredictions() {
     });
   };
 
+  // Filter out events that have already started (start time in the past)
+  const nowUnix = Date.now() / 1000;
+  const upcomingEvents = events.filter(e => {
+    const ts = getEventTimestamp(e);
+    // Keep events with no timestamp (TBD) or future start time
+    return ts === 0 || ts > nowUnix;
+  });
+
   const filteredEvents = selectedGame === 'all' && selectedCategory === 'all'
-    ? sortEvents(events) 
+    ? sortEvents(upcomingEvents) 
     : selectedGame !== 'all'
-      ? sortEvents(events.filter(e => e.game === selectedGame))
-      : sortEvents(events.filter(e => {
+      ? sortEvents(upcomingEvents.filter(e => e.game === selectedGame))
+      : sortEvents(upcomingEvents.filter(e => {
           const gameInfo = ESPORTS_GAMES.find(g => g.key === e.game);
           return gameInfo?.category === selectedCategory;
         }));
