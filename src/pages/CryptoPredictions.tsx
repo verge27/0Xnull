@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
@@ -260,8 +261,9 @@ export default function CryptoPredictions() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 0.2) {
-      toast.error('Minimum bet is $0.20');
+    const validation = validateBetAmount(amountUsd);
+    if (!validation.valid) {
+      toast.error(validation.error);
       return;
     }
 
@@ -781,17 +783,21 @@ export default function CryptoPredictions() {
                   <Input
                     id="bet-amount"
                     type="number"
-                    step="1"
-                    min="1"
+                    step="0.01"
+                    min={BETTING_CONFIG.MINIMUM_BET_USD}
                     placeholder="50"
                     value={betAmountUsd}
                     onChange={(e) => setBetAmountUsd(e.target.value)}
-                    className="pl-7"
+                    className={`pl-7 ${betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? 'border-destructive' : ''}`}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Minimum: $1 USD. You'll pay in XMR at current rate.
-                </p>
+                {betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? (
+                  <p className="text-xs text-destructive mt-1">{validateBetAmount(parseFloat(betAmountUsd)).error}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Minimum: {formatMinimumBet()} USD. You'll pay in XMR at current rate.
+                  </p>
+                )}
               </div>
 
               <div>

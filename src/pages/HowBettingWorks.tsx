@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { HelpCircle, TrendingUp, Users, Shield, Zap, Calculator } from 'lucide-react';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 
 export default function HowBettingWorks() {
   const [betAmount, setBetAmount] = useState<string>('50');
@@ -467,11 +468,13 @@ export default function HowBettingWorks() {
                     <Input
                       id="betAmount"
                       type="number"
-                      min="0"
+                      min={BETTING_CONFIG.MINIMUM_BET_USD}
+                      step="0.01"
                       value={betAmount}
                       onChange={(e) => setBetAmount(e.target.value)}
                       className="mt-1"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">Minimum: {formatMinimumBet()}</p>
                   </div>
                   <div>
                     <Label>Your Side</Label>

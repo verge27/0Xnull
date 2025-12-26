@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse, type BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api, type PredictionMarket } from '@/services/api';
@@ -245,8 +246,9 @@ export default function StarcraftPredictions() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 0.2) {
-      toast.error('Minimum bet is $0.20');
+    const validation = validateBetAmount(amountUsd);
+    if (!validation.valid) {
+      toast.error(validation.error);
       return;
     }
 
@@ -911,13 +913,18 @@ export default function StarcraftPredictions() {
                 <Label>Bet Amount (USD)</Label>
                 <Input
                   type="number"
-                  min="1"
-                  step="1"
+                  min={BETTING_CONFIG.MINIMUM_BET_USD}
+                  step="0.01"
                   placeholder="Enter amount in USD"
                   value={betAmountUsd}
                   onChange={(e) => setBetAmountUsd(e.target.value)}
+                  className={betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? 'border-destructive' : ''}
                 />
-                <p className="text-xs text-muted-foreground">Minimum bet: $1</p>
+                {betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? (
+                  <p className="text-xs text-destructive">{validateBetAmount(parseFloat(betAmountUsd)).error}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Minimum bet: {formatMinimumBet()}</p>
+                )}
               </div>
 
               <div className="space-y-2">
