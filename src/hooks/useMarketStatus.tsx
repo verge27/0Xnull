@@ -47,7 +47,7 @@ export function getMarketStatus(
     return {
       isClosed: true,
       reason: 'resolved',
-      displayText: market.outcome === 'YES' ? 'Resolved: YES' : market.outcome === 'NO' ? 'Resolved: NO' : 'Resolved',
+      displayText: market.outcome?.toUpperCase() === 'YES' ? 'Resolved: YES' : market.outcome?.toUpperCase() === 'NO' ? 'Resolved: NO' : 'Resolved',
     };
   }
 

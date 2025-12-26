@@ -376,7 +376,7 @@ export default function SportsPredictions() {
     const now = Date.now() / 1000;
     
     if (market.resolved) {
-      if (market.outcome === 'YES') {
+      if (market.outcome?.toUpperCase() === 'YES') {
         return <Badge className="bg-emerald-600"><CheckCircle className="w-3 h-3 mr-1" /> YES Won</Badge>;
       } else {
         return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> NO Won</Badge>;
@@ -1005,7 +1005,7 @@ export default function SportsPredictions() {
                 <div className="grid md:grid-cols-2 gap-4">
                   {resolvedMarkets.map((market) => {
                     const totalPool = market.yes_pool_xmr + market.no_pool_xmr;
-                    const winningPool = market.outcome === 'YES' ? market.yes_pool_xmr : market.no_pool_xmr;
+                    const winningPool = market.outcome?.toUpperCase() === 'YES' ? market.yes_pool_xmr : market.no_pool_xmr;
                     const isPaidOut = market.resolved === 1 && market.outcome;
                     
                     return (
@@ -1034,10 +1034,10 @@ export default function SportsPredictions() {
                           {totalPool > 0 && (
                             <div className="space-y-2">
                               <div className="flex gap-4 text-sm">
-                                <span className={market.outcome === 'YES' ? 'text-emerald-500 font-semibold' : 'text-muted-foreground'}>
+                                <span className={market.outcome?.toUpperCase() === 'YES' ? 'text-emerald-500 font-semibold' : 'text-muted-foreground'}>
                                   YES: {market.yes_pool_xmr.toFixed(4)} XMR
                                 </span>
-                                <span className={market.outcome === 'NO' ? 'text-red-500 font-semibold' : 'text-muted-foreground'}>
+                                <span className={market.outcome?.toUpperCase() === 'NO' ? 'text-red-500 font-semibold' : 'text-muted-foreground'}>
                                   NO: {market.no_pool_xmr.toFixed(4)} XMR
                                 </span>
                               </div>

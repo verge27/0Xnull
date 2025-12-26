@@ -232,7 +232,7 @@ export default function CricketPredictions() {
     const now = Date.now() / 1000;
     
     if (market.resolved) {
-      if (market.outcome === 'YES') {
+      if (market.outcome?.toUpperCase() === 'YES') {
         return <Badge className="bg-emerald-600"><CheckCircle className="w-3 h-3 mr-1" /> YES Won</Badge>;
       } else {
         return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> NO Won</Badge>;
