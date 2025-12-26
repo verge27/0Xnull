@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -245,8 +246,9 @@ export default function CombatSports() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 0.2) {
-      toast.error('Minimum bet is $0.20');
+    const validation = validateBetAmount(amountUsd);
+    if (!validation.valid) {
+      toast.error(validation.error);
       return;
     }
 
@@ -795,12 +797,18 @@ export default function CombatSports() {
                   placeholder="10"
                   value={betAmountUsd}
                   onChange={(e) => setBetAmountUsd(e.target.value)}
-                  min="1"
+                  min={BETTING_CONFIG.MINIMUM_BET_USD}
+                  step="0.01"
+                  className={betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? 'border-destructive' : ''}
                 />
-                {betAmountUsd && xmrUsdRate > 0 && (
+                {betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? (
+                  <p className="text-xs text-destructive mt-1">{validateBetAmount(parseFloat(betAmountUsd)).error}</p>
+                ) : betAmountUsd && xmrUsdRate > 0 ? (
                   <p className="text-xs text-muted-foreground mt-1">
                     ≈ {(parseFloat(betAmountUsd) / xmrUsdRate).toFixed(6)} XMR
                   </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">Minimum: {formatMinimumBet()}</p>
                 )}
               </div>
               <div>

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { X, Trash2, Minus, Plus, ShoppingCart, ArrowRight, Loader2, GripVertical, Undo2, TrendingUp, Timer, Eye, AlertTriangle, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -257,8 +258,9 @@ export function BetSlipPanel({
 
     // Validate each item
     for (const item of items) {
-      if (item.amount < 0.2) {
-        toast.error(`Minimum $0.20 per leg`);
+      const validation = validateBetAmount(item.amount);
+      if (!validation.valid) {
+        toast.error(`${validation.error} per leg`);
         return;
       }
     }
@@ -600,18 +602,18 @@ export function BetSlipPanel({
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => onUpdateAmount(item.id, item.amount - 1)}
-                            disabled={item.amount <= 0.5}
+                            onClick={() => onUpdateAmount(item.id, Math.max(BETTING_CONFIG.MINIMUM_BET_USD, item.amount - 1))}
+                            disabled={item.amount <= BETTING_CONFIG.MINIMUM_BET_USD}
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
                           <Input
                             type="number"
                             value={item.amount}
-                            onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || 0.5)}
-                            className="h-8 w-20 text-center"
-                            min={0.5}
-                            step={0.5}
+                            onChange={(e) => onUpdateAmount(item.id, parseFloat(e.target.value) || BETTING_CONFIG.MINIMUM_BET_USD)}
+                            className={`h-8 w-20 text-center ${!validateBetAmount(item.amount).valid ? 'border-destructive' : ''}`}
+                            min={BETTING_CONFIG.MINIMUM_BET_USD}
+                            step={0.1}
                           />
                           <Button
                             variant="outline"

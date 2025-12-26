@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
@@ -248,8 +249,9 @@ export default function EsportsPredictions() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 0.2) {
-      toast.error('Minimum bet is $0.20');
+    const validation = validateBetAmount(amountUsd);
+    if (!validation.valid) {
+      toast.error(validation.error);
       return;
     }
 
@@ -1203,13 +1205,18 @@ export default function EsportsPredictions() {
               <Label>Amount (USD)</Label>
               <Input
                 type="number"
-                min="1"
-                step="1"
+                min={BETTING_CONFIG.MINIMUM_BET_USD}
+                step="0.01"
                 value={betAmountUsd}
                 onChange={(e) => setBetAmountUsd(e.target.value)}
                 placeholder="Enter amount in USD"
+                className={betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? 'border-destructive' : ''}
               />
-              <p className="text-xs text-muted-foreground mt-1">Minimum: $0.20</p>
+              {betAmountUsd && !validateBetAmount(parseFloat(betAmountUsd)).valid ? (
+                <p className="text-xs text-destructive mt-1">{validateBetAmount(parseFloat(betAmountUsd)).error}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">Minimum: {formatMinimumBet()}</p>
+              )}
             </div>
 
             <div>
