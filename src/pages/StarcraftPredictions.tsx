@@ -245,8 +245,8 @@ export default function StarcraftPredictions() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 1) {
-      toast.error('Minimum bet is $1');
+    if (isNaN(amountUsd) || amountUsd < 0.2) {
+      toast.error('Minimum bet is $0.20');
       return;
     }
 

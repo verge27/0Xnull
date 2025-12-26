@@ -257,8 +257,8 @@ export function BetSlipPanel({
 
     // Validate each item
     for (const item of items) {
-      if (item.amount < 0.5) {
-        toast.error(`Minimum $0.50 per leg`);
+      if (item.amount < 0.2) {
+        toast.error(`Minimum $0.20 per leg`);
         return;
       }
     }

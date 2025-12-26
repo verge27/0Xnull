@@ -248,8 +248,8 @@ export default function EsportsPredictions() {
     if (!selectedMarket) return;
     
     const amountUsd = parseFloat(betAmountUsd);
-    if (isNaN(amountUsd) || amountUsd < 1) {
-      toast.error('Minimum bet is $1');
+    if (isNaN(amountUsd) || amountUsd < 0.2) {
+      toast.error('Minimum bet is $0.20');
       return;
     }
 
@@ -1209,7 +1209,7 @@ export default function EsportsPredictions() {
                 onChange={(e) => setBetAmountUsd(e.target.value)}
                 placeholder="Enter amount in USD"
               />
-              <p className="text-xs text-muted-foreground mt-1">Minimum: $1</p>
+              <p className="text-xs text-muted-foreground mt-1">Minimum: $0.20</p>
             </div>
 
             <div>
