@@ -104,7 +104,7 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
           const marketBets = getBetsForMarket(market.market_id);
           const payoutInfo = getPayoutStatus(market, marketBets);
           const PayoutIcon = payoutInfo.icon;
-          const isWinner = market.outcome === 'YES';
+          const isWinner = market.outcome?.toUpperCase() === 'YES';
           
           return (
             <Card 
@@ -191,7 +191,7 @@ export function ResolvedMarketsSection({ markets, getBetsForMarket }: ResolvedMa
                       You had {marketBets.length} bet(s) on this market
                     </p>
                     {marketBets.map((bet, i) => {
-                      const betWon = bet.side?.toUpperCase() === market.outcome;
+                      const betWon = bet.side?.toUpperCase() === market.outcome?.toUpperCase();
                       return (
                         <div key={i} className="flex items-center justify-between mt-1">
                           <div className="flex items-center gap-2">
