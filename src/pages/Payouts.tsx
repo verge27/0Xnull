@@ -86,13 +86,13 @@ export default function Payouts() {
           description: `Leg ${idx + 1} of ${payout.legs!.length}`,
           stake_xmr: payout.stake_xmr,
           payout_xmr: payout.payout_xmr,
-          payout_type: leg.outcome === 'won' ? ('win' as const) : ('refund' as const),
+          payout_type: leg.outcome?.toLowerCase() === 'won' ? ('win' as const) : ('refund' as const),
           side: leg.side,
-          outcome: leg.outcome === 'won' ? leg.side : (leg.side === 'YES' ? 'NO' : 'YES') as 'YES' | 'NO',
+          outcome: leg.outcome?.toLowerCase() === 'won' ? leg.side : (leg.side?.toUpperCase() === 'YES' ? 'NO' : 'YES') as 'YES' | 'NO',
           _isExpandedLeg: true,
           _legIndex: idx,
           _totalLegs: payout.legs!.length,
-          _winsCount: payout.legs!.filter(l => l.outcome === 'won').length,
+          _winsCount: payout.legs!.filter(l => l.outcome?.toLowerCase() === 'won').length,
           _legSide: leg.side,
           _legOutcome: leg.outcome,
         }));
@@ -563,7 +563,7 @@ export default function Payouts() {
                             {group.items.map((payout, legIdx) => {
                               const legSide = (payout as any)._legSide;
                               const legOutcome = (payout as any)._legOutcome;
-                              const isLegWon = legOutcome === 'won' || isWin(payout);
+                              const isLegWon = legOutcome?.toLowerCase() === 'won' || isWin(payout);
                               
                               return (
                                 <div 
@@ -676,13 +676,13 @@ export default function Payouts() {
                                   {isWin(payout) ? 'Winner' : 'Refund'}
                                 </Badge>
                                 {payout.side && payout.side !== 'MULTI' && (
-                                  <Badge variant={payout.side === 'YES' ? 'default' : 'destructive'} className="text-xs">
-                                    {payout.side}
+                                  <Badge variant={payout.side?.toUpperCase() === 'YES' ? 'default' : 'destructive'} className="text-xs">
+                                    {payout.side?.toUpperCase()}
                                   </Badge>
                                 )}
                                 {payout.outcome && payout.outcome !== 'MULTI' && (
                                   <Badge variant="outline" className="text-xs">
-                                    Outcome: {payout.outcome}
+                                    Outcome: {payout.outcome?.toUpperCase()}
                                   </Badge>
                                 )}
                               </div>
