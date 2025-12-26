@@ -239,7 +239,7 @@ export default function MySlips() {
 
   const getOutcomeBadge = (outcome: string | null) => {
     if (!outcome) return null;
-    if (outcome === 'WON') {
+    if (outcome?.toUpperCase() === 'WON') {
       return <Badge className="bg-emerald-600"><CheckCircle className="w-3 h-3 mr-1" /> Won</Badge>;
     }
     return <Badge className="bg-red-600"><XCircle className="w-3 h-3 mr-1" /> Lost</Badge>;
