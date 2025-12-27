@@ -41,13 +41,55 @@ async function fetchExistingMarkets(): Promise<string[]> {
 
 function getSportLabel(sport: string): string {
   const labels: Record<string, string> = {
+    // American Sports
     nfl: 'NFL',
-    premier_league: 'Premier League',
-    ufc: 'UFC',
     nba: 'NBA',
     mlb: 'MLB',
+    nhl: 'NHL',
+    ncaaf: 'NCAA Football',
+    ncaab: 'NCAA Basketball',
+    mls: 'MLS',
+    // Combat Sports
+    ufc: 'UFC',
+    mma: 'MMA',
+    boxing: 'Boxing',
+    // Soccer
+    premier_league: 'Premier League',
+    epl: 'Premier League',
+    la_liga: 'La Liga',
+    bundesliga: 'Bundesliga',
+    serie_a: 'Serie A',
+    ligue_1: 'Ligue 1',
+    champions_league: 'Champions League',
+    europa_league: 'Europa League',
+    // Australian Sports - Soccer
+    soccer_australia_a_league: 'A-League',
+    a_league: 'A-League',
+    aleague: 'A-League',
+    // Australian Sports - AFL
+    aussierules: 'AFL',
+    afl: 'AFL',
+    aussie_rules: 'AFL',
+    australian_rules: 'AFL',
+    aflw: 'AFLW',
+    // Australian Sports - Rugby
+    rugbyunion_super_rugby: 'Super Rugby',
+    super_rugby: 'Super Rugby',
+    superrugby: 'Super Rugby',
+    rugby_championship: 'Rugby Championship',
+    nrl: 'NRL',
+    rugbyleague_nrl: 'NRL',
+    state_of_origin: 'State of Origin',
+    // Other Rugby
+    six_nations: 'Six Nations',
+    premiership_rugby: 'Premiership Rugby',
+    // Cricket
+    big_bash: 'Big Bash',
+    bbl: 'Big Bash',
+    ipl: 'IPL',
+    cricket: 'Cricket',
   };
-  return labels[sport] || sport.toUpperCase();
+  return labels[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 async function createMarket(

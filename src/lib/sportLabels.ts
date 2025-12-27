@@ -123,7 +123,11 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'primeira liga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Primeira Liga' },
   'liga portugal': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Liga Portugal' },
   'liga mx': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Liga MX' },
-  'a-league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'a-league': { sport: 'soccer', sportLabel: 'A-League', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'a league': { sport: 'soccer', sportLabel: 'A-League', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'aleague': { sport: 'soccer', sportLabel: 'A-League', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'hyundai a-league': { sport: 'soccer', sportLabel: 'A-League', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'australian a-league': { sport: 'soccer', sportLabel: 'A-League', sportEmoji: '⚽', leagueLabel: 'A-League' },
   'j-league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'J-League' },
   'j1 league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'J1 League' },
   'k league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'K League' },
@@ -196,22 +200,35 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'psl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'PSL' },
   'cpl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'CPL' },
   
-  // Rugby
-  'super rugby': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Super Rugby' },
-  'six nations': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Six Nations' },
-  'premiership rugby': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Premiership' },
-  'nrl': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'NRL' },
-  'super league': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'Super League' },
+  // Rugby Union
+  'super rugby': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Super Rugby' },
+  'super rugby pacific': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Super Rugby' },
+  'rugby championship': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Rugby Championship' },
+  'wallabies': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Wallabies' },
+  'six nations': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Six Nations' },
+  'premiership rugby': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Premiership' },
+  'rugby world cup': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Rugby World Cup' },
+  'rwc': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Rugby World Cup' },
+  'tri nations': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Tri Nations' },
+  'bledisloe': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Bledisloe Cup' },
+  'bledisloe cup': { sport: 'rugbyunion', sportLabel: 'Rugby Union', sportEmoji: '🏉', leagueLabel: 'Bledisloe Cup' },
   
-  // Aussie Rules Football
-  'afl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
-  'australian football': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
-  'aussie rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
-  'australian rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
-  'aflw': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFLW' },
-  'vfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'VFL' },
-  'sanfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'SANFL' },
-  'wafl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'WAFL' },
+  // Rugby League
+  'nrl': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'NRL' },
+  'state of origin': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'State of Origin' },
+  'super league': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'Super League' },
+  'nrl grand final': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'NRL' },
+  
+  // Aussie Rules Football (AFL) - distinct from soccer and rugby
+  'afl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFL' },
+  'australian football': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFL' },
+  'aussie rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFL' },
+  'australian rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFL' },
+  'afl grand final': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFL' },
+  'aflw': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'AFLW' },
+  'vfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'VFL' },
+  'sanfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'SANFL' },
+  'wafl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏈', leagueLabel: 'WAFL' },
   
   // Esports
   'starcraft': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'StarCraft' },
@@ -415,7 +432,7 @@ const SPORT_EMOJIS: Record<string, string> = {
   'esports': '🎮',
   'rugbyleague': '🏉',
   'rugbyunion': '🏉',
-  'aussierules': '🏉',
+  'aussierules': '🏈',  // AFL uses oval ball, distinct from rugby
   'motorsport': '🏎️',
   'combat': '👊',
   'kickboxing': '🦵',
