@@ -16,6 +16,7 @@ export function SportsCategoryPills({ categories, selectedCategory, onSelect }: 
     'cricket', 
     'basketball',
     'tennis',
+    'combat',
     'baseball',
     'rugby',
     'football',
