@@ -48,46 +48,227 @@ function getSportLabel(sport: string): string {
     nhl: 'NHL',
     ncaaf: 'NCAA Football',
     ncaab: 'NCAA Basketball',
+    wnba: 'WNBA',
     mls: 'MLS',
-    // Combat Sports
+    cfl: 'CFL',
+    xfl: 'XFL',
+    nbl: 'NBL',
+    ahl: 'AHL',
+    
+    // Combat Sports - MMA
     ufc: 'UFC',
     mma: 'MMA',
+    bellator: 'Bellator',
+    pfl: 'PFL',
+    one_championship: 'ONE',
+    one_fc: 'ONE',
+    cage_warriors: 'Cage Warriors',
+    ksw: 'KSW',
+    rizin: 'RIZIN',
+    
+    // Combat Sports - Boxing
     boxing: 'Boxing',
-    // Soccer
+    wbc: 'WBC',
+    wba: 'WBA',
+    ibf: 'IBF',
+    wbo: 'WBO',
+    
+    // Combat Sports - Other
+    bkfc: 'BKFC',
+    bare_knuckle: 'Bare Knuckle',
+    power_slap: 'Power Slap',
+    slap_fighting: 'Slap Fighting',
+    kickboxing: 'Kickboxing',
+    glory: 'GLORY',
+    k1: 'K-1',
+    muay_thai: 'Muay Thai',
+    
+    // Grappling / Wrestling
+    adcc: 'ADCC',
+    ibjjf: 'IBJJF',
+    bjj: 'BJJ',
+    wrestling: 'Wrestling',
+    
+    // Soccer - Major Leagues
     premier_league: 'Premier League',
     epl: 'Premier League',
+    english_premier_league: 'Premier League',
     la_liga: 'La Liga',
+    laliga: 'La Liga',
     bundesliga: 'Bundesliga',
     serie_a: 'Serie A',
+    italian_serie_a: 'Serie A',
     ligue_1: 'Ligue 1',
+    eredivisie: 'Eredivisie',
+    primeira_liga: 'Primeira Liga',
+    liga_portugal: 'Liga Portugal',
+    
+    // Soccer - European Competitions
     champions_league: 'Champions League',
+    ucl: 'Champions League',
     europa_league: 'Europa League',
+    conference_league: 'Conference League',
+    
+    // Soccer - UK
+    championship: 'Championship',
+    efl_championship: 'Championship',
+    fa_cup: 'FA Cup',
+    carabao_cup: 'Carabao Cup',
+    scottish_premiership: 'Scottish Premiership',
+    spfl: 'Scottish Premiership',
+    
+    // Soccer - International
+    world_cup: 'World Cup',
+    euros: 'Euros',
+    copa_america: 'Copa America',
+    afcon: 'AFCON',
+    asian_cup: 'Asian Cup',
+    concacaf: 'CONCACAF',
+    copa_libertadores: 'Copa Libertadores',
+    
+    // Soccer - Other Leagues
+    liga_mx: 'Liga MX',
+    saudi_pro_league: 'Saudi Pro League',
+    turkish_super_lig: 'Turkish Super Lig',
+    belgian_pro_league: 'Belgian Pro League',
+    swiss_super_league: 'Swiss Super League',
+    greek_super_league: 'Greek Super League',
+    
     // Australian Sports - Soccer
     soccer_australia_a_league: 'A-League',
     a_league: 'A-League',
     aleague: 'A-League',
+    
     // Australian Sports - AFL
     aussierules: 'AFL',
     afl: 'AFL',
     aussie_rules: 'AFL',
     australian_rules: 'AFL',
     aflw: 'AFLW',
+    vfl: 'VFL',
+    sanfl: 'SANFL',
+    wafl: 'WAFL',
+    
     // Australian Sports - Rugby
     rugbyunion_super_rugby: 'Super Rugby',
     super_rugby: 'Super Rugby',
     superrugby: 'Super Rugby',
     rugby_championship: 'Rugby Championship',
+    bledisloe: 'Bledisloe Cup',
+    
+    // Rugby League
     nrl: 'NRL',
     rugbyleague_nrl: 'NRL',
     state_of_origin: 'State of Origin',
-    // Other Rugby
+    super_league: 'Super League',
+    
+    // Rugby Union
     six_nations: 'Six Nations',
     premiership_rugby: 'Premiership Rugby',
+    rugby_world_cup: 'Rugby World Cup',
+    
     // Cricket
     big_bash: 'Big Bash',
     bbl: 'Big Bash',
     ipl: 'IPL',
+    psl: 'PSL',
+    cpl: 'CPL',
+    the_hundred: 'The Hundred',
+    t20: 'T20',
+    odi: 'ODI',
+    test_cricket: 'Test Cricket',
     cricket: 'Cricket',
+    
+    // Tennis
+    atp: 'ATP',
+    wta: 'WTA',
+    australian_open: 'Australian Open',
+    french_open: 'French Open',
+    wimbledon: 'Wimbledon',
+    us_open: 'US Open',
+    
+    // Golf
+    pga: 'PGA Tour',
+    pga_tour: 'PGA Tour',
+    lpga: 'LPGA',
+    liv_golf: 'LIV Golf',
+    the_masters: 'The Masters',
+    ryder_cup: 'Ryder Cup',
+    
+    // Motorsport
+    f1: 'Formula 1',
+    formula_1: 'Formula 1',
+    formula_one: 'Formula 1',
+    motogp: 'MotoGP',
+    nascar: 'NASCAR',
+    indycar: 'IndyCar',
+    wrc: 'WRC',
+    formula_e: 'Formula E',
+    
+    // Esports
+    starcraft: 'StarCraft',
+    starcraft_ii: 'StarCraft II',
+    dota_2: 'Dota 2',
+    dota2: 'Dota 2',
+    league_of_legends: 'LoL',
+    lol: 'LoL',
+    cs2: 'CS2',
+    csgo: 'CS2',
+    valorant: 'Valorant',
+    overwatch: 'Overwatch',
+    call_of_duty: 'Call of Duty',
+    cod: 'Call of Duty',
+    rocket_league: 'Rocket League',
+    
+    // Winter Sports
+    skiing: 'Skiing',
+    alpine_skiing: 'Alpine Skiing',
+    cross_country: 'Cross Country',
+    snowboarding: 'Snowboarding',
+    biathlon: 'Biathlon',
+    figure_skating: 'Figure Skating',
+    speed_skating: 'Speed Skating',
+    bobsled: 'Bobsled',
+    luge: 'Luge',
+    curling: 'Curling',
+    ski_jumping: 'Ski Jumping',
+    
+    // Olympics / Athletics
+    olympics: 'Olympics',
+    athletics: 'Athletics',
+    track_and_field: 'Track & Field',
+    swimming: 'Swimming',
+    gymnastics: 'Gymnastics',
+    diving: 'Diving',
+    
+    // Other Sports
+    cycling: 'Cycling',
+    tour_de_france: 'Tour de France',
+    volleyball: 'Volleyball',
+    handball: 'Handball',
+    badminton: 'Badminton',
+    table_tennis: 'Table Tennis',
+    archery: 'Archery',
+    fencing: 'Fencing',
+    equestrian: 'Equestrian',
+    rowing: 'Rowing',
+    
+    // Field Sports
+    lacrosse: 'Lacrosse',
+    pll: 'PLL',
+    nll: 'NLL',
+    field_hockey: 'Field Hockey',
+    polo: 'Polo',
+    
+    // Asian Leagues
+    j_league: 'J-League',
+    j1_league: 'J1 League',
+    k_league: 'K League',
+    cba: 'CBA',
+    kbo: 'KBO',
+    npb: 'NPB',
+    khl: 'KHL',
+    shl: 'SHL',
   };
   return labels[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
