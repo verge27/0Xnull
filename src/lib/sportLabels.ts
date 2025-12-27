@@ -164,13 +164,41 @@ export function extractSportInfo(marketId: string): SportInfo {
   }
 
   // Try to detect combat sports from keywords in market ID
-  if (lowerMarketId.includes('ufc') || lowerMarketId.includes('mma')) {
+  if (lowerMarketId.includes('ufc')) {
     return {
       sport: 'mma',
       sportLabel: 'MMA',
       sportEmoji: '🥊',
       league: 'ufc',
       leagueLabel: 'UFC',
+    };
+  }
+  
+  if (lowerMarketId.includes('bellator')) {
+    return {
+      sport: 'mma',
+      sportLabel: 'MMA',
+      sportEmoji: '🥊',
+      league: 'bellator',
+      leagueLabel: 'Bellator',
+    };
+  }
+  
+  if (lowerMarketId.includes('pfl')) {
+    return {
+      sport: 'mma',
+      sportLabel: 'MMA',
+      sportEmoji: '🥊',
+      league: 'pfl',
+      leagueLabel: 'PFL',
+    };
+  }
+  
+  if (lowerMarketId.includes('mma')) {
+    return {
+      sport: 'mma',
+      sportLabel: 'MMA',
+      sportEmoji: '🥊',
     };
   }
   
