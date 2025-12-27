@@ -95,12 +95,15 @@ const LEAGUE_LABELS: Record<string, string> = {
  * Market ID formats:
  * - sports_basketball_ncaab_eventid_teamslug
  * - sports_americanfootball_nfl_eventid_teamslug  
+ * - sports_mma_ufc_eventid_fighter
  * - cricket_eventid_teamslug
  * - esports_lol_eventid_teamslug
  */
 export function extractSportInfo(marketId: string): SportInfo {
+  const lowerMarketId = marketId.toLowerCase();
+  
   // Handle cricket markets
-  if (marketId.startsWith('cricket_')) {
+  if (lowerMarketId.startsWith('cricket_')) {
     return {
       sport: 'cricket',
       sportLabel: 'Cricket',
@@ -109,7 +112,7 @@ export function extractSportInfo(marketId: string): SportInfo {
   }
 
   // Handle esports markets
-  if (marketId.startsWith('esports_')) {
+  if (lowerMarketId.startsWith('esports_')) {
     const parts = marketId.split('_');
     const league = parts[1] || '';
     return {
@@ -122,27 +125,51 @@ export function extractSportInfo(marketId: string): SportInfo {
   }
 
   // Handle sports_ prefix markets (most common)
-  if (marketId.startsWith('sports_')) {
+  if (lowerMarketId.startsWith('sports_')) {
     const parts = marketId.split('_');
     // Format: sports_<sport>_<league>_<eventid>_<team>
     const sport = parts[1] || '';
     const league = parts[2] || '';
+    
+    // Special handling for combat sports - show league as primary label
+    const isCombat = ['mma', 'boxing'].includes(sport.toLowerCase());
     
     return {
       sport,
       sportLabel: SPORT_LABELS[sport.toLowerCase()] || sport,
       sportEmoji: SPORT_EMOJIS[sport.toLowerCase()] || '🏅',
       league,
-      leagueLabel: LEAGUE_LABELS[league.toLowerCase()] || league.toUpperCase(),
+      leagueLabel: LEAGUE_LABELS[league.toLowerCase()] || (isCombat ? sport.toUpperCase() : league.toUpperCase()),
     };
   }
 
   // Handle crypto/prediction markets
-  if (marketId.startsWith('crypto_')) {
+  if (lowerMarketId.startsWith('crypto_')) {
     return {
       sport: 'crypto',
       sportLabel: 'Crypto',
       sportEmoji: '📈',
+    };
+  }
+
+  // Try to detect combat sports from keywords in market ID
+  if (lowerMarketId.includes('ufc') || lowerMarketId.includes('mma')) {
+    return {
+      sport: 'mma',
+      sportLabel: 'MMA',
+      sportEmoji: '🥊',
+      league: 'ufc',
+      leagueLabel: 'UFC',
+    };
+  }
+  
+  if (lowerMarketId.includes('boxing')) {
+    return {
+      sport: 'boxing',
+      sportLabel: 'Boxing',
+      sportEmoji: '🥊',
+      league: 'boxing',
+      leagueLabel: 'Boxing',
     };
   }
 

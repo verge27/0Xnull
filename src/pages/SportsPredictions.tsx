@@ -37,6 +37,7 @@ import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock } from 'lucide-react';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
+import { extractSportInfo } from '@/lib/sportLabels';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PendingDataIndicator } from '@/components/PendingDataIndicator';
@@ -809,7 +810,16 @@ export default function SportsPredictions() {
                         <div className="h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500 animate-pulse" />
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-lg leading-tight">{market.title}</CardTitle>
+                            <div>
+                              {/* Sport badge */}
+                              <Badge variant="outline" className="text-xs border-primary/30 text-primary/80 mb-2">
+                                {(() => {
+                                  const info = extractSportInfo(market.market_id);
+                                  return `${info.sportEmoji} ${info.leagueLabel || info.sportLabel}`;
+                                })()}
+                              </Badge>
+                              <CardTitle className="text-lg leading-tight">{market.title}</CardTitle>
+                            </div>
                             <Badge className="bg-red-600 text-white animate-pulse gap-1 shrink-0">
                               <Radio className="w-3 h-3" />
                               LIVE
