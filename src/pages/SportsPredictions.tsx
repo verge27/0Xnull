@@ -812,7 +812,7 @@ export default function SportsPredictions() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               {/* Sport badge */}
-                              <Badge variant="outline" className="text-xs border-primary/30 text-primary/80 mb-2">
+                              <Badge variant="secondary" className="text-xs mb-2">
                                 {(() => {
                                   const info = extractSportInfo(market.market_id);
                                   return `${info.sportEmoji} ${info.leagueLabel || info.sportLabel}`;

@@ -75,7 +75,16 @@ export function SportsMarketCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Status badges */}
+      {/* Status + sport badges */}
+      <div className="absolute top-2 left-2 z-10">
+        <Badge
+          variant="outline"
+          className="text-xs bg-background/40 backdrop-blur border-border/60"
+        >
+          {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
+        </Badge>
+      </div>
+
       <div className="absolute top-2 right-2 flex gap-1 z-10">
         {bettingClosed && !isLive && marketStatus.reason !== 'live_scores' && (
           <Badge className="bg-zinc-700 text-zinc-300">
@@ -97,13 +106,8 @@ export function SportsMarketCard({
         )}
       </div>
 
-      <CardContent className="p-4">
-        {/* Sport/League badge */}
-        <div className="mb-3">
-          <Badge variant="outline" className="text-xs border-primary/30 text-primary/80">
-            {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
-          </Badge>
-        </div>
+      <CardContent className="p-4 pt-11">
+        {/* Sport badge moved to top-left for visibility */}
 
         {/* Teams display */}
         <div className="flex items-center justify-between mb-4">
