@@ -8,6 +8,40 @@ export interface SportInfo {
   leagueLabel?: string;
 }
 
+// Map of league/competition prefixes found in descriptions to sport info
+const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; sportEmoji: string; leagueLabel: string }> = {
+  'nba': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NBA' },
+  'nbl': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NBL' },
+  'ncaab': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NCAA Basketball' },
+  'wnba': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'WNBA' },
+  'nfl': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'NFL' },
+  'ncaaf': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'NCAA Football' },
+  'mlb': { sport: 'baseball', sportLabel: 'Baseball', sportEmoji: '⚾', leagueLabel: 'MLB' },
+  'nhl': { sport: 'icehockey', sportLabel: 'Hockey', sportEmoji: '🏒', leagueLabel: 'NHL' },
+  'ufc': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'UFC' },
+  'pfl': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'PFL' },
+  'bellator': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Bellator' },
+  'boxing': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Boxing' },
+  'premier league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
+  'epl': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
+  'la liga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'La Liga' },
+  'bundesliga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Bundesliga' },
+  'serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'ligue 1': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Ligue 1' },
+  'mls': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'MLS' },
+  'champions league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Champions League' },
+  'atp': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'ATP' },
+  'wta': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'WTA' },
+  'pga': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'PGA Tour' },
+  'ipl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'IPL' },
+  'big bash': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'Big Bash' },
+  'starcraft': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'StarCraft' },
+  'dota 2': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Dota 2' },
+  'league of legends': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'LoL' },
+  'cs2': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'CS2' },
+  'valorant': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Valorant' },
+};
+
 // Map of sport keys to display labels
 const SPORT_LABELS: Record<string, string> = {
   'americanfootball': 'Football',
@@ -91,6 +125,42 @@ const LEAGUE_LABELS: Record<string, string> = {
 };
 
 /**
+ * Extract sport info from market description (e.g., "NBA: Team A @ Team B")
+ * This is the primary method since market IDs don't contain sport info
+ */
+export function extractSportFromDescription(description: string): SportInfo | null {
+  if (!description) return null;
+  
+  const lowerDesc = description.toLowerCase();
+  
+  // Check each known prefix
+  for (const [prefix, info] of Object.entries(DESCRIPTION_PREFIXES)) {
+    // Check if description starts with prefix followed by colon (e.g., "NBA:")
+    if (lowerDesc.startsWith(prefix + ':') || lowerDesc.startsWith(prefix + ' ')) {
+      return {
+        sport: info.sport,
+        sportLabel: info.sportLabel,
+        sportEmoji: info.sportEmoji,
+        league: prefix,
+        leagueLabel: info.leagueLabel,
+      };
+    }
+    // Also check if prefix appears anywhere (for formats like "StarCraft II: ...")
+    if (lowerDesc.includes(prefix)) {
+      return {
+        sport: info.sport,
+        sportLabel: info.sportLabel,
+        sportEmoji: info.sportEmoji,
+        league: prefix,
+        leagueLabel: info.leagueLabel,
+      };
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Extract sport and league info from a market ID
  * Market ID formats:
  * - sports_basketball_ncaab_eventid_teamslug
@@ -98,8 +168,17 @@ const LEAGUE_LABELS: Record<string, string> = {
  * - sports_mma_ufc_eventid_fighter
  * - cricket_eventid_teamslug
  * - esports_lol_eventid_teamslug
+ * 
+ * NOTE: Most sports_ markets from the API use format: sports_<hash>_<team>
+ * without sport/league info. Use extractSportFromDescription() as primary method.
  */
-export function extractSportInfo(marketId: string): SportInfo {
+export function extractSportInfo(marketId: string, description?: string): SportInfo {
+  // FIRST: Try to extract from description (most reliable for API markets)
+  if (description) {
+    const fromDesc = extractSportFromDescription(description);
+    if (fromDesc) return fromDesc;
+  }
+  
   const lowerMarketId = marketId.toLowerCase();
   
   // Handle cricket markets
@@ -124,34 +203,25 @@ export function extractSportInfo(marketId: string): SportInfo {
     };
   }
 
-  // Handle sports_ prefix markets (most common)
+  // Handle sports_ prefix markets 
   if (lowerMarketId.startsWith('sports_')) {
     const parts = marketId.split('_');
-    // Format: sports_<sport>_<league>_<eventid>_<team>
+    // Try format: sports_<sport>_<league>_<eventid>_<team>
     const sport = parts[1] || '';
     const league = parts[2] || '';
     
-    // Only return a valid sport if it exists in SPORT_LABELS
+    // Only return if sport exists in SPORT_LABELS (rules out hash IDs)
     const sportLower = sport.toLowerCase();
-    if (!SPORT_LABELS[sportLower]) {
-      // Sport not recognized, return unknown
+    if (SPORT_LABELS[sportLower]) {
+      const isCombat = ['mma', 'boxing'].includes(sportLower);
       return {
-        sport: 'unknown',
-        sportLabel: 'Event',
-        sportEmoji: '📌',
+        sport,
+        sportLabel: SPORT_LABELS[sportLower],
+        sportEmoji: SPORT_EMOJIS[sportLower] || '🏅',
+        league,
+        leagueLabel: LEAGUE_LABELS[league.toLowerCase()] || (isCombat ? sport.toUpperCase() : league.toUpperCase()),
       };
     }
-    
-    // Special handling for combat sports - show league as primary label
-    const isCombat = ['mma', 'boxing'].includes(sportLower);
-    
-    return {
-      sport,
-      sportLabel: SPORT_LABELS[sportLower],
-      sportEmoji: SPORT_EMOJIS[sportLower] || '🏅',
-      league,
-      leagueLabel: LEAGUE_LABELS[league.toLowerCase()] || (isCombat ? sport.toUpperCase() : league.toUpperCase()),
-    };
   }
 
   // Handle crypto/prediction markets
