@@ -44,11 +44,57 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'cage warriors': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Cage Warriors' },
   'ksw': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'KSW' },
   'rizin': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'RIZIN' },
+  'ares': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'ARES' },
+  'lfa': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'LFA' },
+  'invicta': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Invicta FC' },
+  'ufc fight night': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'UFC' },
+  'road fc': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Road FC' },
+  
+  // Boxing
   'boxing': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Boxing' },
   'wbc': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBC' },
   'wba': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBA' },
   'ibf': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'IBF' },
   'wbo': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBO' },
+  'pbc': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'PBC' },
+  'matchroom': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Matchroom' },
+  'top rank': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Top Rank' },
+  'golden boy': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Golden Boy' },
+  
+  // Bare Knuckle / Slap Fighting
+  'bkfc': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👊', leagueLabel: 'BKFC' },
+  'bare knuckle': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👊', leagueLabel: 'Bare Knuckle' },
+  'bare knuckle fc': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👊', leagueLabel: 'BKFC' },
+  'power slap': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👋', leagueLabel: 'Power Slap' },
+  'slap fighting': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👋', leagueLabel: 'Slap Fighting' },
+  'slap': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👋', leagueLabel: 'Slap Fighting' },
+  'slapfight': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '👋', leagueLabel: 'Slap Fighting' },
+  
+  // Kickboxing / Muay Thai
+  'kickboxing': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'Kickboxing' },
+  'glory': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'GLORY' },
+  'glory kickboxing': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'GLORY' },
+  'k-1': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'K-1' },
+  'k1': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'K-1' },
+  'one kickboxing': { sport: 'kickboxing', sportLabel: 'Kickboxing', sportEmoji: '🦵', leagueLabel: 'ONE Kickboxing' },
+  'muay thai': { sport: 'kickboxing', sportLabel: 'Muay Thai', sportEmoji: '🦵', leagueLabel: 'Muay Thai' },
+  'one muay thai': { sport: 'kickboxing', sportLabel: 'Muay Thai', sportEmoji: '🦵', leagueLabel: 'ONE Muay Thai' },
+  'lumpinee': { sport: 'kickboxing', sportLabel: 'Muay Thai', sportEmoji: '🦵', leagueLabel: 'Lumpinee' },
+  'rajadamnern': { sport: 'kickboxing', sportLabel: 'Muay Thai', sportEmoji: '🦵', leagueLabel: 'Rajadamnern' },
+  
+  // Wrestling / Grappling
+  'wrestling': { sport: 'wrestling', sportLabel: 'Wrestling', sportEmoji: '🤼', leagueLabel: 'Wrestling' },
+  'adcc': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'ADCC' },
+  'ibjjf': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'IBJJF' },
+  'bjj': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'BJJ' },
+  'jiu jitsu': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'Jiu Jitsu' },
+  'who\'s number one': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'WNO' },
+  'wno': { sport: 'grappling', sportLabel: 'Grappling', sportEmoji: '🤼', leagueLabel: 'WNO' },
+  
+  // Karate / Taekwondo
+  'karate': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '🥋', leagueLabel: 'Karate' },
+  'taekwondo': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '🥋', leagueLabel: 'Taekwondo' },
+  'judo': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '🥋', leagueLabel: 'Judo' },
   
   // Soccer / Football
   'premier league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
@@ -173,6 +219,10 @@ const SPORT_LABELS: Record<string, string> = {
   'rugbyunion': 'Rugby Union',
   'aussierules': 'Aussie Rules',
   'motorsport': 'Motorsport',
+  'combat': 'Combat',
+  'kickboxing': 'Kickboxing',
+  'grappling': 'Grappling',
+  'wrestling': 'Wrestling',
 };
 
 // Map of sport keys to emojis
@@ -192,6 +242,10 @@ const SPORT_EMOJIS: Record<string, string> = {
   'rugbyunion': '🏉',
   'aussierules': '🏉',
   'motorsport': '🏎️',
+  'combat': '👊',
+  'kickboxing': '🦵',
+  'grappling': '🤼',
+  'wrestling': '🤼',
 };
 
 // Map of league keys to display labels
