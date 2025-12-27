@@ -128,6 +128,32 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'cod': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Call of Duty' },
   'rocket league': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Rocket League' },
   'fifa esports': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'EA FC' },
+  
+  // Motorsport
+  'f1': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 1' },
+  'formula 1': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 1' },
+  'formula one': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 1' },
+  'nascar': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'NASCAR' },
+  'nascar cup': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'NASCAR' },
+  'motogp': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'MotoGP' },
+  'moto gp': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'MotoGP' },
+  'moto2': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Moto2' },
+  'moto3': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Moto3' },
+  'indycar': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'IndyCar' },
+  'indy 500': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Indy 500' },
+  'wrc': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'WRC' },
+  'world rally': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'WRC' },
+  'formula e': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula E' },
+  'le mans': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Le Mans' },
+  'wec': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'WEC' },
+  'dtm': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'DTM' },
+  'supercars': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Supercars' },
+  'v8 supercars': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Supercars' },
+  'imsa': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'IMSA' },
+  'f2': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 2' },
+  'f3': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 3' },
+  'sbk': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Superbike' },
+  'world superbike': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Superbike' },
 };
 
 // Map of sport keys to display labels
@@ -146,6 +172,7 @@ const SPORT_LABELS: Record<string, string> = {
   'rugbyleague': 'Rugby League',
   'rugbyunion': 'Rugby Union',
   'aussierules': 'Aussie Rules',
+  'motorsport': 'Motorsport',
 };
 
 // Map of sport keys to emojis
@@ -164,6 +191,7 @@ const SPORT_EMOJIS: Record<string, string> = {
   'rugbyleague': '🏉',
   'rugbyunion': '🏉',
   'aussierules': '🏉',
+  'motorsport': '🏎️',
 };
 
 // Map of league keys to display labels
