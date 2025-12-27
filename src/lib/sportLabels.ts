@@ -200,6 +200,108 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'f3': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏎️', leagueLabel: 'Formula 3' },
   'sbk': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Superbike' },
   'world superbike': { sport: 'motorsport', sportLabel: 'Motorsport', sportEmoji: '🏍️', leagueLabel: 'Superbike' },
+  
+  // Winter Sports
+  'skiing': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Skiing' },
+  'alpine skiing': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Alpine Skiing' },
+  'downhill': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Downhill' },
+  'slalom': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Slalom' },
+  'giant slalom': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Giant Slalom' },
+  'super-g': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Super-G' },
+  'cross-country skiing': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Cross-Country' },
+  'nordic skiing': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Nordic' },
+  'ski jumping': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Ski Jumping' },
+  'freestyle skiing': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛷️', leagueLabel: 'Freestyle' },
+  'snowboarding': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏂', leagueLabel: 'Snowboarding' },
+  'snowboard': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏂', leagueLabel: 'Snowboarding' },
+  'halfpipe': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏂', leagueLabel: 'Halfpipe' },
+  'slopestyle': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏂', leagueLabel: 'Slopestyle' },
+  'biathlon': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🎿', leagueLabel: 'Biathlon' },
+  'figure skating': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛸️', leagueLabel: 'Figure Skating' },
+  'ice skating': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛸️', leagueLabel: 'Ice Skating' },
+  'speed skating': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛸️', leagueLabel: 'Speed Skating' },
+  'short track': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '⛸️', leagueLabel: 'Short Track' },
+  'bobsled': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🛷', leagueLabel: 'Bobsled' },
+  'bobsleigh': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🛷', leagueLabel: 'Bobsled' },
+  'luge': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🛷', leagueLabel: 'Luge' },
+  'skeleton': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🛷', leagueLabel: 'Skeleton' },
+  'curling': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🥌', leagueLabel: 'Curling' },
+  'winter olympics': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏔️', leagueLabel: 'Winter Olympics' },
+  'x games': { sport: 'wintersports', sportLabel: 'Winter Sports', sportEmoji: '🏂', leagueLabel: 'X Games' },
+  
+  // Olympic / Athletics
+  'olympics': { sport: 'olympics', sportLabel: 'Olympics', sportEmoji: '🏅', leagueLabel: 'Olympics' },
+  'olympic games': { sport: 'olympics', sportLabel: 'Olympics', sportEmoji: '🏅', leagueLabel: 'Olympics' },
+  'summer olympics': { sport: 'olympics', sportLabel: 'Olympics', sportEmoji: '🏅', leagueLabel: 'Summer Olympics' },
+  'athletics': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Athletics' },
+  'track and field': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Track & Field' },
+  'track & field': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Track & Field' },
+  'marathon': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Marathon' },
+  'world athletics': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'World Athletics' },
+  'diamond league': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Diamond League' },
+  
+  // Swimming / Aquatics
+  'swimming': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🏊', leagueLabel: 'Swimming' },
+  'fina': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🏊', leagueLabel: 'World Aquatics' },
+  'world aquatics': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🏊', leagueLabel: 'World Aquatics' },
+  'diving': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🤿', leagueLabel: 'Diving' },
+  'water polo': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🤽', leagueLabel: 'Water Polo' },
+  'synchronized swimming': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🏊', leagueLabel: 'Artistic Swimming' },
+  'artistic swimming': { sport: 'aquatics', sportLabel: 'Aquatics', sportEmoji: '🏊', leagueLabel: 'Artistic Swimming' },
+  
+  // Gymnastics
+  'gymnastics': { sport: 'gymnastics', sportLabel: 'Gymnastics', sportEmoji: '🤸', leagueLabel: 'Gymnastics' },
+  'artistic gymnastics': { sport: 'gymnastics', sportLabel: 'Gymnastics', sportEmoji: '🤸', leagueLabel: 'Artistic' },
+  'rhythmic gymnastics': { sport: 'gymnastics', sportLabel: 'Gymnastics', sportEmoji: '🤸', leagueLabel: 'Rhythmic' },
+  'trampoline': { sport: 'gymnastics', sportLabel: 'Gymnastics', sportEmoji: '🤸', leagueLabel: 'Trampoline' },
+  
+  // Fencing / Archery / Shooting
+  'fencing': { sport: 'combat', sportLabel: 'Combat', sportEmoji: '🤺', leagueLabel: 'Fencing' },
+  'archery': { sport: 'precision', sportLabel: 'Precision', sportEmoji: '🏹', leagueLabel: 'Archery' },
+  'shooting': { sport: 'precision', sportLabel: 'Precision', sportEmoji: '🎯', leagueLabel: 'Shooting' },
+  
+  // Cycling
+  'cycling': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'Cycling' },
+  'tour de france': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'Tour de France' },
+  'giro d\'italia': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'Giro d\'Italia' },
+  'vuelta': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'Vuelta' },
+  'uci': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'UCI' },
+  'track cycling': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'Track Cycling' },
+  'bmx': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚴', leagueLabel: 'BMX' },
+  'mountain biking': { sport: 'cycling', sportLabel: 'Cycling', sportEmoji: '🚵', leagueLabel: 'Mountain Biking' },
+  
+  // Rowing / Canoeing
+  'rowing': { sport: 'rowing', sportLabel: 'Rowing', sportEmoji: '🚣', leagueLabel: 'Rowing' },
+  'canoeing': { sport: 'rowing', sportLabel: 'Rowing', sportEmoji: '🛶', leagueLabel: 'Canoeing' },
+  'kayaking': { sport: 'rowing', sportLabel: 'Rowing', sportEmoji: '🛶', leagueLabel: 'Kayaking' },
+  
+  // Equestrian
+  'equestrian': { sport: 'equestrian', sportLabel: 'Equestrian', sportEmoji: '🏇', leagueLabel: 'Equestrian' },
+  'horse racing': { sport: 'equestrian', sportLabel: 'Horse Racing', sportEmoji: '🏇', leagueLabel: 'Horse Racing' },
+  'kentucky derby': { sport: 'equestrian', sportLabel: 'Horse Racing', sportEmoji: '🏇', leagueLabel: 'Kentucky Derby' },
+  'royal ascot': { sport: 'equestrian', sportLabel: 'Horse Racing', sportEmoji: '🏇', leagueLabel: 'Royal Ascot' },
+  'dressage': { sport: 'equestrian', sportLabel: 'Equestrian', sportEmoji: '🏇', leagueLabel: 'Dressage' },
+  'show jumping': { sport: 'equestrian', sportLabel: 'Equestrian', sportEmoji: '🏇', leagueLabel: 'Show Jumping' },
+  
+  // Other Olympic Sports
+  'volleyball': { sport: 'volleyball', sportLabel: 'Volleyball', sportEmoji: '🏐', leagueLabel: 'Volleyball' },
+  'beach volleyball': { sport: 'volleyball', sportLabel: 'Volleyball', sportEmoji: '🏐', leagueLabel: 'Beach Volleyball' },
+  'handball': { sport: 'handball', sportLabel: 'Handball', sportEmoji: '🤾', leagueLabel: 'Handball' },
+  'badminton': { sport: 'badminton', sportLabel: 'Badminton', sportEmoji: '🏸', leagueLabel: 'Badminton' },
+  'table tennis': { sport: 'tabletennis', sportLabel: 'Table Tennis', sportEmoji: '🏓', leagueLabel: 'Table Tennis' },
+  'ping pong': { sport: 'tabletennis', sportLabel: 'Table Tennis', sportEmoji: '🏓', leagueLabel: 'Table Tennis' },
+  'weightlifting': { sport: 'weightlifting', sportLabel: 'Weightlifting', sportEmoji: '🏋️', leagueLabel: 'Weightlifting' },
+  'triathlon': { sport: 'triathlon', sportLabel: 'Triathlon', sportEmoji: '🏊', leagueLabel: 'Triathlon' },
+  'pentathlon': { sport: 'pentathlon', sportLabel: 'Pentathlon', sportEmoji: '🏅', leagueLabel: 'Pentathlon' },
+  'decathlon': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Decathlon' },
+  'heptathlon': { sport: 'athletics', sportLabel: 'Athletics', sportEmoji: '🏃', leagueLabel: 'Heptathlon' },
+  
+  // Extreme / Action Sports
+  'skateboarding': { sport: 'actionsports', sportLabel: 'Action Sports', sportEmoji: '🛹', leagueLabel: 'Skateboarding' },
+  'surfing': { sport: 'actionsports', sportLabel: 'Action Sports', sportEmoji: '🏄', leagueLabel: 'Surfing' },
+  'wsl': { sport: 'actionsports', sportLabel: 'Action Sports', sportEmoji: '🏄', leagueLabel: 'WSL' },
+  'climbing': { sport: 'actionsports', sportLabel: 'Action Sports', sportEmoji: '🧗', leagueLabel: 'Climbing' },
+  'sport climbing': { sport: 'actionsports', sportLabel: 'Action Sports', sportEmoji: '🧗', leagueLabel: 'Sport Climbing' },
 };
 
 // Map of sport keys to display labels
@@ -223,6 +325,23 @@ const SPORT_LABELS: Record<string, string> = {
   'kickboxing': 'Kickboxing',
   'grappling': 'Grappling',
   'wrestling': 'Wrestling',
+  'wintersports': 'Winter Sports',
+  'olympics': 'Olympics',
+  'athletics': 'Athletics',
+  'aquatics': 'Aquatics',
+  'gymnastics': 'Gymnastics',
+  'cycling': 'Cycling',
+  'rowing': 'Rowing',
+  'equestrian': 'Equestrian',
+  'volleyball': 'Volleyball',
+  'handball': 'Handball',
+  'badminton': 'Badminton',
+  'tabletennis': 'Table Tennis',
+  'weightlifting': 'Weightlifting',
+  'triathlon': 'Triathlon',
+  'pentathlon': 'Pentathlon',
+  'actionsports': 'Action Sports',
+  'precision': 'Precision',
 };
 
 // Map of sport keys to emojis
@@ -246,6 +365,23 @@ const SPORT_EMOJIS: Record<string, string> = {
   'kickboxing': '🦵',
   'grappling': '🤼',
   'wrestling': '🤼',
+  'wintersports': '⛷️',
+  'olympics': '🏅',
+  'athletics': '🏃',
+  'aquatics': '🏊',
+  'gymnastics': '🤸',
+  'cycling': '🚴',
+  'rowing': '🚣',
+  'equestrian': '🏇',
+  'volleyball': '🏐',
+  'handball': '🤾',
+  'badminton': '🏸',
+  'tabletennis': '🏓',
+  'weightlifting': '🏋️',
+  'triathlon': '🏊',
+  'pentathlon': '🏅',
+  'actionsports': '🛹',
+  'precision': '🎯',
 };
 
 // Map of league keys to display labels
