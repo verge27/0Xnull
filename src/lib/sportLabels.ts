@@ -131,13 +131,24 @@ export function extractSportInfo(marketId: string): SportInfo {
     const sport = parts[1] || '';
     const league = parts[2] || '';
     
+    // Only return a valid sport if it exists in SPORT_LABELS
+    const sportLower = sport.toLowerCase();
+    if (!SPORT_LABELS[sportLower]) {
+      // Sport not recognized, return unknown
+      return {
+        sport: 'unknown',
+        sportLabel: 'Event',
+        sportEmoji: '📌',
+      };
+    }
+    
     // Special handling for combat sports - show league as primary label
-    const isCombat = ['mma', 'boxing'].includes(sport.toLowerCase());
+    const isCombat = ['mma', 'boxing'].includes(sportLower);
     
     return {
       sport,
-      sportLabel: SPORT_LABELS[sport.toLowerCase()] || sport,
-      sportEmoji: SPORT_EMOJIS[sport.toLowerCase()] || '🏅',
+      sportLabel: SPORT_LABELS[sportLower],
+      sportEmoji: SPORT_EMOJIS[sportLower] || '🏅',
       league,
       leagueLabel: LEAGUE_LABELS[league.toLowerCase()] || (isCombat ? sport.toUpperCase() : league.toUpperCase()),
     };
