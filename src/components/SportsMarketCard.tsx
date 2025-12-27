@@ -56,6 +56,16 @@ export function SportsMarketCard({
   // Parse team names and sport info from market
   const { teamA, teamB } = parseMatchupFromTitle(market.title);
   const sportInfo = extractSportInfo(market.market_id);
+  
+  // Debug: log market_id and detected sport
+  console.log('SportsMarketCard debug:', { 
+    market_id: market.market_id, 
+    title: market.title,
+    oracle_type: market.oracle_type,
+    oracle_asset: market.oracle_asset,
+    detectedSport: sportInfo.sport,
+    detectedLeague: sportInfo.leagueLabel 
+  });
 
   // Determine sport display - only show if we have a valid recognized sport
   const getSportDisplay = (): string | null => {
