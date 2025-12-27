@@ -103,9 +103,16 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'la liga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'La Liga' },
   'laliga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'La Liga' },
   'bundesliga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Bundesliga' },
+  // Italian Football - Serie A and Italian leagues
   'serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
   'italian serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
   'calcio': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'lega serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'serie a tim': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'italian football': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'italy serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
+  'serie b': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie B' },
+  'italian serie b': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie B' },
   'ligue 1': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Ligue 1' },
   'mls': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'MLS' },
   'champions league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Champions League' },
@@ -196,8 +203,15 @@ const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; 
   'nrl': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'NRL' },
   'super league': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'Super League' },
   
-  // Aussie Rules
+  // Aussie Rules Football
   'afl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
+  'australian football': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
+  'aussie rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
+  'australian rules': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
+  'aflw': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFLW' },
+  'vfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'VFL' },
+  'sanfl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'SANFL' },
+  'wafl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'WAFL' },
   
   // Esports
   'starcraft': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'StarCraft' },
