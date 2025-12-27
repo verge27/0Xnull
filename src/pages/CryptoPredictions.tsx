@@ -198,7 +198,7 @@ export default function CryptoPredictions() {
 
   const fetchMarkets = async () => {
     setLoading(true);
-    setMarkets([]);
+    // Don't clear markets on refresh - keep showing previous data until new data loads
     try {
       // Fetch blocked markets from database
       const { data: blockedData } = await supabase
