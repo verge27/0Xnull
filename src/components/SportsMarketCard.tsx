@@ -57,6 +57,47 @@ export function SportsMarketCard({
   const { teamA, teamB } = parseMatchupFromTitle(market.title);
   const sportInfo = extractSportInfo(market.market_id);
 
+  // Determine sport display - use oracle_asset if sportInfo falls through to default
+  const getSportDisplay = () => {
+    // If we got a real sport, use it
+    if (sportInfo.sport !== 'unknown' && sportInfo.leagueLabel) {
+      return `${sportInfo.sportEmoji} ${sportInfo.leagueLabel}`;
+    }
+    if (sportInfo.sport !== 'unknown') {
+      return `${sportInfo.sportEmoji} ${sportInfo.sportLabel}`;
+    }
+    
+    // Check oracle_asset for sport hints
+    if (market.oracle_asset) {
+      const asset = market.oracle_asset.toLowerCase();
+      if (asset.includes('ufc') || asset.includes('mma')) return '🥊 UFC';
+      if (asset.includes('boxing')) return '🥊 Boxing';
+      if (asset.includes('nfl')) return '🏈 NFL';
+      if (asset.includes('nba')) return '🏀 NBA';
+      if (asset.includes('mlb')) return '⚾ MLB';
+      if (asset.includes('nhl')) return '🏒 NHL';
+      if (asset.includes('soccer') || asset.includes('epl') || asset.includes('premier')) return '⚽ Soccer';
+    }
+    
+    // Check oracle_type for sport hints
+    if (market.oracle_type) {
+      const oracleType = market.oracle_type.toLowerCase();
+      if (oracleType.includes('mma') || oracleType.includes('ufc') || oracleType.includes('fight')) return '🥊 MMA';
+      if (oracleType.includes('boxing')) return '🥊 Boxing';
+      if (oracleType.includes('sport')) return '🏅 Sports';
+    }
+    
+    // Check the title for sport hints
+    const titleLower = market.title.toLowerCase();
+    if (titleLower.includes('wins vs') || titleLower.includes('to win')) {
+      // Looks like a fight/combat market based on "X wins vs Y" pattern
+      return '🥊 MMA';
+    }
+    
+    // Default to MMA for combat sports page (fighters have "wins vs" pattern)
+    return '🥊 MMA';
+  };
+
   // Determine sport from oracle_asset or market_id
   const getSport = () => {
     if (market.oracle_asset) return market.oracle_asset;
@@ -75,13 +116,13 @@ export function SportsMarketCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Status + sport badges */}
+      {/* Sport badge in top-left */}
       <div className="absolute top-2 left-2 z-10">
         <Badge
           variant="outline"
-          className="text-xs bg-background/40 backdrop-blur border-border/60"
+          className="text-xs bg-background/80 backdrop-blur border-border/60"
         >
-          {sportInfo.sportEmoji} {sportInfo.leagueLabel || sportInfo.sportLabel}
+          {getSportDisplay()}
         </Badge>
       </div>
 
