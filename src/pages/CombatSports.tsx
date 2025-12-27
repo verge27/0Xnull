@@ -26,6 +26,7 @@ import { MyBets } from '@/components/MyBets';
 import { PoolTransparency } from '@/components/PoolTransparency';
 import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
+import { extractSportInfo } from '@/lib/sportLabels';
 import { toast } from 'sonner';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
@@ -523,6 +524,13 @@ export default function CombatSports() {
                                 Fight in progress
                               </span>
                             </div>
+                            {/* Sport badge */}
+                            <Badge variant="outline" className="text-xs border-red-500/30 text-red-400 w-fit mb-1">
+                              {(() => {
+                                const info = extractSportInfo(market.market_id);
+                                return `${info.sportEmoji} ${info.leagueLabel || info.sportLabel}`;
+                              })()}
+                            </Badge>
                             <CardTitle className="text-lg">{market.title}</CardTitle>
                           </CardHeader>
                           <CardContent>
@@ -589,6 +597,13 @@ export default function CombatSports() {
                               variant="badge"
                             />
                           </div>
+                          {/* Sport badge */}
+                          <Badge variant="outline" className="text-xs border-red-500/30 text-red-400 w-fit mb-1">
+                            {(() => {
+                              const info = extractSportInfo(market.market_id);
+                              return `${info.sportEmoji} ${info.leagueLabel || info.sportLabel}`;
+                            })()}
+                          </Badge>
                           <CardTitle className="text-lg">{market.title}</CardTitle>
                           <p className="text-sm text-muted-foreground">{market.description}</p>
                         </CardHeader>
@@ -658,6 +673,13 @@ export default function CombatSports() {
                         <div className="flex items-center justify-between">
                           {getStatusBadge(market)}
                         </div>
+                        {/* Sport badge */}
+                        <Badge variant="outline" className="text-xs border-primary/30 text-primary/80 w-fit mb-1">
+                          {(() => {
+                            const info = extractSportInfo(market.market_id);
+                            return `${info.sportEmoji} ${info.leagueLabel || info.sportLabel}`;
+                          })()}
+                        </Badge>
                         <CardTitle className="text-lg">{market.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
