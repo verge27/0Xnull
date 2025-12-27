@@ -10,36 +10,124 @@ export interface SportInfo {
 
 // Map of league/competition prefixes found in descriptions to sport info
 const DESCRIPTION_PREFIXES: Record<string, { sport: string; sportLabel: string; sportEmoji: string; leagueLabel: string }> = {
+  // Basketball
   'nba': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NBA' },
   'nbl': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NBL' },
   'ncaab': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'NCAA Basketball' },
   'wnba': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'WNBA' },
+  'euroleague': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'EuroLeague' },
+  'cba': { sport: 'basketball', sportLabel: 'Basketball', sportEmoji: '🏀', leagueLabel: 'CBA' },
+  
+  // American Football
   'nfl': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'NFL' },
   'ncaaf': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'NCAA Football' },
+  'cfl': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'CFL' },
+  'xfl': { sport: 'americanfootball', sportLabel: 'Football', sportEmoji: '🏈', leagueLabel: 'XFL' },
+  
+  // Baseball
   'mlb': { sport: 'baseball', sportLabel: 'Baseball', sportEmoji: '⚾', leagueLabel: 'MLB' },
+  'npb': { sport: 'baseball', sportLabel: 'Baseball', sportEmoji: '⚾', leagueLabel: 'NPB' },
+  'kbo': { sport: 'baseball', sportLabel: 'Baseball', sportEmoji: '⚾', leagueLabel: 'KBO' },
+  
+  // Hockey
   'nhl': { sport: 'icehockey', sportLabel: 'Hockey', sportEmoji: '🏒', leagueLabel: 'NHL' },
+  'khl': { sport: 'icehockey', sportLabel: 'Hockey', sportEmoji: '🏒', leagueLabel: 'KHL' },
+  'ahl': { sport: 'icehockey', sportLabel: 'Hockey', sportEmoji: '🏒', leagueLabel: 'AHL' },
+  'shl': { sport: 'icehockey', sportLabel: 'Hockey', sportEmoji: '🏒', leagueLabel: 'SHL' },
+  
+  // MMA / Combat Sports
   'ufc': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'UFC' },
   'pfl': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'PFL' },
   'bellator': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Bellator' },
+  'one championship': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'ONE' },
+  'one fc': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'ONE' },
+  'cage warriors': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'Cage Warriors' },
+  'ksw': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'KSW' },
+  'rizin': { sport: 'mma', sportLabel: 'MMA', sportEmoji: '🥊', leagueLabel: 'RIZIN' },
   'boxing': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'Boxing' },
+  'wbc': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBC' },
+  'wba': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBA' },
+  'ibf': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'IBF' },
+  'wbo': { sport: 'boxing', sportLabel: 'Boxing', sportEmoji: '🥊', leagueLabel: 'WBO' },
+  
+  // Soccer / Football
   'premier league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
   'epl': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
+  'english premier league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Premier League' },
   'la liga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'La Liga' },
+  'laliga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'La Liga' },
   'bundesliga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Bundesliga' },
   'serie a': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Serie A' },
   'ligue 1': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Ligue 1' },
   'mls': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'MLS' },
   'champions league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Champions League' },
+  'ucl': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Champions League' },
+  'europa league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Europa League' },
+  'eredivisie': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Eredivisie' },
+  'primeira liga': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Primeira Liga' },
+  'liga mx': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Liga MX' },
+  'a-league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'A-League' },
+  'j-league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'J-League' },
+  'k league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'K League' },
+  'saudi pro league': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Saudi Pro League' },
+  'spl': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'Saudi Pro League' },
+  'world cup': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'World Cup' },
+  'fifa': { sport: 'soccer', sportLabel: 'Soccer', sportEmoji: '⚽', leagueLabel: 'FIFA' },
+  
+  // Tennis
   'atp': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'ATP' },
   'wta': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'WTA' },
+  'australian open': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'Australian Open' },
+  'french open': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'French Open' },
+  'roland garros': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'French Open' },
+  'wimbledon': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'Wimbledon' },
+  'us open': { sport: 'tennis', sportLabel: 'Tennis', sportEmoji: '🎾', leagueLabel: 'US Open' },
+  
+  // Golf
   'pga': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'PGA Tour' },
+  'pga tour': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'PGA Tour' },
+  'lpga': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'LPGA' },
+  'liv golf': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'LIV Golf' },
+  'the masters': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'The Masters' },
+  'ryder cup': { sport: 'golf', sportLabel: 'Golf', sportEmoji: '⛳', leagueLabel: 'Ryder Cup' },
+  
+  // Cricket
   'ipl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'IPL' },
   'big bash': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'Big Bash' },
+  'bbl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'Big Bash' },
+  't20': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'T20' },
+  'test cricket': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'Test' },
+  'odi': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'ODI' },
+  'the hundred': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'The Hundred' },
+  'psl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'PSL' },
+  'cpl': { sport: 'cricket', sportLabel: 'Cricket', sportEmoji: '🏏', leagueLabel: 'CPL' },
+  
+  // Rugby
+  'super rugby': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Super Rugby' },
+  'six nations': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Six Nations' },
+  'premiership rugby': { sport: 'rugbyunion', sportLabel: 'Rugby', sportEmoji: '🏉', leagueLabel: 'Premiership' },
+  'nrl': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'NRL' },
+  'super league': { sport: 'rugbyleague', sportLabel: 'Rugby League', sportEmoji: '🏉', leagueLabel: 'Super League' },
+  
+  // Aussie Rules
+  'afl': { sport: 'aussierules', sportLabel: 'AFL', sportEmoji: '🏉', leagueLabel: 'AFL' },
+  
+  // Esports
   'starcraft': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'StarCraft' },
+  'starcraft ii': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'StarCraft II' },
   'dota 2': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Dota 2' },
+  'dota2': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Dota 2' },
   'league of legends': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'LoL' },
+  'lol': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'LoL' },
   'cs2': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'CS2' },
+  'csgo': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'CS2' },
+  'counter-strike': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'CS2' },
   'valorant': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Valorant' },
+  'overwatch': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Overwatch' },
+  'call of duty': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Call of Duty' },
+  'cod': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Call of Duty' },
+  'rocket league': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'Rocket League' },
+  'fifa esports': { sport: 'esports', sportLabel: 'Esports', sportEmoji: '🎮', leagueLabel: 'EA FC' },
 };
 
 // Map of sport keys to display labels
