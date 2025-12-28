@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.pk-update-profile]
 verify_jwt = false
+
+[functions.pk-image-upload]
+verify_jwt = false

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { X, Loader2, ImagePlus, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { Button } from '@/components/ui/button';
 
 interface ImageUploadProps {
@@ -15,11 +16,79 @@ interface ImageUploadProps {
 
 export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUploadProps) => {
   const { user } = useAuth();
+  const { privateKeyUser, storedPrivateKey } = usePrivateKeyAuth();
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [failedFiles, setFailedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isPkUser = !!privateKeyUser && !user;
+
+  // Upload for private key users via edge function
+  const uploadImagePk = async (file: File, retryCount = 0): Promise<string | null> => {
+    const MAX_RETRIES = 2;
+    
+    if (!storedPrivateKey) {
+      console.error('[ImageUpload] No private key available');
+      toast.error('Private key required for upload');
+      return null;
+    }
+
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    
+    if (!fileExt || !allowedExts.includes(fileExt)) {
+      toast.error('Invalid file type. Use JPG, PNG, WebP, or GIF');
+      return null;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File too large. Max 5MB');
+      return null;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('privateKey', storedPrivateKey);
+      formData.append('file', file);
+      formData.append('action', 'upload');
+
+      const { data, error } = await supabase.functions.invoke('pk-image-upload', {
+        body: formData,
+      });
+
+      if (error) {
+        console.error('[ImageUpload] PK upload error:', error);
+        if (retryCount < MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return uploadImagePk(file, retryCount + 1);
+        }
+        setUploadError(`Upload failed: ${error.message}`);
+        toast.error(`Failed to upload image: ${error.message}`);
+        return null;
+      }
+
+      if (data?.error) {
+        setUploadError(data.error);
+        toast.error(data.error);
+        return null;
+      }
+
+      console.log('[ImageUpload] PK upload successful:', data.url);
+      return data.url;
+    } catch (err: any) {
+      console.error('[ImageUpload] PK unexpected error:', err);
+      if (retryCount < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        return uploadImagePk(file, retryCount + 1);
+      }
+      setUploadError(`Unexpected error: ${err.message}`);
+      toast.error('An unexpected error occurred during upload');
+      return null;
+    }
+  };
+
+  // Upload for regular auth users
   const uploadImage = async (file: File, retryCount = 0): Promise<string | null> => {
     const MAX_RETRIES = 2;
     
@@ -58,7 +127,6 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
       if (error) {
         console.error('[ImageUpload] Storage upload error:', error);
         
-        // Retry on network errors
         if (retryCount < MAX_RETRIES && (error.message?.includes('network') || error.message?.includes('timeout'))) {
           console.log('[ImageUpload] Retrying upload, attempt:', retryCount + 1);
           await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
@@ -81,7 +149,6 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     } catch (err: any) {
       console.error('[ImageUpload] Unexpected error:', err);
       
-      // Retry on unexpected errors
       if (retryCount < MAX_RETRIES) {
         console.log('[ImageUpload] Retrying after error, attempt:', retryCount + 1);
         await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
@@ -93,6 +160,8 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
       return null;
     }
   };
+
+  const doUpload = isPkUser ? uploadImagePk : uploadImage;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -108,14 +177,14 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     }
 
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
-    console.log('[ImageUpload] Starting upload of', filesToUpload.length, 'files');
+    console.log('[ImageUpload] Starting upload of', filesToUpload.length, 'files, isPkUser:', isPkUser);
     setUploading(true);
 
     const uploadedUrls: string[] = [];
     const failed: File[] = [];
     
     for (const file of filesToUpload) {
-      const url = await uploadImage(file);
+      const url = await doUpload(file);
       if (url) {
         uploadedUrls.push(url);
       } else {
@@ -150,7 +219,7 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     const stillFailed: File[] = [];
     
     for (const file of failedFiles) {
-      const url = await uploadImage(file);
+      const url = await doUpload(file);
       if (url) {
         uploadedUrls.push(url);
       } else {
@@ -172,14 +241,30 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     const newImages = images.filter((_, i) => i !== index);
     onImagesChange(newImages);
 
-    // Try to delete from storage (optional - cleanup)
+    // Try to delete from storage
     try {
       const path = imageUrl.split('/listing-images/')[1];
       if (path) {
         console.log('[ImageUpload] Deleting image from storage:', path);
-        const { error } = await supabase.storage.from('listing-images').remove([path]);
-        if (error) {
-          console.error('[ImageUpload] Failed to delete from storage:', error);
+        
+        // PK users use edge function for delete
+        if (isPkUser && storedPrivateKey) {
+          const formData = new FormData();
+          formData.append('privateKey', storedPrivateKey);
+          formData.append('action', 'delete');
+          formData.append('filePath', path);
+          
+          const { error } = await supabase.functions.invoke('pk-image-upload', {
+            body: formData,
+          });
+          if (error) {
+            console.error('[ImageUpload] PK delete error:', error);
+          }
+        } else {
+          const { error } = await supabase.storage.from('listing-images').remove([path]);
+          if (error) {
+            console.error('[ImageUpload] Failed to delete from storage:', error);
+          }
         }
       }
     } catch (err) {
