@@ -515,131 +515,133 @@ export default function CombatSports() {
                       <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                       <p className="text-muted-foreground">Loading MMA fights...</p>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* UFC from Sports API */}
-                      {matches.filter(m => m.sport === 'ufc').length > 0 && (
-                        <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Badge className="bg-red-600">🇺🇸 UFC</Badge>
-                            <span className="text-sm text-muted-foreground">({matches.filter(m => m.sport === 'ufc').length} fights)</span>
-                          </div>
-                          <div className="grid gap-3">
-                            {matches.filter(m => m.sport === 'ufc').sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp)).map((match) => {
-                              const marketStatus = getMatchMarketStatus(match);
-                              return (
-                                <Card key={match.event_id} className="hover:border-red-500/50 transition-colors border-red-500/20">
-                                  <CardContent className="py-4">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <Badge className="bg-red-600 text-xs">🥋 UFC</Badge>
-                                          <span className="text-xs text-muted-foreground">
-                                            {formatMatchTime(match.commence_timestamp)}
-                                          </span>
-                                        </div>
-                                        <div className="text-lg font-semibold">
-                                          {match.home_team} vs {match.away_team}
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        {marketStatus === 'both' ? (
-                                          <Badge className="bg-green-600">Markets Open</Badge>
-                                        ) : marketStatus === 'partial' ? (
-                                          <Badge className="bg-amber-600">Partial</Badge>
-                                        ) : (
-                                          <Button 
-                                            size="sm" 
-                                            className="bg-red-600 hover:bg-red-700"
-                                            onClick={() => setTeamSelectDialog({ open: true, match })}
-                                            disabled={creating}
-                                          >
-                                            Create Market
-                                          </Button>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Tapology promotions */}
-                      {tapologyFights && tapologyFights.length > 0 && Object.entries(
-                        tapologyFights.reduce((acc, fight) => {
-                          const promo = fight.promotion.toLowerCase();
-                          if (!acc[promo]) acc[promo] = [];
-                          acc[promo].push(fight);
-                          return acc;
-                        }, {} as Record<string, TapologyFight[]>)
-                      ).map(([promo, fights]) => {
-                        const colors = PROMOTION_COLORS[promo] || { bg: 'bg-gray-600', text: 'text-gray-400', border: 'border-gray-500' };
-                        const label = PROMOTION_LABELS[promo] || promo.toUpperCase();
-                        
-                        return (
-                          <div key={promo}>
-                            <div className="flex items-center gap-2 mb-3">
-                              <Badge className={`${colors.bg}`}>{label}</Badge>
-                              <span className="text-sm text-muted-foreground">({fights.length} fights)</span>
-                            </div>
-                            <div className="grid gap-3">
-                              {fights.map((fight) => {
-                                const marketStatus = getTapologyMarketStatus(fight);
-                                return (
-                                  <Card key={fight.bout_id} className={`hover:${colors.border}/50 transition-colors ${colors.border}/20`}>
-                                    <CardContent className="py-4">
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-2 mb-2">
-                                            <Badge className={`${colors.bg} text-xs`}>{label}</Badge>
-                                            <span className="text-xs text-muted-foreground">
-                                              {fight.event_date}
-                                            </span>
-                                          </div>
-                                          <div className="text-lg font-semibold">
-                                            {fight.fighter_a} vs {fight.fighter_b}
-                                          </div>
-                                          <p className="text-sm text-muted-foreground mt-1">{fight.event_name}</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          {marketStatus === 'both' ? (
-                                            <Badge className="bg-green-600">Markets Open</Badge>
-                                          ) : marketStatus === 'partial' ? (
-                                            <Badge className="bg-amber-600">Partial</Badge>
-                                          ) : (
-                                            <Button 
-                                              size="sm" 
-                                              className={`${colors.bg} hover:opacity-90`}
-                                              onClick={() => setTapologySelectDialog({ open: true, fight })}
-                                              disabled={creating}
-                                            >
-                                              Create Market
-                                            </Button>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      
-                      {/* No MMA fights */}
-                      {matches.filter(m => m.sport === 'ufc').length === 0 && (!tapologyFights || tapologyFights.length === 0) && (
+                  ) : (() => {
+                    // Combine UFC and Tapology fights into a unified list sorted by date
+                    type UnifiedFight = {
+                      type: 'ufc';
+                      data: SportsMatch;
+                      timestamp: number;
+                    } | {
+                      type: 'tapology';
+                      data: TapologyFight;
+                      timestamp: number;
+                    };
+                    
+                    const ufcFights: UnifiedFight[] = matches
+                      .filter(m => m.sport === 'ufc')
+                      .map(m => ({
+                        type: 'ufc' as const,
+                        data: m,
+                        timestamp: Number(m.commence_timestamp) * 1000,
+                      }));
+                    
+                    const tapFights: UnifiedFight[] = (tapologyFights || []).map(f => ({
+                      type: 'tapology' as const,
+                      data: f,
+                      timestamp: new Date(f.event_date).getTime(),
+                    }));
+                    
+                    const allFights = [...ufcFights, ...tapFights].sort((a, b) => a.timestamp - b.timestamp);
+                    
+                    if (allFights.length === 0) {
+                      return (
                         <Card className="bg-secondary/30">
                           <CardContent className="py-8 text-center">
                             <p className="text-muted-foreground">No upcoming MMA fights found</p>
                           </CardContent>
                         </Card>
-                      )}
-                    </div>
-                  )}
+                      );
+                    }
+                    
+                    return (
+                      <div className="grid gap-3">
+                        {allFights.map((fight) => {
+                          if (fight.type === 'ufc') {
+                            const match = fight.data;
+                            const marketStatus = getMatchMarketStatus(match);
+                            return (
+                              <Card key={match.event_id} className="hover:border-red-500/50 transition-colors border-red-500/20">
+                                <CardContent className="py-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Badge className="bg-red-600 text-xs">🥋 UFC</Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          {formatMatchTime(match.commence_timestamp)}
+                                        </span>
+                                      </div>
+                                      <div className="text-lg font-semibold">
+                                        {match.home_team} vs {match.away_team}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      {marketStatus === 'both' ? (
+                                        <Badge className="bg-green-600">Markets Open</Badge>
+                                      ) : marketStatus === 'partial' ? (
+                                        <Badge className="bg-amber-600">Partial</Badge>
+                                      ) : (
+                                        <Button 
+                                          size="sm" 
+                                          className="bg-red-600 hover:bg-red-700"
+                                          onClick={() => setTeamSelectDialog({ open: true, match })}
+                                          disabled={creating}
+                                        >
+                                          Create Market
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          } else {
+                            const tapFight = fight.data;
+                            const promo = tapFight.promotion.toLowerCase();
+                            const colors = PROMOTION_COLORS[promo] || { bg: 'bg-gray-600', text: 'text-gray-400', border: 'border-gray-500' };
+                            const label = PROMOTION_LABELS[promo] || promo.toUpperCase();
+                            const marketStatus = getTapologyMarketStatus(tapFight);
+                            
+                            return (
+                              <Card key={tapFight.bout_id} className={`hover:${colors.border}/50 transition-colors ${colors.border}/20`}>
+                                <CardContent className="py-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Badge className={`${colors.bg} text-xs`}>{label}</Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          {tapFight.event_date}
+                                        </span>
+                                      </div>
+                                      <div className="text-lg font-semibold">
+                                        {tapFight.fighter_a} vs {tapFight.fighter_b}
+                                      </div>
+                                      <p className="text-sm text-muted-foreground mt-1">{tapFight.event_name}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      {marketStatus === 'both' ? (
+                                        <Badge className="bg-green-600">Markets Open</Badge>
+                                      ) : marketStatus === 'partial' ? (
+                                        <Badge className="bg-amber-600">Partial</Badge>
+                                      ) : (
+                                        <Button 
+                                          size="sm" 
+                                          className={`${colors.bg} hover:opacity-90`}
+                                          onClick={() => setTapologySelectDialog({ open: true, fight: tapFight })}
+                                          disabled={creating}
+                                        >
+                                          Create Market
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          }
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
