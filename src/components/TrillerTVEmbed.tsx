@@ -181,7 +181,7 @@ export function TrillerTVEmbed() {
   }
 
   return (
-    <Card className="overflow-hidden border-red-500/30 bg-gradient-to-br from-background to-red-950/10">
+    <Card className="overflow-hidden border-red-500/30 bg-black/80 backdrop-blur-sm">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg flex items-center gap-2">

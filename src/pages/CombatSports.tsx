@@ -412,15 +412,23 @@ export default function CombatSports() {
     <div className="min-h-screen flex flex-col bg-background relative">
       {/* Background Image */}
       <div 
-        className="fixed inset-0 z-0 opacity-20"
+        className="fixed inset-0 z-0"
         style={{
           backgroundImage: `url(${combatBackground})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',
+          opacity: 0.15,
+          filter: 'blur(2px)',
         }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+      {/* Dark gradient overlay with crimson tint */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(10, 0, 0, 0.9) 0%, rgba(20, 5, 5, 0.75) 50%, rgba(0, 0, 0, 0.95) 100%)',
+        }}
+      />
       <div className="relative z-10">
         <Navbar />
       </div>
