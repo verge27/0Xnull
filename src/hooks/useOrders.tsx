@@ -234,16 +234,8 @@ export async function createOrder(params: CreateOrderParams): Promise<string | n
 
     if (error) throw error;
     
-    // Record sale in analytics
-    try {
-      await supabase.rpc('record_listing_sale', {
-        p_listing_id: listingId,
-        p_quantity: quantity,
-        p_revenue: totalPrice
-      });
-    } catch (analyticsError) {
-      console.error('Failed to record sale analytics:', analyticsError);
-    }
+    // Note: Analytics are now recorded automatically via database trigger 
+    // when order status changes to 'paid' or later
     
     return data.id;
   } catch (e) {
