@@ -6,7 +6,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const DIFFICULTY = 4; // Must match client-side
+
 const isHex = (value: string, length: number) => new RegExp(`^[a-fA-F0-9]{${length}}$`).test(value);
+
+// Server-side PoW verification
+const verifyPoW = async (challenge: string, nonce: number): Promise<boolean> => {
+  const encoder = new TextEncoder();
+  const data = challenge + nonce.toString();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(data));
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  const target = "0".repeat(DIFFICULTY);
+  return hash.startsWith(target);
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,7 +35,9 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const publicKey = String(body?.publicKey ?? "");
     const displayName = String(body?.displayName ?? "");
+    const nonce = Number(body?.nonce);
 
+    // Validate inputs
     if (!isHex(publicKey, 64)) {
       return new Response(JSON.stringify({ error: "Invalid publicKey" }), {
         status: 400,
@@ -36,6 +51,25 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    if (isNaN(nonce) || nonce < 0) {
+      return new Response(JSON.stringify({ error: "Invalid or missing nonce" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Verify Proof of Work
+    const isValidPoW = await verifyPoW(publicKey, nonce);
+    if (!isValidPoW) {
+      console.log(`[pk-register] Invalid PoW for key ${publicKey.slice(0, 8)}... nonce=${nonce}`);
+      return new Response(JSON.stringify({ error: "Invalid proof of work" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`[pk-register] Valid PoW for key ${publicKey.slice(0, 8)}... nonce=${nonce}`);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -56,6 +90,7 @@ serve(async (req) => {
       });
     }
 
+    console.log(`[pk-register] User created: ${data.id}`);
     return new Response(JSON.stringify({ id: data.id }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
