@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { generatePrivateKey, derivePublicKey, getKeyId, isValidPrivateKey } from '@/lib/crypto';
+import { solvePoW } from '@/lib/pow';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -67,16 +68,24 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
     }
   };
 
-  const generateNewKeys = async () => {
+  const generateNewKeys = async (onProgress?: (message: string) => void) => {
     try {
       const privateKey = generatePrivateKey();
       const publicKey = await derivePublicKey(privateKey);
       const keyId = getKeyId(publicKey);
       const displayName = `Anon_${keyId}`;
 
-      // Register the public key in the backend (bypasses RLS)
+      // Solve Proof of Work (takes ~5-10 seconds)
+      onProgress?.('Solving proof of work...');
+      const { nonce } = await solvePoW(publicKey, (attempts) => {
+        onProgress?.(`Solving proof of work... (${Math.floor(attempts / 1000)}k attempts)`);
+      });
+
+      onProgress?.('Registering account...');
+
+      // Register the public key with PoW proof
       const { data, error } = await supabase.functions.invoke('pk-register', {
-        body: { publicKey, displayName },
+        body: { publicKey, displayName, nonce },
       });
 
       if (error) {
