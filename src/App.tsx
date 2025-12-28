@@ -47,7 +47,7 @@ import CricketPredictions from "./pages/CricketPredictions";
 import StarcraftPredictions from "./pages/StarcraftPredictions";
 import TorGuide from "./pages/TorGuide";
 import HowBettingWorks from "./pages/HowBettingWorks";
-import RussianMMA from "./pages/RussianMMA";
+
 import Slap from "./pages/Slap";
 import InfraHub from "./pages/InfraHub";
 import PredictionsHub from "./pages/PredictionsHub";
@@ -104,12 +104,7 @@ const App = () => (
                   <Route path="/predictions/sports/combat" element={<CombatSports />} />
                   <Route path="/predictions/sports/combat/mma" element={<CombatSports />} />
                   <Route path="/predictions/sports/combat/boxing" element={<CombatSports />} />
-                  <Route path="/predictions/sports/combat/eastern" element={<RussianMMA />} />
                   <Route path="/predictions/sports/combat/slap" element={<Slap />} />
-                  
-                  {/* Combat aliases */}
-                  <Route path="/russian-mma" element={<Navigate to="/predictions/sports/combat/eastern" replace />} />
-                  <Route path="/eastern" element={<Navigate to="/predictions/sports/combat/eastern" replace />} />
                   <Route path="/slap" element={<Navigate to="/predictions/sports/combat/slap" replace />} />
                   
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />
