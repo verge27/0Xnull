@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.cleanup-empty-markets]
 verify_jwt = false
+
+[functions.pk-conversations]
+verify_jwt = false
+
+[functions.pk-update-profile]
+verify_jwt = false

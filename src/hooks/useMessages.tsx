@@ -55,7 +55,31 @@ export function useMessages() {
     }
 
     try {
-      // First get conversation IDs where user is a participant
+      // For private key users, use the edge function
+      if (privateKeyUser) {
+        const storedKey = localStorage.getItem('pk_private_key');
+        if (!storedKey) {
+          console.error('No private key stored for PK user');
+          setConversations([]);
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('pk-conversations', {
+          body: { 
+            action: 'list',
+            privateKey: storedKey,
+            timestamp: Date.now()
+          },
+        });
+
+        if (error) throw error;
+        setConversations(data?.conversations || []);
+        setLoading(false);
+        return;
+      }
+
+      // For regular auth users, use direct database queries
       let participantQuery = supabase
         .from('conversation_participants')
         .select('conversation_id');
@@ -202,6 +226,51 @@ export function useConversation(conversationId: string | undefined) {
     }
 
     try {
+      // For private key users, use the edge function
+      if (privateKeyUser) {
+        const storedKey = localStorage.getItem('pk_private_key');
+        if (!storedKey) {
+          console.error('No private key stored for PK user');
+          setMessages([]);
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('pk-conversations', {
+          body: { 
+            action: 'getMessages',
+            privateKey: storedKey,
+            timestamp: Date.now(),
+            conversationId
+          },
+        });
+
+        if (error) throw error;
+        
+        // Set recipient info from participants
+        if (data?.participants) {
+          const recipient = data.participants.find((p: { user_id: string | null; private_key_user_id: string | null }) => 
+            (p.user_id && p.user_id !== user?.id) ||
+            (p.private_key_user_id && p.private_key_user_id !== privateKeyUser?.id)
+          );
+          if (recipient) {
+            const hasPGP = recipient.private_key_user_id 
+              ? !!localStorage.getItem(`pgp_keys_${recipient.private_key_user_id}`)
+              : false;
+            setRecipientInfo({
+              recipientUserId: recipient.user_id || undefined,
+              recipientPkUserId: recipient.private_key_user_id || undefined,
+              recipientHasPGP: hasPGP,
+            });
+          }
+        }
+        
+        setMessages(data?.messages || []);
+        setLoading(false);
+        return;
+      }
+
+      // For regular auth users, use direct database queries
       // First, get participants to find recipient
       const { data: participants } = await supabase
         .from('conversation_participants')
@@ -291,7 +360,7 @@ export function useConversation(conversationId: string | undefined) {
     } finally {
       setLoading(false);
     }
-  }, [conversationId, user]);
+  }, [conversationId, user, privateKeyUser]);
 
   useEffect(() => {
     fetchMessages();
@@ -324,12 +393,30 @@ export function useConversation(conversationId: string | undefined) {
   }, [conversationId]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !user || !content.trim()) return false;
+    if (!conversationId || (!user && !privateKeyUser) || !content.trim()) return false;
 
     try {
+      // For private key users, use edge function
+      if (privateKeyUser) {
+        const storedKey = localStorage.getItem('pk_private_key');
+        if (!storedKey) return false;
+
+        const { error } = await supabase.functions.invoke('pk-conversations', {
+          body: {
+            action: 'sendMessage',
+            privateKey: storedKey,
+            timestamp: Date.now(),
+            conversationId,
+            content: content.trim()
+          },
+        });
+        return !error;
+      }
+
+      // For regular auth users
       const { error } = await supabase.from('messages').insert({
         conversation_id: conversationId,
-        sender_user_id: user.id,
+        sender_user_id: user!.id,
         content: content.trim(),
       });
 
