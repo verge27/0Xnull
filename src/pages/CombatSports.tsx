@@ -502,94 +502,73 @@ export default function CombatSports() {
 
             {/* Upcoming Matches */}
             <TabsContent value="upcoming" className="space-y-6">
-              {/* UFC/Boxing from Sports API */}
-              <div>
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-                  <Calendar className="w-5 h-5" />
-                  UFC & Boxing
-                </h2>
-                
-                {matchesLoading ? (
-                  <div className="text-center py-8">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p className="text-muted-foreground">Loading fights...</p>
-                  </div>
-                ) : filteredMatches.length === 0 ? (
-                  <Card className="bg-secondary/30">
-                    <CardContent className="py-8 text-center">
-                      <p className="text-muted-foreground">No upcoming {activeFilter === 'all' ? 'combat' : activeFilter} fights found</p>
-                      <p className="text-sm text-muted-foreground mt-2">Check back later for new events</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4">
-                    {filteredMatches.map((match) => {
-                      const marketStatus = getMatchMarketStatus(match);
-                      return (
-                        <Card key={match.event_id} className="hover:border-red-500/50 transition-colors">
-                          <CardContent className="py-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {match.sport === 'ufc' ? '🥋 UFC' : '🥊 Boxing'}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatMatchTime(match.commence_timestamp)}
-                                  </span>
-                                </div>
-                                <div className="text-lg font-semibold">
-                                  {match.home_team} vs {match.away_team}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {marketStatus === 'both' ? (
-                                  <Badge className="bg-green-600">Markets Open</Badge>
-                                ) : marketStatus === 'partial' ? (
-                                  <Badge className="bg-amber-600">Partial</Badge>
-                                ) : (
-                                  <Button 
-                                    size="sm" 
-                                    className="bg-red-600 hover:bg-red-700"
-                                    onClick={() => setTeamSelectDialog({ open: true, match })}
-                                    disabled={creating}
-                                  >
-                                    Create Market
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Tapology Fights - Grouped by Promotion */}
+              {/* MMA Section - UFC + Tapology promotions */}
               {(activeFilter === 'all' || activeFilter === 'mma') && (
                 <div>
                   <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-                    <Swords className="w-5 h-5 text-orange-500" />
-                    International MMA Promotions
+                    <Swords className="w-5 h-5 text-red-500" />
+                    MMA
                   </h2>
                   
-                  {tapologyLoading ? (
+                  {(matchesLoading || tapologyLoading) ? (
                     <div className="text-center py-8">
                       <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                      <p className="text-muted-foreground">Loading fights...</p>
+                      <p className="text-muted-foreground">Loading MMA fights...</p>
                     </div>
-                  ) : !tapologyFights || tapologyFights.length === 0 ? (
-                    <Card className="bg-secondary/30">
-                      <CardContent className="py-8 text-center">
-                        <p className="text-muted-foreground">No upcoming international MMA fights found</p>
-                      </CardContent>
-                    </Card>
                   ) : (
-                    <div className="space-y-6">
-                      {/* Group fights by promotion */}
-                      {Object.entries(
+                    <div className="space-y-4">
+                      {/* UFC from Sports API */}
+                      {matches.filter(m => m.sport === 'ufc').length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge className="bg-red-600">🇺🇸 UFC</Badge>
+                            <span className="text-sm text-muted-foreground">({matches.filter(m => m.sport === 'ufc').length} fights)</span>
+                          </div>
+                          <div className="grid gap-3">
+                            {matches.filter(m => m.sport === 'ufc').sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp)).map((match) => {
+                              const marketStatus = getMatchMarketStatus(match);
+                              return (
+                                <Card key={match.event_id} className="hover:border-red-500/50 transition-colors border-red-500/20">
+                                  <CardContent className="py-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <Badge className="bg-red-600 text-xs">🥋 UFC</Badge>
+                                          <span className="text-xs text-muted-foreground">
+                                            {formatMatchTime(match.commence_timestamp)}
+                                          </span>
+                                        </div>
+                                        <div className="text-lg font-semibold">
+                                          {match.home_team} vs {match.away_team}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        {marketStatus === 'both' ? (
+                                          <Badge className="bg-green-600">Markets Open</Badge>
+                                        ) : marketStatus === 'partial' ? (
+                                          <Badge className="bg-amber-600">Partial</Badge>
+                                        ) : (
+                                          <Button 
+                                            size="sm" 
+                                            className="bg-red-600 hover:bg-red-700"
+                                            onClick={() => setTeamSelectDialog({ open: true, match })}
+                                            disabled={creating}
+                                          >
+                                            Create Market
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Tapology promotions */}
+                      {tapologyFights && tapologyFights.length > 0 && Object.entries(
                         tapologyFights.reduce((acc, fight) => {
                           const promo = fight.promotion.toLowerCase();
                           if (!acc[promo]) acc[promo] = [];
@@ -650,10 +629,85 @@ export default function CombatSports() {
                           </div>
                         );
                       })}
+                      
+                      {/* No MMA fights */}
+                      {matches.filter(m => m.sport === 'ufc').length === 0 && (!tapologyFights || tapologyFights.length === 0) && (
+                        <Card className="bg-secondary/30">
+                          <CardContent className="py-8 text-center">
+                            <p className="text-muted-foreground">No upcoming MMA fights found</p>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                   )}
                 </div>
               )}
+
+              {/* Boxing Section - Separate */}
+              {(activeFilter === 'all' || activeFilter === 'boxing') && (
+                <div>
+                  <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                    <span className="text-2xl">🥊</span>
+                    Boxing
+                  </h2>
+                  
+                  {matchesLoading ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      <p className="text-muted-foreground">Loading boxing fights...</p>
+                    </div>
+                  ) : matches.filter(m => m.sport === 'boxing').length === 0 ? (
+                    <Card className="bg-secondary/30">
+                      <CardContent className="py-8 text-center">
+                        <p className="text-muted-foreground">No upcoming boxing fights found</p>
+                        <p className="text-sm text-muted-foreground mt-2">Check back later for new events</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-3">
+                      {matches.filter(m => m.sport === 'boxing').sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp)).map((match) => {
+                        const marketStatus = getMatchMarketStatus(match);
+                        return (
+                          <Card key={match.event_id} className="hover:border-yellow-500/50 transition-colors border-yellow-500/20">
+                            <CardContent className="py-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge className="bg-yellow-600 text-xs">🥊 Boxing</Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatMatchTime(match.commence_timestamp)}
+                                    </span>
+                                  </div>
+                                  <div className="text-lg font-semibold">
+                                    {match.home_team} vs {match.away_team}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {marketStatus === 'both' ? (
+                                    <Badge className="bg-green-600">Markets Open</Badge>
+                                  ) : marketStatus === 'partial' ? (
+                                    <Badge className="bg-amber-600">Partial</Badge>
+                                  ) : (
+                                    <Button 
+                                      size="sm" 
+                                      className="bg-yellow-600 hover:bg-yellow-700"
+                                      onClick={() => setTeamSelectDialog({ open: true, match })}
+                                      disabled={creating}
+                                    >
+                                      Create Market
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
             </TabsContent>
 
             {/* Markets Tab */}
