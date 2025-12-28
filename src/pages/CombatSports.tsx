@@ -16,7 +16,7 @@ import { useSportsMatches, getSportLabel, type SportsMatch } from '@/hooks/useSp
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
-import { useRizinFights, type RizinFight } from '@/hooks/useRizinFights';
+import { useTapologyFights, PROMOTION_COLORS, PROMOTION_LABELS, type TapologyFight } from '@/hooks/useTapologyFights';
 import { api, type PredictionMarket } from '@/services/api';
 import { supabase } from '@/integrations/supabase/client';
 import { BetDepositModal } from '@/components/BetDepositModal';
@@ -50,7 +50,7 @@ export default function CombatSports() {
   const { createSportsMarket } = useSportsEvents();
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { xmrUsdRate } = useExchangeRate();
-  const { data: rizinFights, isLoading: rizinLoading } = useRizinFights();
+  const { data: tapologyFights, isLoading: tapologyLoading } = useTapologyFights();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,8 +79,8 @@ export default function CombatSports() {
     match: null,
   });
   
-  // Rizin selection dialog
-  const [rizinSelectDialog, setRizinSelectDialog] = useState<{ open: boolean; fight: RizinFight | null }>({
+  // Tapology fight selection dialog
+  const [tapologySelectDialog, setTapologySelectDialog] = useState<{ open: boolean; fight: TapologyFight | null }>({
     open: false,
     fight: null,
   });
@@ -116,14 +116,16 @@ export default function CombatSports() {
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      // Filter for sports/manual markets that are combat-related (ufc, boxing, mma, rizin)
+      // Filter for sports/manual markets that are combat-related
       const combatMarkets = apiMarkets.filter(m => {
         if (m.oracle_type !== 'sports' && m.oracle_type !== 'manual') return false;
         const desc = m.description?.toLowerCase() || '';
         const title = m.title?.toLowerCase() || '';
-        const text = `${desc} ${title}`;
+        const marketId = m.market_id?.toLowerCase() || '';
+        const text = `${desc} ${title} ${marketId}`;
         return text.includes('ufc') || text.includes('boxing') || text.includes('mma') || 
-               text.includes('bellator') || text.includes('pfl') || text.includes('rizin');
+               text.includes('bellator') || text.includes('pfl') || text.includes('rizin') ||
+               text.includes('aca') || text.includes('one_');
       });
 
       const unblockedMarkets = combatMarkets.filter(m => !blockedIds.has(m.market_id));
@@ -205,22 +207,25 @@ export default function CombatSports() {
     }
   };
 
-  // Create Rizin market (manual oracle)
-  const handleCreateRizinMarket = async (fight: RizinFight, fighter: string) => {
+  // Create Tapology market (manual oracle)
+  const handleCreateTapologyMarket = async (fight: TapologyFight, fighter: string) => {
     setCreating(true);
     try {
+      const promotion = fight.promotion.toLowerCase();
       const fighterSlug = fighter.toLowerCase().replace(/\s+/g, '_');
-      const marketId = `rizin_${fight.bout_id}_${fighterSlug}`;
+      const marketId = `${promotion}_${fight.bout_id}_${fighterSlug}`;
       
       // Parse the event date
       const eventDate = new Date(fight.event_date);
       const resolutionTimestamp = Math.floor(eventDate.getTime() / 1000) + (3 * 60 * 60); // 3 hours after event
       
+      const promotionLabel = PROMOTION_LABELS[promotion]?.split(' ')[1] || promotion.toUpperCase();
+      
       // Create market via API with manual oracle type
       await api.createMarket({
         market_id: marketId,
         title: `Will ${fighter} win?`,
-        description: `RIZIN: ${fight.fighter_a} @ ${fight.fighter_b} - ${fight.event_name}`,
+        description: `${promotionLabel}: ${fight.fighter_a} @ ${fight.fighter_b} - ${fight.event_name}`,
         oracle_type: 'manual',
         oracle_asset: '',
         oracle_condition: '',
@@ -237,20 +242,21 @@ export default function CombatSports() {
       }, 100);
       setTimeout(() => setNewlyCreatedMarketId(null), 5000);
     } catch (error) {
-      console.error('Error creating Rizin market:', error);
+      console.error('Error creating Tapology market:', error);
       toast.error('Failed to create market');
     } finally {
       setCreating(false);
-      setRizinSelectDialog({ open: false, fight: null });
+      setTapologySelectDialog({ open: false, fight: null });
     }
   };
 
-  // Check if Rizin fight already has markets
-  const getRizinMarketStatus = (fight: RizinFight) => {
+  // Check if Tapology fight already has markets
+  const getTapologyMarketStatus = (fight: TapologyFight) => {
+    const promotion = fight.promotion.toLowerCase();
     const fighterASlug = fight.fighter_a.toLowerCase().replace(/\s+/g, '_');
     const fighterBSlug = fight.fighter_b.toLowerCase().replace(/\s+/g, '_');
-    const aExists = markets.some(m => m.market_id === `rizin_${fight.bout_id}_${fighterASlug}`);
-    const bExists = markets.some(m => m.market_id === `rizin_${fight.bout_id}_${fighterBSlug}`);
+    const aExists = markets.some(m => m.market_id === `${promotion}_${fight.bout_id}_${fighterASlug}`);
+    const bExists = markets.some(m => m.market_id === `${promotion}_${fight.bout_id}_${fighterBSlug}`);
     
     if (aExists && bExists) return 'both';
     if (aExists || bExists) return 'partial';
@@ -423,7 +429,7 @@ export default function CombatSports() {
                 <Swords className="w-8 h-8 text-red-500" />
                 Combat Sports
               </h1>
-              <p className="text-muted-foreground mt-1">UFC • Boxing • MMA</p>
+              <p className="text-muted-foreground mt-1">UFC • Boxing • RIZIN • ONE • PFL • ACA • Bellator</p>
             </div>
             <Button variant="outline" size="sm" onClick={() => { fetchMarkets(); }} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -561,65 +567,87 @@ export default function CombatSports() {
                 )}
               </div>
 
-              {/* Rizin Fights */}
+              {/* Tapology Fights - Grouped by Promotion */}
               {(activeFilter === 'all' || activeFilter === 'mma') && (
                 <div>
                   <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
                     <Swords className="w-5 h-5 text-orange-500" />
-                    RIZIN Fighting Federation
-                    <Badge className="bg-orange-600">Japan</Badge>
+                    International MMA Promotions
                   </h2>
                   
-                  {rizinLoading ? (
+                  {tapologyLoading ? (
                     <div className="text-center py-8">
                       <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                      <p className="text-muted-foreground">Loading RIZIN fights...</p>
+                      <p className="text-muted-foreground">Loading fights...</p>
                     </div>
-                  ) : !rizinFights || rizinFights.length === 0 ? (
+                  ) : !tapologyFights || tapologyFights.length === 0 ? (
                     <Card className="bg-secondary/30">
                       <CardContent className="py-8 text-center">
-                        <p className="text-muted-foreground">No upcoming RIZIN fights found</p>
+                        <p className="text-muted-foreground">No upcoming international MMA fights found</p>
                       </CardContent>
                     </Card>
                   ) : (
-                    <div className="grid gap-4">
-                      {rizinFights.map((fight) => {
-                        const marketStatus = getRizinMarketStatus(fight);
+                    <div className="space-y-6">
+                      {/* Group fights by promotion */}
+                      {Object.entries(
+                        tapologyFights.reduce((acc, fight) => {
+                          const promo = fight.promotion.toLowerCase();
+                          if (!acc[promo]) acc[promo] = [];
+                          acc[promo].push(fight);
+                          return acc;
+                        }, {} as Record<string, TapologyFight[]>)
+                      ).map(([promo, fights]) => {
+                        const colors = PROMOTION_COLORS[promo] || { bg: 'bg-gray-600', text: 'text-gray-400', border: 'border-gray-500' };
+                        const label = PROMOTION_LABELS[promo] || promo.toUpperCase();
+                        
                         return (
-                          <Card key={fight.bout_id} className="hover:border-orange-500/50 transition-colors border-orange-500/20">
-                            <CardContent className="py-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Badge className="bg-orange-600 text-xs">🇯🇵 RIZIN</Badge>
-                                    <span className="text-xs text-muted-foreground">
-                                      {fight.event_date}
-                                    </span>
-                                  </div>
-                                  <div className="text-lg font-semibold">
-                                    {fight.fighter_a} vs {fight.fighter_b}
-                                  </div>
-                                  <p className="text-sm text-muted-foreground mt-1">{fight.event_name}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {marketStatus === 'both' ? (
-                                    <Badge className="bg-green-600">Markets Open</Badge>
-                                  ) : marketStatus === 'partial' ? (
-                                    <Badge className="bg-amber-600">Partial</Badge>
-                                  ) : (
-                                    <Button 
-                                      size="sm" 
-                                      className="bg-orange-600 hover:bg-orange-700"
-                                      onClick={() => setRizinSelectDialog({ open: true, fight })}
-                                      disabled={creating}
-                                    >
-                                      Create Market
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
+                          <div key={promo}>
+                            <div className="flex items-center gap-2 mb-3">
+                              <Badge className={`${colors.bg}`}>{label}</Badge>
+                              <span className="text-sm text-muted-foreground">({fights.length} fights)</span>
+                            </div>
+                            <div className="grid gap-3">
+                              {fights.map((fight) => {
+                                const marketStatus = getTapologyMarketStatus(fight);
+                                return (
+                                  <Card key={fight.bout_id} className={`hover:${colors.border}/50 transition-colors ${colors.border}/20`}>
+                                    <CardContent className="py-4">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <Badge className={`${colors.bg} text-xs`}>{label}</Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                              {fight.event_date}
+                                            </span>
+                                          </div>
+                                          <div className="text-lg font-semibold">
+                                            {fight.fighter_a} vs {fight.fighter_b}
+                                          </div>
+                                          <p className="text-sm text-muted-foreground mt-1">{fight.event_name}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          {marketStatus === 'both' ? (
+                                            <Badge className="bg-green-600">Markets Open</Badge>
+                                          ) : marketStatus === 'partial' ? (
+                                            <Badge className="bg-amber-600">Partial</Badge>
+                                          ) : (
+                                            <Button 
+                                              size="sm" 
+                                              className={`${colors.bg} hover:opacity-90`}
+                                              onClick={() => setTapologySelectDialog({ open: true, fight })}
+                                              disabled={creating}
+                                            >
+                                              Create Market
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                );
+                              })}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
@@ -883,32 +911,34 @@ export default function CombatSports() {
         </DialogContent>
       </Dialog>
 
-      {/* Rizin Select Dialog */}
-      <Dialog open={rizinSelectDialog.open} onOpenChange={(open) => setRizinSelectDialog({ open, fight: rizinSelectDialog.fight })}>
+      {/* Tapology Select Dialog */}
+      <Dialog open={tapologySelectDialog.open} onOpenChange={(open) => setTapologySelectDialog({ open, fight: tapologySelectDialog.fight })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create RIZIN Market</DialogTitle>
+            <DialogTitle>
+              Create {tapologySelectDialog.fight ? (PROMOTION_LABELS[tapologySelectDialog.fight.promotion.toLowerCase()]?.split(' ')[1] || tapologySelectDialog.fight.promotion.toUpperCase()) : ''} Market
+            </DialogTitle>
             <DialogDescription>
               Select which fighter to create a market for (manual resolution)
             </DialogDescription>
           </DialogHeader>
-          {rizinSelectDialog.fight && (
+          {tapologySelectDialog.fight && (
             <div className="grid gap-3">
               <Button 
-                onClick={() => handleCreateRizinMarket(rizinSelectDialog.fight!, rizinSelectDialog.fight!.fighter_a)}
+                onClick={() => handleCreateTapologyMarket(tapologySelectDialog.fight!, tapologySelectDialog.fight!.fighter_a)}
                 disabled={creating}
-                className="bg-orange-600 hover:bg-orange-700"
+                className={`${PROMOTION_COLORS[tapologySelectDialog.fight.promotion.toLowerCase()]?.bg || 'bg-gray-600'} hover:opacity-90`}
               >
                 {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                {rizinSelectDialog.fight.fighter_a} wins?
+                {tapologySelectDialog.fight.fighter_a} wins?
               </Button>
               <Button 
-                onClick={() => handleCreateRizinMarket(rizinSelectDialog.fight!, rizinSelectDialog.fight!.fighter_b)}
+                onClick={() => handleCreateTapologyMarket(tapologySelectDialog.fight!, tapologySelectDialog.fight!.fighter_b)}
                 disabled={creating}
                 variant="outline"
               >
                 {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                {rizinSelectDialog.fight.fighter_b} wins?
+                {tapologySelectDialog.fight.fighter_b} wins?
               </Button>
             </div>
           )}
