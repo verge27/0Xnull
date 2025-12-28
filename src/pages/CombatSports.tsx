@@ -16,6 +16,7 @@ import { useSportsMatches, getSportLabel, type SportsMatch } from '@/hooks/useSp
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { useRizinFights, type RizinFight } from '@/hooks/useRizinFights';
 import { api, type PredictionMarket } from '@/services/api';
 import { supabase } from '@/integrations/supabase/client';
 import { BetDepositModal } from '@/components/BetDepositModal';
@@ -49,6 +50,7 @@ export default function CombatSports() {
   const { createSportsMarket } = useSportsEvents();
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { xmrUsdRate } = useExchangeRate();
+  const { data: rizinFights, isLoading: rizinLoading } = useRizinFights();
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +77,12 @@ export default function CombatSports() {
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: SportsMatch | null }>({
     open: false,
     match: null,
+  });
+  
+  // Rizin selection dialog
+  const [rizinSelectDialog, setRizinSelectDialog] = useState<{ open: boolean; fight: RizinFight | null }>({
+    open: false,
+    fight: null,
   });
 
   // Fetch combat sports matches
@@ -108,11 +116,14 @@ export default function CombatSports() {
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
       const { markets: apiMarkets } = await api.getPredictionMarkets();
-      // Filter for sports markets that are combat-related (ufc, boxing, mma)
+      // Filter for sports/manual markets that are combat-related (ufc, boxing, mma, rizin)
       const combatMarkets = apiMarkets.filter(m => {
-        if (m.oracle_type !== 'sports') return false;
+        if (m.oracle_type !== 'sports' && m.oracle_type !== 'manual') return false;
         const desc = m.description?.toLowerCase() || '';
-        return desc.includes('ufc') || desc.includes('boxing') || desc.includes('mma') || desc.includes('bellator') || desc.includes('pfl');
+        const title = m.title?.toLowerCase() || '';
+        const text = `${desc} ${title}`;
+        return text.includes('ufc') || text.includes('boxing') || text.includes('mma') || 
+               text.includes('bellator') || text.includes('pfl') || text.includes('rizin');
       });
 
       const unblockedMarkets = combatMarkets.filter(m => !blockedIds.has(m.market_id));
@@ -192,6 +203,58 @@ export default function CombatSports() {
       setCreating(false);
       setTeamSelectDialog({ open: false, match: null });
     }
+  };
+
+  // Create Rizin market (manual oracle)
+  const handleCreateRizinMarket = async (fight: RizinFight, fighter: string) => {
+    setCreating(true);
+    try {
+      const fighterSlug = fighter.toLowerCase().replace(/\s+/g, '_');
+      const marketId = `rizin_${fight.bout_id}_${fighterSlug}`;
+      
+      // Parse the event date
+      const eventDate = new Date(fight.event_date);
+      const resolutionTimestamp = Math.floor(eventDate.getTime() / 1000) + (3 * 60 * 60); // 3 hours after event
+      
+      // Create market via API with manual oracle type
+      await api.createMarket({
+        market_id: marketId,
+        title: `Will ${fighter} win?`,
+        description: `RIZIN: ${fight.fighter_a} @ ${fight.fighter_b} - ${fight.event_name}`,
+        oracle_type: 'manual',
+        oracle_asset: '',
+        oracle_condition: '',
+        oracle_value: 0,
+        resolution_time: resolutionTimestamp,
+      });
+      
+      setNewlyCreatedMarketId(marketId);
+      await fetchMarkets();
+      setActiveTab('markets');
+      toast.success(`Market created for ${fighter}`);
+      setTimeout(() => {
+        marketsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      setTimeout(() => setNewlyCreatedMarketId(null), 5000);
+    } catch (error) {
+      console.error('Error creating Rizin market:', error);
+      toast.error('Failed to create market');
+    } finally {
+      setCreating(false);
+      setRizinSelectDialog({ open: false, fight: null });
+    }
+  };
+
+  // Check if Rizin fight already has markets
+  const getRizinMarketStatus = (fight: RizinFight) => {
+    const fighterASlug = fight.fighter_a.toLowerCase().replace(/\s+/g, '_');
+    const fighterBSlug = fight.fighter_b.toLowerCase().replace(/\s+/g, '_');
+    const aExists = markets.some(m => m.market_id === `rizin_${fight.bout_id}_${fighterASlug}`);
+    const bExists = markets.some(m => m.market_id === `rizin_${fight.bout_id}_${fighterBSlug}`);
+    
+    if (aExists && bExists) return 'both';
+    if (aExists || bExists) return 'partial';
+    return 'none';
   };
 
   const getMatchMarketStatus = (match: SportsMatch) => {
@@ -417,12 +480,6 @@ export default function CombatSports() {
             >
               <Link to="/slap">👋 Slap Fighting</Link>
             </Button>
-            <Button 
-              variant="outline" 
-              asChild
-            >
-              <Link to="/russian-mma">🐻 Eastern MMA</Link>
-            </Button>
           </div>
 
           {/* Main Tabs */}
@@ -438,66 +495,135 @@ export default function CombatSports() {
             </TabsList>
 
             {/* Upcoming Matches */}
-            <TabsContent value="upcoming" className="space-y-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Upcoming Fights
-              </h2>
-              
-              {matchesLoading ? (
-                <div className="text-center py-8">
-                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                  <p className="text-muted-foreground">Loading fights...</p>
-                </div>
-              ) : filteredMatches.length === 0 ? (
-                <Card className="bg-secondary/30">
-                  <CardContent className="py-8 text-center">
-                    <p className="text-muted-foreground">No upcoming {activeFilter === 'all' ? 'combat' : activeFilter} fights found</p>
-                    <p className="text-sm text-muted-foreground mt-2">Check back later for new events</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4">
-                  {filteredMatches.map((match) => {
-                    const marketStatus = getMatchMarketStatus(match);
-                    return (
-                      <Card key={match.event_id} className="hover:border-red-500/50 transition-colors">
-                        <CardContent className="py-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {match.sport === 'ufc' ? '🥋 UFC' : '🥊 Boxing'}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatMatchTime(match.commence_timestamp)}
-                                </span>
+            <TabsContent value="upcoming" className="space-y-6">
+              {/* UFC/Boxing from Sports API */}
+              <div>
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                  <Calendar className="w-5 h-5" />
+                  UFC & Boxing
+                </h2>
+                
+                {matchesLoading ? (
+                  <div className="text-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    <p className="text-muted-foreground">Loading fights...</p>
+                  </div>
+                ) : filteredMatches.length === 0 ? (
+                  <Card className="bg-secondary/30">
+                    <CardContent className="py-8 text-center">
+                      <p className="text-muted-foreground">No upcoming {activeFilter === 'all' ? 'combat' : activeFilter} fights found</p>
+                      <p className="text-sm text-muted-foreground mt-2">Check back later for new events</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredMatches.map((match) => {
+                      const marketStatus = getMatchMarketStatus(match);
+                      return (
+                        <Card key={match.event_id} className="hover:border-red-500/50 transition-colors">
+                          <CardContent className="py-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {match.sport === 'ufc' ? '🥋 UFC' : '🥊 Boxing'}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatMatchTime(match.commence_timestamp)}
+                                  </span>
+                                </div>
+                                <div className="text-lg font-semibold">
+                                  {match.home_team} vs {match.away_team}
+                                </div>
                               </div>
-                              <div className="text-lg font-semibold">
-                                {match.home_team} vs {match.away_team}
+                              <div className="flex items-center gap-2">
+                                {marketStatus === 'both' ? (
+                                  <Badge className="bg-green-600">Markets Open</Badge>
+                                ) : marketStatus === 'partial' ? (
+                                  <Badge className="bg-amber-600">Partial</Badge>
+                                ) : (
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-red-600 hover:bg-red-700"
+                                    onClick={() => setTeamSelectDialog({ open: true, match })}
+                                    disabled={creating}
+                                  >
+                                    Create Market
+                                  </Button>
+                                )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {marketStatus === 'both' ? (
-                                <Badge className="bg-green-600">Markets Open</Badge>
-                              ) : marketStatus === 'partial' ? (
-                                <Badge className="bg-amber-600">Partial</Badge>
-                              ) : (
-                                <Button 
-                                  size="sm" 
-                                  className="bg-red-600 hover:bg-red-700"
-                                  onClick={() => setTeamSelectDialog({ open: true, match })}
-                                  disabled={creating}
-                                >
-                                  Create Market
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Rizin Fights */}
+              {(activeFilter === 'all' || activeFilter === 'mma') && (
+                <div>
+                  <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                    <Swords className="w-5 h-5 text-orange-500" />
+                    RIZIN Fighting Federation
+                    <Badge className="bg-orange-600">Japan</Badge>
+                  </h2>
+                  
+                  {rizinLoading ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      <p className="text-muted-foreground">Loading RIZIN fights...</p>
+                    </div>
+                  ) : !rizinFights || rizinFights.length === 0 ? (
+                    <Card className="bg-secondary/30">
+                      <CardContent className="py-8 text-center">
+                        <p className="text-muted-foreground">No upcoming RIZIN fights found</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-4">
+                      {rizinFights.map((fight) => {
+                        const marketStatus = getRizinMarketStatus(fight);
+                        return (
+                          <Card key={fight.bout_id} className="hover:border-orange-500/50 transition-colors border-orange-500/20">
+                            <CardContent className="py-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge className="bg-orange-600 text-xs">🇯🇵 RIZIN</Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {fight.event_date}
+                                    </span>
+                                  </div>
+                                  <div className="text-lg font-semibold">
+                                    {fight.fighter_a} vs {fight.fighter_b}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mt-1">{fight.event_name}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {marketStatus === 'both' ? (
+                                    <Badge className="bg-green-600">Markets Open</Badge>
+                                  ) : marketStatus === 'partial' ? (
+                                    <Badge className="bg-amber-600">Partial</Badge>
+                                  ) : (
+                                    <Button 
+                                      size="sm" 
+                                      className="bg-orange-600 hover:bg-orange-700"
+                                      onClick={() => setRizinSelectDialog({ open: true, fight })}
+                                      disabled={creating}
+                                    >
+                                      Create Market
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
@@ -705,20 +831,7 @@ export default function CombatSports() {
           </Tabs>
 
           {/* Quick Links */}
-          <div className="mt-12 grid sm:grid-cols-2 gap-4">
-            <Card className="bg-secondary/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">🥋 Eastern Combat</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-3">
-                  ONE Championship, Top Dog FC, Road FC
-                </p>
-                <Link to="/predictions/sports/combat/eastern">
-                  <Button variant="outline" size="sm">View Markets →</Button>
-                </Link>
-              </CardContent>
-            </Card>
+          <div className="mt-12">
             <Card className="bg-secondary/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">👋 Slap Fighting</CardTitle>
@@ -764,6 +877,38 @@ export default function CombatSports() {
               >
                 {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
                 {teamSelectDialog.match.away_team} wins?
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Rizin Select Dialog */}
+      <Dialog open={rizinSelectDialog.open} onOpenChange={(open) => setRizinSelectDialog({ open, fight: rizinSelectDialog.fight })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create RIZIN Market</DialogTitle>
+            <DialogDescription>
+              Select which fighter to create a market for (manual resolution)
+            </DialogDescription>
+          </DialogHeader>
+          {rizinSelectDialog.fight && (
+            <div className="grid gap-3">
+              <Button 
+                onClick={() => handleCreateRizinMarket(rizinSelectDialog.fight!, rizinSelectDialog.fight!.fighter_a)}
+                disabled={creating}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
+                {rizinSelectDialog.fight.fighter_a} wins?
+              </Button>
+              <Button 
+                onClick={() => handleCreateRizinMarket(rizinSelectDialog.fight!, rizinSelectDialog.fight!.fighter_b)}
+                disabled={creating}
+                variant="outline"
+              >
+                {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
+                {rizinSelectDialog.fight.fighter_b} wins?
               </Button>
             </div>
           )}
