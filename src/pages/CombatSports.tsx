@@ -29,6 +29,7 @@ import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { extractSportInfo } from '@/lib/sportLabels';
 import { toast } from 'sonner';
+import combatBackground from '@/assets/combat-background.jpg';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
 
@@ -408,10 +409,23 @@ export default function CombatSports() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-background relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 opacity-20"
+        style={{
+          backgroundImage: `url(${combatBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+      <div className="relative z-10">
+        <Navbar />
+      </div>
       
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-5xl mx-auto">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
