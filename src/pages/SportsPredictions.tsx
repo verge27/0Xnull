@@ -905,10 +905,10 @@ export default function SportsPredictions() {
                 </h2>
               </div>
 
-              {/* Category Pills */}
+              {/* Category Pills - exclude combat since it has its own page */}
               {!categoriesLoading && (
                 <SportsCategoryPills
-                  categories={Object.keys(categories)}
+                  categories={Object.keys(categories).filter(c => c !== 'combat')}
                   selectedCategory={selectedCategory}
                   onSelect={handleCategoryChange}
                 />
