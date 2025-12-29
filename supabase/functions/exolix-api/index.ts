@@ -23,9 +23,49 @@ serve(async (req) => {
     let body = null;
 
     switch (action) {
-      case 'currencies':
-        endpoint = `/currencies?withNetworks=true&size=1000`;
-        break;
+      case 'currencies': {
+        // Fetch all currencies with pagination (max 100 per page)
+        const allCurrencies: unknown[] = [];
+        let page = 1;
+        let hasMore = true;
+        
+        while (hasMore) {
+          const currencyHeaders: HeadersInit = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          };
+          if (EXOLIX_API_KEY) {
+            currencyHeaders['Authorization'] = EXOLIX_API_KEY;
+          }
+          
+          const pageResponse = await fetch(
+            `${EXOLIX_API_URL}/currencies?withNetworks=true&size=100&page=${page}`,
+            { headers: currencyHeaders }
+          );
+          
+          if (!pageResponse.ok) {
+            console.error(`Failed to fetch currencies page ${page}`);
+            break;
+          }
+          
+          const pageData = await pageResponse.json();
+          const items = pageData.data || [];
+          allCurrencies.push(...items);
+          
+          // Check if we've fetched all items
+          if (items.length < 100 || allCurrencies.length >= pageData.count) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        }
+        
+        console.log(`Fetched ${allCurrencies.length} currencies from Exolix`);
+        return new Response(
+          JSON.stringify({ data: allCurrencies, count: allCurrencies.length }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
       case 'networks':
         endpoint = `/currencies/${params.code}/networks`;
