@@ -19,8 +19,8 @@ const ExolixWidget = ({
   const src = `https://exolix.com/widget/${fromCoin}:${fromNetwork}-${toCoin}:${toNetwork}?a=${amount}&locale=en&t=${widgetToken}`;
 
   return (
-    <div className={`flex justify-center ${className}`}>
-      <div className="rounded-lg overflow-hidden border border-border bg-card max-w-[560px] w-full">
+    <div className={`w-full flex items-center justify-center ${className}`}>
+      <div className="rounded-lg overflow-hidden border border-border bg-card" style={{ width: '560px', maxWidth: '100%' }}>
         <iframe
           title="Exolix Swap Widget"
           src={src}
@@ -28,8 +28,7 @@ const ExolixWidget = ({
           height="376"
           frameBorder="0"
           scrolling="yes"
-          className="w-full max-w-full"
-          style={{ display: 'block' }}
+          style={{ display: 'block', width: '100%', maxWidth: '560px' }}
         />
       </div>
     </div>
