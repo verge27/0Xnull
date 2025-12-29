@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CoinSelector } from '@/components/CoinSelector';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +27,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
+type Aggregator = 'trocador' | 'exolix';
 
 // Popular coins with preferred networks - XMR FIRST
 // Using exact ticker/network values from Trocador API
@@ -68,6 +71,15 @@ interface RateProvider {
   USD_total_cost_percentage?: string;
 }
 
+interface ExolixRate {
+  fromAmount: number;
+  toAmount: number;
+  rate: number;
+  minAmount: number;
+  maxAmount: number;
+  message?: string;
+}
+
 interface TradeResponse {
   trade_id: string;
   address: string;
@@ -95,7 +107,9 @@ interface SwapHistoryItem {
 const Swaps = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [aggregator, setAggregator] = useState<Aggregator>('trocador');
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [exolixCoins, setExolixCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [fromCoin, setFromCoin] = useState('');
   const [fromNetwork, setFromNetwork] = useState('');
@@ -107,6 +121,7 @@ const Swaps = () => {
   const [refundAddress, setRefundAddress] = useState('');
   
   const [rates, setRates] = useState<RateProvider[]>([]);
+  const [exolixRate, setExolixRate] = useState<ExolixRate | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<RateProvider | null>(null);
   const [loadingRates, setLoadingRates] = useState(false);
   const [trade, setTrade] = useState<TradeResponse | null>(null);
@@ -272,6 +287,48 @@ const Swaps = () => {
     setLoading(false);
   };
 
+  // Fetch Exolix coins
+  const fetchExolixCoins = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('exolix-api', {
+        body: { action: 'currencies' },
+      });
+      
+      if (error) throw error;
+      
+      const currencies = data?.data || [];
+      const mapped: Coin[] = [];
+      
+      currencies.forEach((c: { code: string; name: string; icon: string; networks?: Array<{ network: string; memoNeeded: boolean }> }) => {
+        // Each currency can have multiple networks
+        const networks = c.networks || [{ network: c.code, memoNeeded: false }];
+        networks.forEach((n: { network: string; memoNeeded: boolean }) => {
+          mapped.push({
+            id: `${c.code}-${n.network}`,
+            ticker: c.code.toLowerCase(),
+            name: c.name,
+            network: n.network,
+            memo: n.memoNeeded,
+            image: c.icon,
+            minimum: 0,
+            maximum: 999999,
+          });
+        });
+      });
+      
+      setExolixCoins(mapped);
+    } catch (error) {
+      console.error('Error fetching Exolix coins:', error);
+    }
+  };
+
+  // Fetch Exolix coins when switching to Exolix
+  useEffect(() => {
+    if (aggregator === 'exolix' && exolixCoins.length === 0) {
+      fetchExolixCoins();
+    }
+  }, [aggregator]);
+
   const syncCoins = async () => {
     setLoading(true);
     try {
@@ -323,9 +380,13 @@ const Swaps = () => {
     }
   };
 
+  // Get active coins based on aggregator
+  const getActiveCoins = () => aggregator === 'exolix' ? exolixCoins : coins;
+
   const getUniqueCoins = () => {
+    const activeCoins = getActiveCoins();
     const unique = new Map<string, Coin>();
-    coins.forEach(coin => {
+    activeCoins.forEach(coin => {
       if (!unique.has(coin.ticker)) {
         unique.set(coin.ticker, coin);
       }
@@ -335,11 +396,12 @@ const Swaps = () => {
 
   // Get popular coins with their preferred networks
   const getPriorityCoins = () => {
+    const activeCoins = getActiveCoins();
     const results: (Coin & { preferredLabel: string })[] = [];
     
     for (const pc of POPULAR_COINS) {
       // Find exact ticker+network match (case-insensitive)
-      const coin = coins.find(c => 
+      const coin = activeCoins.find(c => 
         c.ticker.toLowerCase() === pc.ticker.toLowerCase() && 
         c.network.toLowerCase() === pc.network.toLowerCase()
       );
@@ -359,15 +421,18 @@ const Swaps = () => {
   };
 
   const getNetworksForCoin = (ticker: string) => {
-    return coins.filter(c => c.ticker === ticker);
+    const activeCoins = getActiveCoins();
+    return activeCoins.filter(c => c.ticker === ticker);
   };
 
   const requiresMemo = (ticker: string, network: string) => {
-    return coins.find(c => c.ticker === ticker && c.network === network)?.memo || false;
+    const activeCoins = getActiveCoins();
+    return activeCoins.find(c => c.ticker === ticker && c.network === network)?.memo || false;
   };
 
   const getSelectedFromCoin = () => {
-    return coins.find(c => c.ticker === fromCoin && c.network === fromNetwork);
+    const activeCoins = getActiveCoins();
+    return activeCoins.find(c => c.ticker === fromCoin && c.network === fromNetwork);
   };
 
   const handleFromCoinChange = (ticker: string) => {
@@ -385,6 +450,7 @@ const Swaps = () => {
       setFromNetwork('');
     }
     setRates([]);
+    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
   };
@@ -404,8 +470,25 @@ const Swaps = () => {
       setToNetwork('');
     }
     setRates([]);
+    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
+  };
+
+  // Handle aggregator change
+  const handleAggregatorChange = (newAggregator: string) => {
+    setAggregator(newAggregator as Aggregator);
+    // Reset selections when switching aggregators
+    setFromCoin('');
+    setFromNetwork('');
+    setToCoin('');
+    setToNetwork('');
+    setAmount('');
+    setRates([]);
+    setExolixRate(null);
+    setSelectedProvider(null);
+    setHasFetchedRates(false);
+    setTrade(null);
   };
 
 
@@ -417,31 +500,53 @@ const Swaps = () => {
 
     setLoadingRates(true);
     setRates([]);
+    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
 
     try {
-      const { data, error } = await supabase.functions.invoke('trocador-new-rate', {
-        body: {
-          ticker_from: fromCoin,
-          network_from: fromNetwork,
-          ticker_to: toCoin,
-          network_to: toNetwork,
-          amount_from: amount,
-          min_kycrating: 'C',
-        },
-      });
+      if (aggregator === 'exolix') {
+        // Exolix API
+        const { data, error } = await supabase.functions.invoke('exolix-api', {
+          body: {
+            action: 'rate',
+            coinFrom: fromCoin.toUpperCase(),
+            networkFrom: fromNetwork,
+            coinTo: toCoin.toUpperCase(),
+            networkTo: toNetwork,
+            amount: amount,
+            rateType: 'float',
+          },
+        });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
 
-      // Trocador returns quotes in data.quotes.quotes array
-      const quotes = data?.quotes?.quotes || [];
-      if (Array.isArray(quotes) && quotes.length > 0) {
-        setRates(quotes);
-        setSelectedProvider(quotes[0]);
+        setExolixRate(data);
       } else {
-        setRates([]);
+        // Trocador API
+        const { data, error } = await supabase.functions.invoke('trocador-new-rate', {
+          body: {
+            ticker_from: fromCoin,
+            network_from: fromNetwork,
+            ticker_to: toCoin,
+            network_to: toNetwork,
+            amount_from: amount,
+            min_kycrating: 'C',
+          },
+        });
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        // Trocador returns quotes in data.quotes.quotes array
+        const quotes = data?.quotes?.quotes || [];
+        if (Array.isArray(quotes) && quotes.length > 0) {
+          setRates(quotes);
+          setSelectedProvider(quotes[0]);
+        } else {
+          setRates([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching rates:', error);
@@ -452,8 +557,18 @@ const Swaps = () => {
   };
 
   const executeTrade = async () => {
-    if (!selectedProvider || !receiveAddress) {
-      toast({ title: 'Missing fields', description: 'Please select a provider and enter receive address', variant: 'destructive' });
+    if (aggregator === 'trocador' && !selectedProvider) {
+      toast({ title: 'Missing fields', description: 'Please select a provider', variant: 'destructive' });
+      return;
+    }
+    
+    if (aggregator === 'exolix' && !exolixRate) {
+      toast({ title: 'Missing rate', description: 'Please get a rate first', variant: 'destructive' });
+      return;
+    }
+
+    if (!receiveAddress) {
+      toast({ title: 'Missing fields', description: 'Please enter receive address', variant: 'destructive' });
       return;
     }
 
@@ -464,47 +579,99 @@ const Swaps = () => {
 
     setExecutingTrade(true);
     try {
-      const { data, error } = await supabase.functions.invoke('trocador-new-trade', {
-        body: {
-          ticker_from: fromCoin,
-          network_from: fromNetwork,
-          ticker_to: toCoin,
-          network_to: toNetwork,
-          amount_from: amount,
-          address: receiveAddress,
-          address_memo: addressMemo || undefined,
-          refund_address: refundAddress || undefined,
-          provider: selectedProvider.provider,
-          id: `tm_${Date.now()}`,
-        },
-      });
+      if (aggregator === 'exolix') {
+        // Exolix trade
+        const { data, error } = await supabase.functions.invoke('exolix-api', {
+          body: {
+            action: 'create_transaction',
+            coinFrom: fromCoin.toUpperCase(),
+            networkFrom: fromNetwork,
+            coinTo: toCoin.toUpperCase(),
+            networkTo: toNetwork,
+            amount: amount,
+            withdrawalAddress: receiveAddress,
+            withdrawalExtraId: addressMemo || '',
+            refundAddress: refundAddress || '',
+            rateType: 'float',
+          },
+        });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
 
-      setTrade(data);
+        const tradeData: TradeResponse = {
+          trade_id: data.id,
+          address: data.depositAddress,
+          address_memo: data.depositExtraId || undefined,
+          status: data.status,
+          amount_from: String(data.amount),
+          amount_to: String(data.amountTo),
+        };
 
-      // Save to history
-      await supabase.from('swap_history').insert({
-        trade_id: data.trade_id,
-        from_coin: fromCoin,
-        from_network: fromNetwork,
-        to_coin: toCoin,
-        to_network: toNetwork,
-        amount: amount,
-        receive_address: receiveAddress,
-        provider: selectedProvider.provider,
-        provider_address: data.address,
-        provider_memo: data.address_memo,
-        status: data.status,
-        user_id: user?.id || null,
-      });
+        setTrade(tradeData);
 
-      // Save trade_id to localStorage for history
-      saveTradeIdToLocal(data.trade_id);
-      fetchSwapHistory();
+        // Save to history
+        await supabase.from('swap_history').insert({
+          trade_id: data.id,
+          from_coin: fromCoin,
+          from_network: fromNetwork,
+          to_coin: toCoin,
+          to_network: toNetwork,
+          amount: amount,
+          receive_address: receiveAddress,
+          provider: 'Exolix',
+          provider_address: data.depositAddress,
+          provider_memo: data.depositExtraId,
+          status: data.status,
+          user_id: user?.id || null,
+        });
 
-      toast({ title: 'Trade created!', description: `Send ${amount} ${fromCoin} to the address shown` });
+        saveTradeIdToLocal(data.id);
+        fetchSwapHistory();
+        toast({ title: 'Trade created!', description: `Send ${amount} ${fromCoin.toUpperCase()} to the address shown` });
+      } else {
+        // Trocador trade
+        const { data, error } = await supabase.functions.invoke('trocador-new-trade', {
+          body: {
+            ticker_from: fromCoin,
+            network_from: fromNetwork,
+            ticker_to: toCoin,
+            network_to: toNetwork,
+            amount_from: amount,
+            address: receiveAddress,
+            address_memo: addressMemo || undefined,
+            refund_address: refundAddress || undefined,
+            provider: selectedProvider!.provider,
+            id: `tm_${Date.now()}`,
+          },
+        });
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        setTrade(data);
+
+        // Save to history
+        await supabase.from('swap_history').insert({
+          trade_id: data.trade_id,
+          from_coin: fromCoin,
+          from_network: fromNetwork,
+          to_coin: toCoin,
+          to_network: toNetwork,
+          amount: amount,
+          receive_address: receiveAddress,
+          provider: selectedProvider!.provider,
+          provider_address: data.address,
+          provider_memo: data.address_memo,
+          status: data.status,
+          user_id: user?.id || null,
+        });
+
+        // Save trade_id to localStorage for history
+        saveTradeIdToLocal(data.trade_id);
+        fetchSwapHistory();
+        toast({ title: 'Trade created!', description: `Send ${amount} ${fromCoin} to the address shown` });
+      }
     } catch (error) {
       console.error('Error executing trade:', error);
       toast({ title: 'Error', description: 'Failed to create trade', variant: 'destructive' });
@@ -536,8 +703,16 @@ const Swaps = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Crypto Swaps</h1>
-            <p className="text-muted-foreground">Exchange cryptocurrencies privately via Trocador aggregator</p>
+            <p className="text-muted-foreground">Exchange cryptocurrencies privately</p>
           </div>
+
+          {/* Aggregator Selection */}
+          <Tabs value={aggregator} onValueChange={handleAggregatorChange} className="mb-6">
+            <TabsList className="grid w-full grid-cols-2 max-w-xs mx-auto">
+              <TabsTrigger value="trocador">Trocador</TabsTrigger>
+              <TabsTrigger value="exolix">Exolix</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {/* Fiat Gateway Banner */}
           <Link to="/cashout" className="block mb-6">
@@ -839,72 +1014,111 @@ const Swaps = () => {
               {/* Rates & Execute */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Available Providers</CardTitle>
+                  <CardTitle>{aggregator === 'exolix' ? 'Exchange Rate' : 'Available Providers'}</CardTitle>
                   <CardDescription>
-                    {rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates'}
+                    {aggregator === 'exolix' 
+                      ? (exolixRate ? 'Rate fetched from Exolix' : 'Enter swap details to see rate')
+                      : (rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates')
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {rates.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                      {hasFetchedRates ? (
-                        <>
-                          <p className="font-medium text-foreground">No providers available</p>
-                          <p className="text-sm mt-1">This swap pair is not currently supported by any exchange providers. Try a different coin or network combination.</p>
-                        </>
-                      ) : (
-                        <p>No rates yet</p>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {rates.map((rate) => (
-                          <div
-                            key={rate.provider}
-                            className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                              selectedProvider?.provider === rate.provider
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50'
-                            }`}
-                            onClick={() => setSelectedProvider(rate)}
-                          >
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{rate.provider}</span>
-                              <Badge variant="outline" className="text-xs">
-                                KYC: {rate.kycrating}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between text-sm mt-1">
-                              <span className="text-muted-foreground">You receive:</span>
-                              <span className="font-semibold text-primary">{rate.amount_to} {toCoin}</span>
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              ETA: ~{rate.eta} min • KYC: {rate.kycrating} • Insurance: {rate.insurance}%
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <Button
-                        className="w-full"
-                        onClick={executeTrade}
-                        disabled={!selectedProvider || !receiveAddress || executingTrade}
-                      >
-                        {executingTrade ? (
+                  {aggregator === 'exolix' ? (
+                    // Exolix single rate display
+                    !exolixRate ? (
+                      <div className="text-center text-muted-foreground py-8">
+                        <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                        {hasFetchedRates ? (
                           <>
-                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            Creating trade...
+                            <p className="font-medium text-foreground">Rate not available</p>
+                            <p className="text-sm mt-1">{exolixRate === null && hasFetchedRates ? 'This pair may not be supported.' : 'Enter details to get rate.'}</p>
                           </>
                         ) : (
-                          <>
-                            Execute Swap with {selectedProvider?.provider}
-                            <ExternalLink className="h-4 w-4 ml-2" />
-                          </>
+                          <p>No rate yet</p>
                         )}
-                      </Button>
-                    </>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="p-4 rounded-lg border border-primary bg-primary/5">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Exolix</span>
+                            <Badge variant="outline" className="text-xs">No KYC</Badge>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">You receive:</span>
+                            <span className="font-semibold text-primary">{exolixRate.toAmount} {toCoin.toUpperCase()}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            Rate: 1 {fromCoin.toUpperCase()} = {exolixRate.rate.toFixed(6)} {toCoin.toUpperCase()}
+                          </div>
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={executeTrade}
+                          disabled={!receiveAddress || executingTrade}
+                        >
+                          {executingTrade ? (
+                            <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Creating trade...</>
+                          ) : (
+                            <>Execute Swap with Exolix<ExternalLink className="h-4 w-4 ml-2" /></>
+                          )}
+                        </Button>
+                      </>
+                    )
+                  ) : (
+                    // Trocador multi-provider display
+                    rates.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-8">
+                        <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                        {hasFetchedRates ? (
+                          <>
+                            <p className="font-medium text-foreground">No providers available</p>
+                            <p className="text-sm mt-1">This swap pair is not currently supported. Try a different combination.</p>
+                          </>
+                        ) : (
+                          <p>No rates yet</p>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {rates.map((rate) => (
+                            <div
+                              key={rate.provider}
+                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                selectedProvider?.provider === rate.provider
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                              onClick={() => setSelectedProvider(rate)}
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium">{rate.provider}</span>
+                                <Badge variant="outline" className="text-xs">KYC: {rate.kycrating}</Badge>
+                              </div>
+                              <div className="flex justify-between text-sm mt-1">
+                                <span className="text-muted-foreground">You receive:</span>
+                                <span className="font-semibold text-primary">{rate.amount_to} {toCoin}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                ETA: ~{rate.eta} min • Insurance: {rate.insurance}%
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={executeTrade}
+                          disabled={!selectedProvider || !receiveAddress || executingTrade}
+                        >
+                          {executingTrade ? (
+                            <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Creating trade...</>
+                          ) : (
+                            <>Execute Swap with {selectedProvider?.provider}<ExternalLink className="h-4 w-4 ml-2" /></>
+                          )}
+                        </Button>
+                      </>
+                    )
                   )}
                 </CardContent>
               </Card>
@@ -1021,7 +1235,10 @@ const Swaps = () => {
           {/* Info Section */}
           <div className="mt-8 space-y-6">
             <div className="text-center text-sm text-muted-foreground">
-              <p>Powered by <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
+              <p>Powered by {aggregator === 'exolix' 
+                ? <a href="https://exolix.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Exolix</a>
+                : <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a>
+              } exchange {aggregator === 'trocador' ? 'aggregator' : ''}</p>
               <p className="mt-1">All swaps are non-custodial and anonymous</p>
             </div>
 
