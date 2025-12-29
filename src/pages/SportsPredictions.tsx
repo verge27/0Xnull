@@ -35,7 +35,9 @@ import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/compone
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock, Wallet, ChevronDown } from 'lucide-react';
+import ExolixWidget from '@/components/ExolixWidget';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
 import { extractSportInfo } from '@/lib/sportLabels';
 import { supabase } from '@/integrations/supabase/client';
@@ -553,6 +555,22 @@ export default function SportsPredictions() {
                 <HelpCircle className="w-4 h-4" /> Learn How It Works
               </Link>
             </div>
+
+            {/* Exolix Swap Widget */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4" />
+                    Swap to XMR instantly
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3">
+                <ExolixWidget fromCoin="BTC" toCoin="XMR" />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           {/* League Filter - Always visible */}
