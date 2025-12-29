@@ -27,9 +27,10 @@ import { PoolTransparency } from '@/components/PoolTransparency';
 import { TwitchStreamEmbed } from '@/components/TwitchStreamEmbed';
 import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { toast } from 'sonner';
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap, HelpCircle, Info, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Swords, ArrowRight, Trophy, Zap, HelpCircle, Info, ExternalLink, Wallet, ChevronDown, Radio } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Radio } from 'lucide-react';
+import ExolixWidget from '@/components/ExolixWidget';
 import { GAME_DOWNLOAD_URLS } from '@/hooks/useEsportsEvents';
 
 
@@ -503,12 +504,28 @@ export default function StarcraftPredictions() {
           </div>
 
           {/* How Betting Works Banner */}
-          <div className="mb-6 p-3 rounded-lg bg-secondary/50 border border-secondary flex items-center justify-between">
+          <div className="mb-3 p-3 rounded-lg bg-secondary/50 border border-secondary flex items-center justify-between">
             <p className="text-sm text-muted-foreground">New to parimutuel betting?</p>
             <Link to="/how-betting-works" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               <HelpCircle className="w-4 h-4" /> Learn How It Works
             </Link>
           </div>
+
+          {/* Exolix Swap Widget */}
+          <Collapsible className="mb-6">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <Wallet className="w-4 h-4" />
+                  Swap to XMR instantly
+                </span>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
+              <ExolixWidget fromCoin="BTC" toCoin="XMR" />
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Twitch Stream + Community Links */}
           <div className="mb-6">
