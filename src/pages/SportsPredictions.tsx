@@ -453,24 +453,24 @@ export default function SportsPredictions() {
   }, [upcomingMatches]);
   
   const sortedMatches = useMemo(() => {
-    // Filter by league if soccer and a specific league is selected
+    // Filter by league if soccer and a specific league is selected (not 'all' or 'by_league')
     let filtered = upcomingMatches;
-    if (selectedCategory === 'soccer' && soccerLeagueFilter) {
+    if (selectedCategory === 'soccer' && soccerLeagueFilter && soccerLeagueFilter !== 'by_league') {
       filtered = upcomingMatches.filter(m => m.sport === soccerLeagueFilter);
     }
     
     const sorted = [...filtered].sort((a, b) => {
-      // When viewing all categories, sort purely by date
-      if (!selectedCategory) {
-        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-      }
-      
-      // When viewing soccer category - sort by league then by date
-      if (selectedCategory === 'soccer') {
+      // When viewing soccer with "By League" grouping, sort by league then by date
+      if (selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league') {
         const aLeague = SPORT_LABELS[a.sport] || a.sport;
         const bLeague = SPORT_LABELS[b.sport] || b.sport;
         const leagueCompare = aLeague.localeCompare(bLeague);
         if (leagueCompare !== 0) return leagueCompare;
+        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
+      }
+      
+      // Default: sort by date (chronological)
+      if (!selectedCategory || selectedCategory === 'soccer') {
         return Number(a.commence_timestamp) - Number(b.commence_timestamp);
       }
       
@@ -988,7 +988,7 @@ export default function SportsPredictions() {
                     ? 'No upcoming events in this category' 
                     : 'No upcoming events'}
                 </div>
-              ) : selectedCategory === 'soccer' && !soccerLeagueFilter ? (
+              ) : selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league' ? (
                 // Grouped by league view for soccer
                 <div className="space-y-6">
                   {(() => {
