@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useSportsEvents, getSportLabel as getLegacySportLabel, getSportEmoji, type SportsEvent } from '@/hooks/useSportsEvents';
-import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
+import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, SPORT_LABELS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
@@ -92,6 +92,9 @@ export default function SportsPredictions() {
   // Category/League filters
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
+  
+  // Soccer sort mode: 'league' groups by league, 'chronological' sorts by date
+  const [soccerSortMode, setSoccerSortMode] = useState<'league' | 'chronological'>('chronological');
   
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: SportsMatch | null }>({
     open: false,
@@ -435,19 +438,51 @@ export default function SportsPredictions() {
   // Filter out matches that have already started (live) for the Upcoming tab
   const upcomingMatches = matches.filter(m => m.commence_timestamp > now);
   
-  const sortedMatches = [...upcomingMatches].sort((a, b) => {
-    // When viewing all categories, sort purely by date
-    if (!selectedCategory) {
+  // Get unique leagues from soccer matches for the league dropdown
+  const soccerLeagues = useMemo(() => {
+    const leagues = upcomingMatches
+      .filter(m => m.sport_key?.includes('soccer') || SPORT_LABELS[m.sport]?.toLowerCase().includes('league') || 
+        ['premier_league', 'la_liga', 'bundesliga', 'serie_a', 'ligue_1', 'mls', 'champions_league', 
+         'europa_league', 'efl_champ', 'fa_cup', 'eredivisie', 'liga_mx', 'brazil_serie_a'].includes(m.sport))
+      .map(m => m.sport);
+    return [...new Set(leagues)].sort((a, b) => {
+      const aLabel = SPORT_LABELS[a] || a;
+      const bLabel = SPORT_LABELS[b] || b;
+      return aLabel.localeCompare(bLabel);
+    });
+  }, [upcomingMatches]);
+  
+  const sortedMatches = useMemo(() => {
+    const sorted = [...upcomingMatches].sort((a, b) => {
+      // When viewing all categories, sort purely by date
+      if (!selectedCategory) {
+        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
+      }
+      
+      // When viewing soccer category
+      if (selectedCategory === 'soccer') {
+        if (soccerSortMode === 'league') {
+          // Sort by league name first, then by date within each league
+          const aLeague = SPORT_LABELS[a.sport] || a.sport;
+          const bLeague = SPORT_LABELS[b.sport] || b.sport;
+          const leagueCompare = aLeague.localeCompare(bLeague);
+          if (leagueCompare !== 0) return leagueCompare;
+          return Number(a.commence_timestamp) - Number(b.commence_timestamp);
+        }
+        // Chronological mode - just sort by date
+        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
+      }
+      
+      // When viewing a specific category, sort by priority sports first, then by date
+      const aPriority = PRIORITY_SPORTS.indexOf(a.sport);
+      const bPriority = PRIORITY_SPORTS.indexOf(b.sport);
+      if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
+      if (aPriority !== -1) return -1;
+      if (bPriority !== -1) return 1;
       return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-    }
-    // When viewing a specific category, sort by priority sports first, then by date
-    const aPriority = PRIORITY_SPORTS.indexOf(a.sport);
-    const bPriority = PRIORITY_SPORTS.indexOf(b.sport);
-    if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
-    if (aPriority !== -1) return -1;
-    if (bPriority !== -1) return 1;
-    return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-  });
+    });
+    return sorted;
+  }, [upcomingMatches, selectedCategory, soccerSortMode]);
   
   // Separate live, closing soon, and regular markets
   // Live markets = betting closed but not yet resolved (match in progress)
@@ -913,7 +948,7 @@ export default function SportsPredictions() {
 
             {/* Upcoming Events Tab */}
             <TabsContent value="upcoming" className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
                   Upcoming Matches
@@ -921,6 +956,33 @@ export default function SportsPredictions() {
                     <Badge variant="secondary">{matches.length}</Badge>
                   )}
                 </h2>
+                
+                {/* Soccer Sort Controls */}
+                {selectedCategory === 'soccer' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Sort:</span>
+                    <div className="flex bg-muted rounded-lg p-1">
+                      <Button
+                        variant={soccerSortMode === 'chronological' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className="h-7 text-xs px-3"
+                        onClick={() => setSoccerSortMode('chronological')}
+                      >
+                        <Clock className="w-3 h-3 mr-1" />
+                        Time
+                      </Button>
+                      <Button
+                        variant={soccerSortMode === 'league' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className="h-7 text-xs px-3"
+                        onClick={() => setSoccerSortMode('league')}
+                      >
+                        <Trophy className="w-3 h-3 mr-1" />
+                        League
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Category Pills - exclude combat since it has its own page */}
@@ -939,6 +1001,56 @@ export default function SportsPredictions() {
                   {selectedCategory || selectedLeague 
                     ? 'No upcoming events in this category' 
                     : 'No upcoming events'}
+                </div>
+              ) : selectedCategory === 'soccer' && soccerSortMode === 'league' ? (
+                // Grouped by league view for soccer
+                <div className="space-y-6">
+                  {(() => {
+                    // Group matches by league
+                    const groupedByLeague: Record<string, typeof sortedMatches> = {};
+                    sortedMatches.forEach(match => {
+                      const leagueKey = SPORT_LABELS[match.sport] || match.sport;
+                      if (!groupedByLeague[leagueKey]) {
+                        groupedByLeague[leagueKey] = [];
+                      }
+                      groupedByLeague[leagueKey].push(match);
+                    });
+                    
+                    return Object.entries(groupedByLeague)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([league, leagueMatches]) => (
+                        <div key={league}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge variant="outline" className="text-sm px-3 py-1">
+                              ⚽ {league}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {leagueMatches.length} {leagueMatches.length === 1 ? 'match' : 'matches'}
+                            </span>
+                          </div>
+                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {leagueMatches.map(match => {
+                              const marketStatus = getMatchMarketStatus(match);
+                              const matchOdds = getMatchOdds(match);
+                              const matchNow = Date.now() / 1000;
+                              const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                              
+                              return (
+                                <SportsMatchCard
+                                  key={match.event_id}
+                                  match={match}
+                                  odds={matchOdds}
+                                  onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                  isLive={isLive}
+                                  hasMarket={marketStatus !== 'none'}
+                                  backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                  })()}
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
