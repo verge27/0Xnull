@@ -10,6 +10,7 @@ import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, 
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { compareLeagues, getLeagueOrder, REGION_DISPLAY_NAMES, type LeagueRegion } from '@/lib/soccerLeagueOrder';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -438,18 +439,15 @@ export default function SportsPredictions() {
   // Filter out matches that have already started (live) for the Upcoming tab
   const upcomingMatches = matches.filter(m => m.commence_timestamp > now);
   
-  // Get unique leagues from soccer matches for the league dropdown
+  // Get unique leagues from soccer matches for the league dropdown - sorted by region/competition order
   const soccerLeagues = useMemo(() => {
     const leagues = upcomingMatches
       .filter(m => m.sport_key?.includes('soccer') || SPORT_LABELS[m.sport]?.toLowerCase().includes('league') || 
         ['premier_league', 'la_liga', 'bundesliga', 'serie_a', 'ligue_1', 'mls', 'champions_league', 
          'europa_league', 'efl_champ', 'fa_cup', 'eredivisie', 'liga_mx', 'brazil_serie_a'].includes(m.sport))
       .map(m => m.sport);
-    return [...new Set(leagues)].sort((a, b) => {
-      const aLabel = SPORT_LABELS[a] || a;
-      const bLabel = SPORT_LABELS[b] || b;
-      return aLabel.localeCompare(bLabel);
-    });
+    // Sort by region and competition order instead of alphabetically
+    return [...new Set(leagues)].sort(compareLeagues);
   }, [upcomingMatches]);
   
   const sortedMatches = useMemo(() => {
@@ -460,11 +458,9 @@ export default function SportsPredictions() {
     }
     
     const sorted = [...filtered].sort((a, b) => {
-      // When viewing soccer with "By League" grouping, sort by league then by date
+      // When viewing soccer with "By League" grouping, sort by region -> competition -> date
       if (selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league') {
-        const aLeague = SPORT_LABELS[a.sport] || a.sport;
-        const bLeague = SPORT_LABELS[b.sport] || b.sport;
-        const leagueCompare = aLeague.localeCompare(bLeague);
+        const leagueCompare = compareLeagues(a.sport, b.sport);
         if (leagueCompare !== 0) return leagueCompare;
         return Number(a.commence_timestamp) - Number(b.commence_timestamp);
       }
@@ -989,50 +985,84 @@ export default function SportsPredictions() {
                     : 'No upcoming events'}
                 </div>
               ) : selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league' ? (
-                // Grouped by league view for soccer
-                <div className="space-y-6">
+                // Grouped by region then league view for soccer
+                <div className="space-y-8">
                   {(() => {
-                    // Group matches by league
-                    const groupedByLeague: Record<string, typeof sortedMatches> = {};
+                    // Group matches by region then by league
+                    const groupedByRegion: Record<LeagueRegion, Record<string, typeof sortedMatches>> = {} as any;
+                    
                     sortedMatches.forEach(match => {
-                      const leagueKey = SPORT_LABELS[match.sport] || match.sport;
-                      if (!groupedByLeague[leagueKey]) {
-                        groupedByLeague[leagueKey] = [];
+                      const leagueInfo = getLeagueOrder(match.sport);
+                      const region = leagueInfo.region;
+                      const leagueLabel = SPORT_LABELS[match.sport] || match.sport;
+                      
+                      if (!groupedByRegion[region]) {
+                        groupedByRegion[region] = {};
                       }
-                      groupedByLeague[leagueKey].push(match);
+                      if (!groupedByRegion[region][leagueLabel]) {
+                        groupedByRegion[region][leagueLabel] = [];
+                      }
+                      groupedByRegion[region][leagueLabel].push(match);
                     });
                     
-                    return Object.entries(groupedByLeague)
-                      .sort(([a], [b]) => a.localeCompare(b))
-                      .map(([league, leagueMatches]) => (
-                        <div key={league}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Badge variant="outline" className="text-sm px-3 py-1">
-                              ⚽ {league}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {leagueMatches.length} {leagueMatches.length === 1 ? 'match' : 'matches'}
+                    // Sort regions by their order
+                    const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
+                    
+                    return regionOrder
+                      .filter(region => groupedByRegion[region] && Object.keys(groupedByRegion[region]).length > 0)
+                      .map(region => (
+                        <div key={region}>
+                          {/* Region Header */}
+                          <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
+                            <span className="text-lg font-semibold">
+                              {REGION_DISPLAY_NAMES[region]}
                             </span>
                           </div>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {leagueMatches.map(match => {
-                              const marketStatus = getMatchMarketStatus(match);
-                              const matchOdds = getMatchOdds(match);
-                              const matchNow = Date.now() / 1000;
-                              const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
-                              
-                              return (
-                                <SportsMatchCard
-                                  key={match.event_id}
-                                  match={match}
-                                  odds={matchOdds}
-                                  onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
-                                  isLive={isLive}
-                                  hasMarket={marketStatus !== 'none'}
-                                  backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
-                                />
-                              );
-                            })}
+                          
+                          {/* Leagues within region */}
+                          <div className="space-y-6 pl-2">
+                            {Object.entries(groupedByRegion[region])
+                              .sort(([aKey], [bKey]) => {
+                                // Find original sport keys to compare
+                                const aMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === aKey);
+                                const bMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === bKey);
+                                if (aMatch && bMatch) {
+                                  return compareLeagues(aMatch.sport, bMatch.sport);
+                                }
+                                return aKey.localeCompare(bKey);
+                              })
+                              .map(([league, leagueMatches]) => (
+                                <div key={league}>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Badge variant="outline" className="text-sm px-3 py-1">
+                                      ⚽ {league}
+                                    </Badge>
+                                    <span className="text-sm text-muted-foreground">
+                                      {leagueMatches.length} {leagueMatches.length === 1 ? 'match' : 'matches'}
+                                    </span>
+                                  </div>
+                                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {leagueMatches.map(match => {
+                                      const marketStatus = getMatchMarketStatus(match);
+                                      const matchOdds = getMatchOdds(match);
+                                      const matchNow = Date.now() / 1000;
+                                      const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                                      
+                                      return (
+                                        <SportsMatchCard
+                                          key={match.event_id}
+                                          match={match}
+                                          odds={matchOdds}
+                                          onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                          isLive={isLive}
+                                          hasMarket={marketStatus !== 'none'}
+                                          backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                        />
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
                           </div>
                         </div>
                       ));
