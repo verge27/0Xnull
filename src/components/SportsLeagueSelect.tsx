@@ -30,6 +30,7 @@ export function SportsLeagueSelect({ leagues, selectedLeague, onSelect, disabled
       </SelectTrigger>
       <SelectContent className="bg-background border border-border z-50">
         <SelectItem value="all">All Leagues</SelectItem>
+        <SelectItem value="by_league">⚽ Group by League</SelectItem>
         {leagues.map(league => (
           <SelectItem key={league} value={league}>
             {getSportLabel(league)}
