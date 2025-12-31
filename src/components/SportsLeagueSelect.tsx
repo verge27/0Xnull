@@ -8,7 +8,7 @@ import {
   SelectLabel,
 } from '@/components/ui/select';
 import { getSportLabel } from '@/hooks/useSportsCategories';
-import { getLeagueOrder, REGION_DISPLAY_NAMES, type LeagueRegion } from '@/lib/soccerLeagueOrder';
+import { getLeagueOrder, REGION_DISPLAY_NAMES, type LeagueRegion } from '@/lib/leagueOrder';
 import { useMemo } from 'react';
 
 interface SportsLeagueSelectProps {
@@ -31,11 +31,27 @@ export function SportsLeagueSelect({ leagues, selectedLeague, onSelect, disabled
       groups[info.region].push(league);
     });
     
-    // Define display order for regions
+    // Define display order for regions (all sports)
     const regionOrder: LeagueRegion[] = [
+      // Soccer
       'europe_top5', 'europe_other', 'uk_cups', 'europe_cups',
-      'americas', 'americas_cups', 'asia_oceania', 'africa',
-      'international', 'unknown'
+      'americas', 'americas_cups', 'asia_oceania', 'africa', 'international',
+      // American sports
+      'us_major', 'us_college', 'us_minor',
+      // Hockey
+      'hockey_nhl', 'hockey_europe', 'hockey_other',
+      // Tennis
+      'tennis_grand_slam', 'tennis_masters', 'tennis_wta', 'tennis_other',
+      // Cricket
+      'cricket_ipl', 'cricket_international', 'cricket_domestic',
+      // Combat
+      'combat_ufc', 'combat_boxing', 'combat_other',
+      // Golf
+      'golf_major', 'golf_tour',
+      // Rugby
+      'rugby_international', 'rugby_domestic',
+      // Other
+      'unknown'
     ];
     
     return regionOrder
