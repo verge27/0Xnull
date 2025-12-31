@@ -1068,6 +1068,71 @@ export default function SportsPredictions() {
                       ));
                   })()}
                 </div>
+              ) : selectedCategory === 'soccer' ? (
+                // Soccer view grouped by region, sorted chronologically within each region
+                <div className="space-y-8">
+                  {(() => {
+                    // Group matches by region
+                    const groupedByRegion: Record<LeagueRegion, typeof sortedMatches> = {} as any;
+                    
+                    sortedMatches.forEach(match => {
+                      const leagueInfo = getLeagueOrder(match.sport);
+                      const region = leagueInfo.region;
+                      
+                      if (!groupedByRegion[region]) {
+                        groupedByRegion[region] = [];
+                      }
+                      groupedByRegion[region].push(match);
+                    });
+                    
+                    // Sort regions by their order
+                    const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
+                    
+                    return regionOrder
+                      .filter(region => groupedByRegion[region] && groupedByRegion[region].length > 0)
+                      .map(region => {
+                        // Sort matches within region chronologically
+                        const regionMatches = groupedByRegion[region].sort((a, b) => 
+                          Number(a.commence_timestamp) - Number(b.commence_timestamp)
+                        );
+                        
+                        return (
+                          <div key={region}>
+                            {/* Region Header */}
+                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
+                              <span className="text-lg font-semibold">
+                                {REGION_DISPLAY_NAMES[region]}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                ({regionMatches.length} {regionMatches.length === 1 ? 'match' : 'matches'})
+                              </span>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {regionMatches.map(match => {
+                                const marketStatus = getMatchMarketStatus(match);
+                                const matchOdds = getMatchOdds(match);
+                                const matchNow = Date.now() / 1000;
+                                const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                                
+                                return (
+                                  <SportsMatchCard
+                                    key={match.event_id}
+                                    match={match}
+                                    odds={matchOdds}
+                                    onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                    isLive={isLive}
+                                    hasMarket={marketStatus !== 'none'}
+                                    backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      });
+                  })()}
+                </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sortedMatches.map(match => {
