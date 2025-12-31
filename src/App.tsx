@@ -58,6 +58,7 @@ import MySlips from "./pages/MySlips";
 import Payouts from "./pages/Payouts";
 import Influencer from "./pages/Influencer";
 import InfluencerDashboard from "./pages/InfluencerDashboard";
+import PartnerEarnings from "./pages/PartnerEarnings";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +142,9 @@ const App = () => (
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
                   <Route path="/influencer/:code" element={<InfluencerDashboard />} />
+                  
+                  {/* Partner Earnings (private) */}
+                  <Route path="/partners/earnings" element={<PartnerEarnings />} />
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
