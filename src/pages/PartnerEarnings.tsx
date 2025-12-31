@@ -41,11 +41,16 @@ const PartnerEarnings = () => {
   useEffect(() => {
     const fetchEarnings = async () => {
       try {
-        const response = await fetch("https://0xnull.io/api/marketing/partners/mostafa/earnings");
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const response = await fetch(`${supabaseUrl}/functions/v1/partner-earnings?partner=mostafa`);
         if (!response.ok) {
-          throw new Error("Failed to fetch earnings data");
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to fetch earnings data");
         }
         const result = await response.json();
+        if (result.error) {
+          throw new Error(result.error);
+        }
         setData(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load earnings data");

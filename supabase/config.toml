@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.exolix-api]
 verify_jwt = false
+
+[functions.partner-earnings]
+verify_jwt = false
