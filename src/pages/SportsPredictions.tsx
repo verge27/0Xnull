@@ -10,7 +10,7 @@ import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, 
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
-import { compareLeagues, getLeagueOrder, REGION_DISPLAY_NAMES, type LeagueRegion } from '@/lib/soccerLeagueOrder';
+import { compareLeagues, getLeagueOrder, REGION_DISPLAY_NAMES, getRegionsFromSports, getSportDisplayRegion, type LeagueRegion } from '@/lib/leagueOrder';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -457,25 +457,10 @@ export default function SportsPredictions() {
       filtered = upcomingMatches.filter(m => m.sport === soccerLeagueFilter);
     }
     
+    // Always sort by region -> competition -> date for all sports
     const sorted = [...filtered].sort((a, b) => {
-      // When viewing soccer with "By League" grouping, sort by region -> competition -> date
-      if (selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league') {
-        const leagueCompare = compareLeagues(a.sport, b.sport);
-        if (leagueCompare !== 0) return leagueCompare;
-        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-      }
-      
-      // Default: sort by date (chronological)
-      if (!selectedCategory || selectedCategory === 'soccer') {
-        return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-      }
-      
-      // When viewing a specific category, sort by priority sports first, then by date
-      const aPriority = PRIORITY_SPORTS.indexOf(a.sport);
-      const bPriority = PRIORITY_SPORTS.indexOf(b.sport);
-      if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
-      if (aPriority !== -1) return -1;
-      if (bPriority !== -1) return 1;
+      const leagueCompare = compareLeagues(a.sport, b.sport);
+      if (leagueCompare !== 0) return leagueCompare;
       return Number(a.commence_timestamp) - Number(b.commence_timestamp);
     });
     return sorted;
@@ -1173,25 +1158,80 @@ export default function SportsPredictions() {
                   })()}
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sortedMatches.map(match => {
-                    const marketStatus = getMatchMarketStatus(match);
-                    const matchOdds = getMatchOdds(match);
-                    const matchNow = Date.now() / 1000;
-                    const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                // All other sports - grouped by region with collapsible sections
+                <div className="space-y-4">
+                  {(() => {
+                    // Group matches by region using display region (more specific)
+                    const groupedByRegion: Record<string, typeof sortedMatches> = {};
                     
-                    return (
-                      <SportsMatchCard
-                        key={match.event_id}
-                        match={match}
-                        odds={matchOdds}
-                        onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
-                        isLive={isLive}
-                        hasMarket={marketStatus !== 'none'}
-                        backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
-                      />
-                    );
-                  })}
+                    sortedMatches.forEach(match => {
+                      const displayRegion = getSportDisplayRegion(match.sport);
+                      
+                      if (!groupedByRegion[displayRegion]) {
+                        groupedByRegion[displayRegion] = [];
+                      }
+                      groupedByRegion[displayRegion].push(match);
+                    });
+                    
+                    // Get sorted region keys based on first match in each group
+                    const sortedRegionKeys = Object.keys(groupedByRegion).sort((a, b) => {
+                      const aMatch = groupedByRegion[a][0];
+                      const bMatch = groupedByRegion[b][0];
+                      return compareLeagues(aMatch.sport, bMatch.sport);
+                    });
+                    
+                    return sortedRegionKeys.map((regionDisplay, idx) => {
+                      // Sort matches within region chronologically
+                      const regionMatches = groupedByRegion[regionDisplay].sort((a, b) => 
+                        Number(a.commence_timestamp) - Number(b.commence_timestamp)
+                      );
+                      
+                      return (
+                        <Collapsible key={regionDisplay} defaultOpen={idx < 5}>
+                          <Card className="overflow-hidden">
+                            <CollapsibleTrigger className="w-full">
+                              <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg font-semibold">
+                                    {regionDisplay}
+                                  </span>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {regionMatches.length} {regionMatches.length === 1 ? 'match' : 'matches'}
+                                  </Badge>
+                                </div>
+                                <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                              </div>
+                            </CollapsibleTrigger>
+                            
+                            <CollapsibleContent>
+                              <div className="border-t border-border p-4">
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {regionMatches.map(match => {
+                                    const marketStatus = getMatchMarketStatus(match);
+                                    const matchOdds = getMatchOdds(match);
+                                    const matchNow = Date.now() / 1000;
+                                    const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                                    
+                                    return (
+                                      <SportsMatchCard
+                                        key={match.event_id}
+                                        match={match}
+                                        odds={matchOdds}
+                                        onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                        isLive={isLive}
+                                        hasMarket={marketStatus !== 'none'}
+                                        backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </Card>
+                        </Collapsible>
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </TabsContent>
