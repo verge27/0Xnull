@@ -3,25 +3,27 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Check, DollarSign, TrendingUp, Percent, Clock } from "lucide-react";
+import { Copy, Check, DollarSign, TrendingUp, Percent, Clock, User, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 
 interface MonthlyData {
   month: string;
   organic_xmr: number;
   referred_xmr: number;
-  partner_share_xmr: number;
+  share_xmr: number;
 }
 
 interface EarningsData {
-  partner_name: string;
+  partner: string;
+  role: string;
+  rate: string;
   compensation: {
     base_monthly_usd: number;
-    bonus_5k_visitors_usd: number;
+    bonus_monthly_usd: number;
     volume_share_rate: number;
     residual_months_after_exit: number;
   };
-  summary: {
+  volume_share_earnings: {
     total_volume_xmr: number;
     referred_volume_xmr: number;
     organic_volume_xmr: number;
@@ -77,7 +79,7 @@ const PartnerEarnings = () => {
   };
 
   const formatXMR = (value: number) => {
-    return value.toFixed(4);
+    return value.toFixed(8);
   };
 
   if (loading) {
@@ -121,8 +123,31 @@ const PartnerEarnings = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Partner Earnings Dashboard</h1>
-          <p className="text-muted-foreground text-lg">{data.partner_name}</p>
+          <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="text-lg font-medium text-foreground">{data.partner}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              <span>{data.role}</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">{data.rate}</p>
         </div>
+
+        {/* Partner Earnings Highlight */}
+        <Card className="border-emerald-500/30 bg-emerald-500/5 mb-8">
+          <CardContent className="py-8">
+            <div className="text-center">
+              <p className="text-muted-foreground text-sm uppercase tracking-wider mb-2">Your Earnings</p>
+              <p className="font-mono text-4xl md:text-5xl font-bold text-emerald-400">
+                {formatXMR(data.volume_share_earnings.partner_earnings_xmr)} XMR
+              </p>
+              <p className="text-muted-foreground text-sm mt-2">From volume share</p>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 md:grid-cols-2 mb-8">
           {/* Compensation Terms Card */}
@@ -139,8 +164,8 @@ const PartnerEarnings = () => {
                 <span className="font-semibold text-emerald-400">${data.compensation.base_monthly_usd.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border/30">
-                <span className="text-muted-foreground">Bonus at 5k Visitors</span>
-                <span className="font-semibold text-emerald-400">${data.compensation.bonus_5k_visitors_usd.toLocaleString()}</span>
+                <span className="text-muted-foreground">Bonus Monthly</span>
+                <span className="font-semibold text-emerald-400">${data.compensation.bonus_monthly_usd.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border/30">
                 <span className="text-muted-foreground">Volume Share Rate</span>
@@ -153,30 +178,30 @@ const PartnerEarnings = () => {
             </CardContent>
           </Card>
 
-          {/* Earnings Summary Card */}
+          {/* Volume Summary Card */}
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Earnings Summary
+                Volume Summary
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-border/30">
                 <span className="text-muted-foreground">Total Volume</span>
-                <span className="font-mono">{formatXMR(data.summary.total_volume_xmr)} XMR</span>
+                <span className="font-mono text-sm">{formatXMR(data.volume_share_earnings.total_volume_xmr)} XMR</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border/30">
                 <span className="text-muted-foreground">Referred Volume</span>
-                <span className="font-mono">{formatXMR(data.summary.referred_volume_xmr)} XMR</span>
+                <span className="font-mono text-sm">{formatXMR(data.volume_share_earnings.referred_volume_xmr)} XMR</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border/30">
                 <span className="text-muted-foreground">Organic Volume</span>
-                <span className="font-mono">{formatXMR(data.summary.organic_volume_xmr)} XMR</span>
+                <span className="font-mono text-sm">{formatXMR(data.volume_share_earnings.organic_volume_xmr)} XMR</span>
               </div>
               <div className="flex justify-between items-center py-3 bg-emerald-500/10 rounded-lg px-3 -mx-3">
                 <span className="font-semibold text-foreground">Partner Earnings</span>
-                <span className="font-mono text-xl font-bold text-emerald-400">{formatXMR(data.summary.partner_earnings_xmr)} XMR</span>
+                <span className="font-mono font-bold text-emerald-400">{formatXMR(data.volume_share_earnings.partner_earnings_xmr)} XMR</span>
               </div>
             </CardContent>
           </Card>
@@ -205,9 +230,9 @@ const PartnerEarnings = () => {
                   {data.monthly.map((row, index) => (
                     <tr key={index} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                       <td className="py-3 px-4 font-medium">{row.month}</td>
-                      <td className="py-3 px-4 text-right font-mono">{formatXMR(row.organic_xmr)}</td>
-                      <td className="py-3 px-4 text-right font-mono">{formatXMR(row.referred_xmr)}</td>
-                      <td className="py-3 px-4 text-right font-mono text-cyan-400">{formatXMR(row.partner_share_xmr)}</td>
+                      <td className="py-3 px-4 text-right font-mono text-sm">{formatXMR(row.organic_xmr)}</td>
+                      <td className="py-3 px-4 text-right font-mono text-sm">{formatXMR(row.referred_xmr)}</td>
+                      <td className="py-3 px-4 text-right font-mono text-sm text-cyan-400">{formatXMR(row.share_xmr)}</td>
                     </tr>
                   ))}
                 </tbody>
