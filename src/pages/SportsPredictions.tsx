@@ -93,8 +93,8 @@ export default function SportsPredictions() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
   
-  // Soccer sort mode: 'league' groups by league, 'chronological' sorts by date
-  const [soccerSortMode, setSoccerSortMode] = useState<'league' | 'chronological'>('chronological');
+  // Soccer league filter - null means "All Leagues"
+  const [soccerLeagueFilter, setSoccerLeagueFilter] = useState<string | null>(null);
   
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: SportsMatch | null }>({
     open: false,
@@ -453,23 +453,24 @@ export default function SportsPredictions() {
   }, [upcomingMatches]);
   
   const sortedMatches = useMemo(() => {
-    const sorted = [...upcomingMatches].sort((a, b) => {
+    // Filter by league if soccer and a specific league is selected
+    let filtered = upcomingMatches;
+    if (selectedCategory === 'soccer' && soccerLeagueFilter) {
+      filtered = upcomingMatches.filter(m => m.sport === soccerLeagueFilter);
+    }
+    
+    const sorted = [...filtered].sort((a, b) => {
       // When viewing all categories, sort purely by date
       if (!selectedCategory) {
         return Number(a.commence_timestamp) - Number(b.commence_timestamp);
       }
       
-      // When viewing soccer category
+      // When viewing soccer category - sort by league then by date
       if (selectedCategory === 'soccer') {
-        if (soccerSortMode === 'league') {
-          // Sort by league name first, then by date within each league
-          const aLeague = SPORT_LABELS[a.sport] || a.sport;
-          const bLeague = SPORT_LABELS[b.sport] || b.sport;
-          const leagueCompare = aLeague.localeCompare(bLeague);
-          if (leagueCompare !== 0) return leagueCompare;
-          return Number(a.commence_timestamp) - Number(b.commence_timestamp);
-        }
-        // Chronological mode - just sort by date
+        const aLeague = SPORT_LABELS[a.sport] || a.sport;
+        const bLeague = SPORT_LABELS[b.sport] || b.sport;
+        const leagueCompare = aLeague.localeCompare(bLeague);
+        if (leagueCompare !== 0) return leagueCompare;
         return Number(a.commence_timestamp) - Number(b.commence_timestamp);
       }
       
@@ -482,7 +483,7 @@ export default function SportsPredictions() {
       return Number(a.commence_timestamp) - Number(b.commence_timestamp);
     });
     return sorted;
-  }, [upcomingMatches, selectedCategory, soccerSortMode]);
+  }, [upcomingMatches, selectedCategory, soccerLeagueFilter]);
   
   // Separate live, closing soon, and regular markets
   // Live markets = betting closed but not yet resolved (match in progress)
@@ -957,30 +958,15 @@ export default function SportsPredictions() {
                   )}
                 </h2>
                 
-                {/* Soccer Sort Controls */}
-                {selectedCategory === 'soccer' && (
+                {/* Soccer League Filter Dropdown */}
+                {selectedCategory === 'soccer' && soccerLeagues.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Sort:</span>
-                    <div className="flex bg-muted rounded-lg p-1">
-                      <Button
-                        variant={soccerSortMode === 'chronological' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        className="h-7 text-xs px-3"
-                        onClick={() => setSoccerSortMode('chronological')}
-                      >
-                        <Clock className="w-3 h-3 mr-1" />
-                        Time
-                      </Button>
-                      <Button
-                        variant={soccerSortMode === 'league' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        className="h-7 text-xs px-3"
-                        onClick={() => setSoccerSortMode('league')}
-                      >
-                        <Trophy className="w-3 h-3 mr-1" />
-                        League
-                      </Button>
-                    </div>
+                    <span className="text-sm text-muted-foreground">League:</span>
+                    <SportsLeagueSelect
+                      leagues={soccerLeagues}
+                      selectedLeague={soccerLeagueFilter}
+                      onSelect={(league) => setSoccerLeagueFilter(league)}
+                    />
                   </div>
                 )}
               </div>
@@ -1002,7 +988,7 @@ export default function SportsPredictions() {
                     ? 'No upcoming events in this category' 
                     : 'No upcoming events'}
                 </div>
-              ) : selectedCategory === 'soccer' && soccerSortMode === 'league' ? (
+              ) : selectedCategory === 'soccer' && !soccerLeagueFilter ? (
                 // Grouped by league view for soccer
                 <div className="space-y-6">
                   {(() => {
