@@ -3,7 +3,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Check, DollarSign, TrendingUp, Percent, Clock, User, Briefcase } from "lucide-react";
+import { Copy, Check, DollarSign, TrendingUp, Percent, Clock, User, Briefcase, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface MonthlyData {
@@ -39,23 +40,30 @@ const PartnerEarnings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchEarnings = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch("https://api.0xnull.io/api/marketing/partners/mostafa/earnings");
+      if (!response.ok) {
+        throw new Error("Failed to fetch earnings data");
+      }
+      const result = await response.json();
+      setData(result);
+      if (isRefresh) toast.success("Data refreshed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load earnings data");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEarnings = async () => {
-      try {
-        const response = await fetch("https://api.0xnull.io/api/marketing/partners/mostafa/earnings");
-        if (!response.ok) {
-          throw new Error("Failed to fetch earnings data");
-        }
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load earnings data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEarnings();
   }, []);
 
@@ -116,19 +124,31 @@ const PartnerEarnings = () => {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Partner Earnings Dashboard</h1>
-          <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="text-lg font-medium text-foreground">{data.partner}</span>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Partner Earnings Dashboard</h1>
+            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span className="text-lg font-medium text-foreground">{data.partner}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span>{data.role}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
-              <span>{data.role}</span>
-            </div>
+            <p className="text-sm text-muted-foreground mt-2">{data.rate}</p>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">{data.rate}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchEarnings(true)}
+            disabled={refreshing}
+            className="shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
 
         {/* Partner Earnings Highlight */}
