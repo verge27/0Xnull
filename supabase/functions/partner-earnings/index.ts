@@ -23,7 +23,8 @@ serve(async (req) => {
       });
     }
 
-    const targetUrl = `https://0xnull.io/api/marketing/partners/${encodeURIComponent(partner)}/earnings`;
+    // Try api.0xnull.io first (where most API endpoints live)
+    const targetUrl = `https://api.0xnull.io/api/marketing/partners/${encodeURIComponent(partner)}/earnings`;
     
     console.log(`Fetching partner earnings for: ${partner}`);
     console.log(`Target URL: ${targetUrl}`);
