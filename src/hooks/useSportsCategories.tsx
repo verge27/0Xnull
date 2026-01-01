@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
@@ -220,6 +220,26 @@ export const SPORT_LABELS: Record<string, string> = {
   us_election: 'US Election',
 };
 
+// Global cache for prefetched data
+const ALL_CATEGORIES = ['soccer', 'cricket', 'basketball', 'football', 'baseball', 'hockey', 'tennis', 'rugby', 'golf', 'combat', 'other'];
+
+interface SportsCache {
+  allMatches: SportsMatch[];
+  matchesByCategory: Record<string, SportsMatch[]>;
+  lastFetched: number | null;
+  fetchPromise: Promise<void> | null;
+}
+
+const sportsCache: SportsCache = {
+  allMatches: [],
+  matchesByCategory: {},
+  lastFetched: null,
+  fetchPromise: null,
+};
+
+// Cache TTL: 2 minutes
+const CACHE_TTL_MS = 2 * 60 * 1000;
+
 async function sportsRequest<T>(path: string): Promise<T> {
   const proxyUrl = new URL(SPORTS_API_BASE);
   proxyUrl.searchParams.set('path', `/api/sports${path}`);
@@ -233,6 +253,71 @@ async function sportsRequest<T>(path: string): Promise<T> {
     throw new Error(data.detail || data.error || 'Request failed');
   }
   return data;
+}
+
+// Prefetch all sports data in parallel
+export async function prefetchAllSportsData(): Promise<void> {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (sportsCache.lastFetched && now - sportsCache.lastFetched < CACHE_TTL_MS) {
+    return;
+  }
+  
+  // Return existing promise if already fetching
+  if (sportsCache.fetchPromise) {
+    return sportsCache.fetchPromise;
+  }
+  
+  sportsCache.fetchPromise = (async () => {
+    try {
+      // Fetch all categories in parallel
+      const results = await Promise.allSettled(
+        ALL_CATEGORIES.map(cat => 
+          sportsRequest<{ events: SportsMatch[] }>(`/events?category=${cat}`)
+            .then(data => ({ category: cat, events: data.events || [] }))
+        )
+      );
+      
+      const allEvents: SportsMatch[] = [];
+      const seenIds = new Set<string>();
+      const byCategory: Record<string, SportsMatch[]> = {};
+      
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          const { category, events } = result.value;
+          byCategory[category] = events;
+          
+          for (const event of events) {
+            if (!seenIds.has(event.event_id)) {
+              seenIds.add(event.event_id);
+              allEvents.push(event);
+            }
+          }
+        }
+      }
+      
+      // Sort by commence time
+      allEvents.sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp));
+      
+      sportsCache.allMatches = allEvents;
+      sportsCache.matchesByCategory = byCategory;
+      sportsCache.lastFetched = Date.now();
+    } finally {
+      sportsCache.fetchPromise = null;
+    }
+  })();
+  
+  return sportsCache.fetchPromise;
+}
+
+// Get cached data
+export function getCachedSportsData() {
+  return {
+    allMatches: sportsCache.allMatches,
+    matchesByCategory: sportsCache.matchesByCategory,
+    isCached: sportsCache.lastFetched !== null,
+  };
 }
 
 export function useSportsCategories() {
@@ -271,6 +356,8 @@ export function useSportsCategories() {
 
   useEffect(() => {
     fetchCategories();
+    // Start prefetching sports data immediately
+    prefetchAllSportsData();
   }, [fetchCategories]);
 
   return {
@@ -285,8 +372,16 @@ export function useSportsMatches() {
   const [matches, setMatches] = useState<SportsMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
   const fetchByCategory = useCallback(async (category: string) => {
+    // Check cache first
+    const cached = getCachedSportsData();
+    if (cached.isCached && cached.matchesByCategory[category]) {
+      setMatches(cached.matchesByCategory[category]);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
@@ -317,38 +412,43 @@ export function useSportsMatches() {
   }, []);
 
   const fetchAll = useCallback(async () => {
+    // Check cache first
+    const cached = getCachedSportsData();
+    if (cached.isCached && cached.allMatches.length > 0) {
+      setMatches(cached.allMatches);
+      // Still refresh in background if cache is getting stale
+      if (sportsCache.lastFetched && Date.now() - sportsCache.lastFetched > CACHE_TTL_MS / 2) {
+        prefetchAllSportsData().then(() => {
+          const newCached = getCachedSportsData();
+          setMatches(newCached.allMatches);
+        });
+      }
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
-      // Fetch from all categories and combine results
-      const allCategories = ['soccer', 'cricket', 'basketball', 'football', 'baseball', 'hockey', 'tennis', 'rugby', 'golf', 'combat', 'other'];
-      const results = await Promise.allSettled(
-        allCategories.map(cat => sportsRequest<{ events: SportsMatch[] }>(`/events?category=${cat}`))
-      );
-      
-      const allEvents: SportsMatch[] = [];
-      const seenIds = new Set<string>();
-      
-      for (const result of results) {
-        if (result.status === 'fulfilled' && result.value.events) {
-          for (const event of result.value.events) {
-            if (!seenIds.has(event.event_id)) {
-              seenIds.add(event.event_id);
-              allEvents.push(event);
-            }
-          }
-        }
-      }
-      
-      // Sort by commence time (ensure numeric comparison)
-      allEvents.sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp));
-      setMatches(allEvents);
+      await prefetchAllSportsData();
+      const newCached = getCachedSportsData();
+      setMatches(newCached.allMatches);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch matches';
       setError(message);
       console.error('Failed to fetch matches:', e);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  // Auto-populate from cache on mount if available
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      const cached = getCachedSportsData();
+      if (cached.isCached && cached.allMatches.length > 0) {
+        setMatches(cached.allMatches);
+      }
+      initialLoadDone.current = true;
     }
   }, []);
 
