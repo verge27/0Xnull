@@ -59,6 +59,22 @@ const BACKOFF_DURATION_MS = 2 * 60 * 1000; // 2 minutes
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ESPORTS_API_BASE = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
+// Global cache for esports data
+interface EsportsCache {
+  events: EsportsEvent[];
+  lastFetched: number | null;
+  fetchPromise: Promise<void> | null;
+}
+
+const esportsCache: EsportsCache = {
+  events: [],
+  lastFetched: null,
+  fetchPromise: null,
+};
+
+// Cache TTL: 2 minutes
+const CACHE_TTL_MS = 2 * 60 * 1000;
+
 async function esportsRequest<T>(
   path: string,
   options?: { allowNotFound?: boolean }
@@ -100,6 +116,43 @@ async function esportsRequest<T>(
   }
 
   return data as T;
+}
+
+// Prefetch all esports data
+export async function prefetchEsportsData(): Promise<void> {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (esportsCache.lastFetched && now - esportsCache.lastFetched < CACHE_TTL_MS) {
+    return;
+  }
+  
+  // Return existing promise if already fetching
+  if (esportsCache.fetchPromise) {
+    return esportsCache.fetchPromise;
+  }
+  
+  esportsCache.fetchPromise = (async () => {
+    try {
+      const data = await esportsRequest<{ events: EsportsEvent[], count?: number }>('/events');
+      esportsCache.events = data?.events || [];
+      esportsCache.lastFetched = Date.now();
+    } catch (e) {
+      console.error('Failed to prefetch esports events:', e);
+    } finally {
+      esportsCache.fetchPromise = null;
+    }
+  })();
+  
+  return esportsCache.fetchPromise;
+}
+
+// Get cached esports data
+export function getCachedEsportsData() {
+  return {
+    events: esportsCache.events,
+    isCached: esportsCache.lastFetched !== null,
+  };
 }
 
 export const ESPORTS_GAMES = [
@@ -157,8 +210,38 @@ export function useEsportsEvents() {
   const [scoresPollingActive, setScoresPollingActive] = useState(false);
   const scoresIntervalRef = useRef<number | null>(null);
   const backoffStateRef = useRef<Record<string, BackoffState>>({});
+  const initialLoadDone = useRef(false);
+
+  // Auto-populate from cache on mount if available
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      const cached = getCachedEsportsData();
+      if (cached.isCached && cached.events.length > 0) {
+        setEvents(cached.events);
+      }
+      // Start prefetching
+      prefetchEsportsData();
+      initialLoadDone.current = true;
+    }
+  }, []);
 
   const fetchEvents = useCallback(async (game?: string, category?: string) => {
+    // Check cache first if no filters
+    if (!game && !category) {
+      const cached = getCachedEsportsData();
+      if (cached.isCached && cached.events.length > 0) {
+        setEvents(cached.events);
+        // Refresh in background if cache is getting stale
+        if (esportsCache.lastFetched && Date.now() - esportsCache.lastFetched > CACHE_TTL_MS / 2) {
+          prefetchEsportsData().then(() => {
+            const newCached = getCachedEsportsData();
+            setEvents(newCached.events);
+          });
+        }
+        return;
+      }
+    }
+    
     setLoading(true);
     setError(null);
     try {
@@ -169,7 +252,13 @@ export function useEsportsEvents() {
       if (params.toString()) path += `?${params.toString()}`;
       
       const data = await esportsRequest<{ events: EsportsEvent[], count?: number }>(path);
-      setEvents(data.events || []);
+      setEvents(data?.events || []);
+      
+      // Update cache if fetching all
+      if (!game && !category && data?.events) {
+        esportsCache.events = data.events;
+        esportsCache.lastFetched = Date.now();
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to fetch events';
       setError(message);

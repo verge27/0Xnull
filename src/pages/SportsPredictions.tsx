@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useSportsEvents, getSportLabel as getLegacySportLabel, getSportEmoji, type SportsEvent } from '@/hooks/useSportsEvents';
-import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, SPORT_LABELS, getSportLabel, getCategoryLabel, type SportsMatch } from '@/hooks/useSportsCategories';
+import { useSportsCategories, useSportsMatches, useSportsOdds, PRIORITY_SPORTS, SPORT_LABELS, getSportLabel, getCategoryLabel, prefetchAllSportsData, type SportsMatch } from '@/hooks/useSportsCategories';
+import { prefetchEsportsData } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
@@ -143,6 +144,12 @@ export default function SportsPredictions() {
     
     return () => clearInterval(interval);
   }, [placingBet]);
+
+  // Prefetch all sports and esports data on mount for instant tab switching
+  useEffect(() => {
+    prefetchAllSportsData();
+    prefetchEsportsData();
+  }, []);
 
   useEffect(() => {
     fetchMarkets();
