@@ -46,6 +46,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { BackoffBadge } from '@/components/BackoffBadge';
+import { SportsMatchSkeleton, SportsRegionSkeleton } from '@/components/SportsMatchSkeleton';
 
 interface VideoHighlight {
   title: string;
@@ -969,7 +970,7 @@ export default function SportsPredictions() {
               )}
 
               {matchesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading events...</div>
+                <SportsRegionSkeleton count={3} />
               ) : sortedMatches.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {selectedCategory || selectedLeague 
