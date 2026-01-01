@@ -36,8 +36,9 @@ import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
+import { RegionCollapsible, ExpandCollapseButtons } from '@/components/RegionCollapsible';
 import { toast } from 'sonner';
-import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock, Wallet, ChevronDown } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock, Wallet, ChevronDown, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
 import ExolixWidget from '@/components/ExolixWidget';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
@@ -47,6 +48,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { BackoffBadge } from '@/components/BackoffBadge';
 import { SportsMatchSkeleton, SportsRegionSkeleton } from '@/components/SportsMatchSkeleton';
+import { useCollapsibleRegions } from '@/hooks/useCollapsibleRegions';
 
 interface VideoHighlight {
   title: string;
@@ -69,6 +71,7 @@ export default function SportsPredictions() {
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
   const { voucher: savedVoucher } = useVoucher();
+  const collapsibleRegions = useCollapsibleRegions();
   
   // Handle voucher from URL params
   useVoucherFromUrl();
@@ -969,6 +972,44 @@ export default function SportsPredictions() {
                 />
               )}
 
+              {/* Expand/Collapse All Buttons */}
+              {!matchesLoading && sortedMatches.length > 0 && (
+                <div className="flex justify-end">
+                  <ExpandCollapseButtons
+                    regions={(() => {
+                      // Get all current region keys
+                      if (selectedCategory === 'soccer' && soccerLeagueFilter === 'by_league') {
+                        const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
+                        const grouped: Record<string, boolean> = {};
+                        sortedMatches.forEach(match => {
+                          const leagueInfo = getLeagueOrder(match.sport);
+                          grouped[leagueInfo.region] = true;
+                        });
+                        return regionOrder.filter(r => grouped[r]);
+                      } else if (selectedCategory === 'soccer') {
+                        const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
+                        const grouped: Record<string, boolean> = {};
+                        sortedMatches.forEach(match => {
+                          const leagueInfo = getLeagueOrder(match.sport);
+                          grouped[leagueInfo.region] = true;
+                        });
+                        return regionOrder.filter(r => grouped[r]);
+                      } else {
+                        const grouped: Record<string, boolean> = {};
+                        sortedMatches.forEach(match => {
+                          const displayRegion = getSportDisplayRegion(match.sport);
+                          grouped[displayRegion] = true;
+                        });
+                        return Object.keys(grouped);
+                      }
+                    })()}
+                    onExpandAll={collapsibleRegions.expandAll}
+                    onCollapseAll={collapsibleRegions.collapseAll}
+                    expandedCount={collapsibleRegions.expandedRegions.size}
+                  />
+                </div>
+              )}
+
               {matchesLoading ? (
                 <SportsRegionSkeleton count={3} />
               ) : sortedMatches.length === 0 ? (
@@ -1001,91 +1042,84 @@ export default function SportsPredictions() {
                     // Sort regions by their order
                     const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
                     
-                    return regionOrder
-                      .filter(region => groupedByRegion[region] && Object.keys(groupedByRegion[region]).length > 0)
-                      .map((region, idx) => {
+                    const visibleRegions = regionOrder.filter(region => groupedByRegion[region] && Object.keys(groupedByRegion[region]).length > 0);
+                    
+                    // Initialize regions on first render
+                    if (visibleRegions.length > 0 && collapsibleRegions.expandedRegions.size === 0) {
+                      collapsibleRegions.setInitialRegions(visibleRegions, 3);
+                    }
+                    
+                    return visibleRegions.map((region) => {
                         const regionLeagues = Object.entries(groupedByRegion[region]);
                         const totalMatches = regionLeagues.reduce((sum, [, matches]) => sum + matches.length, 0);
+                        const isExpanded = collapsibleRegions.isRegionExpanded(region);
                         
                         return (
-                          <Collapsible key={region} defaultOpen={idx < 3}>
-                            <Card className="overflow-hidden">
-                              <CollapsibleTrigger className="w-full">
-                                <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-lg font-semibold">
-                                      {REGION_DISPLAY_NAMES[region]}
-                                    </span>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {totalMatches} {totalMatches === 1 ? 'match' : 'matches'}
-                                    </Badge>
-                                  </div>
-                                  <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                                </div>
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent>
-                                <div className="border-t border-border">
-                                  {/* Leagues within region */}
-                                  <div className="p-4 space-y-6">
-                                    {regionLeagues
-                                      .sort(([aKey], [bKey]) => {
-                                        const aMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === aKey);
-                                        const bMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === bKey);
-                                        if (aMatch && bMatch) {
-                                          return compareLeagues(aMatch.sport, bMatch.sport);
-                                        }
-                                        return aKey.localeCompare(bKey);
-                                      })
-                                      .map(([league, leagueMatches]) => (
-                                        <Collapsible key={league} defaultOpen>
-                                          <div className="rounded-lg border border-border/50 bg-muted/20">
-                                            <CollapsibleTrigger className="w-full">
-                                              <div className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors cursor-pointer">
-                                                <div className="flex items-center gap-2">
-                                                  <Badge variant="outline" className="text-sm px-3 py-1">
-                                                    ⚽ {league}
-                                                  </Badge>
-                                                  <span className="text-sm text-muted-foreground">
-                                                    {leagueMatches.length} {leagueMatches.length === 1 ? 'match' : 'matches'}
-                                                  </span>
-                                                </div>
-                                                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                                              </div>
-                                            </CollapsibleTrigger>
-                                            
-                                            <CollapsibleContent>
-                                              <div className="p-3 pt-0">
-                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                  {leagueMatches.map(match => {
-                                                    const marketStatus = getMatchMarketStatus(match);
-                                                    const matchOdds = getMatchOdds(match);
-                                                    const matchNow = Date.now() / 1000;
-                                                    const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
-                                                    
-                                                    return (
-                                                      <SportsMatchCard
-                                                        key={match.event_id}
-                                                        match={match}
-                                                        odds={matchOdds}
-                                                        onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
-                                                        isLive={isLive}
-                                                        hasMarket={marketStatus !== 'none'}
-                                                        backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
-                                                      />
-                                                    );
-                                                  })}
-                                                </div>
-                                              </div>
-                                            </CollapsibleContent>
+                          <RegionCollapsible
+                            key={region}
+                            region={region}
+                            displayName={REGION_DISPLAY_NAMES[region]}
+                            matchCount={totalMatches}
+                            isExpanded={isExpanded}
+                            onToggle={() => collapsibleRegions.toggleRegion(region)}
+                          >
+                            {/* Leagues within region */}
+                            <div className="space-y-6">
+                              {regionLeagues
+                                .sort(([aKey], [bKey]) => {
+                                  const aMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === aKey);
+                                  const bMatch = sortedMatches.find(m => (SPORT_LABELS[m.sport] || m.sport) === bKey);
+                                  if (aMatch && bMatch) {
+                                    return compareLeagues(aMatch.sport, bMatch.sport);
+                                  }
+                                  return aKey.localeCompare(bKey);
+                                })
+                                .map(([league, leagueMatches]) => (
+                                  <Collapsible key={league} defaultOpen>
+                                    <div className="rounded-lg border border-border/50 bg-muted/20">
+                                      <CollapsibleTrigger className="w-full">
+                                        <div className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors cursor-pointer">
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="text-sm px-3 py-1">
+                                              ⚽ {league}
+                                            </Badge>
+                                            <span className="text-sm text-muted-foreground">
+                                              {leagueMatches.length} {leagueMatches.length === 1 ? 'match' : 'matches'}
+                                            </span>
                                           </div>
-                                        </Collapsible>
-                                      ))}
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
-                            </Card>
-                          </Collapsible>
+                                          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                        </div>
+                                      </CollapsibleTrigger>
+                                      
+                                      <CollapsibleContent>
+                                        <div className="p-3 pt-0">
+                                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {leagueMatches.map(match => {
+                                              const marketStatus = getMatchMarketStatus(match);
+                                              const matchOdds = getMatchOdds(match);
+                                              const matchNow = Date.now() / 1000;
+                                              const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                                              
+                                              return (
+                                                <SportsMatchCard
+                                                  key={match.event_id}
+                                                  match={match}
+                                                  odds={matchOdds}
+                                                  onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                                  isLive={isLive}
+                                                  hasMarket={marketStatus !== 'none'}
+                                                  backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                                />
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      </CollapsibleContent>
+                                    </div>
+                                  </Collapsible>
+                                ))}
+                            </div>
+                          </RegionCollapsible>
                         );
                       });
                   })()}
@@ -1110,57 +1144,50 @@ export default function SportsPredictions() {
                     // Sort regions by their order
                     const regionOrder: LeagueRegion[] = ['europe_top5', 'europe_other', 'uk_cups', 'europe_cups', 'americas', 'americas_cups', 'asia_oceania', 'africa', 'international', 'unknown'];
                     
-                    return regionOrder
-                      .filter(region => groupedByRegion[region] && groupedByRegion[region].length > 0)
-                      .map((region, idx) => {
+                    const visibleRegions = regionOrder.filter(region => groupedByRegion[region] && groupedByRegion[region].length > 0);
+                    
+                    // Initialize regions on first render
+                    if (visibleRegions.length > 0 && collapsibleRegions.expandedRegions.size === 0) {
+                      collapsibleRegions.setInitialRegions(visibleRegions, 3);
+                    }
+                    
+                    return visibleRegions.map((region) => {
                         // Sort matches within region chronologically
                         const regionMatches = groupedByRegion[region].sort((a, b) => 
                           Number(a.commence_timestamp) - Number(b.commence_timestamp)
                         );
+                        const isExpanded = collapsibleRegions.isRegionExpanded(region);
                         
                         return (
-                          <Collapsible key={region} defaultOpen={idx < 3}>
-                            <Card className="overflow-hidden">
-                              <CollapsibleTrigger className="w-full">
-                                <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-lg font-semibold">
-                                      {REGION_DISPLAY_NAMES[region]}
-                                    </span>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {regionMatches.length} {regionMatches.length === 1 ? 'match' : 'matches'}
-                                    </Badge>
-                                  </div>
-                                  <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                                </div>
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent>
-                                <div className="border-t border-border p-4">
-                                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {regionMatches.map(match => {
-                                      const marketStatus = getMatchMarketStatus(match);
-                                      const matchOdds = getMatchOdds(match);
-                                      const matchNow = Date.now() / 1000;
-                                      const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
-                                      
-                                      return (
-                                        <SportsMatchCard
-                                          key={match.event_id}
-                                          match={match}
-                                          odds={matchOdds}
-                                          onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
-                                          isLive={isLive}
-                                          hasMarket={marketStatus !== 'none'}
-                                          backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
-                                        />
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
-                            </Card>
-                          </Collapsible>
+                          <RegionCollapsible
+                            key={region}
+                            region={region}
+                            displayName={REGION_DISPLAY_NAMES[region]}
+                            matchCount={regionMatches.length}
+                            isExpanded={isExpanded}
+                            onToggle={() => collapsibleRegions.toggleRegion(region)}
+                          >
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {regionMatches.map(match => {
+                                const marketStatus = getMatchMarketStatus(match);
+                                const matchOdds = getMatchOdds(match);
+                                const matchNow = Date.now() / 1000;
+                                const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                                
+                                return (
+                                  <SportsMatchCard
+                                    key={match.event_id}
+                                    match={match}
+                                    odds={matchOdds}
+                                    onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                    isLive={isLive}
+                                    hasMarket={marketStatus !== 'none'}
+                                    backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </RegionCollapsible>
                         );
                       });
                   })()}
@@ -1188,55 +1215,48 @@ export default function SportsPredictions() {
                       return compareLeagues(aMatch.sport, bMatch.sport);
                     });
                     
-                    return sortedRegionKeys.map((regionDisplay, idx) => {
+                    // Initialize regions on first render
+                    if (sortedRegionKeys.length > 0 && collapsibleRegions.expandedRegions.size === 0) {
+                      collapsibleRegions.setInitialRegions(sortedRegionKeys, 5);
+                    }
+                    
+                    return sortedRegionKeys.map((regionDisplay) => {
                       // Sort matches within region chronologically
                       const regionMatches = groupedByRegion[regionDisplay].sort((a, b) => 
                         Number(a.commence_timestamp) - Number(b.commence_timestamp)
                       );
+                      const isExpanded = collapsibleRegions.isRegionExpanded(regionDisplay);
                       
                       return (
-                        <Collapsible key={regionDisplay} defaultOpen={idx < 5}>
-                          <Card className="overflow-hidden">
-                            <CollapsibleTrigger className="w-full">
-                              <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-lg font-semibold">
-                                    {regionDisplay}
-                                  </span>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {regionMatches.length} {regionMatches.length === 1 ? 'match' : 'matches'}
-                                  </Badge>
-                                </div>
-                                <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                              </div>
-                            </CollapsibleTrigger>
-                            
-                            <CollapsibleContent>
-                              <div className="border-t border-border p-4">
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                  {regionMatches.map(match => {
-                                    const marketStatus = getMatchMarketStatus(match);
-                                    const matchOdds = getMatchOdds(match);
-                                    const matchNow = Date.now() / 1000;
-                                    const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
-                                    
-                                    return (
-                                      <SportsMatchCard
-                                        key={match.event_id}
-                                        match={match}
-                                        odds={matchOdds}
-                                        onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
-                                        isLive={isLive}
-                                        hasMarket={marketStatus !== 'none'}
-                                        backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
-                                      />
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </CollapsibleContent>
-                          </Card>
-                        </Collapsible>
+                        <RegionCollapsible
+                          key={regionDisplay}
+                          region={regionDisplay}
+                          displayName={regionDisplay}
+                          matchCount={regionMatches.length}
+                          isExpanded={isExpanded}
+                          onToggle={() => collapsibleRegions.toggleRegion(regionDisplay)}
+                        >
+                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {regionMatches.map(match => {
+                              const marketStatus = getMatchMarketStatus(match);
+                              const matchOdds = getMatchOdds(match);
+                              const matchNow = Date.now() / 1000;
+                              const isLive = match.commence_timestamp <= matchNow && match.commence_timestamp > matchNow - 14400;
+                              
+                              return (
+                                <SportsMatchCard
+                                  key={match.event_id}
+                                  match={match}
+                                  odds={matchOdds}
+                                  onBetClick={(m) => setTeamSelectDialog({ open: true, match: m })}
+                                  isLive={isLive}
+                                  hasMarket={marketStatus !== 'none'}
+                                  backoffUntil={backoffStates?.[match.event_id]?.backoffUntil}
+                                />
+                              );
+                            })}
+                          </div>
+                        </RegionCollapsible>
                       );
                     });
                   })()}
