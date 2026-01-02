@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.partner-earnings]
 verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false

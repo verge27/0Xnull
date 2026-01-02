@@ -12,6 +12,7 @@ import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import { compareLeagues, getLeagueOrder, REGION_DISPLAY_NAMES, getRegionsFromSports, getSportDisplayRegion, type LeagueRegion } from '@/lib/leagueOrder';
+import { useSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -63,6 +64,7 @@ interface VideoHighlight {
 }
 
 export default function SportsPredictions() {
+  useSEO();
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { createSportsMarket, liveScores, backoffStates, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
   const { categories, loading: categoriesLoading } = useSportsCategories();
