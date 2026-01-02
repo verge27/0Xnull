@@ -1052,4 +1052,232 @@ function updateStructuredData(data: StructuredData | StructuredData[] | undefine
   });
 }
 
+// Generate Product schema for marketplace listings
+export interface ProductSEOData {
+  id: string;
+  title: string;
+  description: string;
+  priceUsd: number;
+  images: string[];
+  category: string;
+  condition: 'new' | 'used' | 'digital';
+  stock: number;
+  sellerName?: string;
+}
+
+export function useProductSEO(listing: ProductSEOData | null) {
+  useEffect(() => {
+    if (!listing) return;
+
+    const url = `https://0xnull.io/listing/${listing.id}`;
+    const imageUrl = listing.images[0]?.startsWith('http') 
+      ? listing.images[0] 
+      : `https://0xnull.io${listing.images[0]}`;
+
+    // Update document title
+    document.title = `${listing.title} - 0xNull Marketplace`;
+
+    // Update meta tags
+    updateMetaTag('description', listing.description.slice(0, 160));
+
+    // Open Graph
+    updateMetaTag('og:title', `${listing.title} - 0xNull Marketplace`, 'property');
+    updateMetaTag('og:description', listing.description.slice(0, 160), 'property');
+    updateMetaTag('og:image', imageUrl, 'property');
+    updateMetaTag('og:url', url, 'property');
+    updateMetaTag('og:type', 'product', 'property');
+
+    // Twitter
+    updateMetaTag('twitter:title', `${listing.title} - 0xNull Marketplace`);
+    updateMetaTag('twitter:description', listing.description.slice(0, 160));
+    updateMetaTag('twitter:image', imageUrl);
+
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    // Product structured data
+    const productSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: listing.title,
+      description: listing.description,
+      image: listing.images.map(img => 
+        img.startsWith('http') ? img : `https://0xnull.io${img}`
+      ),
+      url: url,
+      category: listing.category,
+      brand: {
+        '@type': 'Brand',
+        name: '0xNull Marketplace',
+      },
+      offers: {
+        '@type': 'Offer',
+        price: listing.priceUsd.toFixed(2),
+        priceCurrency: 'USD',
+        availability: listing.stock > 0 
+          ? 'https://schema.org/InStock' 
+          : 'https://schema.org/OutOfStock',
+        itemCondition: listing.condition === 'new' 
+          ? 'https://schema.org/NewCondition'
+          : listing.condition === 'used'
+          ? 'https://schema.org/UsedCondition'
+          : 'https://schema.org/NewCondition',
+        seller: listing.sellerName ? {
+          '@type': 'Organization',
+          name: listing.sellerName,
+        } : undefined,
+      },
+    };
+
+    // Breadcrumb for listing
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Marketplace',
+          item: 'https://0xnull.io/browse',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: listing.title,
+          item: url,
+        },
+      ],
+    };
+
+    updateStructuredData([productSchema, breadcrumbSchema]);
+
+  }, [listing]);
+}
+
+// Generate Event schema for prediction markets
+export interface EventSEOData {
+  id: string;
+  question: string;
+  description?: string;
+  resolutionDate?: string;
+  status: 'open' | 'closed' | 'resolved';
+  totalPool?: number;
+  eventType?: 'sports' | 'esports' | 'crypto' | 'other';
+  teams?: { home?: string; away?: string };
+}
+
+export function useEventSEO(event: EventSEOData | null, pageType?: string) {
+  useEffect(() => {
+    if (!event) return;
+
+    const url = `https://0xnull.io/market/${event.id}`;
+    const title = event.question.length > 60 
+      ? `${event.question.slice(0, 57)}...` 
+      : event.question;
+
+    // Update document title
+    document.title = `${title} - 0xNull Predictions`;
+
+    // Update meta tags
+    const description = event.description || `Predict: ${event.question}. Anonymous betting with Monero on 0xNull.`;
+    updateMetaTag('description', description.slice(0, 160));
+
+    // Open Graph
+    updateMetaTag('og:title', `${title} - 0xNull Predictions`, 'property');
+    updateMetaTag('og:description', description.slice(0, 160), 'property');
+    updateMetaTag('og:url', url, 'property');
+    updateMetaTag('og:type', 'website', 'property');
+
+    // Twitter
+    updateMetaTag('twitter:title', `${title} - 0xNull Predictions`);
+    updateMetaTag('twitter:description', description.slice(0, 160));
+
+    // Determine event type for schema
+    let eventSchemaType = 'Event';
+    if (event.eventType === 'sports') eventSchemaType = 'SportsEvent';
+    if (event.teams?.home && event.teams?.away) eventSchemaType = 'SportsEvent';
+
+    // Event structured data
+    const eventSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': eventSchemaType,
+      name: event.question,
+      description: description,
+      url: url,
+      eventStatus: event.status === 'open' 
+        ? 'https://schema.org/EventScheduled'
+        : event.status === 'resolved'
+        ? 'https://schema.org/EventCancelled'
+        : 'https://schema.org/EventPostponed',
+      ...(event.resolutionDate && {
+        startDate: event.resolutionDate,
+        endDate: event.resolutionDate,
+      }),
+      location: {
+        '@type': 'VirtualLocation',
+        url: 'https://0xnull.io',
+      },
+      organizer: {
+        '@type': 'Organization',
+        name: '0xNull',
+        url: 'https://0xnull.io',
+      },
+      ...(event.teams?.home && event.teams?.away && {
+        competitor: [
+          {
+            '@type': 'SportsTeam',
+            name: event.teams.home,
+          },
+          {
+            '@type': 'SportsTeam',
+            name: event.teams.away,
+          },
+        ],
+      }),
+    };
+
+    // Breadcrumb for market
+    const pageName = pageType || 'Predictions';
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: pageName,
+          item: 'https://0xnull.io/predict',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: title,
+          item: url,
+        },
+      ],
+    };
+
+    updateStructuredData([eventSchema, breadcrumbSchema]);
+
+  }, [event, pageType]);
+}
+
 export default useSEO;

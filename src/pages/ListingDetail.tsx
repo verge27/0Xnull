@@ -31,6 +31,7 @@ import { usePGP } from '@/hooks/usePGP';
 import { PGPRequiredDialog } from '@/components/PGPRequiredDialog';
 import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
 import { PaymentMethodSelector, PaymentMethod } from '@/components/PaymentMethodSelector';
+import { useProductSEO } from '@/hooks/useSEO';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -138,6 +139,19 @@ const ListingDetail = () => {
   }, [listing]);
 
   const seller = listing ? DEMO_USERS.find(u => u.id === listing.sellerId) : null;
+
+  // SEO for product schema
+  useProductSEO(listing ? {
+    id: listing.id,
+    title: listing.title,
+    description: listing.description,
+    priceUsd: listing.priceUsd,
+    images: listing.images,
+    category: listing.category,
+    condition: listing.condition,
+    stock: listing.stock,
+    sellerName: seller?.displayName,
+  } : null);
 
   if (loadingListing) {
     return (
