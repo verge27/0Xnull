@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,6 +12,7 @@ import { HelpCircle, TrendingUp, Users, Shield, Zap, Calculator } from 'lucide-r
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 
 export default function HowBettingWorks() {
+  useSEO();
   const [betAmount, setBetAmount] = useState<string>('50');
   const [yesPool, setYesPool] = useState<string>('200');
   const [noPool, setNoPool] = useState<string>('300');

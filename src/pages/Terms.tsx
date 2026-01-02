@@ -1,8 +1,10 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Terms = () => {
+  useSEO();
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

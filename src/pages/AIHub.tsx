@@ -2,6 +2,7 @@ import { Bot, Mic, MessageCircle, Lock, Zap, DollarSign, ExternalLink } from 'lu
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ const features = [
 ];
 
 export default function AIHub() {
+  useSEO();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />

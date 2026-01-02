@@ -4,6 +4,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { useSEO } from '@/hooks/useSEO';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -117,6 +118,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function CryptoPredictions() {
+  useSEO();
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
   const { isAdmin } = useIsAdmin();
   

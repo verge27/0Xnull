@@ -2,6 +2,7 @@ import { RefreshCw, Server, Smartphone, Lock, Zap, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -51,6 +52,7 @@ const features = [
 ];
 
 export default function InfraHub() {
+  useSEO();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
