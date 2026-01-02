@@ -9,7 +9,7 @@ import cricketBackground from '@/assets/cricket-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +58,26 @@ export default function CricketPredictions() {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [placingBet, setPlacingBet] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'Cricket prediction market',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'sports' as const,
+      })),
+      pageTitle: 'Cricket Predictions - 0xNull',
+      pageDescription: 'Anonymous cricket betting with Monero. Predict IPL, international, and T20 match outcomes.',
+      pageUrl: 'https://0xnull.io/cricket',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
   
   const [selectedMatchType, setSelectedMatchType] = useState<string>('all');
   const [teamSelectDialog, setTeamSelectDialog] = useState<{ open: boolean; match: CricketMatch | null }>({

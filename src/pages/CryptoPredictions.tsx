@@ -4,7 +4,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -132,6 +132,26 @@ export default function CryptoPredictions() {
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'Crypto price prediction',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'crypto' as const,
+      })),
+      pageTitle: 'Crypto Predictions - 0xNull',
+      pageDescription: 'Predict cryptocurrency prices anonymously. BTC, ETH, XMR price predictions with privacy.',
+      pageUrl: 'https://0xnull.io/predictions',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
   const [selectedMarket, setSelectedMarket] = useState<PredictionMarket | null>(null);
   const [betDialogOpen, setBetDialogOpen] = useState(false);
   

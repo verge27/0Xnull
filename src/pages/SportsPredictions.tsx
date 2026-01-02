@@ -12,7 +12,7 @@ import { api, type PredictionMarket, type PayoutEntry } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import { compareLeagues, getLeagueOrder, REGION_DISPLAY_NAMES, getRegionsFromSports, getSportDisplayRegion, type LeagueRegion } from '@/lib/leagueOrder';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -89,6 +89,26 @@ export default function SportsPredictions() {
   
   const [depositModalOpen, setDepositModalOpen] = useState(false);
   const [currentBetData, setCurrentBetData] = useState<PlaceBetResponse | null>(null);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'Sports prediction market',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'sports' as const,
+      })),
+      pageTitle: 'Sports Predictions - 0xNull',
+      pageDescription: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA, and more.',
+      pageUrl: 'https://0xnull.io/sports-predictions',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
   
   const [betSide, setBetSide] = useState<'yes' | 'no'>('yes');
   const [betAmountUsd, setBetAmountUsd] = useState('');
