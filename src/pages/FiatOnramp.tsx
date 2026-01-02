@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CreditCard, ExternalLink, Wallet, Info, CheckCircle, ArrowRightLeft } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +31,7 @@ const CRYPTO_OPTIONS = [
 ];
 
 const FiatOnramp = () => {
+  useSEO();
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [fiatCurrency, setFiatCurrency] = useState('usd');
   const [fiatAmount, setFiatAmount] = useState('100');

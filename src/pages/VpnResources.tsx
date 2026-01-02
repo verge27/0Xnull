@@ -1,6 +1,7 @@
 import { Shield, ExternalLink, CheckCircle2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const vpnServices = [
 ];
 
 const VpnResources = () => {
+  useSEO();
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />

@@ -3,6 +3,7 @@ import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp } from 'luc
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,6 +47,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const FiatOfframp = () => {
+  useSEO();
   const { toast } = useToast();
   
   const [selectedCrypto, setSelectedCrypto] = useState('usdt-eth');

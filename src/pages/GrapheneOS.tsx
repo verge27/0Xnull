@@ -1,10 +1,12 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Smartphone, Shield, Lock, Wifi, Users, Globe, Download, HelpCircle, ExternalLink } from 'lucide-react';
 
 const GrapheneOS = () => {
+  useSEO();
   const supportedDevices = [
     { name: 'Pixel 9a', support: 'April 2032', tier: '7-year' },
     { name: 'Pixel 9 / 9 Pro / 9 Pro XL / 9 Pro Fold', support: 'August 2031', tier: '7-year' },

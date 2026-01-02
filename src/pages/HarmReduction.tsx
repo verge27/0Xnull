@@ -1,5 +1,6 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -7,6 +8,7 @@ import { Shield, AlertTriangle, Lock, Eye, ExternalLink, CheckCircle, XCircle } 
 import safetyBackground from '@/assets/safety-background.png';
 
 const HarmReduction = () => {
+  useSEO();
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Background image */}

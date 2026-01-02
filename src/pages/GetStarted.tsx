@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Coins, Download, RefreshCw, Target, Smartphone, Monitor, ExternalLink } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSEO } from "@/hooks/useSEO";
 
 type Step = "landing" | "get-crypto" | "get-wallet" | "get-xmr" | "ready";
 
 const GetStarted = () => {
+  useSEO();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("landing");
   const [hasCrypto, setHasCrypto] = useState<boolean | null>(null);

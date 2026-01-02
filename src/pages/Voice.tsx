@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +46,7 @@ const features = [
 ];
 
 const VoicePage = () => {
+  useSEO();
   const { hasToken, token, refreshBalance } = useToken();
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("");

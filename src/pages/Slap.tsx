@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { BettingCountdown, isBettingOpen } from '@/components/BettingCountdown';
 import { api, type PredictionMarket } from '@/services/api';
 
 const Slap = () => {
+  useSEO();
   const [activeTab, setActiveTab] = useState('events');
   const { data: promotions, isLoading: loadingPromotions } = useSlapPromotions();
   const { data: featured, isLoading: loadingFeatured } = useSlapFeatured();

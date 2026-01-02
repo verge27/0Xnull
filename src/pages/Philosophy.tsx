@@ -1,6 +1,7 @@
 import { Lock, Circle, ExternalLink, Code, KeyRound, Server, Shield, AlertTriangle, Check, X } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +43,7 @@ const essentialReading = [
 ];
 
 const Philosophy = () => {
+  useSEO();
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
