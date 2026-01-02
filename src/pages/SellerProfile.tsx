@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Calendar, ShoppingBag, MessageCircle } from 'lucide-react';
 import { SellerReviews, ReputationBadge } from '@/components/SellerReviews';
 import { useSellerReviews } from '@/hooks/useReviews';
+import { useSellerSEO } from '@/hooks/useSEO';
 
 const SellerProfile = () => {
   const { id } = useParams();
@@ -16,7 +17,29 @@ const SellerProfile = () => {
   const listings = getListings().filter(l => l.sellerId === id && l.status === 'active');
   
   // Fetch real reviews from database
-  const { reputation } = useSellerReviews(id, false);
+  const { reviews, reputation } = useSellerReviews(id, false);
+
+  // Apply seller SEO with AggregateRating schema
+  useSellerSEO(seller && id ? {
+    id: id,
+    displayName: seller.displayName,
+    bio: seller.bio,
+    avatar: seller.avatar,
+    location: seller.location,
+    totalSales: seller.totalSales,
+    joinedAt: seller.joinedAt,
+    reputation: {
+      score: reputation.reputation_score || seller.rating,
+      reviewCount: reputation.total_reviews || seller.reviewCount,
+    },
+    reviews: reviews.slice(0, 5).map(r => ({
+      rating: r.rating,
+      title: r.title || undefined,
+      content: r.content || undefined,
+      reviewerName: r.reviewer_name || undefined,
+      createdAt: r.created_at,
+    })),
+  } : null);
 
   if (!seller) {
     return (
