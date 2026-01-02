@@ -30,10 +30,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSEO } from '@/hooks/useSEO';
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
 import heroBackground from '@/assets/hero-background.png';
 
 const Browse = () => {
+  useSEO();
   const [searchParams, setSearchParams] = useSearchParams();
   const demoListings = getListings();
   const { listings: dbListings } = useListings();

@@ -6,9 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { useSEO } from '@/hooks/useSEO';
 import predictionsBackground from '@/assets/predictions-hero-background.png';
 
 const Index = () => {
+  useSEO();
   const features = [
     {
       icon: Target,
