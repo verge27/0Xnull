@@ -9,6 +9,12 @@ interface SEOProps {
   type?: string;
 }
 
+interface StructuredData {
+  '@context': string;
+  '@type': string;
+  [key: string]: unknown;
+}
+
 const defaultMeta = {
   title: '0xNull - Anonymous Crypto Predictions & Marketplace',
   description: 'Privacy-first prediction markets for sports, esports, and crypto. Anonymous marketplace for goods and services. Pay with Monero and other cryptocurrencies.',
@@ -76,7 +82,173 @@ const pageMeta: Record<string, SEOProps> = {
   },
 };
 
-export function useSEO(customMeta?: SEOProps) {
+// Structured data for different page types
+const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
+  '/': [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+      description: 'Privacy-first prediction markets and anonymous crypto marketplace',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://0xnull.io/browse?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+      logo: 'https://0xnull.io/favicon.jpg',
+      sameAs: [],
+    },
+  ],
+  '/sports-predictions': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Sports Predictions',
+    description: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA, and more.',
+    url: 'https://0xnull.io/sports-predictions',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    about: {
+      '@type': 'Thing',
+      name: 'Sports Betting',
+      description: 'Privacy-focused sports prediction markets',
+    },
+  },
+  '/esports-predictions': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Esports Predictions',
+    description: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends, and more.',
+    url: 'https://0xnull.io/esports-predictions',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    about: {
+      '@type': 'Thing',
+      name: 'Esports Betting',
+      description: 'Privacy-focused esports prediction markets',
+    },
+  },
+  '/predictions': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Crypto Predictions',
+    description: 'Predict cryptocurrency prices anonymously. BTC, ETH, XMR price predictions with privacy.',
+    url: 'https://0xnull.io/predictions',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+  },
+  '/swaps': {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialService',
+    name: 'Crypto Swaps - 0xNull',
+    description: 'Swap cryptocurrencies anonymously. No KYC, no registration required.',
+    url: 'https://0xnull.io/swaps',
+    areaServed: 'Worldwide',
+    availableChannel: {
+      '@type': 'ServiceChannel',
+      serviceUrl: 'https://0xnull.io/swaps',
+    },
+  },
+  '/browse': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Marketplace',
+    description: 'Anonymous crypto marketplace. Buy and sell goods and services with Monero.',
+    url: 'https://0xnull.io/browse',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+  },
+  '/ai': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'AI Services',
+    description: 'Privacy-first AI services including voice cloning and text-to-speech.',
+    url: 'https://0xnull.io/ai',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+  },
+  '/vps': {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Anonymous VPS Hosting',
+    description: 'Anonymous VPS hosting with cryptocurrency payments. No KYC required.',
+    url: 'https://0xnull.io/vps',
+    brand: {
+      '@type': 'Brand',
+      name: '0xNull',
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'XMR',
+      availability: 'https://schema.org/InStock',
+    },
+  },
+  '/phone': {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Anonymous eSIM',
+    description: 'Anonymous eSIM and phone services with crypto payments.',
+    url: 'https://0xnull.io/phone',
+    brand: {
+      '@type': 'Brand',
+      name: '0xNull',
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'XMR',
+      availability: 'https://schema.org/InStock',
+    },
+  },
+  '/safety': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Harm Reduction',
+    description: 'Safety and harm reduction resources for privacy tools and cryptocurrencies.',
+    url: 'https://0xnull.io/safety',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+  },
+  '/terms': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Terms of Service',
+    description: 'Terms of service for 0xNull prediction markets and marketplace.',
+    url: 'https://0xnull.io/terms',
+  },
+  '/privacy': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Privacy Policy',
+    description: 'Privacy policy for 0xNull.',
+    url: 'https://0xnull.io/privacy',
+  },
+};
+
+export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredData | StructuredData[]) {
   const location = useLocation();
   
   useEffect(() => {
@@ -116,7 +288,11 @@ export function useSEO(customMeta?: SEOProps) {
     }
     canonical.href = url;
     
-  }, [location.pathname, customMeta]);
+    // Structured Data (JSON-LD)
+    const structuredData = customStructuredData || pageStructuredData[location.pathname];
+    updateStructuredData(structuredData);
+    
+  }, [location.pathname, customMeta, customStructuredData]);
 }
 
 function updateMetaTag(name: string, content: string, attr: 'name' | 'property' = 'name') {
@@ -127,6 +303,24 @@ function updateMetaTag(name: string, content: string, attr: 'name' | 'property' 
     document.head.appendChild(element);
   }
   element.content = content;
+}
+
+function updateStructuredData(data: StructuredData | StructuredData[] | undefined) {
+  // Remove existing structured data scripts
+  const existingScripts = document.querySelectorAll('script[type="application/ld+json"][data-seo="true"]');
+  existingScripts.forEach(script => script.remove());
+  
+  if (!data) return;
+  
+  const dataArray = Array.isArray(data) ? data : [data];
+  
+  dataArray.forEach(item => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo', 'true');
+    script.textContent = JSON.stringify(item);
+    document.head.appendChild(script);
+  });
 }
 
 export default useSEO;
