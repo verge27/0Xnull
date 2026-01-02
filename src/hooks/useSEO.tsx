@@ -1351,4 +1351,158 @@ export function useEventSEO(event: EventSEOData | null, pageType?: string) {
   }, [event, pageType]);
 }
 
+// Generate Seller/Organization schema with AggregateRating for reviews
+export interface SellerSEOData {
+  id: string;
+  displayName: string;
+  bio?: string;
+  avatar?: string;
+  location?: string;
+  totalSales?: number;
+  joinedAt?: string;
+  reputation: {
+    score: number;
+    reviewCount: number;
+  };
+  reviews?: Array<{
+    rating: number;
+    title?: string;
+    content?: string;
+    reviewerName?: string;
+    createdAt: string;
+  }>;
+}
+
+export function useSellerSEO(seller: SellerSEOData | null) {
+  useEffect(() => {
+    if (!seller) return;
+
+    const url = `https://0xnull.io/seller/${seller.id}`;
+    const title = `${seller.displayName} - 0xNull Marketplace Seller`;
+    const description = seller.bio 
+      ? seller.bio.slice(0, 160)
+      : `${seller.displayName} is a verified seller on 0xNull Marketplace with ${seller.reputation.reviewCount} reviews and a ${seller.reputation.score}/5 rating.`;
+
+    // Update document title
+    document.title = title;
+
+    // Update meta tags
+    updateMetaTag('description', description);
+
+    // Open Graph
+    updateMetaTag('og:title', title, 'property');
+    updateMetaTag('og:description', description, 'property');
+    updateMetaTag('og:url', url, 'property');
+    updateMetaTag('og:type', 'profile', 'property');
+    if (seller.avatar) {
+      updateMetaTag('og:image', seller.avatar, 'property');
+    }
+
+    // Twitter
+    updateMetaTag('twitter:title', title);
+    updateMetaTag('twitter:description', description);
+    if (seller.avatar) {
+      updateMetaTag('twitter:image', seller.avatar);
+    }
+
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    // Build structured data array
+    const structuredDataArray: StructuredData[] = [];
+
+    // Organization/LocalBusiness schema with AggregateRating
+    const sellerSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: seller.displayName,
+      url: url,
+      description: description,
+      ...(seller.avatar && { image: seller.avatar }),
+      ...(seller.location && {
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: seller.location,
+        },
+      }),
+      ...(seller.reputation.reviewCount > 0 && {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: seller.reputation.score.toFixed(1),
+          bestRating: '5',
+          worstRating: '1',
+          ratingCount: seller.reputation.reviewCount,
+          reviewCount: seller.reputation.reviewCount,
+        },
+      }),
+    };
+    structuredDataArray.push(sellerSchema);
+
+    // Add individual Review schemas (up to 5 most recent)
+    if (seller.reviews && seller.reviews.length > 0) {
+      seller.reviews.slice(0, 5).forEach(review => {
+        const reviewSchema: StructuredData = {
+          '@context': 'https://schema.org',
+          '@type': 'Review',
+          itemReviewed: {
+            '@type': 'Organization',
+            name: seller.displayName,
+            url: url,
+          },
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: review.rating,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          ...(review.title && { name: review.title }),
+          ...(review.content && { reviewBody: review.content }),
+          author: {
+            '@type': 'Person',
+            name: review.reviewerName || 'Anonymous',
+          },
+          datePublished: review.createdAt,
+        };
+        structuredDataArray.push(reviewSchema);
+      });
+    }
+
+    // Breadcrumb for seller profile
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Marketplace',
+          item: 'https://0xnull.io/browse',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: seller.displayName,
+          item: url,
+        },
+      ],
+    };
+    structuredDataArray.push(breadcrumbSchema);
+
+    updateStructuredData(structuredDataArray);
+
+  }, [seller]);
+}
+
 export default useSEO;

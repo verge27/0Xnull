@@ -59,6 +59,7 @@ import Payouts from "./pages/Payouts";
 import Influencer from "./pages/Influencer";
 import InfluencerDashboard from "./pages/InfluencerDashboard";
 import PartnerEarnings from "./pages/PartnerEarnings";
+import MarketDetail from "./pages/MarketDetail";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,7 @@ const App = () => (
                   <Route path="/slap" element={<Navigate to="/predictions/sports/combat/slap" replace />} />
                   
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />
+                  <Route path="/market/:id" element={<MarketDetail />} />
                   <Route path="/my-slips" element={<MySlips />} />
                   <Route path="/payouts" element={<Payouts />} />
                   {/* AI */}
