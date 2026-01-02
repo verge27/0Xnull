@@ -132,6 +132,54 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Philosophy - 0xNull',
     description: 'Our philosophy on privacy, freedom, and decentralization. Why we built 0xNull.',
   },
+  '/fiat-onramp': {
+    title: 'Buy Crypto with Fiat - 0xNull',
+    description: 'Buy cryptocurrency with credit card or bank transfer. Get BTC, ETH, and more without KYC.',
+  },
+  '/fiat-offramp': {
+    title: 'Sell Crypto to Fiat - 0xNull',
+    description: 'Convert cryptocurrency to fiat currency. Cash out ETH, USDT, USDC to your bank account.',
+  },
+  '/verify': {
+    title: 'Verify & Security - 0xNull',
+    description: 'Verify 0xNull authenticity. PGP keys, Tor address, and warrant canary for security.',
+  },
+  '/vpn-resources': {
+    title: 'Privacy VPN Resources - 0xNull',
+    description: 'Curated list of privacy-focused VPNs that accept crypto and require no KYC.',
+  },
+  '/wishlist': {
+    title: 'My Wishlist - 0xNull',
+    description: 'Your saved marketplace items. Track products you want to purchase later.',
+  },
+  '/messages': {
+    title: 'Messages - 0xNull',
+    description: 'Encrypted messages with buyers and sellers. Private communication for marketplace orders.',
+  },
+  '/orders': {
+    title: 'My Orders - 0xNull',
+    description: 'Track your marketplace orders. View order history and status updates.',
+  },
+  '/sell': {
+    title: 'Sell on 0xNull - 0xNull',
+    description: 'Start selling on 0xNull marketplace. List products and services, accept crypto payments.',
+  },
+  '/settings': {
+    title: 'Settings - 0xNull',
+    description: 'Manage your 0xNull account settings, profile, and preferences.',
+  },
+  '/my-slips': {
+    title: 'My Bet Slips - 0xNull',
+    description: 'View and track your betting slips. Check multibet status and potential payouts.',
+  },
+  '/payouts': {
+    title: 'Payouts - 0xNull',
+    description: 'View and manage your prediction market payouts. Track winning bets and withdrawals.',
+  },
+  '/auth': {
+    title: 'Login - 0xNull',
+    description: 'Sign in to 0xNull. Access your marketplace and prediction market accounts.',
+  },
 };
 
 // Breadcrumb configuration for pages
@@ -245,6 +293,64 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
   '/philosophy': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Philosophy', url: 'https://0xnull.io/philosophy' },
+  ],
+  '/fiat-onramp': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
+    { name: 'Buy Crypto', url: 'https://0xnull.io/fiat-onramp' },
+  ],
+  '/fiat-offramp': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
+    { name: 'Sell Crypto', url: 'https://0xnull.io/fiat-offramp' },
+  ],
+  '/verify': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Verify', url: 'https://0xnull.io/verify' },
+  ],
+  '/vpn-resources': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
+    { name: 'VPN Resources', url: 'https://0xnull.io/vpn-resources' },
+  ],
+  '/kokoro': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'AI Hub', url: 'https://0xnull.io/ai' },
+    { name: 'Kokoro', url: 'https://0xnull.io/kokoro' },
+  ],
+  '/slap': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Predictions', url: 'https://0xnull.io/predict' },
+    { name: 'Slap Fighting', url: 'https://0xnull.io/slap' },
+  ],
+  '/wishlist': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Wishlist', url: 'https://0xnull.io/wishlist' },
+  ],
+  '/messages': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Messages', url: 'https://0xnull.io/messages' },
+  ],
+  '/orders': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Orders', url: 'https://0xnull.io/orders' },
+  ],
+  '/sell': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Sell', url: 'https://0xnull.io/sell' },
+  ],
+  '/settings': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Settings', url: 'https://0xnull.io/settings' },
+  ],
+  '/my-slips': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Predictions', url: 'https://0xnull.io/predict' },
+    { name: 'My Slips', url: 'https://0xnull.io/my-slips' },
+  ],
+  '/payouts': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Payouts', url: 'https://0xnull.io/payouts' },
   ],
 };
 
@@ -598,6 +704,58 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
       name: 'GrapheneOS',
     },
   },
+  '/fiat-onramp': {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialService',
+    name: 'Buy Crypto with Fiat',
+    description: 'Purchase cryptocurrency with credit card or bank transfer.',
+    url: 'https://0xnull.io/fiat-onramp',
+    areaServed: 'Worldwide',
+  },
+  '/fiat-offramp': {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialService',
+    name: 'Sell Crypto to Fiat',
+    description: 'Convert cryptocurrency to fiat currency.',
+    url: 'https://0xnull.io/fiat-offramp',
+    areaServed: 'Worldwide',
+  },
+  '/verify': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Verify & Security',
+    description: 'Verify 0xNull authenticity and security practices.',
+    url: 'https://0xnull.io/verify',
+  },
+  '/vpn-resources': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Privacy VPN Resources',
+    description: 'Curated list of privacy-focused VPN services.',
+    url: 'https://0xnull.io/vpn-resources',
+  },
+  '/kokoro': {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Kokoro AI Companion',
+    description: 'Private AI companion for conversation.',
+    url: 'https://0xnull.io/kokoro',
+    applicationCategory: 'LifestyleApplication',
+  },
+  '/slap': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Slap Fighting Predictions',
+    description: 'Anonymous slap fighting betting with Monero.',
+    url: 'https://0xnull.io/slap',
+  },
+  '/predict': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Predictions Hub',
+    description: 'All prediction markets in one place.',
+    url: 'https://0xnull.io/predict',
+  },
 };
 
 // Article schemas for blog-style content pages
@@ -717,6 +875,51 @@ const articleSchemas: Record<string, StructuredData> = {
       },
     },
     proficiencyLevel: 'Beginner',
+  },
+  '/grapheneos': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'GrapheneOS: The Privacy-First Mobile OS',
+    description: 'Why GrapheneOS is the best choice for mobile privacy and how to get started.',
+    url: 'https://0xnull.io/grapheneos',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+    proficiencyLevel: 'Beginner',
+  },
+  '/vpn-resources': {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'Privacy-First VPN Resources',
+    description: 'A curated list of VPN services that respect your privacy.',
+    url: 'https://0xnull.io/vpn-resources',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
   },
 };
 

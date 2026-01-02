@@ -1,6 +1,7 @@
 import { Shield, Globe, Key, FileCheck, ChevronDown } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ T6eDG9UAKZVnBtZ2QkkbtAzsPnZ9cNaXIPIw
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 const Verify = () => {
+  useSEO();
   const [isKeyOpen, setIsKeyOpen] = useState(false);
 
   return (

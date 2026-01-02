@@ -9,6 +9,7 @@ import cricketBackground from '@/assets/cricket-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { useSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Radio } from 'lucide-react';
 
 export default function CricketPredictions() {
+  useSEO();
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { matches, liveMatches, upcomingMatches, loading: matchesLoading, fetchMatches, createCricketMarket } = useCricketEvents();
   const { xmrUsdRate } = useExchangeRate();

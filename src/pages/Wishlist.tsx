@@ -5,8 +5,10 @@ import { getWishlist, getListing } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, ShoppingBag } from 'lucide-react';
+import { useSEO } from '@/hooks/useSEO';
 
 const Wishlist = () => {
+  useSEO();
   const wishlistIds = getWishlist();
   const wishlistListings = wishlistIds.map(id => getListing(id)).filter(Boolean);
 

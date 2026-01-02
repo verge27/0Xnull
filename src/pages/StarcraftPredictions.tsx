@@ -8,6 +8,7 @@ import starcraftBackground from '@/assets/starcraft-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { useSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -6,8 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, KeyRound, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSEO } from '@/hooks/useSEO';
 
 export default function Influencer() {
+  useSEO({
+    title: 'Influencer Dashboard - 0xNull',
+    description: 'Access your influencer dashboard to track earnings and referral statistics.',
+  });
+  
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
