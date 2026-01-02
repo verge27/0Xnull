@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +57,26 @@ export default function CombatSports() {
   
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'Combat sports prediction',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'sports' as const,
+      })),
+      pageTitle: 'MMA & Boxing Predictions - 0xNull',
+      pageDescription: 'Anonymous MMA and boxing betting. Predict UFC, boxing, and combat sports outcomes with Monero.',
+      pageUrl: 'https://0xnull.io/combat',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
   const [creating, setCreating] = useState(false);
   const [newlyCreatedMarketId, setNewlyCreatedMarketId] = useState<string | null>(null);
   const marketsRef = useRef<HTMLDivElement>(null);

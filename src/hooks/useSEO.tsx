@@ -1178,6 +1178,77 @@ export interface EventSEOData {
   teams?: { home?: string; away?: string };
 }
 
+// Generate ItemList schema for prediction market list pages
+export interface EventListSEOData {
+  events: Array<{
+    id: string;
+    question: string;
+    description?: string;
+    resolutionDate?: string;
+    status: 'open' | 'closed' | 'resolved';
+    totalPool?: number;
+    eventType?: 'sports' | 'esports' | 'crypto' | 'other';
+    teams?: { home?: string; away?: string };
+  }>;
+  pageTitle: string;
+  pageDescription: string;
+  pageUrl: string;
+}
+
+export function useEventListSEO(data: EventListSEOData | null) {
+  useEffect(() => {
+    if (!data || data.events.length === 0) return;
+
+    // Build ItemList schema with events
+    const itemListSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: data.pageTitle,
+      description: data.pageDescription,
+      url: data.pageUrl,
+      numberOfItems: data.events.length,
+      itemListElement: data.events.slice(0, 20).map((event, index) => {
+        const eventType = event.eventType === 'sports' || (event.teams?.home && event.teams?.away)
+          ? 'SportsEvent'
+          : 'Event';
+        
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': eventType,
+            name: event.question,
+            description: event.description || `Predict: ${event.question}`,
+            url: `${data.pageUrl}#market-${event.id}`,
+            eventStatus: event.status === 'open'
+              ? 'https://schema.org/EventScheduled'
+              : event.status === 'resolved'
+              ? 'https://schema.org/EventCancelled'
+              : 'https://schema.org/EventPostponed',
+            ...(event.resolutionDate && {
+              startDate: event.resolutionDate,
+            }),
+            ...(event.teams?.home && event.teams?.away && {
+              competitor: [
+                { '@type': 'SportsTeam', name: event.teams.home },
+                { '@type': 'SportsTeam', name: event.teams.away },
+              ],
+            }),
+            organizer: {
+              '@type': 'Organization',
+              name: '0xNull',
+              url: 'https://0xnull.io',
+            },
+          },
+        };
+      }),
+    };
+
+    updateStructuredData([itemListSchema]);
+
+  }, [data]);
+}
+
 export function useEventSEO(event: EventSEOData | null, pageType?: string) {
   useEffect(() => {
     if (!event) return;

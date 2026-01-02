@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,26 @@ const Slap = () => {
   // Markets state
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loadingMarkets, setLoadingMarkets] = useState(false);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'Slap fighting prediction',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'sports' as const,
+      })),
+      pageTitle: 'Slap Fighting Predictions - 0xNull',
+      pageDescription: 'Anonymous slap fighting betting. Predict Power Slap and slap fighting match outcomes.',
+      pageUrl: 'https://0xnull.io/slap',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
   
   // Fetch slap/power slap markets
   const fetchMarkets = async () => {

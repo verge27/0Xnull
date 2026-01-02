@@ -8,7 +8,7 @@ import starcraftBackground from '@/assets/starcraft-background.jpg';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,6 +59,7 @@ interface SC2Result {
 }
 
 export default function StarcraftPredictions() {
+  useSEO();
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
@@ -91,6 +92,26 @@ export default function StarcraftPredictions() {
     event: null,
   });
   const [creating, setCreating] = useState(false);
+  
+  // Event list SEO for structured data
+  const eventListData = useMemo(() => {
+    if (markets.length === 0) return null;
+    return {
+      events: markets.filter(m => !m.resolved).slice(0, 20).map(m => ({
+        id: m.market_id,
+        question: m.title || 'StarCraft 2 prediction market',
+        description: m.description,
+        resolutionDate: m.resolution_time ? new Date(m.resolution_time * 1000).toISOString() : undefined,
+        status: m.resolved ? 'resolved' as const : 'open' as const,
+        totalPool: m.yes_pool_xmr + m.no_pool_xmr,
+        eventType: 'esports' as const,
+      })),
+      pageTitle: 'StarCraft 2 Predictions - 0xNull',
+      pageDescription: 'Anonymous StarCraft 2 betting. Predict GSL, ESL, and pro SC2 match outcomes with crypto.',
+      pageUrl: 'https://0xnull.io/starcraft',
+    };
+  }, [markets]);
+  useEventListSEO(eventListData);
 
   // Timer for bet creation progress
   useEffect(() => {
