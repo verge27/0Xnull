@@ -88,6 +88,50 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Support - 0xNull',
     description: 'Get help with 0xNull prediction markets and marketplace. Contact us through SimpleX for private support.',
   },
+  '/voice': {
+    title: 'AI Voice Cloning - 0xNull',
+    description: 'Clone any voice with AI. High-quality text-to-speech synthesis with anonymous crypto payments.',
+  },
+  '/kokoro': {
+    title: 'Kokoro AI Companion - 0xNull',
+    description: 'AI companion for conversation and connection. No logs, no judgment, pay with crypto.',
+  },
+  '/combat': {
+    title: 'MMA & Boxing Predictions - 0xNull',
+    description: 'Anonymous MMA and boxing betting. Predict UFC, boxing, and combat sports outcomes with Monero.',
+  },
+  '/cricket': {
+    title: 'Cricket Predictions - 0xNull',
+    description: 'Anonymous cricket betting with Monero. Predict IPL, international, and T20 match outcomes.',
+  },
+  '/starcraft': {
+    title: 'StarCraft Predictions - 0xNull',
+    description: 'Anonymous StarCraft 2 betting. Predict GSL, ESL, and pro SC2 match outcomes with crypto.',
+  },
+  '/slap': {
+    title: 'Slap Fighting Predictions - 0xNull',
+    description: 'Anonymous slap fighting betting. Predict Power Slap and slap fighting match outcomes.',
+  },
+  '/get-started': {
+    title: 'Get Started - 0xNull',
+    description: 'Learn how to use 0xNull prediction markets and marketplace. Quick start guide for new users.',
+  },
+  '/tor': {
+    title: 'Tor Access Guide - 0xNull',
+    description: 'Access 0xNull via Tor for maximum privacy. Step-by-step guide to anonymous browsing.',
+  },
+  '/grapheneos': {
+    title: 'GrapheneOS Phones - 0xNull',
+    description: 'Privacy-focused GrapheneOS phones. Maximum mobile security with crypto payments.',
+  },
+  '/api-docs': {
+    title: 'API Documentation - 0xNull',
+    description: 'Developer documentation for 0xNull APIs. Build on top of our prediction markets.',
+  },
+  '/philosophy': {
+    title: 'Philosophy - 0xNull',
+    description: 'Our philosophy on privacy, freedom, and decentralization. Why we built 0xNull.',
+  },
 };
 
 // Breadcrumb configuration for pages
@@ -164,6 +208,43 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
   '/privacy': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Privacy Policy', url: 'https://0xnull.io/privacy' },
+  ],
+  '/voice': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'AI Hub', url: 'https://0xnull.io/ai' },
+    { name: 'Voice Cloning', url: 'https://0xnull.io/voice' },
+  ],
+  '/combat': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Predictions', url: 'https://0xnull.io/predict' },
+    { name: 'Combat Sports', url: 'https://0xnull.io/combat' },
+  ],
+  '/cricket': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Predictions', url: 'https://0xnull.io/predict' },
+    { name: 'Cricket', url: 'https://0xnull.io/cricket' },
+  ],
+  '/starcraft': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Predictions', url: 'https://0xnull.io/predict' },
+    { name: 'StarCraft', url: 'https://0xnull.io/starcraft' },
+  ],
+  '/get-started': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Get Started', url: 'https://0xnull.io/get-started' },
+  ],
+  '/tor': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Tor Guide', url: 'https://0xnull.io/tor' },
+  ],
+  '/grapheneos': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
+    { name: 'GrapheneOS', url: 'https://0xnull.io/grapheneos' },
+  ],
+  '/philosophy': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Philosophy', url: 'https://0xnull.io/philosophy' },
   ],
 };
 
@@ -481,6 +562,162 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
       },
     },
   },
+  '/voice': {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'AI Voice Cloning',
+    description: 'Clone any voice with AI. High-quality text-to-speech synthesis.',
+    url: 'https://0xnull.io/voice',
+    applicationCategory: 'MultimediaApplication',
+    offers: {
+      '@type': 'Offer',
+      price: '0.15',
+      priceCurrency: 'USD',
+    },
+  },
+  '/combat': {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'MMA & Boxing Predictions',
+    description: 'Anonymous MMA and boxing betting with Monero.',
+    url: 'https://0xnull.io/combat',
+    isPartOf: {
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+  },
+  '/grapheneos': {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'GrapheneOS Phones',
+    description: 'Privacy-focused GrapheneOS phones with crypto payments.',
+    url: 'https://0xnull.io/grapheneos',
+    brand: {
+      '@type': 'Brand',
+      name: 'GrapheneOS',
+    },
+  },
+};
+
+// Article schemas for blog-style content pages
+const articleSchemas: Record<string, StructuredData> = {
+  '/how-betting-works': {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How Parimutuel Betting Works on 0xNull',
+    description: 'A comprehensive guide to understanding parimutuel betting mechanics, pool-based odds, and the 0.4% fee structure.',
+    url: 'https://0xnull.io/how-betting-works',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': 'https://0xnull.io/how-betting-works',
+    },
+  },
+  '/philosophy': {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'The Philosophy Behind 0xNull',
+    description: 'Our philosophy on privacy, freedom, and decentralization. Why we built 0xNull.',
+    url: 'https://0xnull.io/philosophy',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+  },
+  '/safety': {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'Harm Reduction and Safety Guide',
+    description: 'Safety and harm reduction resources for privacy tools and cryptocurrencies.',
+    url: 'https://0xnull.io/safety',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+  },
+  '/tor': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'How to Access 0xNull via Tor',
+    description: 'Step-by-step guide to accessing 0xNull through the Tor network for maximum privacy.',
+    url: 'https://0xnull.io/tor',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+    proficiencyLevel: 'Beginner',
+  },
+  '/get-started': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'Getting Started with 0xNull',
+    description: 'Quick start guide for new users of 0xNull prediction markets and marketplace.',
+    url: 'https://0xnull.io/get-started',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon.jpg',
+      },
+    },
+    proficiencyLevel: 'Beginner',
+  },
 };
 
 // Generate breadcrumb structured data
@@ -571,6 +808,12 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     const faqSchema = faqSchemas[location.pathname];
     if (faqSchema) {
       allStructuredData.push(faqSchema);
+    }
+    
+    // Add Article schema if available
+    const articleSchema = articleSchemas[location.pathname];
+    if (articleSchema) {
+      allStructuredData.push(articleSchema);
     }
     
     updateStructuredData(allStructuredData.length > 0 ? allStructuredData : undefined);

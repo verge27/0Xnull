@@ -1,6 +1,7 @@
 import { Phone as PhoneIcon, MessageSquare, Wifi, Shield, ExternalLink, Zap, AlertTriangle, Lightbulb, CheckCircle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +70,7 @@ const useCases = [
 ];
 
 const Phone = () => {
+  useSEO();
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Background image */}

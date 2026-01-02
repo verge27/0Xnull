@@ -3,6 +3,7 @@ import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTrian
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,6 +69,7 @@ const operatingSystems = [
 ];
 
 const VPS = () => {
+  useSEO();
   const { toast } = useToast();
   const [token, setToken] = useState('');
   const [savedToken, setSavedToken] = useState<string | null>(null);

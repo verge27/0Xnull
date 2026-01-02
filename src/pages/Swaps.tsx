@@ -4,6 +4,7 @@ import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, History, Clock, T
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { useSEO } from '@/hooks/useSEO';
 import swapsBackground from '@/assets/swaps-background.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,6 +106,7 @@ interface SwapHistoryItem {
 
 
 const Swaps = () => {
+  useSEO();
   const { toast } = useToast();
   const { user } = useAuth();
   const [aggregator, setAggregator] = useState<Aggregator>('trocador');

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ import combatBackground from '@/assets/combat-background.jpg';
 const COMBAT_SPORTS = ['ufc', 'boxing'];
 
 export default function CombatSports() {
+  useSEO();
   const location = useLocation();
   const path = location.pathname;
   
