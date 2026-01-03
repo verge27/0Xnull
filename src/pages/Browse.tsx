@@ -30,12 +30,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useSEO } from '@/hooks/useSEO';
+import { useSEO, useProductListSEO } from '@/hooks/useSEO';
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
 import heroBackground from '@/assets/hero-background.png';
 
 const Browse = () => {
-  useSEO();
   const [searchParams, setSearchParams] = useSearchParams();
   const demoListings = getListings();
   const { listings: dbListings } = useListings();
@@ -142,6 +141,24 @@ const Browse = () => {
     })),
     ...demoListings.map(demo => ({ ...demo, isDemo: true }))
   ];
+
+  // Apply product list SEO schema
+  useProductListSEO({
+    products: listings.slice(0, 20).map(listing => ({
+      id: listing.id,
+      title: listing.title,
+      description: listing.description || '',
+      priceUsd: listing.priceUsd,
+      images: listing.images || ['/placeholder.svg'],
+      category: listing.category,
+      condition: listing.condition || 'new',
+      stock: listing.stock || 1,
+      sellerName: listing.partnerName || listing.seller?.name,
+    })),
+    pageTitle: 'Marketplace - 0xNull',
+    pageDescription: 'Anonymous crypto marketplace. Buy and sell goods and services with Monero.',
+    pageUrl: 'https://0xnull.io/browse',
+  });
 
   const [openCategories, setOpenCategories] = useState<Set<number>>(new Set());
   const [priceRange, setPriceRange] = useState([0, 500]);
