@@ -1505,4 +1505,118 @@ export function useSellerSEO(seller: SellerSEOData | null) {
   }, [seller]);
 }
 
+// Generate ItemList schema for marketplace product list pages
+export interface ProductListSEOData {
+  products: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priceUsd: number;
+    images: string[];
+    category: string;
+    condition: 'new' | 'used' | 'digital';
+    stock: number;
+    sellerName?: string;
+  }>;
+  pageTitle: string;
+  pageDescription: string;
+  pageUrl: string;
+}
+
+export function useProductListSEO(data: ProductListSEOData | null) {
+  useEffect(() => {
+    if (!data || data.products.length === 0) return;
+
+    // Build ItemList schema with products
+    const itemListSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: data.pageTitle,
+      description: data.pageDescription,
+      url: data.pageUrl,
+      numberOfItems: data.products.length,
+      itemListElement: data.products.slice(0, 20).map((product, index) => {
+        const imageUrl = product.images[0]?.startsWith('http') 
+          ? product.images[0] 
+          : `https://0xnull.io${product.images[0]}`;
+        
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'Product',
+            name: product.title,
+            description: product.description.slice(0, 200),
+            url: `https://0xnull.io/listing/${product.id}`,
+            image: imageUrl,
+            category: product.category,
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'USD',
+              price: product.priceUsd.toFixed(2),
+              availability: product.stock > 0 
+                ? 'https://schema.org/InStock' 
+                : 'https://schema.org/OutOfStock',
+              itemCondition: product.condition === 'new' 
+                ? 'https://schema.org/NewCondition'
+                : product.condition === 'used'
+                ? 'https://schema.org/UsedCondition'
+                : 'https://schema.org/NewCondition',
+            },
+            ...(product.sellerName && {
+              seller: {
+                '@type': 'Organization',
+                name: product.sellerName,
+              },
+            }),
+          },
+        };
+      }),
+    };
+
+    // Breadcrumb for marketplace
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Marketplace',
+          item: data.pageUrl,
+        },
+      ],
+    };
+
+    updateStructuredData([itemListSchema, breadcrumbSchema]);
+
+  }, [data]);
+}
+
+// Helper to generate dynamic OG image URL
+export function generateOGImageUrl(params: {
+  title: string;
+  subtitle?: string;
+  type: 'listing' | 'market' | 'seller' | 'page';
+  price?: string;
+  category?: string;
+}): string {
+  const baseUrl = 'https://qjkojiamexufuxsrupjq.supabase.co/functions/v1/og-image';
+  const searchParams = new URLSearchParams();
+  
+  searchParams.set('title', params.title);
+  if (params.subtitle) searchParams.set('subtitle', params.subtitle);
+  searchParams.set('type', params.type);
+  if (params.price) searchParams.set('price', params.price);
+  if (params.category) searchParams.set('category', params.category);
+  
+  return `${baseUrl}?${searchParams.toString()}`;
+}
+
 export default useSEO;

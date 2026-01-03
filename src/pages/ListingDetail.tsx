@@ -31,7 +31,26 @@ import { usePGP } from '@/hooks/usePGP';
 import { PGPRequiredDialog } from '@/components/PGPRequiredDialog';
 import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
 import { PaymentMethodSelector, PaymentMethod } from '@/components/PaymentMethodSelector';
-import { useProductSEO } from '@/hooks/useSEO';
+import { useProductSEO, generateOGImageUrl } from '@/hooks/useSEO';
+
+// Helper to update OG image meta tag
+function updateOGImage(url: string) {
+  let ogImage = document.querySelector('meta[property="og:image"]') as HTMLMetaElement;
+  if (!ogImage) {
+    ogImage = document.createElement('meta');
+    ogImage.setAttribute('property', 'og:image');
+    document.head.appendChild(ogImage);
+  }
+  ogImage.content = url;
+  
+  let twitterImage = document.querySelector('meta[name="twitter:image"]') as HTMLMetaElement;
+  if (!twitterImage) {
+    twitterImage = document.createElement('meta');
+    twitterImage.name = 'twitter:image';
+    document.head.appendChild(twitterImage);
+  }
+  twitterImage.content = url;
+}
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -152,6 +171,20 @@ const ListingDetail = () => {
     stock: listing.stock,
     sellerName: seller?.displayName,
   } : null);
+
+  // Apply dynamic OG image
+  useEffect(() => {
+    if (listing) {
+      const ogImageUrl = generateOGImageUrl({
+        title: listing.title,
+        subtitle: listing.description.slice(0, 100),
+        type: 'listing',
+        price: `$${listing.priceUsd.toFixed(2)}`,
+        category: listing.category,
+      });
+      updateOGImage(ogImageUrl);
+    }
+  }, [listing]);
 
   if (loadingListing) {
     return (

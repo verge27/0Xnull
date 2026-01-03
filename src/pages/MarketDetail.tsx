@@ -5,9 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useEventSEO } from '@/hooks/useSEO';
+import { useEventSEO, generateOGImageUrl } from '@/hooks/useSEO';
 import { Loader2, ArrowLeft, Calendar, Users, TrendingUp, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+
+// Helper to update OG image meta tag
+function updateOGImage(url: string) {
+  let ogImage = document.querySelector('meta[property="og:image"]') as HTMLMetaElement;
+  if (!ogImage) {
+    ogImage = document.createElement('meta');
+    ogImage.setAttribute('property', 'og:image');
+    document.head.appendChild(ogImage);
+  }
+  ogImage.content = url;
+  
+  let twitterImage = document.querySelector('meta[name="twitter:image"]') as HTMLMetaElement;
+  if (!twitterImage) {
+    twitterImage = document.createElement('meta');
+    twitterImage.name = 'twitter:image';
+    document.head.appendChild(twitterImage);
+  }
+  twitterImage.content = url;
+}
 
 interface Market {
   id: string;
@@ -68,6 +87,20 @@ const MarketDetail = () => {
     } : null,
     'Predictions'
   );
+
+  // Apply dynamic OG image
+  useEffect(() => {
+    if (market) {
+      const totalPool = market.total_yes_pool + market.total_no_pool;
+      const ogImageUrl = generateOGImageUrl({
+        title: market.question,
+        subtitle: market.description || 'Anonymous prediction market on 0xNull',
+        type: 'market',
+        price: `${totalPool.toFixed(2)} XMR Pool`,
+      });
+      updateOGImage(ogImageUrl);
+    }
+  }, [market]);
 
   if (loading) {
     return (
