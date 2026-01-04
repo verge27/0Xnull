@@ -18,8 +18,23 @@
       }
       /* Critical base styles */
       *, *::before, *::after { box-sizing: border-box; border-width: 0; border-style: solid; }
-      html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: system-ui, -apple-system, sans-serif; }
+      html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
       body { margin: 0; background-color: hsl(222 47% 5%); color: hsl(210 40% 98%); min-height: 100vh; }
+      /* Font-face with font-display: swap for FOUT instead of FOIT */
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI-fAZ9hjp-Ek-_EeA.woff2') format('woff2');
+      }
       /* Critical layout for hero */
       .min-h-screen { min-height: 100vh; }
       .flex { display: flex; }
@@ -85,6 +100,10 @@
     <!-- Additional SEO -->
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI-fAZ9hjp-Ek-_EeA.woff2" crossorigin />
 
     <!-- Preload critical above-the-fold resources for LCP -->
     <link rel="preload" as="image" href="/src/assets/predictions-hero-background.webp" type="image/webp" fetchpriority="high" />
