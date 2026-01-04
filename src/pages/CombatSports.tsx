@@ -30,7 +30,7 @@ import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { extractSportInfo } from '@/lib/sportLabels';
 import { toast } from 'sonner';
-import combatBackground from '@/assets/combat-background.jpg';
+import combatBackground from '@/assets/combat-background.webp';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
 

@@ -6,7 +6,7 @@ import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionB
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import { useSEO, useEventListSEO } from '@/hooks/useSEO';
-import esportsBackground from '@/assets/esports-background.jpg';
+import esportsBackground from '@/assets/esports-background.webp';
 import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, getGameDownloadUrl, type EsportsEvent } from '@/hooks/useEsportsEvents';
 import { api, type PredictionMarket } from '@/services/api';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
