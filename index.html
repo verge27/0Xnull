@@ -2,7 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Google tag (gtag.js) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Critical CSS - Inlined for faster FCP -->
+    <style>
+      /* Critical design tokens */
+      :root {
+        --background: 222 47% 5%;
+        --foreground: 210 40% 98%;
+        --card: 217 33% 12%;
+        --primary: 160 84% 39%;
+        --muted-foreground: 215 20% 65%;
+        --border: 217 33% 20%;
+        --radius: 0.75rem;
+      }
+      /* Critical base styles */
+      *, *::before, *::after { box-sizing: border-box; border-width: 0; border-style: solid; }
+      html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: system-ui, -apple-system, sans-serif; }
+      body { margin: 0; background-color: hsl(222 47% 5%); color: hsl(210 40% 98%); min-height: 100vh; }
+      /* Critical layout for hero */
+      .min-h-screen { min-height: 100vh; }
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .relative { position: relative; }
+      .absolute { position: absolute; }
+      .inset-0 { inset: 0; }
+      .z-0 { z-index: 0; }
+      .z-10 { z-index: 10; }
+      .overflow-hidden { overflow: hidden; }
+      .container { width: 100%; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+      @media (min-width: 1280px) { .container { max-width: 1280px; } }
+      .text-center { text-align: center; }
+      .mx-auto { margin-left: auto; margin-right: auto; }
+      /* Critical text styles */
+      .text-5xl { font-size: 3rem; line-height: 1; }
+      @media (min-width: 768px) { .md\\:text-7xl { font-size: 4.5rem; line-height: 1; } }
+      .font-bold { font-weight: 700; }
+      .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+      .text-muted-foreground { color: hsl(215 20% 65%); }
+      /* Image optimization */
+      img { max-width: 100%; height: auto; }
+      .object-cover { object-fit: cover; }
+      .w-full { width: 100%; }
+      .h-full { height: 100%; }
+    </style>
+
+    <!-- Google tag (gtag.js) - Deferred -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RV2W11YWGR"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -10,7 +55,6 @@
       gtag('js', new Date());
       gtag('config', 'G-RV2W11YWGR');
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href="https://0xnull.io/" />
     
