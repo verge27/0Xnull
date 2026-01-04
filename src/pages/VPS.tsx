@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import vpsBackground from '@/assets/vps-background.png';
+import vpsBackground from '@/assets/vps-background.webp';
 
 const SPORESTACK_API = 'https://api.sporestack.com';
 
