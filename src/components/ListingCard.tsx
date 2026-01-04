@@ -41,6 +41,10 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           <img
             src={listing.images[0]}
             alt={listing.title}
+            loading="lazy"
+            decoding="async"
+            width={400}
+            height={400}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
           {/* Top left badges */}

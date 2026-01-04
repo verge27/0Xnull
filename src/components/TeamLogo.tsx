@@ -33,10 +33,20 @@ export function TeamLogo({ teamName, sport, size = 'md', className }: TeamLogoPr
     );
   }
   
+  const dimensions = {
+    sm: 20,
+    md: 32,
+    lg: 48,
+  };
+
   return (
     <img
       src={logoUrl}
-      alt={teamName}
+      alt={teamName || 'Team logo'}
+      width={dimensions[size]}
+      height={dimensions[size]}
+      loading="lazy"
+      decoding="async"
       className={cn(sizeClasses[size], 'object-contain', className)}
       onError={(e) => {
         // Hide image on error, show fallback
