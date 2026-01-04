@@ -4,7 +4,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse, type BetStatusResponse } from '@/hooks/usePredictionBets';
 import { api, type PredictionMarket } from '@/services/api';
-import starcraftBackground from '@/assets/starcraft-background.jpg';
+import starcraftBackground from '@/assets/starcraft-background.webp';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';

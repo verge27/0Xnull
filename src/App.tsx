@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,60 +9,74 @@ import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
 import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
 import { NetworkStatusBanner } from "./components/NetworkStatusBanner";
+
+// Eagerly loaded pages (critical path)
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
-import ListingDetail from "./pages/ListingDetail";
-import Checkout from "./pages/Checkout";
-import OrderTracking from "./pages/OrderTracking";
-import SellerProfile from "./pages/SellerProfile";
-import Sell from "./pages/Sell";
-import NewListing from "./pages/NewListing";
-import EditListing from "./pages/EditListing";
-import Orders from "./pages/Orders";
-import Settings from "./pages/Settings";
-import Auth from "./pages/Auth";
-import Wishlist from "./pages/Wishlist";
-import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
-import HarmReduction from "./pages/HarmReduction";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import Swaps from "./pages/Swaps";
-import VPS from "./pages/VPS";
-import Phone from "./pages/Phone";
-import AIHub from "./pages/AIHub";
-import VpnResources from "./pages/VpnResources";
-import Philosophy from "./pages/Philosophy";
-import GrapheneOS from "./pages/GrapheneOS";
-import FiatOfframp from "./pages/FiatOfframp";
-import FiatOnramp from "./pages/FiatOnramp";
-import ApiAnalytics from "./pages/ApiAnalytics";
-import Voice from "./pages/Voice";
-import Kokoro from "./pages/Kokoro";
-import Verify from "./pages/Verify";
-import Support from "./pages/Support";
-import CryptoPredictions from "./pages/CryptoPredictions";
-import SportsPredictions from "./pages/SportsPredictions";
-import EsportsPredictions from "./pages/EsportsPredictions";
-import CricketPredictions from "./pages/CricketPredictions";
-import StarcraftPredictions from "./pages/StarcraftPredictions";
-import TorGuide from "./pages/TorGuide";
-import HowBettingWorks from "./pages/HowBettingWorks";
 
-import Slap from "./pages/Slap";
-import InfraHub from "./pages/InfraHub";
-import PredictionsHub from "./pages/PredictionsHub";
-import CombatSports from "./pages/CombatSports";
-import GetStarted from "./pages/GetStarted";
-import ApiDocs from "./pages/ApiDocs";
-import MySlips from "./pages/MySlips";
-import Payouts from "./pages/Payouts";
-import Influencer from "./pages/Influencer";
-import InfluencerDashboard from "./pages/InfluencerDashboard";
-import PartnerEarnings from "./pages/PartnerEarnings";
-import MarketDetail from "./pages/MarketDetail";
+// Lazy loaded pages (code splitting for better initial bundle size)
+const ListingDetail = lazy(() => import("./pages/ListingDetail"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderTracking = lazy(() => import("./pages/OrderTracking"));
+const SellerProfile = lazy(() => import("./pages/SellerProfile"));
+const Sell = lazy(() => import("./pages/Sell"));
+const NewListing = lazy(() => import("./pages/NewListing"));
+const EditListing = lazy(() => import("./pages/EditListing"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Messages = lazy(() => import("./pages/Messages"));
+const HarmReduction = lazy(() => import("./pages/HarmReduction"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Swaps = lazy(() => import("./pages/Swaps"));
+const VPS = lazy(() => import("./pages/VPS"));
+const Phone = lazy(() => import("./pages/Phone"));
+const AIHub = lazy(() => import("./pages/AIHub"));
+const VpnResources = lazy(() => import("./pages/VpnResources"));
+const Philosophy = lazy(() => import("./pages/Philosophy"));
+const GrapheneOS = lazy(() => import("./pages/GrapheneOS"));
+const FiatOfframp = lazy(() => import("./pages/FiatOfframp"));
+const FiatOnramp = lazy(() => import("./pages/FiatOnramp"));
+const ApiAnalytics = lazy(() => import("./pages/ApiAnalytics"));
+const Voice = lazy(() => import("./pages/Voice"));
+const Kokoro = lazy(() => import("./pages/Kokoro"));
+const Verify = lazy(() => import("./pages/Verify"));
+const Support = lazy(() => import("./pages/Support"));
+const TorGuide = lazy(() => import("./pages/TorGuide"));
+const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
+
+// Heavy prediction pages (largest bundles - definitely lazy load)
+const CryptoPredictions = lazy(() => import("./pages/CryptoPredictions"));
+const SportsPredictions = lazy(() => import("./pages/SportsPredictions"));
+const EsportsPredictions = lazy(() => import("./pages/EsportsPredictions"));
+const CricketPredictions = lazy(() => import("./pages/CricketPredictions"));
+const StarcraftPredictions = lazy(() => import("./pages/StarcraftPredictions"));
+const CombatSports = lazy(() => import("./pages/CombatSports"));
+const Slap = lazy(() => import("./pages/Slap"));
+const PredictionsHub = lazy(() => import("./pages/PredictionsHub"));
+const MarketDetail = lazy(() => import("./pages/MarketDetail"));
+
+// Other lazy loaded pages
+const InfraHub = lazy(() => import("./pages/InfraHub"));
+const GetStarted = lazy(() => import("./pages/GetStarted"));
+const ApiDocs = lazy(() => import("./pages/ApiDocs"));
+const MySlips = lazy(() => import("./pages/MySlips"));
+const Payouts = lazy(() => import("./pages/Payouts"));
+const Influencer = lazy(() => import("./pages/Influencer"));
+const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
+const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 
 const queryClient = new QueryClient();
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="animate-pulse text-muted-foreground">Loading...</div>
+  </div>
+);
 
 const App = () => (
   <GlobalErrorBoundary>
@@ -74,6 +89,7 @@ const App = () => (
           <AuthProvider>
             <PrivateKeyAuthProvider>
               <TokenProvider>
+              <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   
@@ -151,6 +167,7 @@ const App = () => (
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+              </Suspense>
               </TokenProvider>
             </PrivateKeyAuthProvider>
           </AuthProvider>
