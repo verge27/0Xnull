@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
+import { BackgroundImage } from '@/components/OptimizedImage';
 import predictionsBackground from '@/assets/predictions-hero-background.png';
 
 const Index = () => {
@@ -39,16 +40,12 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section with Background */}
-      <section className="relative overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={predictionsBackground} 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
-        </div>
+      <BackgroundImage
+        src={predictionsBackground}
+        priority={true}
+        className="relative overflow-hidden"
+        overlayClassName="bg-gradient-to-b from-background/70 via-background/60 to-background"
+      >
         
         <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -102,7 +99,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </BackgroundImage>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20">

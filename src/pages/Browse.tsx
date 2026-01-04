@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useSEO, useProductListSEO } from '@/hooks/useSEO';
+import { BackgroundImage, OptimizedImage } from '@/components/OptimizedImage';
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
 import heroBackground from '@/assets/hero-background.png';
 
@@ -305,19 +306,13 @@ const Browse = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative w-full h-[65vh] overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img 
-            src={heroBackground} 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-          {/* Darker gradient overlay for better text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background" />
-          <div className="absolute inset-0 bg-background/30" />
-        </div>
-        
+      <BackgroundImage
+        src={heroBackground}
+        priority={true}
+        className="w-full h-[65vh] overflow-hidden"
+        overlayClassName="bg-gradient-to-b from-background/60 via-background/70 to-background"
+      >
+        <div className="absolute inset-0 bg-background/30" />
         {/* Centered Text Overlay */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
           <p className="text-4xl md:text-6xl font-semibold text-foreground drop-shadow-lg animate-fade-in">
@@ -343,7 +338,7 @@ const Browse = () => {
             </Button>
           </div>
         </div>
-      </section>
+      </BackgroundImage>
       
       {/* Main Content - on solid dark background */}
       <div id="marketplace-content" className="container mx-auto px-4 py-8 relative z-10">

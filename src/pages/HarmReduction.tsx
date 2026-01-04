@@ -11,11 +11,17 @@ const HarmReduction = () => {
   useSEO();
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Background image */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${safetyBackground})`, zIndex: -2 }}
-      />
+      {/* Background image - using img for better optimization */}
+      <div className="fixed inset-0" style={{ zIndex: -2 }}>
+        <img 
+          src={safetyBackground} 
+          alt="" 
+          loading="eager"
+          decoding="async"
+          className="w-full h-full object-cover"
+          fetchPriority="high"
+        />
+      </div>
       <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
       
       <Navbar />

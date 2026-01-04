@@ -30,6 +30,10 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
           <img
             src={images[selectedIndex]}
             alt={`${title} - Image ${selectedIndex + 1}`}
+            loading="eager"
+            decoding="async"
+            width={600}
+            height={600}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
           {images.length > 1 && (
@@ -66,6 +70,10 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
                 <img
                   src={image}
                   alt={`Thumbnail ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  width={80}
+                  height={80}
                   className="w-full h-full object-cover"
                 />
               </button>
@@ -87,6 +95,8 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
             <img
               src={images[selectedIndex]}
               alt={`${title} - Image ${selectedIndex + 1}`}
+              loading="eager"
+              decoding="sync"
               className="max-w-full max-h-full object-contain"
             />
             {images.length > 1 && (
