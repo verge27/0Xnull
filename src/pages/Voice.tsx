@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
 import { api, type Voice, TIER_CONFIG } from "@/services/api";
-import voiceBackground from "@/assets/voice-background.png";
+import voiceBackground from "@/assets/voice-background.webp";
 
 const tiers = [
   { id: "free", name: "Free", price: "Free", description: "100 chars max", maxChars: 100 },

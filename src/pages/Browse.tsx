@@ -33,7 +33,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useSEO, useProductListSEO } from '@/hooks/useSEO';
 import { BackgroundImage, OptimizedImage } from '@/components/OptimizedImage';
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
-import heroBackground from '@/assets/hero-background.png';
+import heroBackground from '@/assets/hero-background.webp';
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
