@@ -10,6 +10,8 @@ import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 
 // Responsive hero background images for different screen sizes
+// Using 100vw sizing, browser selects based on viewport * DPR
+// Mobile 2x DPR needs ~800px, tablet needs ~1024px, desktop needs ~1920px
 const heroImages = {
   small: '/images/backgrounds/predictions-hero-background-640.webp',
   medium: '/images/backgrounds/predictions-hero-background-1024.webp',
@@ -56,7 +58,7 @@ const Index = () => {
       <BackgroundImage
         src={heroImages.small}
         responsiveSources={heroResponsiveSources}
-        sizes="(max-width: 640px) 640px, (max-width: 1024px) 1024px, 1920px"
+        sizes="100vw"
         priority={true}
         className="relative overflow-hidden"
         overlayClassName="bg-gradient-to-b from-background/70 via-background/60 to-background"
