@@ -9,7 +9,18 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 
-const predictionsBackground = '/images/backgrounds/predictions-hero-background.webp';
+// Responsive hero background images for different screen sizes
+const heroImages = {
+  small: '/images/backgrounds/predictions-hero-background-640.webp',
+  medium: '/images/backgrounds/predictions-hero-background-1024.webp',
+  large: '/images/backgrounds/predictions-hero-background.webp',
+};
+
+const heroResponsiveSources = [
+  { src: heroImages.small, width: 640 },
+  { src: heroImages.medium, width: 1024 },
+  { src: heroImages.large, width: 1920 },
+];
 
 const Index = () => {
   useSEO();
@@ -43,7 +54,9 @@ const Index = () => {
       
       {/* Hero Section with Background */}
       <BackgroundImage
-        src={predictionsBackground}
+        src={heroImages.large}
+        responsiveSources={heroResponsiveSources}
+        sizes="100vw"
         priority={true}
         className="relative overflow-hidden"
         overlayClassName="bg-gradient-to-b from-background/70 via-background/60 to-background"
