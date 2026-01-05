@@ -39,6 +39,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <main>
       
       {/* Hero Section with Background */}
       <BackgroundImage
@@ -103,14 +104,15 @@ const Index = () => {
       </BackgroundImage>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-20" aria-labelledby="features-heading">
+        <h2 id="features-heading" className="sr-only">Key Features</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
               <Card key={index} className="border-border/50 bg-card/50 backdrop-blur">
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
@@ -134,7 +136,7 @@ const Index = () => {
                 1
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Pick a Market</h3>
+                <h3 className="text-lg font-semibold mb-2">Pick a Market</h3>
                 <p className="text-muted-foreground">
                   Browse sports, esports, combat and crypto price predictions. Choose YES or NO on the outcome you believe in.
                 </p>
@@ -145,7 +147,7 @@ const Index = () => {
                 2
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Scan & Send XMR</h3>
+                <h3 className="text-lg font-semibold mb-2">Scan & Send XMR</h3>
                 <p className="text-muted-foreground">
                   Get a unique deposit address. Scan the QR with your Monero wallet. One confirmation and you're in.
                 </p>
@@ -156,7 +158,7 @@ const Index = () => {
                 3
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Get Paid Automatically</h3>
+                <h3 className="text-lg font-semibold mb-2">Get Paid Automatically</h3>
                 <p className="text-muted-foreground">
                   Winners split the pool when the market resolves. Payouts sent instantly to your wallet — no withdrawal requests.
                 </p>
@@ -185,6 +187,7 @@ const Index = () => {
           </CardContent>
         </Card>
       </section>
+      </main>
 
       <Footer />
       <SiteAssistant />

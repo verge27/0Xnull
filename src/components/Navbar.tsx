@@ -65,8 +65,8 @@ export const Navbar = () => {
     <nav className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-            <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+          <Link to="/" className="flex items-center gap-2 group flex-shrink-0" aria-label="0xNull Home">
+            <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" aria-hidden="true" />
             <span className="text-2xl font-bold text-gradient hidden sm:inline">0xNull</span>
           </Link>
 
@@ -88,8 +88,8 @@ export const Navbar = () => {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="secondary" size="icon" className="sm:hidden border border-primary/50 animate-pulse">
-                  <Menu className="w-5 h-5 text-primary" />
+                <Button variant="secondary" size="icon" className="sm:hidden border border-primary/50 animate-pulse" aria-label="Open navigation menu">
+                  <Menu className="w-5 h-5 text-primary" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-72 overflow-y-auto">
@@ -162,7 +162,7 @@ export const Navbar = () => {
                   </Link>
                   <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Kokoro</span>
-                    <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded">Soon</span>
+                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
                   </Link>
 
                   {/* Infrastructure */}
@@ -257,7 +257,7 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
                     Kokoro Companion
-                    <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded ml-2">Soon</span>
+                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded ml-2">Soon</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
