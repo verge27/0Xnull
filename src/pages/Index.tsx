@@ -75,26 +75,26 @@ const Index = () => {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/get-started">
-                <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-pulse">
-                  <Rocket className="w-5 h-5" />
+                <Button size="lg" className="gap-2 text-lg px-8 neon-glow-primary transition-transform hover:scale-105">
+                  <Rocket className="w-5 h-5" aria-hidden="true" />
                   Get Started
                 </Button>
               </Link>
               <Link to="/esports-predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta">
-                  <Gamepad2 className="w-5 h-5" />
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-magenta-static transition-transform hover:scale-105">
+                  <Gamepad2 className="w-5 h-5" aria-hidden="true" />
                   eSports
                 </Button>
               </Link>
               <Link to="/sports-predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan" style={{ animationDelay: '0.5s' }}>
-                  <Trophy className="w-5 h-5" />
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-cyan-static transition-transform hover:scale-105">
+                  <Trophy className="w-5 h-5" aria-hidden="true" />
                   Sports
                 </Button>
               </Link>
               <Link to="/predictions/sports/combat">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-magenta" style={{ animationDelay: '1s' }}>
-                  <Swords className="w-5 h-5" />
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-magenta-static transition-transform hover:scale-105">
+                  <Swords className="w-5 h-5" aria-hidden="true" />
                   Combat
                 </Button>
               </Link>

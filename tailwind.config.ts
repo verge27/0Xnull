@@ -85,26 +85,32 @@ export default {
         },
         "neon-pulse": {
           "0%, 100%": {
-            boxShadow: "0 0 5px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.2), inset 0 0 10px hsl(var(--primary) / 0.05)",
+            opacity: "0.85",
+            transform: "scale(1)",
           },
           "50%": {
-            boxShadow: "0 0 10px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3), inset 0 0 15px hsl(var(--primary) / 0.1)",
+            opacity: "1",
+            transform: "scale(1.02)",
           },
         },
         "neon-glow-cyan": {
           "0%, 100%": {
-            boxShadow: "0 0 5px hsl(180 100% 50% / 0.3), 0 0 20px hsl(180 100% 50% / 0.2)",
+            opacity: "0.85",
+            transform: "scale(1)",
           },
           "50%": {
-            boxShadow: "0 0 10px hsl(180 100% 50% / 0.5), 0 0 30px hsl(180 100% 50% / 0.3)",
+            opacity: "1",
+            transform: "scale(1.02)",
           },
         },
         "neon-glow-magenta": {
           "0%, 100%": {
-            boxShadow: "0 0 5px hsl(300 100% 50% / 0.3), 0 0 20px hsl(300 100% 50% / 0.2)",
+            opacity: "0.85",
+            transform: "scale(1)",
           },
           "50%": {
-            boxShadow: "0 0 10px hsl(300 100% 50% / 0.5), 0 0 30px hsl(300 100% 50% / 0.3)",
+            opacity: "1",
+            transform: "scale(1.02)",
           },
         },
       },

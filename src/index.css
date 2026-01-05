@@ -60,3 +60,31 @@ All colors MUST be HSL.
     @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02];
   }
 }
+
+/* GPU-accelerated neon glow effects using pseudo-elements */
+@layer components {
+  .neon-glow-primary {
+    @apply relative;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.4), 0 0 24px hsl(var(--primary) / 0.25);
+  }
+  
+  .neon-glow-primary::after {
+    content: '';
+    @apply absolute inset-0 rounded-md pointer-events-none;
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.5), 0 0 32px hsl(var(--primary) / 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .neon-glow-primary:hover::after {
+    opacity: 1;
+  }
+  
+  .neon-glow-cyan-static {
+    box-shadow: 0 0 8px hsl(180 100% 50% / 0.3), 0 0 20px hsl(180 100% 50% / 0.2);
+  }
+  
+  .neon-glow-magenta-static {
+    box-shadow: 0 0 8px hsl(300 100% 50% / 0.3), 0 0 20px hsl(300 100% 50% / 0.2);
+  }
+}
