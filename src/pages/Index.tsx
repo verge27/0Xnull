@@ -28,7 +28,10 @@ const heroResponsiveSources = [
 ];
 
 const Index = () => {
-  useSEO();
+  useSEO({
+    title: '0xNull | Anonymous Prediction Markets & Crypto Marketplace',
+    description: 'Discover 0xNull Marketplace, a privacy-first anonymous prediction markets and cryptocurrency marketplace. Access digital goods, services, and prediction markets with Monero and other crypto | no KYC, no tracking.',
+  });
   const features = [
     {
       icon: Target,
@@ -208,8 +211,8 @@ const Index = () => {
 
       {/* SEO Rich Text Section */}
       <SEORichText 
-        title="Anonymous Prediction Markets with Monero"
-        content="<p>Placeholder SEO content for the homepage. This section will contain keyword-rich content about anonymous prediction markets, XMR betting, and privacy-focused gambling.</p>"
+        title="0xNull Marketplace | Anonymous Crypto Marketplace & Prediction Markets"
+        content="<p>0xNull Marketplace is a privacy-first, anonymous cryptocurrency marketplace built for users who want full financial privacy and access to no-KYC prediction markets. Designed around anonymity and censorship resistance, 0xNull lets users interact, trade, and make predictions without accounts, identity verification, or personal data exposure.</p><p>At its core, 0xNull combines an anonymous marketplace with privacy-preserving prediction markets covering sports, esports, and crypto. All predictions are made without KYC requirements and settled using privacy-focused cryptocurrencies like Monero, ensuring transactions remain confidential and untraceable.</p><p>Unlike traditional platforms, 0xNull does not track users, collect personal information, or rely on centralized intermediaries. Payments and interactions are crypto-native, allowing users to participate freely in markets, access digital goods and services, or explore prediction opportunities while maintaining full control over their privacy.</p><p>Beyond prediction markets, the 0xNull ecosystem includes anonymous services such as VPS hosting, crypto swaps, and digital utilities—each aligned with the same privacy-first principles. Whether you're placing a prediction, purchasing a service, or swapping assets, anonymity remains the default.</p><p>Explore the 0xNull Marketplace to access no-KYC prediction markets and anonymous crypto services—built for users who value privacy above all else.</p>"
       />
       </main>
 
