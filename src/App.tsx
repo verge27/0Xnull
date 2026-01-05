@@ -10,10 +10,12 @@ import { TokenProvider } from "./hooks/useToken";
 import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
 import { NetworkStatusBanner } from "./components/NetworkStatusBanner";
 
-// Eagerly loaded pages (critical path)
-import Index from "./pages/Index";
-import Browse from "./pages/Browse";
+// Only NotFound is eagerly loaded (tiny, used as fallback)
 import NotFound from "./pages/NotFound";
+
+// Lazy loaded pages - including Index and Browse for better initial bundle
+const Index = lazy(() => import("./pages/Index"));
+const Browse = lazy(() => import("./pages/Browse"));
 
 // Lazy loaded pages (code splitting for better initial bundle size)
 const ListingDetail = lazy(() => import("./pages/ListingDetail"));
