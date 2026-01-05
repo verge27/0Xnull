@@ -17,7 +17,7 @@ export const SEORichText = ({ title, content, className = '' }: SEORichTextProps
       <Card className="bg-card/30 border-border/30">
         <CardContent className="p-8 md:p-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold">{title}</h2>
+            <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
             <Button
               variant="ghost"
               size="sm"
