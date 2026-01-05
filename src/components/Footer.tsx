@@ -23,7 +23,7 @@ export const Footer = () => {
 
           {/* Marketplace */}
           <div>
-            <h4 className="font-semibold mb-3">Marketplace</h4>
+            <h3 className="font-semibold mb-3 text-sm">Marketplace</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/browse" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -40,7 +40,7 @@ export const Footer = () => {
 
           {/* Predictions */}
           <div>
-            <h4 className="font-semibold mb-3">Predictions</h4>
+            <h3 className="font-semibold mb-3 text-sm">Predictions</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/esports-predictions" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -67,7 +67,7 @@ export const Footer = () => {
 
           {/* AI */}
           <div>
-            <h4 className="font-semibold mb-3">AI</h4>
+            <h3 className="font-semibold mb-3 text-sm">AI</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/voice" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -77,7 +77,7 @@ export const Footer = () => {
               <li>
                 <Link to="/kokoro" className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2">
                   Kokoro
-                  <span className="text-[10px] bg-amber-500/90 text-white px-1.5 py-0.5 rounded">Soon</span>
+                  <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
                 </Link>
               </li>
             </ul>
@@ -85,7 +85,7 @@ export const Footer = () => {
 
           {/* Infrastructure */}
           <div>
-            <h4 className="font-semibold mb-3">Infrastructure</h4>
+            <h3 className="font-semibold mb-3 text-sm">Infrastructure</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/swaps" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -114,8 +114,8 @@ export const Footer = () => {
         {/* SimpleX Support Section */}
         <div className="border-t border-border mt-8 pt-8 flex flex-col items-center text-center">
           <div className="flex items-center gap-2 mb-3">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            <h4 className="font-semibold">Contact Us on SimpleX</h4>
+            <MessageSquare className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 className="font-semibold text-sm">Contact Us on SimpleX</h3>
           </div>
           <div className="p-3 bg-white rounded-xl mb-3">
             <QRCodeSVG 
