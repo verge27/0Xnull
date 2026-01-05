@@ -10,10 +10,9 @@ import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 
 // Responsive hero background images for different screen sizes
-// Note: mobile/tablet use a lighter background to keep LCP fast.
 const heroImages = {
-  small: '/images/backgrounds/hero-background.webp',
-  medium: '/images/backgrounds/hero-background.webp',
+  small: '/images/backgrounds/predictions-hero-background-640.webp',
+  medium: '/images/backgrounds/predictions-hero-background-1024.webp',
   large: '/images/backgrounds/predictions-hero-background.webp',
 };
 
