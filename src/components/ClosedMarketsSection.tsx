@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lock, RefreshCw, Clock, Bell, Volume2, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Lock, RefreshCw, Clock, Bell, Volume2, AlertTriangle, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { type PredictionMarket, api } from '@/services/api';
 import { useState, useEffect, useRef } from 'react';
@@ -115,12 +115,16 @@ export function ClosedMarketsSection({ markets, getBetsForMarket, onMarketsUpdat
     }
   };
 
-  const handleResolve = async (marketId: string, outcome: 'YES' | 'NO') => {
+  const handleResolve = async (marketId: string, outcome: 'YES' | 'NO' | 'DRAW') => {
     setResolvingMarket(marketId);
     try {
       const result = await api.resolveMarket(marketId, outcome);
       if (result.success) {
-        toast.success(`Market resolved as ${outcome}`);
+        if (outcome === 'DRAW') {
+          toast.success('Market resolved as DRAW - all bets will be refunded');
+        } else {
+          toast.success(`Market resolved as ${outcome}`);
+        }
         onMarketsUpdate?.();
       } else {
         toast.error(result.message || 'Failed to resolve market');
@@ -277,6 +281,23 @@ export function ClosedMarketsSection({ markets, getBetsForMarket, onMarketsUpdat
                         NO Won
                       </Button>
                     </div>
+                    {/* DRAW option for sports markets */}
+                    {market.market_id.startsWith('sports_') && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full mt-2 border-amber-600 text-amber-500 hover:bg-amber-600/20"
+                        onClick={() => handleResolve(market.market_id, 'DRAW')}
+                        disabled={resolvingMarket === market.market_id}
+                      >
+                        {resolvingMarket === market.market_id ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <MinusCircle className="w-3 h-3 mr-1" />
+                        )}
+                        DRAW (Refund All)
+                      </Button>
+                    )}
                   </div>
                 )}
                 

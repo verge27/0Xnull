@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.og-image]
 verify_jwt = false
+
+[functions.resolve-sports-markets]
+verify_jwt = false
