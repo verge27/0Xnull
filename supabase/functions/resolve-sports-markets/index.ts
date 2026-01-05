@@ -8,12 +8,23 @@ const corsHeaders = {
 const API_BASE = 'https://api.0xnull.io/api';
 const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
 
+// Cache configuration
+const SCORE_CACHE = new Map<string, { data: MatchScore | null; timestamp: number; resolutionTime?: number }>();
+const CACHE_TTL_FINAL = 3600000; // 1 hour for final scores
+const CACHE_TTL_IN_PROGRESS = 30000; // 30 seconds for in-progress games
+const CACHE_TTL_NOT_FOUND = 120000; // 2 minutes for not found events
+
+// Smart polling intervals based on time to resolution
+const POLL_INTERVAL_SOON = 60000; // 1 minute when game is near/past end
+const POLL_INTERVAL_MEDIUM = 300000; // 5 minutes when 1-2 hours out
+const POLL_INTERVAL_FAR = 900000; // 15 minutes when > 2 hours out
+
 interface PredictionMarket {
   market_id: string;
   title: string;
   description: string;
   oracle_type: string;
-  oracle_asset: string; // event_id for sports markets
+  oracle_asset: string;
   oracle_condition: string;
   resolution_time: number;
   resolved: number;
@@ -44,6 +55,69 @@ const ODDS_API_SPORTS = [
   'boxing_boxing',
 ];
 
+// Get cache TTL based on score status
+function getCacheTtl(score: MatchScore | null): number {
+  if (!score) return CACHE_TTL_NOT_FOUND;
+  if (score.status === 'final') return CACHE_TTL_FINAL;
+  return CACHE_TTL_IN_PROGRESS;
+}
+
+// Check if cached score is still valid
+function getCachedScore(eventId: string): MatchScore | null | undefined {
+  const cached = SCORE_CACHE.get(eventId);
+  if (!cached) return undefined;
+  
+  const ttl = getCacheTtl(cached.data);
+  if (Date.now() - cached.timestamp > ttl) {
+    SCORE_CACHE.delete(eventId);
+    return undefined;
+  }
+  
+  return cached.data;
+}
+
+// Set cached score
+function setCachedScore(eventId: string, score: MatchScore | null, resolutionTime?: number): void {
+  SCORE_CACHE.set(eventId, {
+    data: score,
+    timestamp: Date.now(),
+    resolutionTime
+  });
+}
+
+// Determine polling priority based on resolution time
+function getPollingPriority(resolutionTime: number): { priority: 'high' | 'medium' | 'low'; interval: number } {
+  const now = Math.floor(Date.now() / 1000);
+  const timeToResolution = resolutionTime - now;
+  
+  // Past resolution time or within 30 minutes - high priority
+  if (timeToResolution <= 1800) {
+    return { priority: 'high', interval: POLL_INTERVAL_SOON };
+  }
+  
+  // 30 minutes to 2 hours - medium priority
+  if (timeToResolution <= 7200) {
+    return { priority: 'medium', interval: POLL_INTERVAL_MEDIUM };
+  }
+  
+  // More than 2 hours out - low priority
+  return { priority: 'low', interval: POLL_INTERVAL_FAR };
+}
+
+// Check if we should poll this market based on last poll time
+function shouldPollMarket(eventId: string, resolutionTime: number): boolean {
+  const cached = SCORE_CACHE.get(eventId);
+  if (!cached) return true;
+  
+  // Always poll if we have a final score (just return cached)
+  if (cached.data?.status === 'final') return false;
+  
+  const { interval } = getPollingPriority(resolutionTime);
+  const timeSinceLastPoll = Date.now() - cached.timestamp;
+  
+  return timeSinceLastPoll >= interval;
+}
+
 // Fetch unresolved sports markets from 0xNull
 async function fetchUnresolvedSportsMarkets(): Promise<PredictionMarket[]> {
   const res = await fetch(`${API_BASE}/predictions/markets?include_resolved=false`);
@@ -71,7 +145,6 @@ async function fetchOddsApiScores(eventId: string): Promise<MatchScore | null> {
   }
 
   try {
-    // Try each sport to find the event
     for (const sport of ODDS_API_SPORTS) {
       try {
         const url = `${ODDS_API_BASE}/sports/${sport}/scores?apiKey=${oddsApiKey}&daysFrom=3`;
@@ -91,14 +164,12 @@ async function fetchOddsApiScores(eventId: string): Promise<MatchScore | null> {
         const events = await res.json();
         
         for (const event of events) {
-          // Check if this event matches our eventId
           const eventIdMatch = event.id === eventId || 
             eventId.includes(event.id) ||
             event.id?.includes(eventId);
           
           if (!eventIdMatch) continue;
           
-          // Check if game is completed
           if (!event.completed) {
             console.log(`Odds API: Game ${eventId} not completed yet`);
             return {
@@ -111,7 +182,6 @@ async function fetchOddsApiScores(eventId: string): Promise<MatchScore | null> {
             };
           }
           
-          // Extract scores
           const homeScoreData = event.scores?.find((s: any) => s.name === event.home_team);
           const awayScoreData = event.scores?.find((s: any) => s.name === event.away_team);
           
@@ -130,7 +200,6 @@ async function fetchOddsApiScores(eventId: string): Promise<MatchScore | null> {
           };
         }
       } catch (e) {
-        // Continue to next sport
         continue;
       }
     }
@@ -224,12 +293,29 @@ async function fetchEspnScore(eventId: string): Promise<MatchScore | null> {
   }
 }
 
-// Main score fetching function - tries Odds API first, then ESPN
-async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
-  // Try The Odds API first (primary source)
+// Main score fetching function with caching
+async function fetchMatchScore(eventId: string, resolutionTime?: number): Promise<MatchScore | null> {
+  // Check cache first
+  const cached = getCachedScore(eventId);
+  if (cached !== undefined) {
+    console.log(`Cache hit for ${eventId}: ${cached?.status || 'not_found'}`);
+    return cached;
+  }
+  
+  // Check if we should even poll based on timing
+  if (resolutionTime && !shouldPollMarket(eventId, resolutionTime)) {
+    const existingCache = SCORE_CACHE.get(eventId);
+    if (existingCache) {
+      console.log(`Skipping poll for ${eventId} - not time yet`);
+      return existingCache.data;
+    }
+  }
+  
+  // Try The Odds API first
   console.log(`Fetching score for ${eventId} from Odds API...`);
   const oddsScore = await fetchOddsApiScores(eventId);
   if (oddsScore) {
+    setCachedScore(eventId, oddsScore, resolutionTime);
     return oddsScore;
   }
   
@@ -237,9 +323,12 @@ async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
   console.log(`Falling back to ESPN for ${eventId}...`);
   const espnScore = await fetchEspnScore(eventId);
   if (espnScore) {
+    setCachedScore(eventId, espnScore, resolutionTime);
     return espnScore;
   }
   
+  // Cache the null result to avoid hammering APIs
+  setCachedScore(eventId, null, resolutionTime);
   console.log(`No score found for event ${eventId} from any source`);
   return null;
 }
@@ -251,11 +340,11 @@ function determineOutcome(score: MatchScore): 'YES' | 'NO' | 'DRAW' | null {
   }
   
   if (score.homeScore > score.awayScore) {
-    return 'YES'; // Home team wins
+    return 'YES';
   } else if (score.awayScore > score.homeScore) {
-    return 'NO'; // Away team wins
+    return 'NO';
   } else {
-    return 'DRAW'; // Draw - trigger refunds
+    return 'DRAW';
   }
 }
 
@@ -282,7 +371,7 @@ async function resolveMarket(marketId: string, outcome: 'YES' | 'NO' | 'DRAW'): 
   }
 }
 
-// Extract event ID from market ID (format: sports_{event_id})
+// Extract event ID from market ID
 function extractEventId(marketId: string): string | null {
   if (!marketId.startsWith('sports_')) return null;
   return marketId.replace('sports_', '');
@@ -293,7 +382,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Verify cron secret for automated calls
   const cronSecret = Deno.env.get('CRON_SECRET');
   const authHeader = req.headers.get('authorization');
   const url = new URL(req.url);
@@ -310,9 +398,18 @@ serve(async (req) => {
   try {
     console.log('Resolve sports markets job started');
     console.log(`Odds API configured: ${!!Deno.env.get('ODDS_API_KEY')}`);
+    console.log(`Cache size: ${SCORE_CACHE.size} entries`);
     
     const markets = await fetchUnresolvedSportsMarkets();
     console.log(`Found ${markets.length} unresolved sports markets pending resolution`);
+    
+    // Sort markets by priority - closest to resolution time first
+    const sortedMarkets = [...markets].sort((a, b) => {
+      const priorityA = getPollingPriority(a.resolution_time);
+      const priorityB = getPollingPriority(b.resolution_time);
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[priorityA.priority] - priorityOrder[priorityB.priority];
+    });
     
     const results = {
       resolved: 0,
@@ -321,12 +418,14 @@ serve(async (req) => {
       awayWins: 0,
       pending: 0,
       failed: 0,
+      skipped: 0,
+      cacheHits: 0,
       oddsApiHits: 0,
       espnFallbacks: 0,
-      details: [] as { marketId: string; outcome: string | null; status: string; source?: string }[]
+      details: [] as { marketId: string; outcome: string | null; status: string; source?: string; priority?: string }[]
     };
     
-    for (const market of markets) {
+    for (const market of sortedMarkets) {
       const eventId = extractEventId(market.market_id);
       if (!eventId) {
         console.log(`Invalid market ID format: ${market.market_id}`);
@@ -334,7 +433,39 @@ serve(async (req) => {
         continue;
       }
       
-      const score = await fetchMatchScore(eventId);
+      const { priority } = getPollingPriority(market.resolution_time);
+      
+      // Check if we should skip based on polling interval
+      if (!shouldPollMarket(eventId, market.resolution_time)) {
+        const cached = SCORE_CACHE.get(eventId);
+        if (cached?.data?.status === 'final') {
+          // Still try to resolve if we have a final score cached
+          const outcome = determineOutcome(cached.data);
+          if (outcome) {
+            const success = await resolveMarket(market.market_id, outcome);
+            if (success) {
+              results.resolved++;
+              results.cacheHits++;
+              if (outcome === 'DRAW') results.draws++;
+              else if (outcome === 'YES') results.homeWins++;
+              else results.awayWins++;
+              results.details.push({
+                marketId: market.market_id,
+                outcome,
+                status: 'resolved_from_cache',
+                source: cached.data.source,
+                priority
+              });
+              continue;
+            }
+          }
+        }
+        console.log(`Skipping ${market.market_id} - poll interval not reached (priority: ${priority})`);
+        results.skipped++;
+        continue;
+      }
+      
+      const score = await fetchMatchScore(eventId, market.resolution_time);
       
       if (!score) {
         console.log(`No score data available for ${market.market_id}`);
@@ -342,12 +473,12 @@ serve(async (req) => {
         results.details.push({
           marketId: market.market_id,
           outcome: null,
-          status: 'no_score_data'
+          status: 'no_score_data',
+          priority
         });
         continue;
       }
       
-      // Track data source
       if (score.source === 'odds_api') {
         results.oddsApiHits++;
       } else {
@@ -361,7 +492,8 @@ serve(async (req) => {
           marketId: market.market_id,
           outcome: null,
           status: score.status,
-          source: score.source
+          source: score.source,
+          priority
         });
         continue;
       }
@@ -388,7 +520,8 @@ serve(async (req) => {
           marketId: market.market_id,
           outcome,
           status: 'resolved',
-          source: score.source
+          source: score.source,
+          priority
         });
       } else {
         results.failed++;
@@ -396,7 +529,8 @@ serve(async (req) => {
           marketId: market.market_id,
           outcome,
           status: 'resolution_failed',
-          source: score.source
+          source: score.source,
+          priority
         });
       }
       
@@ -410,7 +544,9 @@ serve(async (req) => {
       homeWins: results.homeWins,
       awayWins: results.awayWins,
       pending: results.pending,
+      skipped: results.skipped,
       failed: results.failed,
+      cacheHits: results.cacheHits,
       oddsApiHits: results.oddsApiHits,
       espnFallbacks: results.espnFallbacks
     });
@@ -418,6 +554,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       ...results,
+      cacheSize: SCORE_CACHE.size,
       timestamp: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
