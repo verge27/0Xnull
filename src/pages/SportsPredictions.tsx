@@ -65,7 +65,10 @@ interface VideoHighlight {
 }
 
 export default function SportsPredictions() {
-  useSEO();
+  useSEO({
+    title: 'Anonymous Sports Predictions | No-KYC Sports Markets – 0xNull',
+    description: 'Place anonymous sports predictions on 0xNull with no KYC or accounts required. Predict sports outcomes using Monero and other cryptocurrencies on a privacy-first platform.',
+  });
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { createSportsMarket, liveScores, backoffStates, startLiveScorePolling, stopLiveScorePolling, pollingActive, lastUpdated } = useSportsEvents();
   const { categories, loading: categoriesLoading } = useSportsCategories();
@@ -1606,8 +1609,8 @@ export default function SportsPredictions() {
         
         {/* SEO Rich Text Section */}
         <SEORichText 
-          title="Sports Betting with Monero"
-          content="<p>Placeholder SEO content for Sports Predictions. This section will contain keyword-rich content about anonymous sports betting, XMR sports wagering, and privacy-focused sportsbook.</p>"
+          title="Anonymous Sports Prediction Markets on 0xNull"
+          content="<p>0xNull Sports Predictions offers a privacy-first way to participate in anonymous, no-KYC sports prediction markets. Users can place predictions on major sporting events without creating accounts, submitting personal information, or completing identity verification.</p><p>Unlike traditional sportsbooks and prediction platforms, 0xNull is built for anonymity. All sports predictions are made using cryptocurrencies, including privacy-focused options like Monero, ensuring transactions remain confidential and censorship-resistant.</p><p>The platform covers a wide range of sports markets, allowing users to predict outcomes securely while maintaining full control over their privacy. With no centralized custody of user data and no KYC requirements, 0xNull removes common barriers that limit access to global prediction markets.</p><p>Whether you're predicting match outcomes, tournament results, or seasonal performances, 0xNull enables sports predictions without surveillance, tracking, or identity exposure. Every market is designed around fairness, transparency, and user sovereignty.</p><p>Explore anonymous sports prediction markets on 0xNull and participate freely—without KYC, accounts, or compromised privacy.</p>"
         />
         
         <Footer />
