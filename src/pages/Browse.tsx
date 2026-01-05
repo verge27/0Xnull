@@ -145,6 +145,11 @@ const Browse = () => {
     ...demoListings.map(demo => ({ ...demo, isDemo: true }))
   ];
 
+  useSEO({
+    title: 'Anonymous Crypto Marketplace | No-KYC Prediction Markets – 0xNull',
+    description: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services, and Monero payments—built for privacy-first users.',
+  });
+
   // Apply product list SEO schema
   useProductListSEO({
     products: listings.slice(0, 20).map(listing => ({
@@ -158,8 +163,8 @@ const Browse = () => {
       stock: listing.stock || 1,
       sellerName: listing.partnerName || listing.seller?.name,
     })),
-    pageTitle: 'Marketplace - 0xNull',
-    pageDescription: 'Anonymous crypto marketplace. Buy and sell goods and services with Monero.',
+    pageTitle: 'Anonymous Crypto Marketplace | No-KYC Prediction Markets – 0xNull',
+    pageDescription: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services, and Monero payments—built for privacy-first users.',
     pageUrl: 'https://0xnull.io/browse',
   });
 
@@ -601,8 +606,8 @@ const Browse = () => {
       
       {/* SEO Rich Text Section */}
       <SEORichText 
-        title="Anonymous Cryptocurrency Marketplace"
-        content="<p>Placeholder SEO content for Marketplace. This section will contain keyword-rich content about anonymous marketplace, buying with Monero, and privacy-focused e-commerce.</p>"
+        title="Anonymous Crypto Marketplace with No-KYC Prediction Markets"
+        content="<p>0xNull Marketplace is an anonymous crypto marketplace built for privacy-first users who want access to no-KYC prediction markets and digital services. The platform allows users to interact, trade, and participate without creating accounts, submitting identity documents, or exposing personal information.</p><p>Unlike traditional online marketplaces, 0xNull operates without KYC, user tracking, or centralized identity systems. All activity is crypto-native, with support for privacy-focused cryptocurrencies such as Monero, ensuring confidential and censorship-resistant transactions.</p><p>The marketplace brings together multiple privacy-preserving services in one ecosystem. Users can access anonymous sports, crypto, and esports prediction markets, crypto swaps, anonymous VPS hosting, and other digital services—without sacrificing anonymity or control.</p><p>By removing intermediaries and data collection, 0xNull Marketplace empowers users to participate freely in markets and services regardless of location or restrictions. Every market and service is designed with privacy as the default, not an optional feature.</p><p>Explore the 0xNull Marketplace to access anonymous, no-KYC prediction markets and crypto services—all in one privacy-first platform.</p>"
       />
 
       {/* Site Assistant Chatbot */}
