@@ -1,6 +1,6 @@
 /**
  * Route prefetching registry for lazy-loaded pages
- * Maps routes to their dynamic import functions for prefetching on hover
+ * Maps routes to their dynamic import functions for prefetching on hover/viewport
  */
 
 type ImportFn = () => Promise<{ default: React.ComponentType }>;
@@ -65,13 +65,17 @@ const routeImports: Record<string, ImportFn> = {
 // Track which routes have already been prefetched to avoid duplicate requests
 const prefetchedRoutes = new Set<string>();
 
+// Normalize a path for lookup
+function normalizePath(path: string): string {
+  return path.split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
+}
+
 /**
  * Prefetch a route's JavaScript chunk
  * @param path - The route path to prefetch
  */
 export function prefetchRoute(path: string): void {
-  // Normalize path (remove trailing slash, query params, hash)
-  const normalizedPath = path.split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
+  const normalizedPath = normalizePath(path);
   
   // Skip if already prefetched
   if (prefetchedRoutes.has(normalizedPath)) {
@@ -115,4 +119,68 @@ export function isInternalRoute(path: string): boolean {
     return false;
   }
   return true;
+}
+
+// Shared IntersectionObserver for viewport-based prefetching
+let prefetchObserver: IntersectionObserver | null = null;
+const observedElements = new WeakMap<Element, string>();
+
+/**
+ * Get or create the shared IntersectionObserver for prefetching
+ */
+function getPrefetchObserver(): IntersectionObserver {
+  if (!prefetchObserver) {
+    prefetchObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const path = observedElements.get(entry.target);
+            if (path) {
+              prefetchRoute(path);
+              // Unobserve after prefetching
+              prefetchObserver?.unobserve(entry.target);
+              observedElements.delete(entry.target);
+            }
+          }
+        });
+      },
+      {
+        // Start prefetching when element is within 200px of viewport
+        rootMargin: '200px',
+        threshold: 0,
+      }
+    );
+  }
+  return prefetchObserver;
+}
+
+/**
+ * Observe an element for viewport-based prefetching
+ * @param element - The DOM element (usually a link) to observe
+ * @param path - The route path to prefetch when visible
+ */
+export function observeForPrefetch(element: Element, path: string): void {
+  if (!isInternalRoute(path)) return;
+  
+  const normalizedPath = normalizePath(path);
+  
+  // Skip if already prefetched
+  if (prefetchedRoutes.has(normalizedPath)) return;
+  
+  // Skip if no matching route
+  if (!routeImports[normalizedPath]) return;
+  
+  observedElements.set(element, normalizedPath);
+  getPrefetchObserver().observe(element);
+}
+
+/**
+ * Stop observing an element for prefetching
+ * @param element - The DOM element to unobserve
+ */
+export function unobserveForPrefetch(element: Element): void {
+  if (prefetchObserver && observedElements.has(element)) {
+    prefetchObserver.unobserve(element);
+    observedElements.delete(element);
+  }
 }
