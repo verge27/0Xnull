@@ -101,16 +101,18 @@
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-    <!-- Preload critical fonts -->
+    <!-- Preconnect to critical origins first -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI-fAZ9hjp-Ek-_EeA.woff2" crossorigin />
-
-    <!-- Preload critical above-the-fold resources for LCP -->
-    <link rel="preload" as="image" href="/images/backgrounds/predictions-hero-background.webp" type="image/webp" fetchpriority="high" />
-    
-    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://qjkojiamexufuxsrupjq.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://qjkojiamexufuxsrupjq.supabase.co" />
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    
+    <!-- Preload critical fonts -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI-fAZ9hjp-Ek-_EeA.woff2" crossorigin />
+
+    <!-- Preload critical above-the-fold resources for LCP (optimized image) -->
+    <link rel="preload" as="image" href="/images/backgrounds/predictions-hero-background.webp" type="image/webp" fetchpriority="high" />
 
     <!-- Prefetch likely next-page navigations for faster perceived performance -->
     <link rel="prefetch" href="/get-started" />
