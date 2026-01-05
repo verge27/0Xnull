@@ -372,19 +372,18 @@ export default function SportsPredictions() {
     fetchMarkets();
   };
 
-  const handleCreateMarket = async (match: SportsMatch, team: string) => {
+  const handleCreateMarket = async (match: SportsMatch) => {
     setCreating(true);
     const event: SportsEvent = {
       ...match,
       commence_time: new Date(match.commence_timestamp * 1000).toISOString(),
     };
-    const success = await createSportsMarket(event, team);
+    const success = await createSportsMarket(event);
     setCreating(false);
     setTeamSelectDialog({ open: false, match: null });
     if (success) {
-      // Generate the market ID that was created
-      const teamSlug = team.toLowerCase().replace(/\s+/g, '_');
-      const marketId = `sports_${match.event_id}_${teamSlug}`;
+      // Generate the market ID that was created (now just event_id, no team slug)
+      const marketId = `sports_${match.event_id}`;
       setNewlyCreatedMarketId(marketId);
       
       // Switch to markets tab and scroll after data loads
@@ -1623,36 +1622,39 @@ export default function SportsPredictions() {
       >
         <DialogContent className="bg-background">
           <DialogHeader>
-            <DialogTitle>Select Team to Bet On</DialogTitle>
+            <DialogTitle>Create Market</DialogTitle>
             <DialogDescription>
-              Choose which team you think will win
+              Create a single market for this match
             </DialogDescription>
           </DialogHeader>
           
           {teamSelectDialog.match && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-2"
-                  onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.home_team)}
-                  disabled={creating}
-                >
+              <div className="flex items-center justify-center gap-4 py-4">
+                <div className="text-center">
                   <TeamLogo teamName={teamSelectDialog.match.home_team} sport={teamSelectDialog.match.sport} size="md" />
-                  <span className="font-medium">{teamSelectDialog.match.home_team}</span>
-                  <span className="text-xs text-muted-foreground">Home</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto py-4 flex flex-col gap-2"
-                  onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.away_team)}
-                  disabled={creating}
-                >
+                  <div className="font-medium mt-2">{teamSelectDialog.match.home_team}</div>
+                  <Badge variant="outline" className="mt-1">YES</Badge>
+                </div>
+                <div className="text-2xl font-bold text-muted-foreground">vs</div>
+                <div className="text-center">
                   <TeamLogo teamName={teamSelectDialog.match.away_team} sport={teamSelectDialog.match.sport} size="md" />
-                  <span className="font-medium">{teamSelectDialog.match.away_team}</span>
-                  <span className="text-xs text-muted-foreground">Away</span>
-                </Button>
+                  <div className="font-medium mt-2">{teamSelectDialog.match.away_team}</div>
+                  <Badge variant="outline" className="mt-1">NO</Badge>
+                </div>
               </div>
+              
+              <div className="text-center text-xs text-muted-foreground">
+                Draw = all bets refunded
+              </div>
+              
+              <Button
+                className="w-full"
+                onClick={() => handleCreateMarket(teamSelectDialog.match!)}
+                disabled={creating}
+              >
+                {creating ? 'Creating...' : 'Create Market'}
+              </Button>
             </div>
           )}
         </DialogContent>

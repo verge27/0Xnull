@@ -38,9 +38,9 @@ export function SportsEventsPanel({ onMarketsCreated, existingMarketIds }: Sport
     }
   };
 
-  const handleCreateMarket = async (event: SportsEvent, team: string) => {
+  const handleCreateMarket = async (event: SportsEvent) => {
     setCreating(true);
-    const success = await createSportsMarket(event, team);
+    const success = await createSportsMarket(event);
     setCreating(false);
     setTeamSelectDialog({ open: false, event: null });
     if (success) {
@@ -221,35 +221,25 @@ export function SportsEventsPanel({ onMarketsCreated, existingMarketIds }: Sport
                   {formatGameTime(teamSelectDialog.event.commence_timestamp)}
                 </div>
                 
-                <div className="grid gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-16 text-lg justify-start px-6"
-                    onClick={() => handleCreateMarket(teamSelectDialog.event!, teamSelectDialog.event!.home_team)}
-                    disabled={creating || existingMarketIds.includes(
-                      `sports_${teamSelectDialog.event.event_id}_${teamSelectDialog.event.home_team.toLowerCase().replace(/\s+/g, '_')}`
-                    )}
-                  >
-                    <span className="mr-3">🏠</span>
-                    {teamSelectDialog.event.home_team}
-                    {existingMarketIds.includes(
-                      `sports_${teamSelectDialog.event.event_id}_${teamSelectDialog.event.home_team.toLowerCase().replace(/\s+/g, '_')}`
-                    ) && <Badge variant="secondary" className="ml-auto">Exists</Badge>}
-                  </Button>
+                <div className="space-y-4">
+                  <div className="text-center text-sm text-muted-foreground">
+                    This will create a single market for the match:<br/>
+                    <strong>YES</strong> = {teamSelectDialog.event.home_team} wins<br/>
+                    <strong>NO</strong> = {teamSelectDialog.event.away_team} wins<br/>
+                    <span className="text-xs">Draw = all bets refunded</span>
+                  </div>
                   
                   <Button
-                    variant="outline"
-                    className="h-16 text-lg justify-start px-6"
-                    onClick={() => handleCreateMarket(teamSelectDialog.event!, teamSelectDialog.event!.away_team)}
+                    className="w-full h-16 text-lg"
+                    onClick={() => handleCreateMarket(teamSelectDialog.event!)}
                     disabled={creating || existingMarketIds.includes(
-                      `sports_${teamSelectDialog.event.event_id}_${teamSelectDialog.event.away_team.toLowerCase().replace(/\s+/g, '_')}`
+                      `sports_${teamSelectDialog.event.event_id}`
                     )}
                   >
-                    <span className="mr-3">✈️</span>
-                    {teamSelectDialog.event.away_team}
+                    {creating ? 'Creating...' : 'Create Market'}
                     {existingMarketIds.includes(
-                      `sports_${teamSelectDialog.event.event_id}_${teamSelectDialog.event.away_team.toLowerCase().replace(/\s+/g, '_')}`
-                    ) && <Badge variant="secondary" className="ml-auto">Exists</Badge>}
+                      `sports_${teamSelectDialog.event.event_id}`
+                    ) && <Badge variant="secondary" className="ml-2">Already Exists</Badge>}
                   </Button>
                 </div>
                 
