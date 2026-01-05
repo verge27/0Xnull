@@ -480,7 +480,8 @@ export const api = {
   },
 
   // Resolve a market manually (admin only)
-  async resolveMarket(marketId: string, outcome: 'YES' | 'NO'): Promise<{ success: boolean; message?: string }> {
+  // DRAW outcome triggers automatic refunds for all bets
+  async resolveMarket(marketId: string, outcome: 'YES' | 'NO' | 'DRAW'): Promise<{ success: boolean; message?: string }> {
     return proxyRequest<{ success: boolean; message?: string }>(`/api/predictions/markets/${marketId}/resolve`, {
       method: 'POST',
       body: JSON.stringify({ outcome }),
