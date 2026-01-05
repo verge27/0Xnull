@@ -57,7 +57,7 @@ import linkLogo from '@/assets/crypto/link.png';
 import uniLogo from '@/assets/crypto/uni.png';
 import aaveLogo from '@/assets/crypto/aave.png';
 import fartcoinLogo from '@/assets/crypto/fartcoin.png';
-import cryptoPredictionsBackground from '@/assets/crypto-predictions-background.webp';
+const cryptoPredictionsBackground = '/images/backgrounds/crypto-predictions-background.webp';
 
 const TRADING_PAIRS = [
   { symbol: 'BTC/USDT', tvSymbol: 'OKX:BTCUSDT' },

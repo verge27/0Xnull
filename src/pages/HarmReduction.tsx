@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, AlertTriangle, Lock, Eye, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
-import safetyBackground from '@/assets/safety-background.webp';
+const safetyBackground = '/images/backgrounds/safety-background.webp';
 
 const HarmReduction = () => {
   useSEO();
