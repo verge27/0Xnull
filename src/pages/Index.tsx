@@ -16,14 +16,13 @@ const heroImages = {
   small: '/images/backgrounds/predictions-hero-background-640.webp',
   medium: '/images/backgrounds/predictions-hero-background-1024.webp',
   large: '/images/backgrounds/predictions-hero-background.webp',
+  xl: '/images/backgrounds/predictions-hero-background-1536.webp',
 };
 
 const heroResponsiveSources = [
   { src: heroImages.small, width: 640 },
   { src: heroImages.medium, width: 1024 },
-  // Temporary 1536w “bridge” using the 1024px file to avoid downloading the 1920px image on high-DPR mobile.
-  // For best sharpness, replace this src with a real 1536px-wide WebP later.
-  { src: heroImages.medium, width: 1536 },
+  { src: heroImages.xl, width: 1536 },
   { src: heroImages.large, width: 1920 },
 ];
 
