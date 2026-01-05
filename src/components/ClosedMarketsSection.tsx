@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { ResolutionStatusPanel } from '@/components/ResolutionStatusPanel';
 
 // Simple notification sound using Web Audio API
 const playNotificationSound = () => {
@@ -181,6 +182,12 @@ export function ClosedMarketsSection({ markets, getBetsForMarket, onMarketsUpdat
           <span className="text-xs">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
         </Button>
       </div>
+      
+      {/* Admin Resolution Status Panel */}
+      {isAdmin && (
+        <ResolutionStatusPanel onManualTrigger={onMarketsUpdate} />
+      )}
+      
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {markets.map(market => {
           const odds = getOdds(market);
