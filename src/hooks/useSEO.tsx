@@ -1063,6 +1063,10 @@ export interface ProductSEOData {
   condition: 'new' | 'used' | 'digital';
   stock: number;
   sellerName?: string;
+  sellerRating?: number;
+  sellerReviewCount?: number;
+  shipsFrom?: string;
+  shipsTo?: string[];
 }
 
 export function useProductSEO(listing: ProductSEOData | null) {
@@ -1101,25 +1105,84 @@ export function useProductSEO(listing: ProductSEOData | null) {
     }
     canonical.href = url;
 
-    // Product structured data
+    // Calculate price valid until (1 year from now)
+    const priceValidUntil = new Date();
+    priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
+
+    // Build shipping details if available
+    const shippingDetails = listing.shipsFrom ? {
+      '@type': 'OfferShippingDetails',
+      shippingRate: {
+        '@type': 'MonetaryAmount',
+        value: '0',
+        currency: 'USD',
+      },
+      shippingDestination: {
+        '@type': 'DefinedRegion',
+        addressCountry: listing.shipsTo?.length ? listing.shipsTo : ['US', 'CA', 'GB', 'DE', 'AU'],
+      },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 1,
+          maxValue: 3,
+          unitCode: 'DAY',
+        },
+        transitTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 3,
+          maxValue: 14,
+          unitCode: 'DAY',
+        },
+      },
+    } : undefined;
+
+    // Merchant return policy
+    const hasMerchantReturnPolicy = {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: 'US',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: 30,
+      returnMethod: 'https://schema.org/ReturnByMail',
+      returnFees: 'https://schema.org/FreeReturn',
+    };
+
+    // Product structured data with all required fields
     const productSchema: StructuredData = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: listing.title,
       description: listing.description,
-      image: listing.images.map(img => 
-        img.startsWith('http') ? img : `https://0xnull.io${img}`
-      ),
+      image: listing.images.length > 0 
+        ? listing.images.map(img => 
+            img.startsWith('http') ? img : `https://0xnull.io${img}`
+          )
+        : ['https://0xnull.io/og-image.png'],
       url: url,
+      sku: listing.id,
+      mpn: listing.id,
       category: listing.category,
       brand: {
         '@type': 'Brand',
-        name: '0xNull Marketplace',
+        name: listing.sellerName || '0xNull Marketplace',
       },
+      // Add aggregate rating if seller has reviews
+      ...(listing.sellerRating && listing.sellerReviewCount ? {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: listing.sellerRating.toFixed(1),
+          reviewCount: listing.sellerReviewCount,
+          bestRating: '5',
+          worstRating: '1',
+        },
+      } : {}),
       offers: {
         '@type': 'Offer',
+        url: url,
         price: listing.priceUsd.toFixed(2),
         priceCurrency: 'USD',
+        priceValidUntil: priceValidUntil.toISOString().split('T')[0],
         availability: listing.stock > 0 
           ? 'https://schema.org/InStock' 
           : 'https://schema.org/OutOfStock',
@@ -1128,10 +1191,12 @@ export function useProductSEO(listing: ProductSEOData | null) {
           : listing.condition === 'used'
           ? 'https://schema.org/UsedCondition'
           : 'https://schema.org/NewCondition',
-        seller: listing.sellerName ? {
+        seller: {
           '@type': 'Organization',
-          name: listing.sellerName,
-        } : undefined,
+          name: listing.sellerName || '0xNull Marketplace',
+        },
+        hasMerchantReturnPolicy: hasMerchantReturnPolicy,
+        ...(shippingDetails ? { shippingDetails: shippingDetails } : {}),
       },
     };
 

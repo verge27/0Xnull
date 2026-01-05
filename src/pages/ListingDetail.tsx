@@ -170,6 +170,10 @@ const ListingDetail = () => {
     condition: listing.condition,
     stock: listing.stock,
     sellerName: seller?.displayName,
+    sellerRating: seller?.rating,
+    sellerReviewCount: seller?.reviewCount,
+    shipsFrom: listing.shipsFrom,
+    shipsTo: listing.shipsTo,
   } : null);
 
   // Apply dynamic OG image
