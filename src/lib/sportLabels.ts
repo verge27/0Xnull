@@ -697,7 +697,7 @@ export function getLeagueLabel(marketId: string): string | null {
  * Returns formatted "Team A vs Team B" string
  */
 export function parseMatchupFromTitle(title: string): { teamA: string; teamB: string; matchup: string } {
-  // Format: "Team A wins vs Team B"
+  // New format: "Home Team wins vs Away Team"
   const winsVsMatch = title.match(/(.+?)\s+wins\s+vs\s+(.+)/i);
   if (winsVsMatch) {
     const teamA = winsVsMatch[1].trim();
@@ -705,7 +705,7 @@ export function parseMatchupFromTitle(title: string): { teamA: string; teamB: st
     return { teamA, teamB, matchup: `${teamA} vs ${teamB}` };
   }
   
-  // Format: "Will Team A win?"
+  // Legacy format: "Will Team A win?"
   const willWinMatch = title.match(/Will\s+(.+?)\s+win\??/i);
   if (willWinMatch) {
     const teamA = willWinMatch[1].trim();

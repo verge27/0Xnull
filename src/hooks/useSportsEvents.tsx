@@ -275,13 +275,14 @@ export function useSportsEvents() {
     };
   }, []);
 
+  // Create a single market per match: YES = home team wins, NO = away team wins
+  // Draw results in all bets being refunded
   const createSportsMarket = useCallback(async (
-    event: SportsEvent,
-    selectedTeam: string
+    event: SportsEvent
   ): Promise<boolean> => {
     try {
-      const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
-      const marketId = `sports_${event.event_id}_${teamSlug}`;
+      // Single market per match - use event_id only (no team slug)
+      const marketId = `sports_${event.event_id}`;
       
       // Match start time (betting closes when match starts)
       const matchStartTime = event.commence_timestamp;
@@ -293,23 +294,24 @@ export function useSportsEvents() {
       
       await api.createMarket({
         market_id: marketId,
-        title: `Will ${selectedTeam} win?`,
-        description: `${sportLabel}: ${event.away_team} @ ${event.home_team}`,
+        // New title format: "Home Team wins vs Away Team"
+        title: `${event.home_team} wins vs ${event.away_team}`,
+        description: `${sportLabel}: ${event.home_team} vs ${event.away_team}. YES = ${event.home_team} wins. NO = ${event.away_team} wins. Draw = all bets refunded.`,
         oracle_type: 'sports',
         oracle_asset: event.event_id,
-        oracle_condition: selectedTeam, // Team name for resolution
+        oracle_condition: 'match_winner', // Resolution tracks home/away winner
         oracle_value: 0,
         resolution_time: resolutionTime,
         betting_closes_at: matchStartTime,  // Betting closes when match starts
         commence_time: matchStartTime,       // Match start time for display
       });
       
-      toast.success(`Market created for ${selectedTeam}`);
+      toast.success(`Market created: ${event.home_team} vs ${event.away_team}`);
       return true;
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to create market';
       if (message.includes('already exists')) {
-        toast.info('Market already exists for this team');
+        toast.info('Market already exists for this match');
       } else {
         toast.error(message);
       }
@@ -333,24 +335,11 @@ export function useSportsEvents() {
     let skipped = 0;
     
     for (const event of upcomingEvents) {
-      // Create market for home team
-      const homeSlug = event.home_team.toLowerCase().replace(/\s+/g, '_');
-      const homeMarketId = `sports_${event.event_id}_${homeSlug}`;
+      // Create single market per match (not per team)
+      const marketId = `sports_${event.event_id}`;
       
-      if (!existingMarketIds.includes(homeMarketId)) {
-        const success = await createSportsMarket(event, event.home_team);
-        if (success) created++;
-        else skipped++;
-      } else {
-        skipped++;
-      }
-      
-      // Create market for away team
-      const awaySlug = event.away_team.toLowerCase().replace(/\s+/g, '_');
-      const awayMarketId = `sports_${event.event_id}_${awaySlug}`;
-      
-      if (!existingMarketIds.includes(awayMarketId)) {
-        const success = await createSportsMarket(event, event.away_team);
+      if (!existingMarketIds.includes(marketId)) {
+        const success = await createSportsMarket(event);
         if (success) created++;
         else skipped++;
       } else {

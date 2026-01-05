@@ -124,13 +124,13 @@ export function SportsMarketCard({
       <CardContent className="p-4 pt-11">
         {/* Sport badge moved to top-left for visibility */}
 
-        {/* Teams display */}
+        {/* Teams display - YES = teamA (home), NO = teamB (away) */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 flex-1">
             <TeamLogo teamName={teamA} sport={getSport()} size="md" />
             <div className="text-left">
               <div className="font-semibold text-sm">{teamA}</div>
-              <div className="text-xs text-muted-foreground">to win</div>
+              <div className="text-xs text-emerald-400 font-medium">YES to win</div>
             </div>
           </div>
           
@@ -139,7 +139,7 @@ export function SportsMarketCard({
           <div className="flex items-center gap-3 flex-1 justify-end">
             <div className="text-right">
               <div className="font-semibold text-sm">{teamB || 'Draw/Other'}</div>
-              <div className="text-xs text-muted-foreground">opponent</div>
+              <div className="text-xs text-red-400 font-medium">NO to win</div>
             </div>
             {teamB && <TeamLogo teamName={teamB} sport={getSport()} size="md" />}
           </div>

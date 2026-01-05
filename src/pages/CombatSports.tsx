@@ -199,11 +199,11 @@ export default function CombatSports() {
     return false;
   }).sort((a, b) => Number(a.commence_timestamp) - Number(b.commence_timestamp));
 
-  const handleCreateMarket = async (match: SportsMatch, team: string) => {
+  const handleCreateMarket = async (match: SportsMatch) => {
     setCreating(true);
     try {
-      const teamSlug = team.toLowerCase().replace(/\s+/g, '_');
-      const marketId = `sports_${match.event_id}_${teamSlug}`;
+      // Market ID is now just event_id (no team slug)
+      const marketId = `sports_${match.event_id}`;
       
       await createSportsMarket({
         event_id: match.event_id,
@@ -213,7 +213,7 @@ export default function CombatSports() {
         away_team: match.away_team,
         commence_time: new Date(Number(match.commence_timestamp) * 1000).toISOString(),
         commence_timestamp: Number(match.commence_timestamp),
-      }, team);
+      });
       
       setNewlyCreatedMarketId(marketId);
       await fetchMarkets();
@@ -1001,26 +1001,24 @@ export default function CombatSports() {
           <DialogHeader>
             <DialogTitle>Create Market</DialogTitle>
             <DialogDescription>
-              Select which fighter to create a market for
+              Create a single market for this fight
             </DialogDescription>
           </DialogHeader>
           {teamSelectDialog.match && (
-            <div className="grid gap-3">
+            <div className="space-y-4">
+              <div className="text-center text-sm text-muted-foreground">
+                <strong>YES</strong> = {teamSelectDialog.match.home_team} wins<br/>
+                <strong>NO</strong> = {teamSelectDialog.match.away_team} wins<br/>
+                <span className="text-xs">Draw = all bets refunded</span>
+              </div>
+              
               <Button 
-                onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.home_team)}
+                onClick={() => handleCreateMarket(teamSelectDialog.match!)}
                 disabled={creating}
-                className="bg-red-600 hover:bg-red-700"
+                className="w-full bg-red-600 hover:bg-red-700"
               >
                 {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                {teamSelectDialog.match.home_team} wins?
-              </Button>
-              <Button 
-                onClick={() => handleCreateMarket(teamSelectDialog.match!, teamSelectDialog.match!.away_team)}
-                disabled={creating}
-                variant="outline"
-              >
-                {creating ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                {teamSelectDialog.match.away_team} wins?
+                Create Market: {teamSelectDialog.match.home_team} vs {teamSelectDialog.match.away_team}
               </Button>
             </div>
           )}

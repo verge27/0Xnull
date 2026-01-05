@@ -273,12 +273,11 @@ function getSportLabel(sport: string): string {
   return labels[sport] || sport.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-async function createMarket(
-  event: SportsEvent,
-  selectedTeam: string
-): Promise<boolean> {
-  const teamSlug = selectedTeam.toLowerCase().replace(/\s+/g, '_');
-  const marketId = `sports_${event.event_id}_${teamSlug}`;
+// Create a single market per match: YES = home team wins, NO = away team wins
+// Draw results in all bets being refunded
+async function createMarket(event: SportsEvent): Promise<boolean> {
+  // Single market per match - use event_id only (no team slug)
+  const marketId = `sports_${event.event_id}`;
   
   // Resolution time = commence time + 4 hours (for game to complete)
   const resolutionTime = event.commence_timestamp + 14400;
@@ -287,11 +286,12 @@ async function createMarket(
   
   const body = {
     market_id: marketId,
-    title: `Will ${selectedTeam} win?`,
-    description: `${sportLabel}: ${event.away_team} @ ${event.home_team}`,
+    // New title format: "Home Team wins vs Away Team"
+    title: `${event.home_team} wins vs ${event.away_team}`,
+    description: `${sportLabel}: ${event.home_team} vs ${event.away_team}. YES = ${event.home_team} wins. NO = ${event.away_team} wins. Draw = all bets refunded.`,
     oracle_type: 'sports',
     oracle_asset: event.event_id,
-    oracle_condition: 'winner',
+    oracle_condition: 'match_winner', // Resolution tracks home/away winner
     oracle_value: 0,
     resolution_time: resolutionTime,
   };
@@ -351,24 +351,11 @@ serve(async (req) => {
     let skipped = 0;
     
     for (const event of upcomingEvents) {
-      // Create market for home team
-      const homeSlug = event.home_team.toLowerCase().replace(/\s+/g, '_');
-      const homeMarketId = `sports_${event.event_id}_${homeSlug}`;
+      // Create single market per match (not per team)
+      const marketId = `sports_${event.event_id}`;
       
-      if (!existingMarketIds.includes(homeMarketId)) {
-        const success = await createMarket(event, event.home_team);
-        if (success) created++;
-        else skipped++;
-      } else {
-        skipped++;
-      }
-      
-      // Create market for away team
-      const awaySlug = event.away_team.toLowerCase().replace(/\s+/g, '_');
-      const awayMarketId = `sports_${event.event_id}_${awaySlug}`;
-      
-      if (!existingMarketIds.includes(awayMarketId)) {
-        const success = await createMarket(event, event.away_team);
+      if (!existingMarketIds.includes(marketId)) {
+        const success = await createMarket(event);
         if (success) created++;
         else skipped++;
       } else {
