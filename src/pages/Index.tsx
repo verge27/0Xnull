@@ -54,9 +54,9 @@ const Index = () => {
       
       {/* Hero Section with Background */}
       <BackgroundImage
-        src={heroImages.large}
+        src={heroImages.small}
         responsiveSources={heroResponsiveSources}
-        sizes="100vw"
+        sizes="(max-width: 640px) 640px, (max-width: 1024px) 1024px, 1920px"
         priority={true}
         className="relative overflow-hidden"
         overlayClassName="bg-gradient-to-b from-background/70 via-background/60 to-background"
