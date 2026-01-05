@@ -107,7 +107,10 @@ interface SwapHistoryItem {
 
 
 const Swaps = () => {
-  useSEO();
+  useSEO({
+    title: 'Anonymous Crypto Swaps No KYC | Private Crypto Exchange – 0xNull',
+    description: 'Use anonymous crypto swaps on 0xNull with no KYC or accounts. Swap cryptocurrencies privately with Monero support on a privacy-first platform.',
+  });
   const { toast } = useToast();
   const { user } = useAuth();
   const [aggregator, setAggregator] = useState<Aggregator>('trocador');
@@ -1299,8 +1302,8 @@ const Swaps = () => {
       
       {/* SEO Rich Text Section */}
       <SEORichText 
-        title="Anonymous Crypto Swaps"
-        content="<p>Placeholder SEO content for Crypto Swaps. This section will contain keyword-rich content about anonymous cryptocurrency exchanges, no-KYC swaps, and privacy-focused crypto trading.</p>"
+        title="Anonymous Crypto Swaps with No KYC on 0xNull"
+        content="<p>0xNull provides anonymous crypto swaps with no KYC, no accounts, and no identity verification. Users can swap cryptocurrencies directly while maintaining full financial privacy and control.</p><p>Unlike centralized exchanges, 0xNull crypto swaps are privacy-first and non-custodial. There is no user registration, no personal data collection, and no tracking. Swaps are completed using crypto-native infrastructure and support privacy-focused assets such as Monero, ensuring confidential transactions.</p><p>These no-KYC crypto swaps allow users to exchange assets without exposing identity, submitting documents, or relying on custodial platforms. By removing traditional exchange barriers, 0xNull enables global access to crypto swaps regardless of jurisdiction or restrictions.</p><p>Designed for users who prioritize anonymity and sovereignty, 0xNull crypto swaps offer a secure and censorship-resistant way to exchange digital assets without compromising privacy.</p><p>Swap cryptocurrencies anonymously on 0xNull—no KYC, no accounts, just private crypto-to-crypto swaps.</p>"
       />
 
       <Footer />
