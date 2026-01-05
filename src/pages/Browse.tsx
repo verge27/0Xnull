@@ -321,20 +321,20 @@ const Browse = () => {
           </p>
           <div className="flex flex-wrap gap-4 justify-center animate-fade-in mt-24 md:mt-32" style={{ animationDelay: '0.2s' }}>
             <Link to="/get-started">
-              <Button size="lg" className="gap-2 text-lg px-8 shadow-lg animate-neon-glow-orange">
-                <Rocket className="w-5 h-5" />
+              <Button size="lg" className="gap-2 text-lg px-8 neon-glow-primary transition-transform hover:scale-105">
+                <Rocket className="w-5 h-5" aria-hidden="true" />
                 Start Selling & Buying
               </Button>
             </Link>
             <Button 
               size="lg" 
               variant="outline" 
-              className="gap-2 text-lg px-8 shadow-lg bg-background/50 backdrop-blur-sm animate-neon-glow-cyan"
+              className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-cyan-static transition-transform hover:scale-105"
               onClick={() => {
                 document.getElementById('marketplace-content')?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" aria-hidden="true" />
               Browse Products & Services
             </Button>
           </div>
