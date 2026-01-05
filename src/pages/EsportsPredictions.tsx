@@ -47,7 +47,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function EsportsPredictions() {
-  useSEO();
+  useSEO({
+    title: 'Anonymous Esports Prediction Markets | No-KYC Esports Predictions – 0xNull',
+    description: 'Access anonymous esports prediction markets on 0xNull. Predict esports outcomes with no KYC, no accounts, and Monero payments on a privacy-first platform.',
+  });
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { 
     events, 
@@ -1149,8 +1152,8 @@ export default function EsportsPredictions() {
         
         {/* SEO Rich Text Section */}
         <SEORichText 
-          title="Esports Betting with Monero"
-          content="<p>Placeholder SEO content for Esports Predictions. This section will contain keyword-rich content about anonymous esports betting, CS2 betting, Dota 2 predictions, and privacy-focused esports wagering.</p>"
+          title="Anonymous Esports Prediction Markets on 0xNull"
+          content="<p>0xNull provides anonymous esports prediction markets with no KYC, no accounts, and no identity verification. Users can predict outcomes across major esports titles while maintaining full privacy and financial sovereignty.</p><p>Unlike traditional esports betting or prediction platforms, 0xNull esports prediction markets are built for anonymity. There is no user registration, no personal data collection, and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant participation.</p><p>These no-KYC esports prediction markets cover popular competitive games and tournaments, allowing users to predict match outcomes, series results, and major event conclusions without relying on centralized operators. By removing identity requirements, 0xNull enables global access to esports markets regardless of location or restrictions.</p><p>With a privacy-first architecture and crypto-native settlement, 0xNull creates a secure environment for anonymous esports predictions. The platform is designed for users who want to engage with competitive gaming markets without surveillance, accounts, or third-party oversight.</p><p>Explore anonymous esports prediction markets on 0xNull and participate freely—no KYC, no accounts, just privacy.</p>"
         />
 
         <Footer />
