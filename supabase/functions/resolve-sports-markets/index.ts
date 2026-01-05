@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 const API_BASE = 'https://api.0xnull.io/api';
+const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
 
 interface PredictionMarket {
   market_id: string;
@@ -24,8 +25,24 @@ interface PredictionMarket {
 interface MatchScore {
   homeScore: number;
   awayScore: number;
+  homeTeam: string;
+  awayTeam: string;
   status: 'final' | 'in_progress' | 'scheduled' | 'unknown';
+  source: 'odds_api' | 'espn';
 }
+
+// Sport key mappings for The Odds API
+const ODDS_API_SPORTS = [
+  'soccer_epl', 'soccer_spain_la_liga', 'soccer_germany_bundesliga',
+  'soccer_italy_serie_a', 'soccer_france_ligue_one', 'soccer_usa_mls',
+  'soccer_uefa_champs_league', 'soccer_uefa_europa_league',
+  'americanfootball_nfl', 'americanfootball_ncaaf',
+  'basketball_nba', 'basketball_ncaab',
+  'baseball_mlb',
+  'icehockey_nhl',
+  'mma_mixed_martial_arts',
+  'boxing_boxing',
+];
 
 // Fetch unresolved sports markets from 0xNull
 async function fetchUnresolvedSportsMarkets(): Promise<PredictionMarket[]> {
@@ -45,10 +62,89 @@ async function fetchUnresolvedSportsMarkets(): Promise<PredictionMarket[]> {
   );
 }
 
-// Fetch match score from ESPN API (unofficial)
-async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
+// Fetch scores from The Odds API (primary source)
+async function fetchOddsApiScores(eventId: string): Promise<MatchScore | null> {
+  const oddsApiKey = Deno.env.get('ODDS_API_KEY');
+  if (!oddsApiKey) {
+    console.log('ODDS_API_KEY not configured, skipping Odds API');
+    return null;
+  }
+
   try {
-    // Try multiple ESPN sport endpoints
+    // Try each sport to find the event
+    for (const sport of ODDS_API_SPORTS) {
+      try {
+        const url = `${ODDS_API_BASE}/sports/${sport}/scores?apiKey=${oddsApiKey}&daysFrom=3`;
+        const res = await fetch(url, {
+          headers: { 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(8000)
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            console.error('Odds API: Invalid API key');
+            return null;
+          }
+          continue;
+        }
+        
+        const events = await res.json();
+        
+        for (const event of events) {
+          // Check if this event matches our eventId
+          const eventIdMatch = event.id === eventId || 
+            eventId.includes(event.id) ||
+            event.id?.includes(eventId);
+          
+          if (!eventIdMatch) continue;
+          
+          // Check if game is completed
+          if (!event.completed) {
+            console.log(`Odds API: Game ${eventId} not completed yet`);
+            return {
+              homeScore: event.scores?.find((s: any) => s.name === event.home_team)?.score || 0,
+              awayScore: event.scores?.find((s: any) => s.name === event.away_team)?.score || 0,
+              homeTeam: event.home_team,
+              awayTeam: event.away_team,
+              status: 'in_progress',
+              source: 'odds_api'
+            };
+          }
+          
+          // Extract scores
+          const homeScoreData = event.scores?.find((s: any) => s.name === event.home_team);
+          const awayScoreData = event.scores?.find((s: any) => s.name === event.away_team);
+          
+          const homeScore = parseInt(homeScoreData?.score || '0', 10);
+          const awayScore = parseInt(awayScoreData?.score || '0', 10);
+          
+          console.log(`Odds API: Found final score for ${eventId}: ${event.home_team} ${homeScore} - ${event.away_team} ${awayScore}`);
+          
+          return {
+            homeScore,
+            awayScore,
+            homeTeam: event.home_team,
+            awayTeam: event.away_team,
+            status: 'final',
+            source: 'odds_api'
+          };
+        }
+      } catch (e) {
+        // Continue to next sport
+        continue;
+      }
+    }
+    
+    return null;
+  } catch (e) {
+    console.error('Odds API error:', e);
+    return null;
+  }
+}
+
+// Fetch match score from ESPN API (fallback)
+async function fetchEspnScore(eventId: string): Promise<MatchScore | null> {
+  try {
     const sportEndpoints = [
       'soccer/eng.1', 'soccer/usa.1', 'soccer/esp.1', 'soccer/ger.1', 'soccer/ita.1', 'soccer/fra.1',
       'soccer/uefa.champions', 'soccer/uefa.europa',
@@ -72,7 +168,6 @@ async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
         const events = data.events || [];
         
         for (const event of events) {
-          // Check if this event matches our eventId (could be in various formats)
           const eventIdMatch = event.id === eventId || 
             event.uid?.includes(eventId) ||
             eventId.includes(event.id);
@@ -90,7 +185,6 @@ async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
           const homeScore = parseInt(homeTeam.score || '0', 10);
           const awayScore = parseInt(awayTeam.score || '0', 10);
           
-          // Check game status
           const statusType = competition.status?.type?.name || event.status?.type?.name;
           const isCompleted = statusType === 'STATUS_FINAL' || 
             statusType === 'STATUS_FULL_TIME' ||
@@ -98,57 +192,62 @@ async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
             competition.status?.type?.completed === true;
           
           if (isCompleted) {
-            console.log(`Found final score for ${eventId}: Home ${homeScore} - Away ${awayScore}`);
+            console.log(`ESPN: Found final score for ${eventId}: ${homeTeam.team?.displayName} ${homeScore} - ${awayTeam.team?.displayName} ${awayScore}`);
             return {
               homeScore,
               awayScore,
-              status: 'final'
+              homeTeam: homeTeam.team?.displayName || 'Home',
+              awayTeam: awayTeam.team?.displayName || 'Away',
+              status: 'final',
+              source: 'espn'
             };
           }
           
-          // Game in progress or scheduled
           return {
             homeScore,
             awayScore,
-            status: competition.status?.type?.state === 'in' ? 'in_progress' : 'scheduled'
+            homeTeam: homeTeam.team?.displayName || 'Home',
+            awayTeam: awayTeam.team?.displayName || 'Away',
+            status: competition.status?.type?.state === 'in' ? 'in_progress' : 'scheduled',
+            source: 'espn'
           };
         }
       } catch (e) {
-        // Continue to next sport endpoint
         continue;
       }
     }
     
-    // Try the Odds API as fallback (if event info is stored there)
-    try {
-      const oddsRes = await fetch(`${API_BASE}/sports/events`);
-      if (oddsRes.ok) {
-        const oddsData = await oddsRes.json();
-        const event = (oddsData.events || []).find((e: any) => e.event_id === eventId);
-        if (event && event.scores) {
-          return {
-            homeScore: event.scores.home || 0,
-            awayScore: event.scores.away || 0,
-            status: event.completed ? 'final' : 'in_progress'
-          };
-        }
-      }
-    } catch {
-      // Fallback failed
-    }
-    
-    console.log(`No score found for event ${eventId}`);
     return null;
   } catch (e) {
-    console.error(`Error fetching score for ${eventId}:`, e);
+    console.error(`ESPN error for ${eventId}:`, e);
     return null;
   }
+}
+
+// Main score fetching function - tries Odds API first, then ESPN
+async function fetchMatchScore(eventId: string): Promise<MatchScore | null> {
+  // Try The Odds API first (primary source)
+  console.log(`Fetching score for ${eventId} from Odds API...`);
+  const oddsScore = await fetchOddsApiScores(eventId);
+  if (oddsScore) {
+    return oddsScore;
+  }
+  
+  // Fallback to ESPN
+  console.log(`Falling back to ESPN for ${eventId}...`);
+  const espnScore = await fetchEspnScore(eventId);
+  if (espnScore) {
+    return espnScore;
+  }
+  
+  console.log(`No score found for event ${eventId} from any source`);
+  return null;
 }
 
 // Determine outcome based on score
 function determineOutcome(score: MatchScore): 'YES' | 'NO' | 'DRAW' | null {
   if (score.status !== 'final') {
-    return null; // Game not finished
+    return null;
   }
   
   if (score.homeScore > score.awayScore) {
@@ -200,7 +299,6 @@ serve(async (req) => {
   const url = new URL(req.url);
   const isManualTrigger = url.searchParams.get('manual') === 'true';
   
-  // Allow manual trigger without auth for testing, or require cron secret
   if (!isManualTrigger && cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     console.log('Unauthorized: Invalid or missing cron secret');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -211,8 +309,8 @@ serve(async (req) => {
 
   try {
     console.log('Resolve sports markets job started');
+    console.log(`Odds API configured: ${!!Deno.env.get('ODDS_API_KEY')}`);
     
-    // Fetch unresolved sports markets
     const markets = await fetchUnresolvedSportsMarkets();
     console.log(`Found ${markets.length} unresolved sports markets pending resolution`);
     
@@ -223,7 +321,9 @@ serve(async (req) => {
       awayWins: 0,
       pending: 0,
       failed: 0,
-      details: [] as { marketId: string; outcome: string | null; status: string }[]
+      oddsApiHits: 0,
+      espnFallbacks: 0,
+      details: [] as { marketId: string; outcome: string | null; status: string; source?: string }[]
     };
     
     for (const market of markets) {
@@ -234,7 +334,6 @@ serve(async (req) => {
         continue;
       }
       
-      // Fetch score for this event
       const score = await fetchMatchScore(eventId);
       
       if (!score) {
@@ -248,32 +347,38 @@ serve(async (req) => {
         continue;
       }
       
+      // Track data source
+      if (score.source === 'odds_api') {
+        results.oddsApiHits++;
+      } else {
+        results.espnFallbacks++;
+      }
+      
       if (score.status !== 'final') {
         console.log(`Game not finished for ${market.market_id}: ${score.status}`);
         results.pending++;
         results.details.push({
           marketId: market.market_id,
           outcome: null,
-          status: score.status
+          status: score.status,
+          source: score.source
         });
         continue;
       }
       
-      // Determine outcome
       const outcome = determineOutcome(score);
       if (!outcome) {
         results.pending++;
         continue;
       }
       
-      // Resolve the market
       const success = await resolveMarket(market.market_id, outcome);
       
       if (success) {
         results.resolved++;
         if (outcome === 'DRAW') {
           results.draws++;
-          console.log(`DRAW detected for ${market.market_id}: ${score.homeScore}-${score.awayScore}. All bets will be refunded.`);
+          console.log(`DRAW: ${score.homeTeam} ${score.homeScore} - ${score.awayTeam} ${score.awayScore}. All bets refunded.`);
         } else if (outcome === 'YES') {
           results.homeWins++;
         } else {
@@ -282,28 +387,32 @@ serve(async (req) => {
         results.details.push({
           marketId: market.market_id,
           outcome,
-          status: 'resolved'
+          status: 'resolved',
+          source: score.source
         });
       } else {
         results.failed++;
         results.details.push({
           marketId: market.market_id,
           outcome,
-          status: 'resolution_failed'
+          status: 'resolution_failed',
+          source: score.source
         });
       }
       
-      // Small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Rate limiting delay
+      await new Promise(resolve => setTimeout(resolve, 250));
     }
     
-    console.log('Resolve sports markets job completed:', {
+    console.log('Resolution job completed:', {
       resolved: results.resolved,
       draws: results.draws,
       homeWins: results.homeWins,
       awayWins: results.awayWins,
       pending: results.pending,
-      failed: results.failed
+      failed: results.failed,
+      oddsApiHits: results.oddsApiHits,
+      espnFallbacks: results.espnFallbacks
     });
     
     return new Response(JSON.stringify({
