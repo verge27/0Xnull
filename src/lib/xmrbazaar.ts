@@ -10,12 +10,12 @@
 // Real XMRBazaar listing images
 import noxmrImg from '@/assets/xmrbazaar/noxmr.jpg';
 import getMoneroImg from '@/assets/xmrbazaar/get-monero.jpg';
-import fiatPaymentsImg from '@/assets/xmrbazaar/fiat-payments.jpg';
-import matrixServerImg from '@/assets/xmrbazaar/matrix-server.jpg';
+const fiatPaymentsImg = '/images/products/fiat-payments.jpg';
+const matrixServerImg = '/images/products/matrix-server.jpg';
 import designServicesImg from '@/assets/xmrbazaar/design-services.jpg';
 import pixelFoldImg from '@/assets/xmrbazaar/pixel-fold.jpg';
 import fpgaImg from '@/assets/xmrbazaar/fpga.jpg';
-import aeronnectEsimImg from '@/assets/xmrbazaar/aeronnect-esim.jpg';
+const aeronnectEsimImg = '/images/products/aeronnect-esim.jpg';
 const luckyCatStickerImg = '/images/products/lucky-cat-sticker.jpg';
 import moneroPatchImg from '@/assets/xmrbazaar/monero-patch.jpg';
 const longboardImg = '/images/products/longboard.jpg';
