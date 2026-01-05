@@ -25,28 +25,28 @@ const defaultMeta = {
 const pageMeta: Record<string, SEOProps> = {
   '/': defaultMeta,
   '/predict': {
-    title: 'Predictions Hub - 0xNull',
-    description: 'Make anonymous predictions on sports, esports, crypto, and more. Win XMR with privacy-first prediction markets.',
+    title: 'Anonymous Crypto Prediction Markets | No-KYC Betting Hub – 0xNull',
+    description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and private predictions across sports, esports, and crypto.',
   },
   '/sports-predictions': {
-    title: 'Sports Predictions - 0xNull',
-    description: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA, and more.',
+    title: 'Anonymous Sports Predictions | No-KYC Crypto Betting – 0xNull',
+    description: 'Place anonymous sports predictions on 0xNull. No KYC, no accounts, private Monero betting on football, basketball, tennis, and more.',
   },
   '/esports-predictions': {
-    title: 'Esports Predictions - 0xNull',
-    description: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends, and more.',
+    title: 'Anonymous Esports Predictions | No-KYC Crypto Betting – 0xNull',
+    description: 'Bet on esports anonymously with 0xNull. No KYC, no accounts, private Monero predictions on CS2, Dota 2, LoL, and more.',
   },
   '/predictions': {
-    title: 'Crypto Predictions - 0xNull',
-    description: 'Predict cryptocurrency prices anonymously. BTC, ETH, XMR price predictions with privacy.',
+    title: 'Anonymous Crypto Price Predictions | No-KYC Bitcoin Betting – 0xNull',
+    description: 'Make anonymous crypto price predictions on 0xNull. No KYC, no accounts, private Monero betting on Bitcoin, Ethereum, and more.',
   },
   '/swaps': {
-    title: 'Crypto Swaps - 0xNull',
-    description: 'Swap cryptocurrencies anonymously. No KYC, no registration. Exchange BTC, ETH, XMR and more.',
+    title: 'Anonymous Crypto Swaps No KYC | Private Crypto Exchange – 0xNull',
+    description: 'Use anonymous crypto swaps on 0xNull with no KYC or accounts. Swap cryptocurrencies privately with Monero support on a privacy-first platform.',
   },
   '/browse': {
-    title: 'Marketplace - 0xNull',
-    description: 'Anonymous crypto marketplace. Buy and sell goods and services with Monero.',
+    title: 'Anonymous Crypto Marketplace | No-KYC Prediction Markets – 0xNull',
+    description: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services, and Monero payments—built for privacy-first users.',
   },
   '/ai': {
     title: 'AI Services - 0xNull',
@@ -57,8 +57,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Privacy infrastructure services. VPS, eSIM, swaps, and more with anonymous crypto payments.',
   },
   '/vps': {
-    title: 'Anonymous VPS - 0xNull',
-    description: 'Anonymous VPS hosting with cryptocurrency. No KYC, privacy-focused virtual private servers.',
+    title: 'Anonymous VPS Hosting with Cryptocurrency | No-KYC VPS – 0xNull',
+    description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments, and privacy-first virtual servers.',
   },
   '/phone': {
     title: 'Anonymous eSIM - 0xNull',
@@ -113,8 +113,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Anonymous slap fighting betting. Predict Power Slap and slap fighting match outcomes.',
   },
   '/get-started': {
-    title: 'Get Started - 0xNull',
-    description: 'Learn how to use 0xNull prediction markets and marketplace. Quick start guide for new users.',
+    title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
+    description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and full privacy from the start.',
   },
   '/tor': {
     title: 'Tor Access Guide - 0xNull',
