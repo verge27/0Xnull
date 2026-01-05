@@ -11,8 +11,13 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    // Speed up builds (the platform build step has its own timeout; Vite cannot change it)
+    reportCompressedSize: false,
+    sourcemap: false,
+    minify: "esbuild",
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
+      // Reduce I/O contention in constrained CI environments
       maxParallelFileOps: 2,
     },
   },
