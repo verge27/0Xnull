@@ -105,6 +105,11 @@ export function OptimizedImage({
   return <img src={src} {...imgProps} />;
 }
 
+interface ResponsiveSource {
+  src: string;
+  width: number;
+}
+
 interface BackgroundImageProps {
   src: string;
   alt?: string;
@@ -112,11 +117,16 @@ interface BackgroundImageProps {
   priority?: boolean;
   children?: React.ReactNode;
   overlayClassName?: string;
+  /** Responsive image sources for srcset - array of {src, width} */
+  responsiveSources?: ResponsiveSource[];
+  /** Sizes attribute for responsive images */
+  sizes?: string;
 }
 
 /**
  * Optimized background image component for hero sections
  * Uses img tag instead of CSS background-image for better optimization
+ * Supports responsive srcset for serving smaller images on mobile
  */
 export function BackgroundImage({
   src,
@@ -125,26 +135,19 @@ export function BackgroundImage({
   priority = true, // Hero images are usually above the fold
   children,
   overlayClassName,
+  responsiveSources,
+  sizes = '100vw',
 }: BackgroundImageProps) {
-  // Generate WebP source if the original is jpg/png
-  const isConvertible = /\.(jpe?g|png)$/i.test(src);
-  const webpSrc = isConvertible ? src.replace(/\.(jpe?g|png)$/i, '.webp') : null;
+  // Build srcset from responsive sources
+  const srcSet = responsiveSources
+    ? responsiveSources.map(({ src, width }) => `${src} ${width}w`).join(', ')
+    : undefined;
 
-  const imgElement = webpSrc ? (
-    <picture>
-      <source srcSet={webpSrc} type="image/webp" />
-      <img
-        src={src}
-        alt={alt}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding={priority ? 'sync' : 'async'}
-        className="w-full h-full object-cover"
-        fetchPriority={priority ? 'high' : 'auto'}
-      />
-    </picture>
-  ) : (
+  const imgElement = (
     <img
       src={src}
+      srcSet={srcSet}
+      sizes={srcSet ? sizes : undefined}
       alt={alt}
       loading={priority ? 'eager' : 'lazy'}
       decoding={priority ? 'sync' : 'async'}
@@ -155,7 +158,7 @@ export function BackgroundImage({
 
   return (
     <div className={cn('relative', className)}>
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         {imgElement}
       </div>
       {overlayClassName && (
