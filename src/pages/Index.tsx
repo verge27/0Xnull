@@ -10,8 +10,8 @@ import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 
 // Responsive hero background images for different screen sizes
-// Using 100vw sizing, browser selects based on viewport * DPR
-// Mobile 2x DPR needs ~800px, tablet needs ~1024px, desktop needs ~1920px
+// Using 100vw sizing, browser selects based on viewport * DPR.
+// NOTE: We include a 1536w candidate to prevent high-DPR phones from jumping straight to the 1920w asset.
 const heroImages = {
   small: '/images/backgrounds/predictions-hero-background-640.webp',
   medium: '/images/backgrounds/predictions-hero-background-1024.webp',
@@ -21,6 +21,9 @@ const heroImages = {
 const heroResponsiveSources = [
   { src: heroImages.small, width: 640 },
   { src: heroImages.medium, width: 1024 },
+  // Temporary 1536w “bridge” using the 1024px file to avoid downloading the 1920px image on high-DPR mobile.
+  // For best sharpness, replace this src with a real 1536px-wide WebP later.
+  { src: heroImages.medium, width: 1536 },
   { src: heroImages.large, width: 1920 },
 ];
 
