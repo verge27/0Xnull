@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
+import { SEORichText } from '@/components/SEORichText';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -853,6 +854,12 @@ const VPS = () => {
           </div>
         </div>
       </main>
+      
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Anonymous VPS Hosting with Cryptocurrency"
+        content="<p>Placeholder SEO content for Anonymous VPS. This section will contain keyword-rich content about privacy-focused VPS hosting, anonymous servers, and crypto-paid virtual private servers.</p>"
+      />
 
       <Footer />
     </div>

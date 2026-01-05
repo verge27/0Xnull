@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { SEORichText } from '@/components/SEORichText';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 const sportsBackground = '/images/backgrounds/sports-background.webp';
@@ -1602,6 +1603,12 @@ export default function SportsPredictions() {
             </Card>
           </div>
         </main>
+        
+        {/* SEO Rich Text Section */}
+        <SEORichText 
+          title="Sports Betting with Monero"
+          content="<p>Placeholder SEO content for Sports Predictions. This section will contain keyword-rich content about anonymous sports betting, XMR sports wagering, and privacy-focused sportsbook.</p>"
+        />
         
         <Footer />
       </div>

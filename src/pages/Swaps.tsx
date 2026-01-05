@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
+import { SEORichText } from '@/components/SEORichText';
 const swapsBackground = '/images/backgrounds/swaps-background.webp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1295,6 +1296,12 @@ const Swaps = () => {
           </div>
         </div>
       </main>
+      
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Anonymous Crypto Swaps"
+        content="<p>Placeholder SEO content for Crypto Swaps. This section will contain keyword-rich content about anonymous cryptocurrency exchanges, no-KYC swaps, and privacy-focused crypto trading.</p>"
+      />
 
       <Footer />
       <SiteAssistant />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { SEORichText } from '@/components/SEORichText';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
@@ -1038,6 +1039,12 @@ export default function CryptoPredictions() {
           betSlip.clearBetSlip();
           toast.success('All bets confirmed!');
         }}
+      />
+      
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Crypto Price Predictions with Monero"
+        content="<p>Placeholder SEO content for Crypto Predictions. This section will contain keyword-rich content about anonymous crypto betting, BTC price predictions, and privacy-focused crypto wagering.</p>"
       />
       
       <Footer />
