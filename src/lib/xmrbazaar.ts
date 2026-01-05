@@ -16,9 +16,9 @@ import designServicesImg from '@/assets/xmrbazaar/design-services.jpg';
 import pixelFoldImg from '@/assets/xmrbazaar/pixel-fold.jpg';
 import fpgaImg from '@/assets/xmrbazaar/fpga.jpg';
 import aeronnectEsimImg from '@/assets/xmrbazaar/aeronnect-esim.jpg';
-import luckyCatStickerImg from '@/assets/xmrbazaar/lucky-cat-sticker.jpg';
+const luckyCatStickerImg = '/images/products/lucky-cat-sticker.jpg';
 import moneroPatchImg from '@/assets/xmrbazaar/monero-patch.jpg';
-import longboardImg from '@/assets/xmrbazaar/longboard.jpg';
+const longboardImg = '/images/products/longboard.jpg';
 import vpsComboImg from '@/assets/xmrbazaar/vps-combo.jpg';
 import hodlersDenImg from '@/assets/xmrbazaar/hodlersden-domain.jpg';
 
