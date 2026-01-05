@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { SEORichText } from '@/components/SEORichText';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -1145,6 +1146,12 @@ export default function EsportsPredictions() {
             </TabsContent>
           </Tabs>
         </main>
+        
+        {/* SEO Rich Text Section */}
+        <SEORichText 
+          title="Esports Betting with Monero"
+          content="<p>Placeholder SEO content for Esports Predictions. This section will contain keyword-rich content about anonymous esports betting, CS2 betting, Dota 2 predictions, and privacy-focused esports wagering.</p>"
+        />
 
         <Footer />
       </div>

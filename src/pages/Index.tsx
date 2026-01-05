@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { SEORichText } from '@/components/SEORichText';
 import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 
@@ -204,6 +205,12 @@ const Index = () => {
           </CardContent>
         </Card>
       </section>
+
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Anonymous Prediction Markets with Monero"
+        content="<p>Placeholder SEO content for the homepage. This section will contain keyword-rich content about anonymous prediction markets, XMR betting, and privacy-focused gambling.</p>"
+      />
       </main>
 
       <Footer />

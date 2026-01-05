@@ -7,6 +7,7 @@ import { ArrowRight, Check, Coins, Download, RefreshCw, Target, Smartphone, Moni
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
+import { SEORichText } from "@/components/SEORichText";
 
 type Step = "landing" | "get-crypto" | "get-wallet" | "get-xmr" | "ready";
 
@@ -390,6 +391,13 @@ const GetStarted = () => {
       <main className="flex-1 container mx-auto px-4 py-12 md:py-20">
         {renderStep()}
       </main>
+      
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Get Started with Anonymous Betting"
+        content="<p>Placeholder SEO content for Get Started. This section will contain keyword-rich content about how to start betting anonymously, getting Monero, and using 0xNull.</p>"
+      />
+      
       <Footer />
     </div>
   );

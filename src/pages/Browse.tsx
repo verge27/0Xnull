@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useSEO, useProductListSEO } from '@/hooks/useSEO';
+import { SEORichText } from '@/components/SEORichText';
 import { BackgroundImage, OptimizedImage } from '@/components/OptimizedImage';
 import moneroJobsLogo from '@/assets/monero-jobs-logo.png';
 
@@ -597,6 +598,12 @@ const Browse = () => {
           </div>
         </div>
       </div>
+      
+      {/* SEO Rich Text Section */}
+      <SEORichText 
+        title="Anonymous Cryptocurrency Marketplace"
+        content="<p>Placeholder SEO content for Marketplace. This section will contain keyword-rich content about anonymous marketplace, buying with Monero, and privacy-focused e-commerce.</p>"
+      />
 
       {/* Site Assistant Chatbot */}
       <SiteAssistant />
