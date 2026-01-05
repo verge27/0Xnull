@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
-import sportsBackground from '@/assets/sports-background.webp';
+const sportsBackground = '/images/backgrounds/sports-background.webp';
 import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';

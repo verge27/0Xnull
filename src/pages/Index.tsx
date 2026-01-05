@@ -8,7 +8,8 @@ import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
-import predictionsBackground from '@/assets/predictions-hero-background.webp';
+
+const predictionsBackground = '/images/backgrounds/predictions-hero-background.webp';
 
 const Index = () => {
   useSEO();

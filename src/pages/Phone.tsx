@@ -5,7 +5,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import esimBackground from '@/assets/esim-background.webp';
+const esimBackground = '/images/backgrounds/esim-background.webp';
 
 const AFFILIATE_BASE = "https://lnvpn.net";
 const REF = "?ref=syndicate";

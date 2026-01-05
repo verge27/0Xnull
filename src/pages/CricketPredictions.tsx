@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useCricketEvents, CRICKET_MATCH_TYPES, getSportLabel, getSportIcon, type CricketMatch } from '@/hooks/useCricketEvents';
 import { api, type PredictionMarket } from '@/services/api';
-import cricketBackground from '@/assets/cricket-background.webp';
+const cricketBackground = '/images/backgrounds/cricket-background.webp';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
