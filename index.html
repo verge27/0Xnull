@@ -125,6 +125,8 @@
 
   <body>
     <div id="root"></div>
+    <!-- Main app module - loads asynchronously -->
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Note: Service worker registration is deferred in main.tsx -->
   </body>
 </html>

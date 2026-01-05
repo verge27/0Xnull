@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt", // Manual registration in main.tsx
+      injectRegister: null, // We handle registration manually
       includeAssets: ["favicon.ico", "favicon.svg", "favicon.jpg", "robots.txt"],
       manifest: {
         name: "TariMarket",
