@@ -220,8 +220,31 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Trocador API error:', response.status, errorText);
-      errorMessage = `Trocador API returned ${response.status}`;
-      throw new Error(errorMessage);
+      
+      // Parse error and provide user-friendly message
+      let userMessage = 'Trade could not be created. ';
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.error) {
+          if (errorJson.error.includes('unknown error')) {
+            userMessage += 'This coin/network pair may not be available or the amount is outside allowed limits. Try a different provider or amount.';
+          } else {
+            userMessage += errorJson.error;
+          }
+        }
+      } catch {
+        userMessage += 'Please try a different provider or check your inputs.';
+      }
+      
+      errorMessage = userMessage;
+      
+      // Return the error immediately with proper status
+      await logApiCall('trocador-new-trade', '/new_trade', 'GET', response.status, Date.now() - startTime, errorText);
+      
+      return new Response(JSON.stringify({ error: userMessage }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
