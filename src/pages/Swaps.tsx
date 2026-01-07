@@ -261,7 +261,26 @@ const Swaps = () => {
     return () => clearInterval(interval);
   }, [swapHistory]);
 
+  const COINS_CACHE_KEY = 'trocador_coins_cache';
+  const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+
   const fetchCoins = async () => {
+    // Check localStorage cache first
+    try {
+      const cached = localStorage.getItem(COINS_CACHE_KEY);
+      if (cached) {
+        const { coins: cachedCoins, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_DURATION_MS && cachedCoins?.length > 0) {
+          console.log('Using cached coins:', cachedCoins.length);
+          setCoins(cachedCoins);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to read coins cache:', e);
+    }
+
     // First fetch popular coins specifically to ensure they're loaded
     const popularTickers = POPULAR_COINS.map(p => p.ticker.toLowerCase());
     
@@ -310,6 +329,16 @@ const Swaps = () => {
       console.log('Popular coins loaded:', popularData?.length);
       console.log('Total coins:', combined.length);
       setCoins(combined);
+
+      // Cache to localStorage
+      try {
+        localStorage.setItem(COINS_CACHE_KEY, JSON.stringify({
+          coins: combined,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Failed to cache coins:', e);
+      }
     }
     setLoading(false);
   };
