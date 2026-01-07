@@ -270,20 +270,41 @@ const Swaps = () => {
       .select('*')
       .or(popularTickers.map(t => `ticker.ilike.${t}`).join(','));
     
-    // Then fetch all other coins
-    const { data: allData, error: allError } = await supabase
-      .from('coins')
-      .select('*')
-      .order('ticker')
-      .limit(5000);
+    // Fetch all coins with pagination (Supabase limits to 1000 per request)
+    const allCoins: Coin[] = [];
+    const pageSize = 1000;
+    let page = 0;
+    let hasMore = true;
     
-    if (popularError || allError) {
-      console.error('Error fetching coins:', popularError || allError);
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('coins')
+        .select('*')
+        .order('ticker')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+      if (error) {
+        console.error('Error fetching coins page:', error);
+        toast({ title: 'Error', description: 'Failed to load coins', variant: 'destructive' });
+        break;
+      }
+      
+      if (data && data.length > 0) {
+        allCoins.push(...data);
+        page++;
+        hasMore = data.length === pageSize;
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    if (popularError) {
+      console.error('Error fetching popular coins:', popularError);
       toast({ title: 'Error', description: 'Failed to load coins', variant: 'destructive' });
     } else {
       // Combine, removing duplicates (popular coins take precedence)
       const popularSet = new Set(popularData?.map(c => `${c.ticker}-${c.network}`) || []);
-      const otherCoins = allData?.filter(c => !popularSet.has(`${c.ticker}-${c.network}`)) || [];
+      const otherCoins = allCoins.filter(c => !popularSet.has(`${c.ticker}-${c.network}`));
       const combined = [...(popularData || []), ...otherCoins];
       
       console.log('Popular coins loaded:', popularData?.length);
