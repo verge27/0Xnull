@@ -475,18 +475,20 @@ export default function FlashMarkets() {
             <div className="grid grid-cols-2 gap-4">
               <Button
                 size="lg"
-                className="h-16 text-xl bg-green-600 hover:bg-green-700 text-white"
+                className="h-20 text-xl font-bold text-white"
+                style={{ backgroundColor: '#22c55e' }}
                 onClick={() => openBetModal('up')}
               >
-                <TrendingUp className="mr-2 h-6 w-6" />
+                <TrendingUp className="mr-2 h-7 w-7" />
                 UP
               </Button>
               <Button
                 size="lg"
-                className="h-16 text-xl bg-red-600 hover:bg-red-700 text-white"
+                className="h-20 text-xl font-bold text-white"
+                style={{ backgroundColor: '#ef4444' }}
                 onClick={() => openBetModal('down')}
               >
-                <TrendingDown className="mr-2 h-6 w-6" />
+                <TrendingDown className="mr-2 h-7 w-7" />
                 DOWN
               </Button>
             </div>
