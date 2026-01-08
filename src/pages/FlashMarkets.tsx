@@ -27,6 +27,16 @@ interface FlashRound {
   view_key: string;
 }
 
+interface ResolvedRound {
+  round_id: string;
+  asset: string;
+  start_price: number;
+  end_price: number;
+  outcome: 'up' | 'down';
+  resolved_at: number;
+  total_pool: number;
+}
+
 interface BetResult {
   bet_id: string;
   deposit_address: string;
@@ -121,6 +131,17 @@ export default function FlashMarkets() {
       return res.json();
     },
     refetchInterval: 1000,
+  });
+
+  // Fetch recent resolved rounds
+  const { data: recentResults } = useQuery<ResolvedRound[]>({
+    queryKey: ['flash-history', asset],
+    queryFn: async () => {
+      const res = await fetch(`${API}/api/flash/rounds/history/${asset}?limit=5`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   // Place bet mutation
@@ -301,6 +322,60 @@ export default function FlashMarkets() {
             <Card className="p-8 bg-card border-border text-center">
               <p className="text-4xl mb-2">⏳</p>
               <p className="text-muted-foreground">Waiting for result...</p>
+            </Card>
+          )}
+
+          {/* Recent Results */}
+          {recentResults && recentResults.length > 0 && (
+            <Card className="p-4 bg-card/80 backdrop-blur border-border">
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <span className="text-sm">📊</span>
+                Recent Results
+              </h3>
+              <div className="space-y-2">
+                {recentResults.map((result) => {
+                  const priceChange = ((result.end_price - result.start_price) / result.start_price) * 100;
+                  const timeAgo = Math.floor((Date.now() / 1000 - result.resolved_at) / 60);
+                  return (
+                    <div 
+                      key={result.round_id}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          result.outcome === 'up' ? 'bg-green-500/20' : 'bg-red-500/20'
+                        }`}>
+                          {result.outcome === 'up' ? (
+                            <TrendingUp className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-red-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className={`font-medium text-sm ${
+                            result.outcome === 'up' ? 'text-green-500' : 'text-red-500'
+                          }`}>
+                            {result.outcome.toUpperCase()} won
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {timeAgo < 1 ? 'Just now' : `${timeAgo}m ago`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-mono ${
+                          priceChange >= 0 ? 'text-green-500' : 'text-red-500'
+                        }`}>
+                          {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {result.total_pool?.toFixed(2) || '0.00'} XMR
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </Card>
           )}
 
