@@ -35,6 +35,12 @@ interface BetResult {
   qr_uri: string;
 }
 
+const BINANCE_SYMBOLS: Record<string, string> = {
+  BTC: 'BTCUSDT',
+  ETH: 'ETHUSDT', 
+  XMR: 'XMRUSDT',
+};
+
 export default function FlashMarkets() {
   const [asset, setAsset] = useState('BTC');
   const [showBetModal, setShowBetModal] = useState(false);
@@ -42,6 +48,19 @@ export default function FlashMarkets() {
   const [betAmount, setBetAmount] = useState('0.01');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [betResult, setBetResult] = useState<BetResult | null>(null);
+
+  // Poll Binance prices every 2 seconds
+  const { data: price } = useQuery({
+    queryKey: ['binance-price', asset],
+    queryFn: async () => {
+      const symbol = BINANCE_SYMBOLS[asset];
+      const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+      if (!res.ok) throw new Error('Failed to fetch price');
+      const data = await res.json();
+      return parseFloat(data.price);
+    },
+    refetchInterval: 2000,
+  });
 
   // Poll current round every second
   const { data: round } = useQuery<FlashRound>({
@@ -130,11 +149,11 @@ export default function FlashMarkets() {
           </div>
 
           {/* Current Price */}
-          <Card className="p-6 bg-card border-border">
+          <Card className="p-6 bg-card/80 backdrop-blur border-border">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Current {asset} Price</p>
               <p className="text-4xl font-bold text-foreground mt-1">
-                ${round?.current_price?.toLocaleString(undefined, {
+                ${(price ?? round?.current_price)?.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }) || '---'}
