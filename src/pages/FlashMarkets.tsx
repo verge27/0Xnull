@@ -96,6 +96,7 @@ export default function FlashMarkets() {
   const [betAmount, setBetAmount] = useState('0.01');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [betResult, setBetResult] = useState<BetResult | null>(null);
+  const [isShaking, setIsShaking] = useState(false);
   
   // Track user's active bets for win detection (persisted to localStorage)
   const [activeBets, setActiveBets] = useState<Record<string, { round_id: string; side: 'up' | 'down' }>>(() => {
@@ -303,10 +304,12 @@ export default function FlashMarkets() {
       playCountdownTick(timeRemaining);
     }
     
-    // Play resolution sound when round resolves (time hits 0)
+    // Play resolution sound and trigger shake when round resolves (time hits 0)
     if (timeRemaining === 0 && lastPlayedSecondRef.current !== 0) {
       lastPlayedSecondRef.current = 0;
       playResolutionSound();
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     }
     
     // Reset when new round starts
@@ -345,7 +348,7 @@ export default function FlashMarkets() {
       >
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-black/50" />
-        <div className="w-full max-w-md space-y-6 relative z-10">
+        <div className={`w-full max-w-md space-y-6 relative z-10 ${isShaking ? 'animate-shake' : ''}`}>
           {/* Header */}
           <div className="text-center relative">
             <Button
