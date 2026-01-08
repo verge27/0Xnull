@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { TrendingUp, TrendingDown, Timer, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Timer, Zap, Volume2, VolumeX } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
+import { playCountdownTick, playResolutionSound } from '@/lib/sounds';
 
 const API = 'https://api.0xnull.io';
 
@@ -261,6 +262,39 @@ export default function FlashMarkets() {
     }
   }, [recentResults, activeBets, triggerWinCelebration]);
 
+  // Countdown sounds for final 5 seconds
+  const lastPlayedSecondRef = useRef<number | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('flash-sounds-enabled') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    if (!soundEnabled || !round?.time_remaining) return;
+    
+    const timeRemaining = round.time_remaining;
+    
+    // Play tick sounds for final 5 seconds
+    if (timeRemaining <= 5 && timeRemaining > 0 && timeRemaining !== lastPlayedSecondRef.current) {
+      lastPlayedSecondRef.current = timeRemaining;
+      playCountdownTick(timeRemaining);
+    }
+    
+    // Play resolution sound when round resolves (time hits 0)
+    if (timeRemaining === 0 && lastPlayedSecondRef.current !== 0) {
+      lastPlayedSecondRef.current = 0;
+      playResolutionSound();
+    }
+    
+    // Reset when new round starts
+    if (timeRemaining > 5) {
+      lastPlayedSecondRef.current = null;
+    }
+  }, [round?.time_remaining, soundEnabled]);
+
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
@@ -293,7 +327,22 @@ export default function FlashMarkets() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="w-full max-w-md space-y-6 relative z-10">
           {/* Header */}
-          <div className="text-center">
+          <div className="text-center relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                const newValue = !soundEnabled;
+                setSoundEnabled(newValue);
+                try {
+                  localStorage.setItem('flash-sounds-enabled', String(newValue));
+                } catch {}
+              }}
+              className="absolute right-0 top-0 text-muted-foreground hover:text-foreground"
+              title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
+            >
+              {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+            </Button>
             <h1 className="text-3xl font-bold flex items-center justify-center gap-2 text-foreground">
               <Zap className="h-8 w-8 text-purple-500" />
               Bull vs Bear
