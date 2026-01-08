@@ -54,8 +54,8 @@ const BINANCE_SYMBOLS: Record<string, string> = {
   ETH: 'ETHUSDT',
 };
 
-const COINGECKO_IDS: Record<string, string> = {
-  XMR: 'monero',
+const KRAKEN_PAIRS: Record<string, string> = {
+  XMR: 'XMRUSD',
 };
 
 // Simple sparkline component
@@ -157,16 +157,19 @@ export default function FlashMarkets() {
     }, 250);
   }, []);
 
-  // Poll prices every 2 seconds (Binance for BTC/ETH, CoinGecko for XMR)
+  // Poll prices every 2 seconds (Binance for BTC/ETH, Kraken for XMR)
   const { data: price } = useQuery({
     queryKey: ['crypto-price', asset],
     queryFn: async () => {
       if (asset === 'XMR') {
-        // Use CoinGecko for XMR
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
+        // Use Kraken for XMR
+        const pair = KRAKEN_PAIRS[asset];
+        const res = await fetch(`https://api.kraken.com/0/public/Ticker?pair=${pair}`);
         if (!res.ok) throw new Error('Failed to fetch XMR price');
         const data = await res.json();
-        return data.monero.usd as number;
+        // Kraken returns { result: { XXMRZUSD: { c: ["price", "volume"] } } }
+        const pairKey = Object.keys(data.result)[0];
+        return parseFloat(data.result[pairKey].c[0]);
       } else {
         // Use Binance for BTC/ETH
         const symbol = BINANCE_SYMBOLS[asset];
@@ -176,7 +179,7 @@ export default function FlashMarkets() {
         return parseFloat(data.price);
       }
     },
-    refetchInterval: asset === 'XMR' ? 5000 : 2000, // CoinGecko has rate limits, poll less frequently
+    refetchInterval: 2000,
   });
 
   // Update price history when price changes
