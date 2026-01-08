@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { TrendingUp, TrendingDown, Timer, Zap } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 const API = 'https://api.0xnull.io';
 
@@ -90,12 +92,48 @@ export default function FlashMarkets() {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [betResult, setBetResult] = useState<BetResult | null>(null);
   
+  // Track user's active bets for win detection
+  const [activeBets, setActiveBets] = useState<Record<string, { round_id: string; side: 'up' | 'down' }>>({});
+  const lastResolvedRoundRef = useRef<string | null>(null);
+  
   // Price history for sparkline (last 30 data points = ~1 minute at 2s intervals)
   const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({
     BTC: [],
     ETH: [],
     XMR: [],
   });
+
+  // Confetti celebration function
+  const triggerWinCelebration = useCallback(() => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#22c55e', '#10b981', '#34d399', '#6ee7b7', '#fbbf24'],
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#22c55e', '#10b981', '#34d399', '#6ee7b7', '#fbbf24'],
+      });
+    }, 250);
+  }, []);
 
   // Poll Binance prices every 2 seconds
   const { data: price } = useQuery({
@@ -160,8 +198,52 @@ export default function FlashMarkets() {
       if (!res.ok) throw new Error(await res.text());
       return res.json();
     },
-    onSuccess: (data) => setBetResult(data),
+    onSuccess: (data) => {
+      setBetResult(data);
+      // Track the bet for win detection
+      if (round?.round_id) {
+        setActiveBets(prev => ({
+          ...prev,
+          [round.round_id]: { round_id: round.round_id, side: selectedSide }
+        }));
+      }
+    },
   });
+
+  // Check for wins when recent results update
+  useEffect(() => {
+    if (recentResults && recentResults.length > 0) {
+      const latestResult = recentResults[0];
+      
+      // Check if this is a new result we haven't processed
+      if (latestResult.round_id !== lastResolvedRoundRef.current) {
+        lastResolvedRoundRef.current = latestResult.round_id;
+        
+        // Check if user had a bet on this round
+        const userBet = activeBets[latestResult.round_id];
+        if (userBet) {
+          if (userBet.side === latestResult.outcome) {
+            // User won!
+            triggerWinCelebration();
+            toast.success('🎉 You won!', {
+              description: `${latestResult.outcome.toUpperCase()} was correct!`,
+            });
+          } else {
+            // User lost
+            toast.error('Better luck next time', {
+              description: `${latestResult.outcome.toUpperCase()} won this round.`,
+            });
+          }
+          // Remove the bet from active bets
+          setActiveBets(prev => {
+            const newBets = { ...prev };
+            delete newBets[latestResult.round_id];
+            return newBets;
+          });
+        }
+      }
+    }
+  }, [recentResults, activeBets, triggerWinCelebration]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
