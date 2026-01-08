@@ -12,7 +12,8 @@ import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import { playCountdownTick, playResolutionSound } from '@/lib/sounds';
 
-const API = 'https://api.0xnull.io';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 interface FlashRound {
   round_id: string;
@@ -193,7 +194,9 @@ export default function FlashMarkets() {
   const { data: round } = useQuery<FlashRound>({
     queryKey: ['flash-round', asset],
     queryFn: async () => {
-      const res = await fetch(`${API}/api/flash/rounds/current/${asset}`);
+      const url = new URL(PROXY_URL);
+      url.searchParams.set('path', `/api/flash/rounds/current/${asset}`);
+      const res = await fetch(url.toString());
       if (!res.ok) throw new Error('Failed to fetch round');
       return res.json();
     },
@@ -204,7 +207,10 @@ export default function FlashMarkets() {
   const { data: recentResults } = useQuery<ResolvedRound[]>({
     queryKey: ['flash-history', asset],
     queryFn: async () => {
-      const res = await fetch(`${API}/api/flash/rounds/history/${asset}?limit=5`);
+      const url = new URL(PROXY_URL);
+      url.searchParams.set('path', `/api/flash/rounds/history/${asset}`);
+      url.searchParams.set('limit', '5');
+      const res = await fetch(url.toString());
       if (!res.ok) return [];
       return res.json();
     },
@@ -214,7 +220,9 @@ export default function FlashMarkets() {
   // Place bet mutation
   const placeBet = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${API}/api/flash/bet`, {
+      const url = new URL(PROXY_URL);
+      url.searchParams.set('path', '/api/flash/bet');
+      const res = await fetch(url.toString(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
