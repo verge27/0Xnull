@@ -70,6 +70,7 @@ const Payouts = lazy(() => import("./pages/Payouts"));
 const Influencer = lazy(() => import("./pages/Influencer"));
 const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
+const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 
 const queryClient = new QueryClient();
 
@@ -131,6 +132,7 @@ const App = () => (
                   <Route path="/market/:id" element={<MarketDetail />} />
                   <Route path="/my-slips" element={<MySlips />} />
                   <Route path="/payouts" element={<Payouts />} />
+                  <Route path="/flash" element={<FlashMarkets />} />
                   {/* AI */}
                   <Route path="/ai" element={<AIHub />} />
                   <Route path="/voice" element={<Voice />} />
