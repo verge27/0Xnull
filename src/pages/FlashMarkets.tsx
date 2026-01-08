@@ -399,22 +399,38 @@ export default function FlashMarkets() {
           </Card>
 
           {/* Timer */}
-          <Card className="p-4 bg-card border-border">
+          <Card className={`p-4 bg-card border-border transition-all duration-200 ${
+            round?.time_remaining && round.time_remaining <= 5 && round.time_remaining > 0 
+              ? 'ring-2 ring-yellow-500/50 animate-pulse' 
+              : ''
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Timer className={`h-5 w-5 ${round?.phase === 'betting' ? 'text-green-500' : 'text-yellow-500'}`} />
+                <Timer className={`h-5 w-5 ${
+                  round?.time_remaining && round.time_remaining <= 5 && round.time_remaining > 0
+                    ? 'text-yellow-500 animate-bounce'
+                    : round?.phase === 'betting' ? 'text-green-500' : 'text-yellow-500'
+                }`} />
                 <span className="text-muted-foreground">
                   {round?.phase === 'betting' ? 'Betting closes' :
                    round?.phase === 'locked' ? 'Result in' : 'Starts in'}
                 </span>
               </div>
-              <span className={`text-2xl font-mono font-bold ${round?.phase === 'betting' ? 'text-green-500' : 'text-yellow-500'}`}>
+              <span className={`text-2xl font-mono font-bold transition-all duration-200 ${
+                round?.time_remaining && round.time_remaining <= 5 && round.time_remaining > 0
+                  ? 'text-yellow-400 scale-110'
+                  : round?.phase === 'betting' ? 'text-green-500' : 'text-yellow-500'
+              }`}>
                 {formatTime(round?.time_remaining || 0)}
               </span>
             </div>
             <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
               <div 
-                className={`h-full transition-all duration-1000 ${round?.phase === 'betting' ? 'bg-green-500' : 'bg-yellow-500'}`}
+                className={`h-full transition-all duration-1000 ${
+                  round?.time_remaining && round.time_remaining <= 5 && round.time_remaining > 0
+                    ? 'bg-yellow-400'
+                    : round?.phase === 'betting' ? 'bg-green-500' : 'bg-yellow-500'
+                }`}
                 style={{ width: `${Math.min(100, ((round?.time_remaining || 0) / 300) * 100)}%` }}
               />
             </div>
