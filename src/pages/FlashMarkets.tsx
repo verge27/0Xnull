@@ -92,9 +92,25 @@ export default function FlashMarkets() {
   const [payoutAddress, setPayoutAddress] = useState('');
   const [betResult, setBetResult] = useState<BetResult | null>(null);
   
-  // Track user's active bets for win detection
-  const [activeBets, setActiveBets] = useState<Record<string, { round_id: string; side: 'up' | 'down' }>>({});
+  // Track user's active bets for win detection (persisted to localStorage)
+  const [activeBets, setActiveBets] = useState<Record<string, { round_id: string; side: 'up' | 'down' }>>(() => {
+    try {
+      const stored = localStorage.getItem('flash-active-bets');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
   const lastResolvedRoundRef = useRef<string | null>(null);
+
+  // Persist active bets to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('flash-active-bets', JSON.stringify(activeBets));
+    } catch {
+      // localStorage unavailable
+    }
+  }, [activeBets]);
   
   // Price history for sparkline (last 30 data points = ~1 minute at 2s intervals)
   const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({
