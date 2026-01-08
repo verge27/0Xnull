@@ -92,8 +92,18 @@ export default function FlashMarkets() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-6">
+      <main 
+        className="flex-1 flex items-center justify-center p-4 relative"
+        style={{
+          backgroundImage: 'url(/images/backgrounds/flash-background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="w-full max-w-md space-y-6 relative z-10">
           {/* Header */}
           <div className="text-center">
             <h1 className="text-3xl font-bold flex items-center justify-center gap-2 text-foreground">
