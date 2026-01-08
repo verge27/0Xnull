@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -129,6 +129,11 @@ export const Navbar = () => {
                     <Bitcoin className="w-5 h-5 text-orange-500" />
                     <span>Crypto</span>
                   </Link>
+                  <Link to="/flash" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <Zap className="w-4 h-4 text-purple-500" />
+                    <span className="text-muted-foreground">Flash (5min)</span>
+                    <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded">NEW</span>
+                  </Link>
                   <Link to="/my-slips" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Receipt className="w-5 h-5 text-primary" />
                     <span>My Slips</span>
@@ -226,6 +231,13 @@ export const Navbar = () => {
               <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link to="/predictions" className="cursor-pointer">Crypto Markets</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/flash" className="cursor-pointer flex items-center gap-2">
+                  <Zap className="w-3 h-3 text-purple-500" />
+                  Flash (5min)
+                  <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded ml-auto">NEW</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
