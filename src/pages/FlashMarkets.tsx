@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -41,6 +41,37 @@ const BINANCE_SYMBOLS: Record<string, string> = {
   XMR: 'XMRUSDT',
 };
 
+// Simple sparkline component
+const Sparkline = ({ data, width = 120, height = 32 }: { data: number[]; width?: number; height?: number }) => {
+  if (data.length < 2) return null;
+  
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  
+  const points = data.map((value, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((value - min) / range) * height;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  const isUp = data[data.length - 1] >= data[0];
+  const strokeColor = isUp ? '#22c55e' : '#ef4444';
+  
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 export default function FlashMarkets() {
   const [asset, setAsset] = useState('BTC');
   const [showBetModal, setShowBetModal] = useState(false);
@@ -48,6 +79,13 @@ export default function FlashMarkets() {
   const [betAmount, setBetAmount] = useState('0.01');
   const [payoutAddress, setPayoutAddress] = useState('');
   const [betResult, setBetResult] = useState<BetResult | null>(null);
+  
+  // Price history for sparkline (last 30 data points = ~1 minute at 2s intervals)
+  const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({
+    BTC: [],
+    ETH: [],
+    XMR: [],
+  });
 
   // Poll Binance prices every 2 seconds
   const { data: price } = useQuery({
@@ -61,6 +99,18 @@ export default function FlashMarkets() {
     },
     refetchInterval: 2000,
   });
+
+  // Update price history when price changes
+  useEffect(() => {
+    if (price) {
+      setPriceHistory(prev => {
+        const history = [...(prev[asset] || []), price];
+        // Keep last 30 data points (~1 minute)
+        const trimmed = history.slice(-30);
+        return { ...prev, [asset]: trimmed };
+      });
+    }
+  }, [price, asset]);
 
   // Poll current round every second
   const { data: round } = useQuery<FlashRound>({
@@ -150,14 +200,33 @@ export default function FlashMarkets() {
 
           {/* Current Price */}
           <Card className="p-6 bg-card/80 backdrop-blur border-border">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Current {asset} Price</p>
-              <p className="text-4xl font-bold text-foreground mt-1">
-                ${(price ?? round?.current_price)?.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }) || '---'}
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Current {asset} Price</p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  ${(price ?? round?.current_price)?.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) || '---'}
+                </p>
+                {priceHistory[asset]?.length >= 2 && (
+                  <p className={`text-xs mt-1 ${
+                    priceHistory[asset][priceHistory[asset].length - 1] >= priceHistory[asset][0] 
+                      ? 'text-green-500' 
+                      : 'text-red-500'
+                  }`}>
+                    {priceHistory[asset][priceHistory[asset].length - 1] >= priceHistory[asset][0] ? '▲' : '▼'}
+                    {' '}
+                    {Math.abs(
+                      ((priceHistory[asset][priceHistory[asset].length - 1] - priceHistory[asset][0]) / priceHistory[asset][0]) * 100
+                    ).toFixed(3)}% (1m)
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <Sparkline data={priceHistory[asset] || []} width={100} height={40} />
+                <span className="text-[10px] text-muted-foreground">Last 1 min</span>
+              </div>
             </div>
           </Card>
 
