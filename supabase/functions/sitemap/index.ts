@@ -36,7 +36,7 @@ const staticPages = [
   { path: '/tor-guide', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-01' },
   { path: '/philosophy', priority: '0.5', changefreq: 'yearly', lastmod: '2024-11-01' },
   { path: '/support', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-15' },
-  { path: '/verify', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-01' },
+  { path: '/verify', priority: '0.5', changefreq: 'monthly', lastmod: '2026-01-09' },
   { path: '/terms', priority: '0.4', changefreq: 'yearly', lastmod: '2024-11-01' },
   { path: '/privacy', priority: '0.4', changefreq: 'yearly', lastmod: '2024-11-01' },
   { path: '/api-docs', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-15' },

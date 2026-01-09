@@ -148,7 +148,7 @@ const Verify = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                As of <span className="font-semibold text-foreground">December 9, 2025</span>:
+                As of <span className="font-semibold text-foreground">January 9, 2026</span>:
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
