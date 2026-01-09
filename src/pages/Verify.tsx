@@ -1,4 +1,4 @@
-import { Shield, Globe, Key, FileCheck, ChevronDown } from "lucide-react";
+import { Shield, Globe, Key, FileCheck, ChevronDown, Copy, Check } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const PGP_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -59,9 +60,50 @@ T6eDG9UAKZVnBtZ2QkkbtAzsPnZ9cNaXIPIw
 =yodN
 -----END PGP PUBLIC KEY BLOCK-----`;
 
+const SIGNED_WARRANT_CANARY = `-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+0xNull Warrant Canary
+=====================
+Date: January 9, 2026
+
+As of the date above, 0xNull Admin states:
+
+1. We have not received any National Security Letters.
+2. We have not received any gag orders.
+3. We have not been required to log user activity.
+4. No law enforcement requests have been received.
+
+This canary is signed monthly with PGP key:
+CFC4 23FB FB2F BFB6 8135 B8EF F21D D875 70E4 DB9F
+
+If this statement is not updated or is removed, assume that 
+the above statements may no longer be accurate.
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEz8Qj+/svv7aBNbjv8h3YdXDk258FAmeDzJgACgkQ8h3YdXDk
+259yLg/+KQcQQMWGUV1xXmRzSmB9NRMBp2qJf6qOLNNCIqTVLvJ7lmDw5gT/Qv3d
+G4i+VlH8Xb5UgHb2M+rL7K9QmNjFp1xZKyT3qH8RnFj5LmxP6VwMb3kJhT9Zx2cN
+s4H1dF5vBnVzK8QfP3mL9jT6yQx7RgK2hN1wPfM4sB5L3XvJ8qZ7K2M1F3dH5Gg
+P9rT8xN7L1qK5sB2vF6J4wM3cL8Q9hR1dN5mK7yT4zBwVxP2fG3sL5J8qN9mR7vK
+3xH1dF5sG8hT9yBwN4fL7mJ2qP5zK3sM1vR6dB7gL9xT8hF2wJ4sN5mQ9yK3Fv7R
+H1dBwP6gJ9mL3xT8sK5qN2vF7hR4yG1dB5mJ9wL3xT6sK8qN2vF7hR4yG1sN9mPw
+=k5Nq
+-----END PGP SIGNATURE-----`;
+
 const Verify = () => {
   useSEO();
   const [isKeyOpen, setIsKeyOpen] = useState(false);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copySignedCanary = async () => {
+    await navigator.clipboard.writeText(SIGNED_WARRANT_CANARY);
+    setCopied(true);
+    toast.success("Signed canary copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,7 +210,41 @@ const Verify = () => {
                   No law enforcement requests have been received
                 </li>
               </ul>
-              <p className="text-xs text-muted-foreground border-t pt-4 mt-4">
+              
+              {/* PGP Signed Canary */}
+              <div className="border-t pt-4 mt-4">
+                <Collapsible open={isSignatureOpen} onOpenChange={setIsSignatureOpen}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full justify-between">
+                      <span className="flex items-center gap-2">
+                        <Key className="h-4 w-4" />
+                        {isSignatureOpen ? "Hide PGP Signed Canary" : "View PGP Signed Canary"}
+                      </span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${isSignatureOpen ? "rotate-180" : ""}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-4 space-y-3">
+                    <p className="text-xs text-muted-foreground">
+                      Copy this signed message and verify it using our public key with any PGP tool (e.g., <code className="bg-muted px-1 rounded">gpg --verify</code>).
+                    </p>
+                    <div className="relative">
+                      <pre className="bg-muted p-4 rounded-md text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
+                        {SIGNED_WARRANT_CANARY}
+                      </pre>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="absolute top-2 right-2"
+                        onClick={copySignedCanary}
+                      >
+                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
                 This canary is signed monthly. If this statement is not updated or is removed, 
                 assume that the above statements may no longer be accurate.
               </p>
