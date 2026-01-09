@@ -1,4 +1,4 @@
-import { Shield, Globe, Key, FileCheck, ChevronDown, Copy, Check } from "lucide-react";
+import { Shield, Globe, Key, FileCheck, ChevronDown, Copy, Check, Terminal } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
@@ -96,6 +96,7 @@ const Verify = () => {
   useSEO();
   const [isKeyOpen, setIsKeyOpen] = useState(false);
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const copySignedCanary = async () => {
@@ -223,10 +224,7 @@ const Verify = () => {
                       <ChevronDown className={`h-4 w-4 transition-transform ${isSignatureOpen ? "rotate-180" : ""}`} />
                     </Button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-4 space-y-3">
-                    <p className="text-xs text-muted-foreground">
-                      Copy this signed message and verify it using our public key with any PGP tool (e.g., <code className="bg-muted px-1 rounded">gpg --verify</code>).
-                    </p>
+                  <CollapsibleContent className="mt-4 space-y-4">
                     <div className="relative">
                       <pre className="bg-muted p-4 rounded-md text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all max-h-64 overflow-y-auto">
                         {SIGNED_WARRANT_CANARY}
@@ -240,6 +238,71 @@ const Verify = () => {
                         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
+                    
+                    {/* Verification Instructions */}
+                    <Collapsible open={isInstructionsOpen} onOpenChange={setIsInstructionsOpen}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground hover:text-foreground">
+                          <span className="flex items-center gap-2">
+                            <Terminal className="h-4 w-4" />
+                            {isInstructionsOpen ? "Hide Verification Instructions" : "How to Verify This Signature"}
+                          </span>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isInstructionsOpen ? "rotate-180" : ""}`} />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-3 space-y-4">
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-4 text-sm">
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">1</span>
+                              Save the public key
+                            </h4>
+                            <p className="text-muted-foreground text-xs mb-2">
+                              Copy the public key from above and save it to a file:
+                            </p>
+                            <code className="block bg-background p-2 rounded text-xs font-mono">
+                              gpg --import 0xnull-public.asc
+                            </code>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
+                              Save the signed canary
+                            </h4>
+                            <p className="text-muted-foreground text-xs mb-2">
+                              Copy the signed message above and save it to a file (e.g., <code className="bg-background px-1 rounded">canary.txt</code>).
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
+                              Verify the signature
+                            </h4>
+                            <p className="text-muted-foreground text-xs mb-2">
+                              Run this command to verify:
+                            </p>
+                            <code className="block bg-background p-2 rounded text-xs font-mono">
+                              gpg --verify canary.txt
+                            </code>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span>
+                              Check the output
+                            </h4>
+                            <p className="text-muted-foreground text-xs">
+                              Look for <code className="bg-background px-1 rounded">Good signature from "0xNull Admin"</code> and verify the fingerprint matches:
+                            </p>
+                            <code className="block bg-background p-2 rounded text-xs font-mono mt-2">
+                              CFC4 23FB FB2F BFB6 8135 B8EF F21D D875 70E4 DB9F
+                            </code>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </CollapsibleContent>
                 </Collapsible>
               </div>
