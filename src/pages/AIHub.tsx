@@ -6,6 +6,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { KeypairGenerator } from '@/components/KeypairGenerator';
 
 const services = [
   {
@@ -112,6 +113,11 @@ export default function AIHub() {
                 </CardWrapper>
               );
             })}
+          </div>
+
+          {/* Keypair Generator */}
+          <div className="mb-8">
+            <KeypairGenerator />
           </div>
 
           {/* NanoGPT Banner */}
