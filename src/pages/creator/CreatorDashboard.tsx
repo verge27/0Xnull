@@ -153,49 +153,54 @@ const CreatorDashboard = () => {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="border-[#FF6600]/20 bg-[#FF6600]/5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Coins className="w-4 h-4 text-[#FF6600]" />
-                Total Earnings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-[#FF6600]">
-                {creator.stats?.total_earnings_xmr.toFixed(4) || '0.0000'} XMR
-              </p>
-            </CardContent>
-          </Card>
+        {(() => {
+          const earnings = creator.stats?.total_earnings_xmr ?? 0;
+          const views = creator.stats?.total_views ?? 0;
+          const unlocks = creator.stats?.total_unlocks ?? 0;
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                Total Views
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">
-                {creator.stats?.total_views.toLocaleString() || '0'}
-              </p>
-            </CardContent>
-          </Card>
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Card className="border-[#FF6600]/20 bg-[#FF6600]/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-[#FF6600]" />
+                    Total Earnings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-[#FF6600]">
+                    {earnings.toFixed(4)} XMR
+                  </p>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Unlock className="w-4 h-4" />
-                Total Unlocks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">
-                {creator.stats?.total_unlocks.toLocaleString() || '0'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    Total Views
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{views.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Unlock className="w-4 h-4" />
+                    Total Unlocks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{unlocks.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            </div>
+          );
+        })()}
+
 
         {/* Content Grid */}
         <div className="flex items-center justify-between mb-4">
