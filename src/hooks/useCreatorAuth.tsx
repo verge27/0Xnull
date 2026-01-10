@@ -24,6 +24,8 @@ interface CreatorAuthContextType {
   // Keypair generation
   generatedKeypair: { publicKey: string; privateKey: string } | null;
   generateNewKeypair: () => { publicKey: string; privateKey: string };
+  clearKeypair: () => void;
+  hasStoredKeypair: boolean;
   
   // Auth actions
   register: (privateKey: string, displayName: string, bio?: string) => Promise<void>;
@@ -111,6 +113,14 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     storeKeypair(keypair);
     return keypair;
   }, []);
+
+  const clearKeypair = useCallback(() => {
+    setGeneratedKeypair(null);
+    storeKeypair(null);
+  }, []);
+
+  // Check if there's a stored keypair (for UI indication)
+  const hasStoredKeypair = generatedKeypair !== null;
 
   const performAuth = async (privateKey: string, publicKey: string): Promise<string> => {
     // Get challenge
@@ -226,6 +236,8 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
         isAuthenticated: !!creator,
         generatedKeypair,
         generateNewKeypair,
+        clearKeypair,
+        hasStoredKeypair,
         register,
         login,
         logout,
