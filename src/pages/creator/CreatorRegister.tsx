@@ -235,9 +235,16 @@ const CreatorRegister = () => {
     } catch (error) {
       console.error('[CreatorRegister] Registration failed:', error);
       const parsedError = parseRegistrationError(error);
-      setRegistrationError(parsedError);
 
-      // Suppressed: Don't show toast for network errors, inline message is enough
+      // If 409 conflict (already registered), auto-redirect to login with prefilled key
+      if (parsedError.type === 'conflict') {
+        console.log('[CreatorRegister] 409 conflict - redirecting to login with prefilled key');
+        sessionStorage.setItem('creator_prefill_key', generatedKeypair.privateKey);
+        navigate('/creator/login');
+        return;
+      }
+
+      setRegistrationError(parsedError);
     } finally {
       setIsSubmitting(false);
     }
