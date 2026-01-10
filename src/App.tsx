@@ -80,6 +80,7 @@ const CreatorsHub = lazy(() => import("./pages/creator/CreatorsHub"));
 const CreatorProfile = lazy(() => import("./pages/creator/CreatorProfile"));
 const ContentView = lazy(() => import("./pages/creator/ContentView"));
 const ContentSearch = lazy(() => import("./pages/creator/ContentSearch"));
+const CreatorTerms = lazy(() => import("./pages/creator/CreatorTerms"));
 const queryClient = new QueryClient();
 
 // Loading fallback component
@@ -182,6 +183,7 @@ const App = () => (
                   <Route path="/creator/register" element={<CreatorRegister />} />
                   <Route path="/creator/login" element={<CreatorLogin />} />
                   <Route path="/creator/dashboard" element={<CreatorDashboard />} />
+                  <Route path="/creator/terms" element={<CreatorTerms />} />
                   <Route path="/creator/:id" element={<CreatorProfile />} />
                   <Route path="/content/:id" element={<ContentView />} />
                   <Route path="/content/search" element={<ContentSearch />} />
