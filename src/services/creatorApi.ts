@@ -1,8 +1,13 @@
 /**
  * Creator API client for 0xNull.io creator platform
+ * Routes through edge function proxy to avoid CORS issues
  */
 
-const CREATOR_API_BASE = 'https://api.0xnull.io/api/creator';
+// Use the proxy edge function to avoid CORS
+const getProxyUrl = (path: string) => {
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'qjkojiamexufuxsrupjq';
+  return `https://${projectId}.supabase.co/functions/v1/creator-proxy?path=${encodeURIComponent(path)}`;
+};
 
 // Types
 export interface CreatorProfile {
@@ -93,7 +98,7 @@ class CreatorApiClient {
     return !!this.token;
   }
 
-  // Private request helper
+  // Private request helper - routes through proxy
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -108,7 +113,7 @@ class CreatorApiClient {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${CREATOR_API_BASE}${endpoint}`, {
+    const response = await fetch(getProxyUrl(endpoint), {
       ...options,
       headers,
     });
@@ -153,7 +158,8 @@ class CreatorApiClient {
   }
 
   getMediaUrl(hash: string): string {
-    return `${CREATOR_API_BASE}/media/${hash}`;
+    // Media URLs need direct access (no CORS issue for media)
+    return `https://api.0xnull.io/api/creator/media/${hash}`;
   }
 
   // ============ Auth Endpoints ============
@@ -209,7 +215,7 @@ class CreatorApiClient {
     }
     // Don't set Content-Type for FormData - browser will set it with boundary
     
-    const response = await fetch(`${CREATOR_API_BASE}/content/upload`, {
+    const response = await fetch(getProxyUrl('/content/upload'), {
       method: 'POST',
       headers,
       body: formData,
@@ -232,11 +238,11 @@ class CreatorApiClient {
   // ============ User Endpoints (X-0xNull-Token) ============
 
   async unlockContent(contentId: string, userToken: string): Promise<UnlockResponse> {
-    const response = await fetch(`${CREATOR_API_BASE}/content/${contentId}/unlock`, {
+    const response = await fetch(getProxyUrl(`/content/${contentId}/unlock`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-0xNull-Token': userToken,
+        'x-creator-token': userToken,
       },
     });
 
@@ -249,9 +255,9 @@ class CreatorApiClient {
   }
 
   async checkUnlockStatus(contentId: string, userToken: string): Promise<{ unlocked: boolean }> {
-    const response = await fetch(`${CREATOR_API_BASE}/content/${contentId}/status`, {
+    const response = await fetch(getProxyUrl(`/content/${contentId}/status`), {
       headers: {
-        'X-0xNull-Token': userToken,
+        'x-creator-token': userToken,
       },
     });
 
