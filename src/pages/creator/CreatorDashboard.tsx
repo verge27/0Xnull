@@ -27,6 +27,7 @@ const CreatorDashboard = () => {
   
   const [content, setContent] = useState<ContentItem[]>([]);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Redirect if not authenticated
@@ -44,9 +45,10 @@ const CreatorDashboard = () => {
       try {
         const { content } = await creatorApi.getMyContent();
         setContent(content);
+        setLoadError(null);
       } catch (error) {
         console.error('Failed to fetch content:', error);
-        toast.error('Failed to load your content');
+        setLoadError('Failed to load your content. You may not be fully authenticated yet.');
       } finally {
         setIsLoadingContent(false);
       }
@@ -65,10 +67,11 @@ const CreatorDashboard = () => {
       await creatorApi.deleteContent(contentId);
       setContent(prev => prev.filter(c => c.id !== contentId));
       toast.success('Content deleted');
+      setLoadError(null);
       refreshProfile();
     } catch (error) {
       console.error('Failed to delete content:', error);
-      toast.error('Failed to delete content');
+      setLoadError('Failed to delete content.');
     }
   };
 
@@ -116,6 +119,12 @@ const CreatorDashboard = () => {
             </Button>
           </div>
         </div>
+
+        {loadError && (
+          <div className="mb-6 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+            {loadError}
+          </div>
+        )}
 
         {/* Quick Actions */}
         <Card className="mb-8 border-[#FF6600]/30 bg-gradient-to-r from-[#FF6600]/5 to-transparent">
