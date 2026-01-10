@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
+import { creatorApi } from '@/services/creatorApi';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -20,6 +21,8 @@ interface RegistrationError {
   type: ErrorType;
   message: string;
 }
+
+type WhitelistStatus = 'unchecked' | 'checking' | 'approved' | 'pending' | 'error';
 
 const parseRegistrationError = (error: unknown): RegistrationError => {
   const message = error instanceof Error ? error.message : 'Unknown error';
@@ -74,12 +77,40 @@ const CreatorRegister = () => {
   const [bio, setBio] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationError, setRegistrationError] = useState<RegistrationError | null>(null);
+  const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus>('unchecked');
+  const [whitelistMessage, setWhitelistMessage] = useState<string>('');
+
+  const checkWhitelistStatus = async () => {
+    if (!generatedKeypair) return;
+    
+    setWhitelistStatus('checking');
+    setWhitelistMessage('');
+    
+    try {
+      const result = await creatorApi.checkWhitelist(generatedKeypair.publicKey);
+      if (result.whitelisted) {
+        setWhitelistStatus('approved');
+        setWhitelistMessage('Your public key is approved! You can proceed with registration.');
+        toast.success('Public key is whitelisted!');
+      } else {
+        setWhitelistStatus('pending');
+        setWhitelistMessage(result.message || 'Your public key is not yet approved. Please contact admin via SimpleX.');
+      }
+    } catch (error) {
+      console.error('Whitelist check failed:', error);
+      setWhitelistStatus('error');
+      setWhitelistMessage('Unable to check whitelist status. Please try again or proceed with registration.');
+      toast.error('Could not check whitelist status');
+    }
+  };
 
   const handleGenerate = () => {
     generateNewKeypair();
     setCopiedPublic(false);
     setCopiedPrivate(false);
     setSavedKey(false);
+    setWhitelistStatus('unchecked');
+    setWhitelistMessage('');
   };
 
   const copyToClipboard = async (text: string, type: 'public' | 'private') => {
@@ -221,19 +252,85 @@ const CreatorRegister = () => {
                         )}
                       </Button>
                     </div>
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 space-y-2">
-                      <p className="text-xs text-blue-400 font-medium">
-                        📤 Send this to admin for whitelist approval before continuing.
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                        onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
-                      >
-                        Contact Admin via SimpleX
-                      </Button>
-                    </div>
+                    {/* Whitelist Status Check */}
+                    {whitelistStatus === 'approved' ? (
+                      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          <p className="text-xs text-green-400 font-medium">
+                            ✅ {whitelistMessage}
+                          </p>
+                        </div>
+                      </div>
+                    ) : whitelistStatus === 'pending' ? (
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <XCircle className="w-4 h-4 text-amber-500" />
+                          <p className="text-xs text-amber-400 font-medium">
+                            ⏳ {whitelistMessage}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                            onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
+                          >
+                            Contact Admin
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                            onClick={checkWhitelistStatus}
+                          >
+                            <Search className="w-3 h-3 mr-1" />
+                            Check Again
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 space-y-2">
+                        <p className="text-xs text-blue-400 font-medium">
+                          📤 Send this to admin for whitelist approval before continuing.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                            onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
+                          >
+                            Contact Admin
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                            onClick={checkWhitelistStatus}
+                            disabled={whitelistStatus === 'checking'}
+                          >
+                            {whitelistStatus === 'checking' ? (
+                              <>
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                Checking...
+                              </>
+                            ) : (
+                              <>
+                                <Search className="w-3 h-3 mr-1" />
+                                Check Status
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        {whitelistStatus === 'error' && whitelistMessage && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {whitelistMessage}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Private Key */}
