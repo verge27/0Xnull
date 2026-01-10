@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,7 +67,7 @@ const parseRegistrationError = (error: unknown): RegistrationError => {
 
 const CreatorRegister = () => {
   const navigate = useNavigate();
-  const { generatedKeypair, generateNewKeypair, register } = useCreatorAuth();
+  const { generatedKeypair, generateNewKeypair, clearKeypair, hasStoredKeypair, register } = useCreatorAuth();
   
   const [step, setStep] = useState<Step>('generate');
   const [copiedPublic, setCopiedPublic] = useState(false);
@@ -218,16 +218,28 @@ const CreatorRegister = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {!generatedKeypair ? (
-                <Button
-                  onClick={handleGenerate}
-                  className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
-                  size="lg"
-                >
-                  <Key className="w-4 h-4 mr-2" />
-                  Generate New Identity
-                </Button>
+                <div className="space-y-4">
+                  <Button
+                    onClick={handleGenerate}
+                    className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
+                    size="lg"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Generate New Identity
+                  </Button>
+                </div>
               ) : (
                 <>
+                  {/* Restored Keypair Notice */}
+                  {hasStoredKeypair && (
+                    <Alert className="border-blue-500/50 bg-blue-500/10">
+                      <RotateCcw className="h-4 w-4 text-blue-500" />
+                      <AlertTitle className="text-blue-400">Restored Keypair</AlertTitle>
+                      <AlertDescription className="text-blue-400/80">
+                        This keypair was restored from your previous session. If you want to start fresh, click "Clear & Generate New" below.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   {/* Public Key */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -378,23 +390,40 @@ const CreatorRegister = () => {
                     </label>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        clearKeypair();
+                        setWhitelistStatus('unchecked');
+                        setWhitelistMessage('');
+                        setSavedKey(false);
+                      }}
+                      className="flex-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                      size="sm"
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Clear & Start Fresh
+                    </Button>
                     <Button
                       variant="outline"
                       onClick={handleGenerate}
                       className="flex-1"
+                      size="sm"
                     >
+                      <RotateCcw className="w-3 h-3 mr-1" />
                       Regenerate
                     </Button>
-                    <Button
-                      onClick={handleContinueToProfile}
-                      disabled={!savedKey}
-                      className="flex-1 bg-[#FF6600] hover:bg-[#FF6600]/90"
-                    >
-                      Continue
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
                   </div>
+
+                  <Button
+                    onClick={handleContinueToProfile}
+                    disabled={!savedKey}
+                    className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
+                  >
+                    Continue
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
                 </>
               )}
             </CardContent>
