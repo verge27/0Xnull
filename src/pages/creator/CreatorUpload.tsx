@@ -14,7 +14,6 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
@@ -40,6 +39,7 @@ const CreatorUpload = () => {
   // Upload state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uiError, setUiError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -71,12 +71,14 @@ const CreatorUpload = () => {
   const handleFileSelect = useCallback((selectedFile: File) => {
     const error = validateFile(selectedFile);
     if (error) {
-      toast.error(error);
+      console.warn('[CreatorUpload] File validation failed:', error);
+      setUiError(error);
       return;
     }
 
+    setUiError(null);
     setFile(selectedFile);
-    
+
     // Generate preview
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target?.result as string);
@@ -126,10 +128,13 @@ const CreatorUpload = () => {
 
   const handleUpload = async () => {
     if (!file || !title.trim()) {
-      toast.error('Please provide a file and title');
+      const msg = 'Please provide a file and title';
+      console.warn('[CreatorUpload]', msg);
+      setUiError(msg);
       return;
     }
 
+    setUiError(null);
     setIsUploading(true);
     setUploadProgress(10);
 
@@ -145,17 +150,16 @@ const CreatorUpload = () => {
       setUploadProgress(30);
 
       const content = await creatorApi.uploadContent(formData);
-      
+
       setUploadProgress(100);
-      
-      toast.success('Content uploaded successfully!');
+      console.log('[CreatorUpload] Upload successful:', content.id);
       refreshProfile();
-      
+
       // Navigate to the content or dashboard
       navigate(`/content/${content.id}`);
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Upload failed');
+      setUiError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
@@ -178,8 +182,9 @@ const CreatorUpload = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/creator/dashboard')}>
+        <div className="flex items-center gap-4 mb-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/creator/dashboard')}
+          >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
@@ -189,6 +194,12 @@ const CreatorUpload = () => {
             </p>
           </div>
         </div>
+
+        {uiError && (
+          <div className="mb-6 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+            {uiError}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Zone */}

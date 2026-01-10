@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
@@ -230,7 +229,6 @@ const CreatorRegister = () => {
     try {
       await register(generatedKeypair.privateKey, displayName, bio || undefined);
       console.log('[CreatorRegister] Registration successful!');
-      toast.success('Creator account created successfully!');
       navigate('/creator/dashboard');
     } catch (error) {
       console.error('[CreatorRegister] Registration failed:', error);

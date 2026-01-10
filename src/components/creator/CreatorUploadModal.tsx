@@ -13,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
-import { toast } from 'sonner';
 
 interface CreatorUploadModalProps {
   open: boolean;
@@ -32,6 +31,7 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [uiError, setUiError] = useState<string | null>(null);
 
   const resetForm = () => {
     setFile(null);
@@ -49,15 +49,19 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
 
     // Validate file type
     if (!selectedFile.type.startsWith('image/') && !selectedFile.type.startsWith('video/')) {
-      toast.error('Only images and videos are allowed');
+      setUiError('Only images and videos are allowed');
+      console.warn('[CreatorUploadModal] Invalid file type');
       return;
     }
 
     // Validate file size (max 100MB)
     if (selectedFile.size > 100 * 1024 * 1024) {
-      toast.error('File size must be less than 100MB');
+      setUiError('File size must be less than 100MB');
+      console.warn('[CreatorUploadModal] File too large');
       return;
     }
+
+    setUiError(null);
 
     setFile(selectedFile);
 
@@ -85,20 +89,21 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
 
   const handleUpload = async () => {
     if (!file) {
-      toast.error('Please select a file');
+      setUiError('Please select a file');
       return;
     }
 
     if (!title.trim()) {
-      toast.error('Title is required');
+      setUiError('Title is required');
       return;
     }
 
     if (isPaid && (!price || parseFloat(price) <= 0)) {
-      toast.error('Please enter a valid price');
+      setUiError('Please enter a valid price');
       return;
     }
 
+    setUiError(null);
     setIsUploading(true);
 
     try {
@@ -111,13 +116,13 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
       if (tags.trim()) formData.append('tags', tags.trim());
 
       const content = await creatorApi.uploadContent(formData);
-      toast.success('Content uploaded successfully!');
+      console.log('[CreatorUploadModal] Upload successful:', content.id);
       onSuccess(content);
       resetForm();
       onOpenChange(false);
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Upload failed');
+      setUiError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setIsUploading(false);
     }
@@ -136,6 +141,12 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
         </DialogHeader>
 
         <div className="space-y-4">
+          {uiError && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+              {uiError}
+            </div>
+          )}
+
           {/* File Upload */}
           {!file ? (
             <div

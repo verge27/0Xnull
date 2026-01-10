@@ -13,7 +13,6 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
@@ -38,6 +37,7 @@ const CreatorSettings = () => {
   // UI state
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [uiMessage, setUiMessage] = useState<string | null>(null);
 
   // Load existing profile data
   useEffect(() => {
@@ -74,14 +74,16 @@ const CreatorSettings = () => {
     if (!file) return;
     
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      setUiMessage('Please select an image file');
       return;
     }
-    
+
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Avatar must be under 5MB');
+      setUiMessage('Avatar must be under 5MB');
       return;
     }
+
+    setUiMessage(null);
     
     setAvatarFile(file);
     const reader = new FileReader();
@@ -94,14 +96,16 @@ const CreatorSettings = () => {
     if (!file) return;
     
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      setUiMessage('Please select an image file');
       return;
     }
-    
+
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Banner must be under 10MB');
+      setUiMessage('Banner must be under 10MB');
       return;
     }
+
+    setUiMessage(null);
     
     setBannerFile(file);
     const reader = new FileReader();
@@ -123,9 +127,11 @@ const CreatorSettings = () => {
 
   const handleSave = async () => {
     if (!displayName.trim()) {
-      toast.error('Display name is required');
+      setUiMessage('Display name is required');
       return;
     }
+
+    setUiMessage(null);
 
     setIsSaving(true);
 
@@ -157,10 +163,10 @@ const CreatorSettings = () => {
       });
 
       await refreshProfile();
-      toast.success('Profile updated successfully!');
+      setUiMessage('Profile updated successfully.');
     } catch (error) {
       console.error('Failed to save profile:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save profile');
+      setUiMessage(error instanceof Error ? error.message : 'Failed to save profile');
     } finally {
       setIsSaving(false);
     }
@@ -170,7 +176,7 @@ const CreatorSettings = () => {
     const url = `${window.location.origin}/creator/${creator?.id}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
-    toast.success('Profile URL copied!');
+    setUiMessage('Profile URL copied.');
     setTimeout(() => setCopied(false), 2000);
   };
 
