@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -79,6 +79,7 @@ const CreatorRegister = () => {
   const [registrationError, setRegistrationError] = useState<RegistrationError | null>(null);
   const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus>('unchecked');
   const [whitelistMessage, setWhitelistMessage] = useState<string>('');
+  const [showRestoredNotice, setShowRestoredNotice] = useState(true);
 
   const checkWhitelistStatus = async () => {
     if (!generatedKeypair) return;
@@ -111,6 +112,7 @@ const CreatorRegister = () => {
     setSavedKey(false);
     setWhitelistStatus('unchecked');
     setWhitelistMessage('');
+    setShowRestoredNotice(true);
   };
 
   const copyToClipboard = async (text: string, type: 'public' | 'private') => {
@@ -231,13 +233,23 @@ const CreatorRegister = () => {
               ) : (
                 <>
                   {/* Restored Keypair Notice */}
-                  {hasStoredKeypair && (
-                    <Alert className="border-blue-500/50 bg-blue-500/10">
+                  {hasStoredKeypair && showRestoredNotice && (
+                    <Alert className="relative border-blue-500/50 bg-blue-500/10 pr-10">
                       <RotateCcw className="h-4 w-4 text-blue-500" />
                       <AlertTitle className="text-blue-400">Restored Keypair</AlertTitle>
                       <AlertDescription className="text-blue-400/80">
-                        This keypair was restored from your previous session. If you want to start fresh, click "Clear & Generate New" below.
+                        This keypair was restored from your previous session. If you want to start fresh, click "Clear & Start Fresh" below.
                       </AlertDescription>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-2 h-7 w-7 text-blue-400 hover:bg-blue-500/10"
+                        onClick={() => setShowRestoredNotice(false)}
+                        aria-label="Dismiss"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </Alert>
                   )}
                   {/* Public Key */}
@@ -398,6 +410,7 @@ const CreatorRegister = () => {
                         setWhitelistStatus('unchecked');
                         setWhitelistMessage('');
                         setSavedKey(false);
+                        setShowRestoredNotice(true);
                       }}
                       className="flex-1 border-destructive/50 text-destructive hover:bg-destructive/10"
                       size="sm"
@@ -505,13 +518,23 @@ const CreatorRegister = () => {
               {registrationError && (
                 <Alert 
                   variant={registrationError.type === 'whitelist' ? 'default' : 'destructive'}
-                  className={registrationError.type === 'whitelist' 
+                  className={`relative pr-10 ${registrationError.type === 'whitelist' 
                     ? 'border-amber-500/50 bg-amber-500/10' 
                     : registrationError.type === 'network'
                     ? 'border-blue-500/50 bg-blue-500/10'
                     : ''
-                  }
+                  }`}
                 >
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-2 h-7 w-7 text-muted-foreground hover:bg-muted/30"
+                    onClick={() => setRegistrationError(null)}
+                    aria-label="Dismiss"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                   {registrationError.type === 'whitelist' ? (
                     <ShieldX className="h-4 w-4 text-amber-500" />
                   ) : registrationError.type === 'network' ? (
