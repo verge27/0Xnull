@@ -23,14 +23,23 @@ const CreatorProfile = () => {
       if (!id) return;
       
       try {
-        const [profileData, contentData] = await Promise.all([
-          creatorApi.getCreatorProfile(id),
-          creatorApi.searchContent({ q: '', page: 1, limit: 50 }), // TODO: Get creator-specific content
-        ]);
-        
+        const profileData = await creatorApi.getCreatorProfile(id);
         setProfile(profileData);
-        // Filter content by creator (temporary until API supports it)
-        setContent(contentData.content.filter(c => c.creator_id === id));
+        
+        // Content is included in the profile response or we need to fetch separately
+        // For now, search with creator filter
+        try {
+          const contentData = await creatorApi.searchContent({ 
+            q: '', 
+            page: 1, 
+            limit: 50 
+          });
+          // Filter content by creator
+          setContent(contentData.content.filter(c => c.creator_id === id));
+        } catch {
+          // Content fetch failed, show empty
+          setContent([]);
+        }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
         setError('Creator not found');

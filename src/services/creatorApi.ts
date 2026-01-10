@@ -55,9 +55,9 @@ export interface AuthVerifyResponse {
   creator_id: string;
 }
 
-// Storage keys
-const CREATOR_TOKEN_KEY = 'creator_session_token';
-const CREATOR_ID_KEY = 'creator_id';
+// Storage keys (per spec: creator_token, creator_pubkey)
+const CREATOR_TOKEN_KEY = 'creator_token';
+const CREATOR_PUBKEY_KEY = 'creator_pubkey';
 
 class CreatorApiClient {
   private token: string | null = null;
@@ -69,24 +69,24 @@ class CreatorApiClient {
   }
 
   // Token management
-  setToken(token: string, creatorId: string): void {
+  setToken(token: string, pubkey: string): void {
     this.token = token;
     localStorage.setItem(CREATOR_TOKEN_KEY, token);
-    localStorage.setItem(CREATOR_ID_KEY, creatorId);
+    localStorage.setItem(CREATOR_PUBKEY_KEY, pubkey);
   }
 
   getToken(): string | null {
     return this.token;
   }
 
-  getCreatorId(): string | null {
-    return localStorage.getItem(CREATOR_ID_KEY);
+  getPubkey(): string | null {
+    return localStorage.getItem(CREATOR_PUBKEY_KEY);
   }
 
   clearSession(): void {
     this.token = null;
     localStorage.removeItem(CREATOR_TOKEN_KEY);
-    localStorage.removeItem(CREATOR_ID_KEY);
+    localStorage.removeItem(CREATOR_PUBKEY_KEY);
   }
 
   isAuthenticated(): boolean {
@@ -123,8 +123,8 @@ class CreatorApiClient {
 
   // ============ Public Endpoints ============
 
-  async browseCreators(page = 1, limit = 20): Promise<{ creators: CreatorProfile[]; total: number }> {
-    return this.request(`/browse?page=${page}&limit=${limit}`);
+  async browseCreators(limit = 20, offset = 0): Promise<{ creators: CreatorProfile[]; total: number }> {
+    return this.request(`/browse?limit=${limit}&offset=${offset}`);
   }
 
   async searchContent(params: {

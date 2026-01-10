@@ -89,8 +89,8 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     // Verify and get token
     const { token, creator_id } = await creatorApi.verifySignature(publicKey, signature);
     
-    // Store session
-    creatorApi.setToken(token, creator_id);
+    // Store session with pubkey (per spec: store pubkey, not creator_id)
+    creatorApi.setToken(token, publicKey);
     
     return creator_id;
   };
@@ -102,8 +102,15 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
 
     const publicKey = getPubkeyFromPrivate(privateKey);
     
-    // Register profile
-    await creatorApi.register(publicKey, displayName, bio);
+    // Register profile (may fail with 403 if not whitelisted)
+    try {
+      await creatorApi.register(publicKey, displayName, bio);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('403')) {
+        throw new Error('Not yet approved. Send your public key to admin for whitelist approval.');
+      }
+      throw error;
+    }
     
     // Authenticate
     const creatorId = await performAuth(privateKey, publicKey);

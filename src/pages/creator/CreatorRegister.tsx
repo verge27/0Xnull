@@ -142,7 +142,7 @@ const CreatorRegister = () => {
                   {/* Public Key */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">
-                      Your Creator ID (Public Key)
+                      Your Public Key (Creator ID)
                     </label>
                     <div className="relative">
                       <Input
@@ -163,9 +163,11 @@ const CreatorRegister = () => {
                         )}
                       </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      This is your public identifier. Share it freely.
-                    </p>
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                      <p className="text-xs text-blue-400 font-medium">
+                        📤 Send this to admin for whitelist approval before continuing.
+                      </p>
+                    </div>
                   </div>
 
                   {/* Private Key */}
@@ -195,7 +197,7 @@ const CreatorRegister = () => {
                     </div>
                     <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
                       <p className="text-xs text-destructive font-medium">
-                        ⚠️ SAVE THIS KEY NOW! It cannot be recovered. Anyone with this key controls your account.
+                        🔐 SAVE THIS NOW - Cannot be recovered. This is your login.
                       </p>
                     </div>
                   </div>
