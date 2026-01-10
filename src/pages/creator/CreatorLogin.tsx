@@ -25,6 +25,7 @@ const CreatorLogin = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [derivedPublicKey, setDerivedPublicKey] = useState<string | null>(null);
   const [prefilled, setPrefilled] = useState(false);
+  const [autoLoginTriggered, setAutoLoginTriggered] = useState(false);
 
   // Check for prefilled key from registration redirect (409 conflict)
   useEffect(() => {
@@ -37,6 +38,15 @@ const CreatorLogin = () => {
     }
   }, []);
 
+  // Auto-trigger login when prefilled from 409 redirect
+  useEffect(() => {
+    if (prefilled && privateKey && isValidPrivateKey(privateKey) && !autoLoginTriggered && !isLoading) {
+      console.log('[CreatorLogin] Auto-triggering login for prefilled key');
+      setAutoLoginTriggered(true);
+      performLogin(privateKey);
+    }
+  }, [prefilled, privateKey, autoLoginTriggered, isLoading]);
+
   const handleKeyChange = (value: string) => {
     // Only allow hex characters
     const cleaned = value.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
@@ -45,6 +55,7 @@ const CreatorLogin = () => {
     setStatusMessage('');
     setDerivedPublicKey(null);
     setPrefilled(false);
+    setAutoLoginTriggered(false);
   };
 
   const checkAccountStatus = async () => {
@@ -93,13 +104,13 @@ const CreatorLogin = () => {
     }
   };
 
-  const handleLogin = async () => {
-    const cleanKey = privateKey.trim().toLowerCase();
-    
+  const performLogin = async (keyToUse: string) => {
+    const cleanKey = keyToUse.trim().toLowerCase();
+
     console.log('[CreatorLogin] Starting login flow...');
     console.log('[CreatorLogin] Key length:', cleanKey.length);
     console.log('[CreatorLogin] Key valid:', isValidPrivateKey(cleanKey));
-    
+
     if (!isValidPrivateKey(cleanKey)) {
       console.error('[CreatorLogin] Invalid key format');
       return;
@@ -123,9 +134,9 @@ const CreatorLogin = () => {
       console.error('[CreatorLogin] Login failed:', error);
       console.error('[CreatorLogin] Error type:', error instanceof Error ? error.constructor.name : typeof error);
       console.error('[CreatorLogin] Error message:', error instanceof Error ? error.message : String(error));
-      
+
       const message = error instanceof Error ? error.message.toLowerCase() : 'login failed';
-      
+
       if (message.includes('404') || message.includes('not found') || message.includes('no creator')) {
         console.log('[CreatorLogin] Account not found - suggesting registration');
         setAccountStatus('not_registered');
@@ -141,6 +152,10 @@ const CreatorLogin = () => {
       setIsLoading(false);
       console.log('[CreatorLogin] Login flow completed');
     }
+  };
+
+  const handleLogin = () => {
+    performLogin(privateKey);
   };
 
   const isKeyValid = isValidPrivateKey(privateKey);
