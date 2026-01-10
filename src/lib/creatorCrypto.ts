@@ -71,7 +71,8 @@ export const isValidPublicKey = (key: string): boolean => {
 };
 
 // Truncate key for display: "a1b2c3...f6a1b2"
-export const truncateKey = (key: string, startChars = 6, endChars = 6): string => {
+export const truncateKey = (key: string | undefined | null, startChars = 6, endChars = 6): string => {
+  if (!key) return '';
   if (key.length <= startChars + endChars + 3) return key;
   return `${key.slice(0, startChars)}...${key.slice(-endChars)}`;
 };
