@@ -7,9 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { PrivateKeyAuthProvider } from "./hooks/usePrivateKeyAuth";
 import { TokenProvider } from "./hooks/useToken";
+import { CreatorAuthProvider } from "./hooks/useCreatorAuth";
 import { GlobalErrorBoundary } from "./components/GlobalErrorBoundary";
 import { NetworkStatusBanner } from "./components/NetworkStatusBanner";
-
 // Only NotFound is eagerly loaded (tiny, used as fallback)
 import NotFound from "./pages/NotFound";
 
@@ -72,6 +72,14 @@ const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 
+// Creator pages
+const CreatorRegister = lazy(() => import("./pages/creator/CreatorRegister"));
+const CreatorLogin = lazy(() => import("./pages/creator/CreatorLogin"));
+const CreatorDashboard = lazy(() => import("./pages/creator/CreatorDashboard"));
+const CreatorsHub = lazy(() => import("./pages/creator/CreatorsHub"));
+const CreatorProfile = lazy(() => import("./pages/creator/CreatorProfile"));
+const ContentView = lazy(() => import("./pages/creator/ContentView"));
+const ContentSearch = lazy(() => import("./pages/creator/ContentSearch"));
 const queryClient = new QueryClient();
 
 // Loading fallback component
@@ -92,6 +100,7 @@ const App = () => (
           <AuthProvider>
             <PrivateKeyAuthProvider>
               <TokenProvider>
+              <CreatorAuthProvider>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -168,10 +177,20 @@ const App = () => (
                   {/* Partner Earnings (private) */}
                   <Route path="/partners/earnings" element={<PartnerEarnings />} />
                   
+                  {/* Creators */}
+                  <Route path="/creators" element={<CreatorsHub />} />
+                  <Route path="/creator/register" element={<CreatorRegister />} />
+                  <Route path="/creator/login" element={<CreatorLogin />} />
+                  <Route path="/creator/dashboard" element={<CreatorDashboard />} />
+                  <Route path="/creator/:id" element={<CreatorProfile />} />
+                  <Route path="/content/:id" element={<ContentView />} />
+                  <Route path="/content/search" element={<ContentSearch />} />
+                  
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              </CreatorAuthProvider>
               </TokenProvider>
             </PrivateKeyAuthProvider>
           </AuthProvider>

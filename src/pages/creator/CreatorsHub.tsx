@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const CreatorsHub = () => {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -169,6 +169,16 @@ export const Navbar = () => {
                     <span className="text-muted-foreground">Kokoro</span>
                     <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
                   </Link>
+                  
+                  {/* Creators */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Creators</div>
+                  <Link to="/creators" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <span>Browse Creators</span>
+                  </Link>
+                  <Link to="/creator/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Become a Creator</span>
+                  </Link>
 
                   {/* Infrastructure */}
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infrastructure</div>
@@ -263,6 +273,7 @@ export const Navbar = () => {
                   <Link to="/ai" className="cursor-pointer">AI Hub</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Services</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
                 </DropdownMenuItem>
@@ -271,6 +282,17 @@ export const Navbar = () => {
                     Kokoro Companion
                     <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded ml-2">Soon</span>
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Creators</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/creators" className="cursor-pointer flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Browse Creators
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

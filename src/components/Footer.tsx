@@ -80,6 +80,11 @@ export const Footer = () => {
                   <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/creators" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Creators
+                </Link>
+              </li>
             </ul>
           </div>
 

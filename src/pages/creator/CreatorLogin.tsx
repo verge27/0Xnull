@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { isValidPrivateKey } from '@/lib/creatorCrypto';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const CreatorLogin = () => {
   const navigate = useNavigate();

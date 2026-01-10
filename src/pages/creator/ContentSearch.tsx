@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const ContentSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();

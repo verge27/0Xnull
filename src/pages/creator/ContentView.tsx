@@ -15,8 +15,8 @@ import {
 import { creatorApi, ContentItem, UnlockResponse } from '@/services/creatorApi';
 import { useToken } from '@/hooks/useToken';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const ContentView = () => {
   const { id } = useParams<{ id: string }>();
