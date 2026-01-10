@@ -164,6 +164,36 @@ class CreatorApiClient {
 
   // ============ Auth Endpoints ============
 
+  async checkWhitelist(pubkey: string): Promise<{ whitelisted: boolean; message?: string }> {
+    try {
+      const response = await fetch(getProxyUrl(`/whitelist/check?pubkey=${pubkey}`));
+      if (response.ok) {
+        return await response.json();
+      }
+      // If 404, endpoint might not exist - try alternative check via challenge
+      if (response.status === 404) {
+        // Fallback: try to get challenge - if it fails with 403, not whitelisted
+        try {
+          await this.getChallenge(pubkey);
+          return { whitelisted: true };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : '';
+          if (msg.includes('403') || msg.includes('forbidden') || msg.includes('whitelist')) {
+            return { whitelisted: false, message: 'Public key not yet approved' };
+          }
+          throw err;
+        }
+      }
+      if (response.status === 403) {
+        return { whitelisted: false, message: 'Public key not yet approved' };
+      }
+      const data = await response.json().catch(() => ({}));
+      return { whitelisted: false, message: data.error || 'Unable to verify status' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async register(pubkey: string, displayName: string, bio?: string): Promise<{ creator_id: string }> {
     return this.request('/register', {
       method: 'POST',
