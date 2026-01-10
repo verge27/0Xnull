@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Upload, ImageIcon, Film, Loader2, ArrowLeft, 
-  X, Check, DollarSign, Tag, AlertCircle, Zap
+  X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,9 +17,11 @@ import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
+import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
+const MAX_UPLOAD_ATTEMPTS = 3;
 
 const CreatorUpload = () => {
   const navigate = useNavigate();
@@ -39,10 +41,15 @@ const CreatorUpload = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   
-  // Upload state
+  // Upload state with retry tracking
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadState, setUploadState] = useState<UploadProgress>({
+    status: 'idle',
+    progress: 0,
+    attempt: 1,
+    maxAttempts: MAX_UPLOAD_ATTEMPTS,
+  });
   const [uiError, setUiError] = useState<string | null>(null);
 
   // Redirect if not authenticated
@@ -171,7 +178,9 @@ const CreatorUpload = () => {
 
     setUiError(null);
     setIsUploading(true);
-    setUploadProgress(10);
+    
+    const progressTracker = createProgressTracker(setUploadState, MAX_UPLOAD_ATTEMPTS);
+    progressTracker.uploading(10);
 
     try {
       const formData = new FormData();
@@ -182,11 +191,26 @@ const CreatorUpload = () => {
       if (isPaid) formData.append('price_xmr', price);
       if (tags.length > 0) formData.append('tags', tags.join(','));
 
-      setUploadProgress(30);
+      progressTracker.uploading(30);
 
-      const content = await creatorApi.uploadContent(formData);
+      // Upload with retry logic
+      const content = await withRetry(
+        async () => {
+          progressTracker.uploading(50);
+          const result = await creatorApi.uploadContent(formData);
+          return result;
+        },
+        {
+          maxRetries: MAX_UPLOAD_ATTEMPTS - 1,
+          baseDelayMs: 2000,
+          maxDelayMs: 15000,
+          onRetry: (attempt, error, delayMs) => {
+            progressTracker.retrying(attempt, error, delayMs);
+          },
+        }
+      );
 
-      setUploadProgress(100);
+      progressTracker.success();
       console.log('[CreatorUpload] Upload successful:', content.id);
       refreshProfile();
 
@@ -194,10 +218,11 @@ const CreatorUpload = () => {
       navigate(`/content/${content.id}`);
     } catch (error) {
       console.error('Upload failed:', error);
-      setUiError(error instanceof Error ? error.message : 'Upload failed');
+      const errorMsg = error instanceof Error ? error.message : 'Upload failed';
+      progressTracker.failed(errorMsg);
+      setUiError(errorMsg);
     } finally {
       setIsUploading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -351,19 +376,50 @@ const CreatorUpload = () => {
               </Card>
             )}
 
-            {/* Upload Progress */}
+            {/* Upload Progress with Retry Status */}
             {isUploading && (
-              <Card>
+              <Card className={uploadState.status === 'retrying' ? 'border-yellow-500/50' : ''}>
                 <CardContent className="py-6">
                   <div className="flex items-center gap-4">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#FF6600]" />
+                    {uploadState.status === 'retrying' ? (
+                      <RefreshCw className="w-5 h-5 animate-spin text-yellow-500" />
+                    ) : (
+                      <Loader2 className="w-5 h-5 animate-spin text-[#FF6600]" />
+                    )}
                     <div className="flex-1">
-                      <p className="text-sm font-medium mb-2">Uploading...</p>
-                      <Progress value={uploadProgress} className="h-2" />
+                      {uploadState.status === 'retrying' ? (
+                        <>
+                          <p className="text-sm font-medium text-yellow-500 mb-1">
+                            Retrying... (Attempt {uploadState.attempt}/{uploadState.maxAttempts})
+                          </p>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {uploadState.error || 'Connection issue, retrying automatically'}
+                          </p>
+                          {uploadState.retryingIn && (
+                            <p className="text-xs text-muted-foreground">
+                              Waiting {Math.round(uploadState.retryingIn / 1000)}s before retry...
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium mb-2">
+                            Uploading...
+                            {uploadState.attempt > 1 && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (Attempt {uploadState.attempt}/{uploadState.maxAttempts})
+                              </span>
+                            )}
+                          </p>
+                          <Progress value={uploadState.progress} className="h-2" />
+                        </>
+                      )}
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                      {uploadProgress}%
-                    </span>
+                    {uploadState.status !== 'retrying' && (
+                      <span className="text-sm text-muted-foreground">
+                        {uploadState.progress}%
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
