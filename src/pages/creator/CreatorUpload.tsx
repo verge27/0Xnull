@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Upload, ImageIcon, Film, Loader2, ArrowLeft, 
-  X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw
+  X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw, Clock, Image as ImageIcon2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,13 +12,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
 import { optimizeVideo, isCompressibleVideo, type VideoCompressionProgress } from '@/lib/videoCompression';
-import { extractVideoThumbnail } from '@/lib/videoThumbnail';
+import { extractVideoThumbnail, getVideoDuration } from '@/lib/videoThumbnail';
 import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -36,6 +37,9 @@ const CreatorUpload = () => {
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [compressionSavings, setCompressionSavings] = useState<number | null>(null);
   const [skipCompression, setSkipCompression] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [thumbnailTime, setThumbnailTime] = useState<number>(1);
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
   
   // Form state
   const [title, setTitle] = useState('');
@@ -96,8 +100,20 @@ const CreatorUpload = () => {
     setOriginalFile(selectedFile);
     setCompressionSavings(null);
     setCompressionProgress(null);
+    setVideoDuration(null);
+    setThumbnailTime(1);
 
     const shouldSkip = forceSkipCompression || skipCompression;
+
+    // Get video duration for timeline
+    if (isCompressibleVideo(selectedFile)) {
+      try {
+        const duration = await getVideoDuration(selectedFile);
+        setVideoDuration(duration);
+      } catch (err) {
+        console.warn('[CreatorUpload] Failed to get video duration:', err);
+      }
+    }
 
     // Skip compression if toggle is enabled
     if (shouldSkip) {
@@ -223,6 +239,52 @@ const CreatorUpload = () => {
     setPreview(null);
     setVideoThumbnail(null);
     setCompressionSavings(null);
+    setVideoDuration(null);
+    setThumbnailTime(1);
+  };
+
+  // Handle thumbnail time change
+  const handleThumbnailTimeChange = useCallback(async (time: number) => {
+    setThumbnailTime(time);
+    
+    if (!originalFile || !isCompressibleVideo(originalFile)) return;
+    
+    setIsGeneratingThumbnail(true);
+    try {
+      const thumbnail = await extractVideoThumbnail(originalFile, { time });
+      setVideoThumbnail(thumbnail.dataUrl);
+      setPreview(thumbnail.dataUrl);
+    } catch (err) {
+      console.warn('[CreatorUpload] Failed to update thumbnail:', err);
+    } finally {
+      setIsGeneratingThumbnail(false);
+    }
+  }, [originalFile]);
+
+  // Calculate upload time estimate
+  const uploadTimeEstimate = useMemo(() => {
+    if (!file) return null;
+    
+    // Assume average upload speed of 2 Mbps (conservative estimate)
+    const avgSpeedBps = 2 * 1024 * 1024 / 8; // 2 Mbps in bytes per second
+    const seconds = file.size / avgSpeedBps;
+    
+    if (seconds < 60) {
+      return `~${Math.max(1, Math.round(seconds))} seconds`;
+    } else if (seconds < 3600) {
+      const minutes = Math.round(seconds / 60);
+      return `~${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    } else {
+      const hours = Math.round(seconds / 3600);
+      return `~${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+  }, [file]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const addTag = () => {
@@ -457,6 +519,50 @@ const CreatorUpload = () => {
                       Original: {(originalFile.size / (1024 * 1024)).toFixed(1)} MB → Optimized: {(file.size / (1024 * 1024)).toFixed(1)} MB
                     </p>
                   )}
+                  {uploadTimeEstimate && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                      <Clock className="w-3 h-3" />
+                      <span>Estimated upload time: {uploadTimeEstimate}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Video Thumbnail Picker */}
+            {file && isVideo && videoDuration && videoDuration > 2 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ImageIcon2 className="w-5 h-5 text-[#FF6600]" />
+                    Thumbnail
+                    {isGeneratingThumbnail && (
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Select the frame to use as the preview thumbnail
+                  </p>
+                  <div className="space-y-3">
+                    <Slider
+                      value={[thumbnailTime]}
+                      min={0}
+                      max={Math.floor(videoDuration)}
+                      step={0.5}
+                      onValueChange={([value]) => handleThumbnailTimeChange(value)}
+                      disabled={isGeneratingThumbnail || isCompressing}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0:00</span>
+                      <span className="font-medium text-foreground">
+                        {formatTime(thumbnailTime)}
+                      </span>
+                      <span>{formatTime(videoDuration)}</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
