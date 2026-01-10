@@ -171,7 +171,18 @@ const CreatorLogin = () => {
           </p>
         </div>
 
-        {prefilled && (
+        {/* Auto-login overlay */}
+        {prefilled && isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-4 p-6 rounded-lg bg-card border border-border shadow-lg">
+              <Loader2 className="w-10 h-10 text-[#FF6600] animate-spin" />
+              <p className="text-lg font-medium">Signing you in...</p>
+              <p className="text-sm text-muted-foreground">Your account was found, logging in automatically.</p>
+            </div>
+          </div>
+        )}
+
+        {prefilled && !isLoading && (
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-500" />
