@@ -9,13 +9,15 @@ import {
   MessageCircle, 
   Share2,
   Volume2,
-  VolumeX
+  VolumeX,
+  Gift
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ContentItem, creatorApi, CreatorProfile } from '@/services/creatorApi';
+import { TipModal } from './TipModal';
 
 interface ContentFeedItemProps {
   content: ContentItem;
@@ -239,6 +241,16 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
             <Eye className="w-5 h-5" />
             <span className="text-sm">{content.view_count || 0}</span>
           </button>
+          <TipModal 
+            creator={creator} 
+            contentId={content.id}
+            trigger={
+              <button className="flex items-center gap-1 hover:text-[#FF6600] transition-colors">
+                <Gift className="w-5 h-5" />
+                <span className="text-sm">Tip</span>
+              </button>
+            }
+          />
           <button className="ml-auto hover:text-[#FF6600] transition-colors">
             <Share2 className="w-5 h-5" />
           </button>
