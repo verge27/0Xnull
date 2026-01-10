@@ -50,18 +50,23 @@ serve(async (req) => {
 
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (contentType?.includes('multipart/form-data')) {
-        // For file uploads, forward the FormData
+        // For file uploads: read the form data and reconstruct it for the upstream
+        // We need to pass the raw body with the correct content-type header (including boundary)
         body = await req.arrayBuffer();
+        // Forward the FULL content-type header which includes the boundary
         upstreamHeaders['Content-Type'] = contentType;
+        console.log(`[creator-proxy] Forwarding multipart upload, size: ${(body as ArrayBuffer).byteLength} bytes`);
       } else if (contentType?.includes('application/json')) {
         body = await req.text();
         upstreamHeaders['Content-Type'] = 'application/json';
       }
     }
 
-    // Make request to upstream API with timeout
+    // Make request to upstream API with timeout - longer timeout for file uploads
+    const isUpload = contentType?.includes('multipart/form-data');
+    const timeoutMs = isUpload ? 120000 : 30000; // 2 minutes for uploads
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(targetUrl, {
@@ -73,9 +78,10 @@ serve(async (req) => {
 
       clearTimeout(timeoutId);
 
+      console.log(`[creator-proxy] Response status: ${response.status}`);
+
       // Get response body
       const responseText = await response.text();
-      console.log(`[creator-proxy] Response status: ${response.status}`);
 
       // Try to parse as JSON
       let responseBody: unknown;
@@ -83,6 +89,11 @@ serve(async (req) => {
         responseBody = JSON.parse(responseText);
       } catch {
         responseBody = { message: responseText };
+      }
+
+      // Log error details for debugging
+      if (!response.ok) {
+        console.error(`[creator-proxy] Upstream error: ${response.status}`, responseBody);
       }
 
       return new Response(
@@ -98,7 +109,7 @@ serve(async (req) => {
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         console.error('[creator-proxy] Request timeout');
         return new Response(
-          JSON.stringify({ error: 'Request timeout' }),
+          JSON.stringify({ error: 'Request timeout - file may be too large' }),
           { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

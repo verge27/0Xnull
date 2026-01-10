@@ -287,20 +287,31 @@ class CreatorApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
     // Don't set Content-Type for FormData - browser will set it with boundary
+
+    console.log('[CreatorApi] uploadContent: starting upload');
     
-    const response = await fetch(getProxyUrl('/content/upload'), {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
+    try {
+      const response = await fetch(getProxyUrl('/content/upload'), {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Upload failed');
+      console.log('[CreatorApi] uploadContent: response status', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[CreatorApi] uploadContent: error', errorData);
+        throw new Error(errorData.error || errorData.message || `Upload failed: ${response.status}`);
+      }
+
+      const raw = await response.json();
+      console.log('[CreatorApi] uploadContent: success', raw);
+      return normalizeContentItem(raw);
+    } catch (err) {
+      console.error('[CreatorApi] uploadContent: exception', err);
+      throw err;
     }
-
-    const raw = await response.json();
-    return normalizeContentItem(raw);
   }
 
   async deleteContent(contentId: string): Promise<void> {
