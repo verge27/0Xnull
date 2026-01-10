@@ -35,6 +35,7 @@ const CreatorUpload = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [compressionSavings, setCompressionSavings] = useState<number | null>(null);
+  const [skipCompression, setSkipCompression] = useState(false);
   
   // Form state
   const [title, setTitle] = useState('');
@@ -83,7 +84,7 @@ const CreatorUpload = () => {
     return null;
   };
 
-  const handleFileSelect = useCallback(async (selectedFile: File) => {
+  const handleFileSelect = useCallback(async (selectedFile: File, forceSkipCompression = false) => {
     const error = validateFile(selectedFile);
     if (error) {
       console.warn('[CreatorUpload] File validation failed:', error);
@@ -95,6 +96,31 @@ const CreatorUpload = () => {
     setOriginalFile(selectedFile);
     setCompressionSavings(null);
     setCompressionProgress(null);
+
+    const shouldSkip = forceSkipCompression || skipCompression;
+
+    // Skip compression if toggle is enabled
+    if (shouldSkip) {
+      setFile(selectedFile);
+      
+      // Still generate thumbnail for videos
+      if (isCompressibleVideo(selectedFile)) {
+        try {
+          const thumbnail = await extractVideoThumbnail(selectedFile, { time: 1 });
+          setVideoThumbnail(thumbnail.dataUrl);
+          setPreview(thumbnail.dataUrl);
+        } catch {
+          const reader = new FileReader();
+          reader.onload = (e) => setPreview(e.target?.result as string);
+          reader.readAsDataURL(selectedFile);
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.readAsDataURL(selectedFile);
+      }
+      return;
+    }
 
     // Compress images before upload
     if (isCompressibleImage(selectedFile)) {
@@ -172,7 +198,7 @@ const CreatorUpload = () => {
       reader.onload = (e) => setPreview(e.target?.result as string);
       reader.readAsDataURL(selectedFile);
     }
-  }, []);
+  }, [skipCompression]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -600,6 +626,53 @@ const CreatorUpload = () => {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Compression Settings */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-[#FF6600]" />
+                  Optimization
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Original Quality</p>
+                    <p className="text-sm text-muted-foreground">
+                      Skip compression and upload full quality
+                    </p>
+                  </div>
+                  <Switch
+                    checked={skipCompression}
+                    onCheckedChange={(checked) => {
+                      setSkipCompression(checked);
+                      // Re-process file if one is selected
+                      if (originalFile) {
+                        handleFileSelect(originalFile, checked);
+                      }
+                    }}
+                    disabled={isCompressing || isUploading}
+                  />
+                </div>
+                {!skipCompression && (
+                  <div className="bg-[#FF6600]/10 border border-[#FF6600]/20 rounded-lg p-3">
+                    <p className="text-sm text-[#FF6600] flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Images & videos are optimized for faster uploads
+                    </p>
+                  </div>
+                )}
+                {skipCompression && (
+                  <div className="bg-muted rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      Large files may take longer to upload
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
