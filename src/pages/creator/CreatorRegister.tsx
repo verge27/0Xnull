@@ -89,7 +89,7 @@ const CreatorRegister = () => {
   const [showImportKey, setShowImportKey] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
-  const handleImportKeypair = () => {
+  const handleImportKeypair = async () => {
     setImportError(null);
     const trimmedKey = importPrivateKey.trim().toLowerCase();
     
@@ -104,9 +104,30 @@ const CreatorRegister = () => {
     }
     
     try {
-      importKeypair(trimmedKey);
+      const keypair = importKeypair(trimmedKey);
       setImportPrivateKey('');
       toast.success('Private key imported successfully!');
+      
+      // Auto-check whitelist status
+      if (keypair?.publicKey) {
+        setWhitelistStatus('checking');
+        setWhitelistMessage('');
+        try {
+          const result = await creatorApi.checkWhitelist(keypair.publicKey);
+          if (result.whitelisted) {
+            setWhitelistStatus('approved');
+            setWhitelistMessage('Your public key is approved! You can proceed with registration.');
+            toast.success('Public key is whitelisted!');
+          } else {
+            setWhitelistStatus('pending');
+            setWhitelistMessage(result.message || 'Your public key is not yet approved. Please contact admin via SimpleX.');
+          }
+        } catch (checkError) {
+          console.error('Whitelist check failed:', checkError);
+          setWhitelistStatus('error');
+          setWhitelistMessage('Unable to check whitelist status. Please try again or proceed with registration.');
+        }
+      }
     } catch (error) {
       setImportError(error instanceof Error ? error.message : 'Failed to import key');
     }
