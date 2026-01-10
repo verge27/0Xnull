@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Upload, ImageIcon, Film, Loader2, ArrowLeft, 
-  X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw, Clock, Image as ImageIcon2
+  X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw, Clock, Image as ImageIcon2,
+  Calendar, Plus, Trash2, CheckCircle2, XCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,17 @@ import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/upl
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
 const MAX_UPLOAD_ATTEMPTS = 3;
+const MAX_BULK_FILES = 10;
+
+interface BulkFileItem {
+  id: string;
+  file: File;
+  processedFile: File | null;
+  preview: string | null;
+  status: 'pending' | 'processing' | 'ready' | 'uploading' | 'done' | 'error';
+  error?: string;
+  compressionSavings?: number;
+}
 
 const CreatorUpload = () => {
   const navigate = useNavigate();
@@ -48,6 +60,16 @@ const CreatorUpload = () => {
   const [price, setPrice] = useState('0.01');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  
+  // Scheduling state
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
+  
+  // Bulk upload state
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [bulkFiles, setBulkFiles] = useState<BulkFileItem[]>([]);
+  const [bulkUploadProgress, setBulkUploadProgress] = useState({ current: 0, total: 0 });
   
   // Upload state with retry tracking
   const [isUploading, setIsUploading] = useState(false);
@@ -287,6 +309,181 @@ const CreatorUpload = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Get minimum date for scheduling (now)
+  const getMinDate = () => {
+    const now = new Date();
+    return now.toISOString().split('T')[0];
+  };
+
+  // Get scheduled datetime ISO string
+  const getScheduledDateTime = (): string | null => {
+    if (!isScheduled || !scheduledDate || !scheduledTime) return null;
+    const dateTime = new Date(`${scheduledDate}T${scheduledTime}`);
+    return dateTime.toISOString();
+  };
+
+  // Bulk upload handlers
+  const handleBulkFileSelect = useCallback(async (files: FileList) => {
+    const newFiles: BulkFileItem[] = [];
+    const remaining = MAX_BULK_FILES - bulkFiles.length;
+    
+    for (let i = 0; i < Math.min(files.length, remaining); i++) {
+      const file = files[i];
+      const error = validateFile(file);
+      if (error) {
+        console.warn('[CreatorUpload] Skipping invalid file:', file.name, error);
+        continue;
+      }
+      
+      newFiles.push({
+        id: `${Date.now()}-${i}-${file.name}`,
+        file,
+        processedFile: null,
+        preview: null,
+        status: 'pending',
+      });
+    }
+    
+    setBulkFiles(prev => [...prev, ...newFiles]);
+    
+    // Process files (compress + generate previews)
+    for (const item of newFiles) {
+      await processBulkFile(item);
+    }
+  }, [bulkFiles.length, skipCompression]);
+
+  const processBulkFile = async (item: BulkFileItem) => {
+    setBulkFiles(prev => prev.map(f => 
+      f.id === item.id ? { ...f, status: 'processing' as const } : f
+    ));
+
+    try {
+      let processedFile = item.file;
+      let savings: number | undefined;
+      let previewUrl: string | null = null;
+
+      if (!skipCompression) {
+        if (isCompressibleImage(item.file)) {
+          const result = await optimizeImage(item.file);
+          processedFile = result.file;
+          if (result.compressionRatio < 1) {
+            savings = Math.round((1 - result.compressionRatio) * 100);
+          }
+        } else if (isCompressibleVideo(item.file)) {
+          const result = await optimizeVideo(item.file);
+          processedFile = result.file;
+          if (result.compressionRatio < 1) {
+            savings = Math.round((1 - result.compressionRatio) * 100);
+          }
+        }
+      }
+
+      // Generate preview
+      if (item.file.type.startsWith('video/')) {
+        try {
+          const thumb = await extractVideoThumbnail(processedFile, { time: 1 });
+          previewUrl = thumb.dataUrl;
+        } catch {
+          previewUrl = URL.createObjectURL(processedFile);
+        }
+      } else {
+        previewUrl = URL.createObjectURL(processedFile);
+      }
+
+      setBulkFiles(prev => prev.map(f => 
+        f.id === item.id ? { 
+          ...f, 
+          processedFile,
+          preview: previewUrl,
+          status: 'ready' as const,
+          compressionSavings: savings,
+        } : f
+      ));
+    } catch (err) {
+      setBulkFiles(prev => prev.map(f => 
+        f.id === item.id ? { 
+          ...f, 
+          status: 'error' as const,
+          error: err instanceof Error ? err.message : 'Processing failed',
+        } : f
+      ));
+    }
+  };
+
+  const removeBulkFile = (id: string) => {
+    setBulkFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const handleBulkUpload = async () => {
+    const readyFiles = bulkFiles.filter(f => f.status === 'ready');
+    if (readyFiles.length === 0) {
+      setUiError('No files ready for upload');
+      return;
+    }
+
+    if (!title.trim()) {
+      setUiError('Please provide a title template');
+      return;
+    }
+
+    setUiError(null);
+    setIsUploading(true);
+    setBulkUploadProgress({ current: 0, total: readyFiles.length });
+
+    let successCount = 0;
+    const scheduledAt = getScheduledDateTime();
+
+    for (let i = 0; i < readyFiles.length; i++) {
+      const item = readyFiles[i];
+      const fileToUpload = item.processedFile || item.file;
+      
+      setBulkFiles(prev => prev.map(f => 
+        f.id === item.id ? { ...f, status: 'uploading' as const } : f
+      ));
+      setBulkUploadProgress({ current: i + 1, total: readyFiles.length });
+
+      try {
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+        // Use title with index for bulk
+        const itemTitle = readyFiles.length > 1 
+          ? `${title.trim()} (${i + 1})` 
+          : title.trim();
+        formData.append('title', itemTitle);
+        if (description.trim()) formData.append('description', description.trim());
+        formData.append('tier', isPaid ? 'paid' : 'free');
+        if (isPaid) formData.append('price_xmr', price);
+        if (tags.length > 0) formData.append('tags', tags.join(','));
+        if (scheduledAt) formData.append('scheduled_at', scheduledAt);
+
+        await withRetry(
+          async () => creatorApi.uploadContent(formData),
+          { maxRetries: MAX_UPLOAD_ATTEMPTS - 1, baseDelayMs: 2000, maxDelayMs: 15000 }
+        );
+
+        setBulkFiles(prev => prev.map(f => 
+          f.id === item.id ? { ...f, status: 'done' as const } : f
+        ));
+        successCount++;
+      } catch (err) {
+        setBulkFiles(prev => prev.map(f => 
+          f.id === item.id ? { 
+            ...f, 
+            status: 'error' as const,
+            error: err instanceof Error ? err.message : 'Upload failed',
+          } : f
+        ));
+      }
+    }
+
+    setIsUploading(false);
+    refreshProfile();
+
+    if (successCount === readyFiles.length) {
+      navigate('/creator/dashboard');
+    }
+  };
+
   const addTag = () => {
     const tag = tagInput.trim().toLowerCase();
     if (tag && !tags.includes(tag) && tags.length < 5) {
@@ -328,6 +525,10 @@ const CreatorUpload = () => {
       formData.append('tier', isPaid ? 'paid' : 'free');
       if (isPaid) formData.append('price_xmr', price);
       if (tags.length > 0) formData.append('tags', tags.join(','));
+      
+      // Add scheduled time if enabled
+      const scheduledAt = getScheduledDateTime();
+      if (scheduledAt) formData.append('scheduled_at', scheduledAt);
 
       progressTracker.uploading(30);
 
@@ -365,7 +566,11 @@ const CreatorUpload = () => {
   };
 
   const isVideo = file?.type.startsWith('video/');
-  const canSubmit = file && title.trim() && (!isPaid || (parseFloat(price) >= 0.001));
+  const canSubmit = isBulkMode 
+    ? bulkFiles.some(f => f.status === 'ready') && title.trim() && (!isPaid || (parseFloat(price) >= 0.001))
+    : file && title.trim() && (!isPaid || (parseFloat(price) >= 0.001));
+  const bulkReadyCount = bulkFiles.filter(f => f.status === 'ready').length;
+  const bulkProcessingCount = bulkFiles.filter(f => f.status === 'processing' || f.status === 'pending').length;
 
   if (authLoading || !creator) {
     return (
@@ -380,21 +585,42 @@ const CreatorUpload = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/creator/dashboard')}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Upload Content</h1>
-            <p className="text-sm text-muted-foreground">
-              Share your content with your audience
-            </p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/creator/dashboard')}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Upload Content</h1>
+              <p className="text-sm text-muted-foreground">
+                Share your content with your audience
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={isBulkMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setIsBulkMode(!isBulkMode);
+                if (!isBulkMode) {
+                  clearFile();
+                } else {
+                  setBulkFiles([]);
+                }
+              }}
+              disabled={isUploading}
+              className={isBulkMode ? 'bg-[#FF6600] hover:bg-[#FF6600]/90' : ''}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Bulk Upload
+            </Button>
           </div>
         </div>
 
         {uiError && (
-          <div className="mb-6 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+          <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             {uiError}
           </div>
         )}
@@ -402,7 +628,154 @@ const CreatorUpload = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Zone */}
           <div className="space-y-6">
-            {!file ? (
+            {isBulkMode ? (
+              /* Bulk Upload Mode */
+              <>
+                <Card
+                  className={`border-2 border-dashed transition-colors ${
+                    isDragging 
+                      ? 'border-[#FF6600] bg-[#FF6600]/5' 
+                      : 'border-border hover:border-[#FF6600]/50'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    if (e.dataTransfer.files.length > 0) {
+                      handleBulkFileSelect(e.dataTransfer.files);
+                    }
+                  }}
+                >
+                  <CardContent className="py-8">
+                    <input
+                      type="file"
+                      id="bulk-file-upload"
+                      className="hidden"
+                      accept={ALLOWED_TYPES.join(',')}
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          handleBulkFileSelect(e.target.files);
+                          e.target.value = '';
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="bulk-file-upload"
+                      className="flex flex-col items-center cursor-pointer"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-[#FF6600]/10 flex items-center justify-center mb-3">
+                        <Plus className="w-8 h-8 text-[#FF6600]" />
+                      </div>
+                      <p className="text-lg font-medium mb-1">
+                        Add Files
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Select up to {MAX_BULK_FILES} files
+                      </p>
+                    </label>
+                  </CardContent>
+                </Card>
+
+                {/* Bulk File Queue */}
+                {bulkFiles.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center justify-between">
+                        <span>Upload Queue ({bulkFiles.length}/{MAX_BULK_FILES})</span>
+                        {bulkProcessingCount > 0 && (
+                          <Badge variant="secondary" className="animate-pulse">
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            Processing {bulkProcessingCount}
+                          </Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 max-h-80 overflow-y-auto">
+                      {bulkFiles.map((item) => (
+                        <div 
+                          key={item.id} 
+                          className={`flex items-center gap-3 p-2 rounded-lg border ${
+                            item.status === 'error' ? 'border-destructive/50 bg-destructive/5' :
+                            item.status === 'done' ? 'border-green-500/50 bg-green-500/5' :
+                            'border-border'
+                          }`}
+                        >
+                          {/* Preview */}
+                          <div className="w-12 h-12 rounded bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                            {item.preview ? (
+                              <img src={item.preview} alt="" className="w-full h-full object-cover" />
+                            ) : item.status === 'processing' || item.status === 'pending' ? (
+                              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                            ) : (
+                              <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.file.name}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{(item.file.size / (1024 * 1024)).toFixed(1)} MB</span>
+                              {item.compressionSavings && item.compressionSavings > 0 && (
+                                <Badge variant="outline" className="text-green-500 border-green-500/30 text-[10px] py-0">
+                                  -{item.compressionSavings}%
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Status */}
+                          <div className="shrink-0">
+                            {item.status === 'done' && (
+                              <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            )}
+                            {item.status === 'error' && (
+                              <XCircle className="w-5 h-5 text-destructive" />
+                            )}
+                            {item.status === 'uploading' && (
+                              <Loader2 className="w-5 h-5 animate-spin text-[#FF6600]" />
+                            )}
+                            {(item.status === 'ready' || item.status === 'pending' || item.status === 'processing') && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => removeBulkFile(item.id)}
+                                disabled={isUploading || item.status === 'processing'}
+                              >
+                                <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Bulk Upload Progress */}
+                {isUploading && bulkUploadProgress.total > 0 && (
+                  <Card>
+                    <CardContent className="py-4">
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="w-5 h-5 animate-spin text-[#FF6600]" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-2">
+                            Uploading {bulkUploadProgress.current} of {bulkUploadProgress.total}
+                          </p>
+                          <Progress 
+                            value={(bulkUploadProgress.current / bulkUploadProgress.total) * 100} 
+                            className="h-2" 
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : !file ? (
               <Card
                 className={`border-2 border-dashed transition-colors ${
                   isDragging 
@@ -782,6 +1155,72 @@ const CreatorUpload = () => {
               </CardContent>
             </Card>
 
+            {/* Scheduling */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-[#FF6600]" />
+                  Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Schedule for Later</p>
+                    <p className="text-sm text-muted-foreground">
+                      Publish at a specific date and time
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isScheduled}
+                    onCheckedChange={setIsScheduled}
+                    disabled={isUploading}
+                  />
+                </div>
+
+                {isScheduled && (
+                  <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                    <div className="space-y-2">
+                      <Label htmlFor="schedule-date">Date</Label>
+                      <Input
+                        id="schedule-date"
+                        type="date"
+                        min={getMinDate()}
+                        value={scheduledDate}
+                        onChange={(e) => setScheduledDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="schedule-time">Time</Label>
+                      <Input
+                        id="schedule-time"
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                      />
+                    </div>
+                    {scheduledDate && scheduledTime && (
+                      <div className="col-span-2 bg-[#FF6600]/10 border border-[#FF6600]/20 rounded-lg p-3">
+                        <p className="text-sm text-[#FF6600] flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Will publish on {new Date(`${scheduledDate}T${scheduledTime}`).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!isScheduled && (
+                  <div className="bg-muted rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Content will publish immediately
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Pricing */}
             <Card>
               <CardHeader>
@@ -843,20 +1282,25 @@ const CreatorUpload = () => {
 
             {/* Submit */}
             <Button
-              onClick={handleUpload}
-              disabled={!canSubmit || isUploading}
+              onClick={isBulkMode ? handleBulkUpload : handleUpload}
+              disabled={!canSubmit || isUploading || (isBulkMode && bulkProcessingCount > 0)}
               className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
               size="lg"
             >
               {isUploading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading...
+                  {isBulkMode ? `Uploading ${bulkUploadProgress.current}/${bulkUploadProgress.total}...` : 'Uploading...'}
                 </>
               ) : (
                 <>
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Content
+                  {isBulkMode 
+                    ? `Upload ${bulkReadyCount} File${bulkReadyCount !== 1 ? 's' : ''}` 
+                    : isScheduled && scheduledDate && scheduledTime
+                      ? 'Schedule Content'
+                      : 'Upload Content'
+                  }
                 </>
               )}
             </Button>
