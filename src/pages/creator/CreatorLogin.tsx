@@ -55,13 +55,20 @@ const CreatorLogin = () => {
       setStatusMessage('Account found! You can sign in.');
       toast.success('Account found!');
     } catch (error) {
-      const message = error instanceof Error ? error.message : '';
-      if (message.includes('404') || message.includes('not found')) {
+      console.error('Check status error:', error);
+      const message = error instanceof Error ? error.message.toLowerCase() : '';
+      if (message.includes('404') || message.includes('not found') || message.includes('no creator')) {
         setAccountStatus('not_registered');
         setStatusMessage('No account found for this key. You may need to register first.');
+        toast.info('No account found for this key');
+      } else if (message.includes('403') || message.includes('forbidden') || message.includes('whitelist')) {
+        setAccountStatus('not_registered');
+        setStatusMessage('Key not whitelisted. You may need to get approved first.');
+        toast.info('Key not whitelisted');
       } else {
         setAccountStatus('error');
-        setStatusMessage('Unable to check account status. Try signing in directly.');
+        setStatusMessage(`Unable to check account status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error('Failed to check account status');
       }
     }
   };
