@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import CreatorUploadModal from '@/components/creator/CreatorUploadModal';
@@ -66,7 +65,7 @@ const CreatorDashboard = () => {
     try {
       await creatorApi.deleteContent(contentId);
       setContent(prev => prev.filter(c => c.id !== contentId));
-      toast.success('Content deleted');
+      console.log('[CreatorDashboard] Content deleted:', contentId);
       setLoadError(null);
       refreshProfile();
     } catch (error) {

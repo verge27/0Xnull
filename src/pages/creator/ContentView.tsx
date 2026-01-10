@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { creatorApi, ContentItem, UnlockResponse } from '@/services/creatorApi';
 import { useToken } from '@/hooks/useToken';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
@@ -30,6 +29,7 @@ const ContentView = () => {
   // Payment flow
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState<UnlockResponse | null>(null);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -53,7 +53,7 @@ const ContentView = () => {
 
   const handleUnlock = async () => {
     if (!token) {
-      toast.error('Please create a token first to unlock content');
+      console.warn('[ContentView] Missing token - redirecting to /ai');
       navigate('/ai');
       return;
     }
@@ -63,10 +63,11 @@ const ContentView = () => {
     try {
       const payment = await creatorApi.unlockContent(id, token);
       setPaymentInfo(payment);
+      setPaymentMessage(null);
       setIsPaymentOpen(true);
     } catch (err) {
       console.error('Failed to start unlock:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to start unlock');
+      setPaymentMessage(err instanceof Error ? err.message : 'Failed to start unlock');
     }
   };
 
@@ -77,15 +78,16 @@ const ContentView = () => {
     try {
       const { unlocked } = await creatorApi.checkUnlockStatus(id, token);
       if (unlocked) {
-        toast.success('Payment confirmed! Content unlocked.');
+        console.log('[ContentView] Payment confirmed - content unlocked');
+        setPaymentMessage('Payment confirmed! Content unlocked.');
         setIsPaymentOpen(false);
         fetchContent(); // Refresh to show unlocked content
       } else {
-        toast.info('Payment not yet received. Keep waiting...');
+        setPaymentMessage('Payment not yet received. Keep waiting...');
       }
     } catch (err) {
       console.error('Failed to check payment:', err);
-      toast.error('Failed to check payment status');
+      setPaymentMessage('Failed to check payment status');
     } finally {
       setIsCheckingPayment(false);
     }
@@ -96,7 +98,7 @@ const ContentView = () => {
     await navigator.clipboard.writeText(paymentInfo.payment_address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success('Address copied!');
+    setPaymentMessage('Address copied.');
   };
 
   if (isLoading) {
@@ -254,9 +256,15 @@ const ContentView = () => {
               Send exactly {paymentInfo?.amount_xmr} XMR to unlock this content
             </DialogDescription>
           </DialogHeader>
-
+          
           {paymentInfo && (
             <div className="space-y-4">
+              {paymentMessage && (
+                <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                  {paymentMessage}
+                </div>
+              )}
+
               {/* QR Code */}
               <div className="flex justify-center p-4 bg-white rounded-lg">
                 <QRCodeSVG
