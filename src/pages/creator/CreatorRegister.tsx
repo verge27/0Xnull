@@ -221,10 +221,18 @@ const CreatorRegister = () => {
                         )}
                       </Button>
                     </div>
-                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 space-y-2">
                       <p className="text-xs text-blue-400 font-medium">
                         📤 Send this to admin for whitelist approval before continuing.
                       </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                        onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
+                      >
+                        Contact Admin via SimpleX
+                      </Button>
                     </div>
                   </div>
 
