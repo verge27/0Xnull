@@ -40,11 +40,43 @@ interface CreatorAuthContextType {
 const CreatorAuthContext = createContext<CreatorAuthContextType | undefined>(undefined);
 
 const PRIVATE_KEY_STORAGE = 'creator_private_key_encrypted';
+const PENDING_KEYPAIR_STORAGE = 'creator_pending_keypair';
+
+// Helper to safely get/set keypair from sessionStorage
+const getStoredKeypair = (): { publicKey: string; privateKey: string } | null => {
+  try {
+    const stored = sessionStorage.getItem(PENDING_KEYPAIR_STORAGE);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.publicKey && parsed.privateKey) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse stored keypair:', e);
+  }
+  return null;
+};
+
+const storeKeypair = (keypair: { publicKey: string; privateKey: string } | null) => {
+  try {
+    if (keypair) {
+      sessionStorage.setItem(PENDING_KEYPAIR_STORAGE, JSON.stringify(keypair));
+    } else {
+      sessionStorage.removeItem(PENDING_KEYPAIR_STORAGE);
+    }
+  } catch (e) {
+    console.error('Failed to store keypair:', e);
+  }
+};
 
 export const CreatorAuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [creator, setCreator] = useState<CreatorUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [generatedKeypair, setGeneratedKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
+  const [generatedKeypair, setGeneratedKeypair] = useState<{ publicKey: string; privateKey: string } | null>(() => {
+    // Initialize from sessionStorage if available
+    return getStoredKeypair();
+  });
 
   // Initialize - check for existing session
   useEffect(() => {
@@ -76,6 +108,7 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
   const generateNewKeypair = useCallback(() => {
     const keypair = generateKeypair();
     setGeneratedKeypair(keypair);
+    storeKeypair(keypair);
     return keypair;
   }, []);
 
@@ -129,8 +162,9 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
       },
     });
     
-    // Clear generated keypair from memory
+    // Clear generated keypair from memory and storage
     setGeneratedKeypair(null);
+    storeKeypair(null);
   };
 
   const login = async (privateKey: string) => {
@@ -162,6 +196,7 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     creatorApi.clearSession();
     setCreator(null);
     setGeneratedKeypair(null);
+    storeKeypair(null);
   };
 
   const refreshProfile = async () => {
