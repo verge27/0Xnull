@@ -328,7 +328,7 @@ export default function FlashMarkets() {
   };
 
   const totalPool = (round?.pools?.up || 0) + (round?.pools?.down || 0);
-  const upPercent = totalPool > 0 ? (round!.pools.up / totalPool) * 100 : 50;
+  const upPercent = totalPool > 0 ? ((round?.pools?.up || 0) / totalPool) * 100 : 50;
 
   const openBetModal = (side: 'up' | 'down') => {
     setSelectedSide(side);
