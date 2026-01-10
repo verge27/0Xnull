@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Key, Loader2, Eye, EyeOff, Shield, CheckCircle2, XCircle, Search, Import } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,16 +12,30 @@ import { Footer } from '@/components/Footer';
 
 type AccountStatus = 'unchecked' | 'checking' | 'registered' | 'not_registered' | 'error';
 
+const PREFILL_KEY_STORAGE = 'creator_prefill_key';
+
 const CreatorLogin = () => {
   const navigate = useNavigate();
   const { login } = useCreatorAuth();
-  
+
   const [privateKey, setPrivateKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [accountStatus, setAccountStatus] = useState<AccountStatus>('unchecked');
   const [statusMessage, setStatusMessage] = useState('');
   const [derivedPublicKey, setDerivedPublicKey] = useState<string | null>(null);
+  const [prefilled, setPrefilled] = useState(false);
+
+  // Check for prefilled key from registration redirect (409 conflict)
+  useEffect(() => {
+    const storedKey = sessionStorage.getItem(PREFILL_KEY_STORAGE);
+    if (storedKey && isValidPrivateKey(storedKey)) {
+      console.log('[CreatorLogin] Found prefilled key from registration redirect');
+      setPrivateKey(storedKey);
+      setPrefilled(true);
+      sessionStorage.removeItem(PREFILL_KEY_STORAGE);
+    }
+  }, []);
 
   const handleKeyChange = (value: string) => {
     // Only allow hex characters
@@ -30,6 +44,7 @@ const CreatorLogin = () => {
     setAccountStatus('unchecked');
     setStatusMessage('');
     setDerivedPublicKey(null);
+    setPrefilled(false);
   };
 
   const checkAccountStatus = async () => {
@@ -140,6 +155,17 @@ const CreatorLogin = () => {
             Already have a keypair? Sign in with your private key.
           </p>
         </div>
+
+        {prefilled && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <p className="text-sm text-green-400">
+                Your key is already registered! Click <strong>Sign In</strong> to continue.
+              </p>
+            </div>
+          </div>
+        )}
 
         <Card className="border-border/50">
           <CardHeader>
