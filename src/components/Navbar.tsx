@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
+import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIdentity';
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ import { toast } from 'sonner';
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
+  const identity = useNavbarIdentity();
   const betSlip = useMultibetSlip();
   const navigate = useNavigate();
   const location = useLocation();
@@ -294,6 +296,12 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
                 </DropdownMenuItem>
+                <NavbarIdentitySection 
+                  keys={identity.keys}
+                  onGenerate={identity.generate}
+                  onLogin={identity.login}
+                  onLogout={identity.logout}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -320,6 +328,12 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/phone" className="cursor-pointer">eSIM & Phone</Link>
                 </DropdownMenuItem>
+                <NavbarIdentitySection 
+                  keys={identity.keys}
+                  onGenerate={identity.generate}
+                  onLogin={identity.login}
+                  onLogout={identity.logout}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
 
