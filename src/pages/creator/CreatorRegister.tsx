@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X, Import } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X, Import, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -86,6 +86,7 @@ const CreatorRegister = () => {
   // Import mode state
   const [keypairMode, setKeypairMode] = useState<KeypairMode>('generate');
   const [importPrivateKey, setImportPrivateKey] = useState('');
+  const [showImportKey, setShowImportKey] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
   const handleImportKeypair = () => {
@@ -298,16 +299,32 @@ const CreatorRegister = () => {
                     <div className="space-y-3">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Your Private Key</label>
-                        <Input
-                          type="password"
-                          value={importPrivateKey}
-                          onChange={(e) => {
-                            setImportPrivateKey(e.target.value);
-                            setImportError(null);
-                          }}
-                          placeholder="Enter your 128-character private key..."
-                          className={`font-mono text-xs ${importError ? 'border-destructive' : ''}`}
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showImportKey ? 'text' : 'password'}
+                            value={importPrivateKey}
+                            onChange={(e) => {
+                              setImportPrivateKey(e.target.value);
+                              setImportError(null);
+                            }}
+                            placeholder="Enter your 128-character private key..."
+                            className={`font-mono text-xs pr-10 ${importError ? 'border-destructive' : ''}`}
+                          />
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                            onClick={() => setShowImportKey(!showImportKey)}
+                            aria-label={showImportKey ? 'Hide private key' : 'Show private key'}
+                          >
+                            {showImportKey ? (
+                              <EyeOff className="w-4 h-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
                         {importError && (
                           <p className="text-xs text-destructive">{importError}</p>
                         )}
