@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { KeypairGenerator } from '@/components/KeypairGenerator';
 
 const services = [
   {
@@ -110,6 +111,11 @@ export default function InfraHub() {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Keypair Generator */}
+          <div className="mt-8">
+            <KeypairGenerator />
           </div>
 
           {/* Bottom CTA */}
