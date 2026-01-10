@@ -82,7 +82,6 @@ const CreatorLogin = () => {
     
     if (!isValidPrivateKey(cleanKey)) {
       console.error('[CreatorLogin] Invalid key format');
-      toast.error('Invalid private key format. Expected 128 hex characters.');
       return;
     }
 
@@ -110,19 +109,14 @@ const CreatorLogin = () => {
       
       if (message.includes('404') || message.includes('not found') || message.includes('no creator')) {
         console.log('[CreatorLogin] Account not found - suggesting registration');
-        toast.error('No account found. Please register first.');
         setAccountStatus('not_registered');
         setStatusMessage('No account found for this key.');
       } else if (message.includes('403') || message.includes('forbidden')) {
         console.log('[CreatorLogin] Access forbidden');
-        toast.error('Access denied. Key may not be whitelisted.');
         setAccountStatus('not_registered');
         setStatusMessage('Key not whitelisted or access denied.');
-      } else if (message.includes('network') || message.includes('fetch')) {
-        console.log('[CreatorLogin] Network error');
-        toast.error('Network error. Please check your connection.');
       } else {
-        toast.error(error instanceof Error ? error.message : 'Login failed. Check your private key.');
+        console.log('[CreatorLogin] Other error:', message);
       }
     } finally {
       setIsLoading(false);
