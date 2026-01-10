@@ -149,6 +149,7 @@ export const Footer = () => {
         <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link to="/creator/terms" className="hover:text-foreground transition-colors">Creator Terms</Link>
             <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link to="/api-docs" className="hover:text-foreground transition-colors">API</Link>
             <Link to="/verify" className="hover:text-foreground transition-colors">Verify & Canary</Link>
