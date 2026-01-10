@@ -412,18 +412,28 @@ const CreatorRegister = () => {
                         <code className="block text-xs bg-background/50 p-2 rounded break-all">
                           {generatedKeypair.publicKey}
                         </code>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mt-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                          onClick={() => {
-                            navigator.clipboard.writeText(generatedKeypair.publicKey);
-                            toast.success('Public key copied!');
-                          }}
-                        >
-                          <Copy className="w-3 h-3 mr-1" />
-                          Copy Public Key
-                        </Button>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                            onClick={() => {
+                              navigator.clipboard.writeText(generatedKeypair.publicKey);
+                              toast.success('Public key copied!');
+                            }}
+                          >
+                            <Copy className="w-3 h-3 mr-1" />
+                            Copy Public Key
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                            onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
+                          >
+                            Contact Admin via SimpleX
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </AlertDescription>
