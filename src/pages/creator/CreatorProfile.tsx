@@ -11,12 +11,15 @@ import {
   MessageCircle,
   Share2,
   Copy,
-  Check
+  Check,
+  Heart,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { creatorApi, CreatorProfile as CreatorProfileType, ContentItem } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
 import { Navbar } from '@/components/Navbar';
@@ -24,6 +27,9 @@ import { Footer } from '@/components/Footer';
 import { ContentFeedItem } from '@/components/creator/ContentFeedItem';
 import { MediaGrid } from '@/components/creator/MediaGrid';
 import { SubscriptionCard } from '@/components/creator/SubscriptionCard';
+import { TipModal } from '@/components/creator/TipModal';
+import { CreatorDMPanel } from '@/components/creator/CreatorDMPanel';
+import { BundlesSection } from '@/components/creator/BundlesSection';
 import { toast } from 'sonner';
 
 const CreatorProfile = () => {
@@ -37,6 +43,7 @@ const CreatorProfile = () => {
   const [viewMode, setViewMode] = useState<'feed' | 'grid'>('feed');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDMOpen, setIsDMOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -164,12 +171,24 @@ const CreatorProfile = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <TipModal creator={profile} />
                     <Button variant="outline" size="icon" onClick={handleShare}>
                       {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
+                    <Sheet open={isDMOpen} onOpenChange={setIsDMOpen}>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="icon">
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="p-0 w-full sm:max-w-md">
+                        <CreatorDMPanel 
+                          creator={profile} 
+                          isSubscribed={isSubscribed}
+                          onClose={() => setIsDMOpen(false)}
+                        />
+                      </SheetContent>
+                    </Sheet>
                   </div>
                 </div>
                 
@@ -237,6 +256,12 @@ const CreatorProfile = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Bundles Section */}
+              <BundlesSection 
+                creator={profile} 
+                content={content}
+              />
             </div>
 
             {/* Main content - Timeline */}
