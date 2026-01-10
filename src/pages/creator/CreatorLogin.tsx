@@ -76,29 +76,57 @@ const CreatorLogin = () => {
   const handleLogin = async () => {
     const cleanKey = privateKey.trim().toLowerCase();
     
+    console.log('[CreatorLogin] Starting login flow...');
+    console.log('[CreatorLogin] Key length:', cleanKey.length);
+    console.log('[CreatorLogin] Key valid:', isValidPrivateKey(cleanKey));
+    
     if (!isValidPrivateKey(cleanKey)) {
+      console.error('[CreatorLogin] Invalid key format');
       toast.error('Invalid private key format. Expected 128 hex characters.');
       return;
     }
 
+    // Derive public key for logging
+    try {
+      const pubKey = getPubkeyFromPrivate(cleanKey);
+      console.log('[CreatorLogin] Derived public key:', pubKey);
+    } catch (e) {
+      console.error('[CreatorLogin] Failed to derive public key:', e);
+    }
+
     setIsLoading(true);
     try {
+      console.log('[CreatorLogin] Calling login()...');
       await login(cleanKey);
+      console.log('[CreatorLogin] Login successful!');
       toast.success('Welcome back!');
       navigate('/creator/dashboard');
     } catch (error) {
-      console.error('Login failed:', error);
-      const message = error instanceof Error ? error.message : 'Login failed';
+      console.error('[CreatorLogin] Login failed:', error);
+      console.error('[CreatorLogin] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('[CreatorLogin] Error message:', error instanceof Error ? error.message : String(error));
       
-      if (message.includes('404') || message.includes('not found')) {
+      const message = error instanceof Error ? error.message.toLowerCase() : 'login failed';
+      
+      if (message.includes('404') || message.includes('not found') || message.includes('no creator')) {
+        console.log('[CreatorLogin] Account not found - suggesting registration');
         toast.error('No account found. Please register first.');
         setAccountStatus('not_registered');
         setStatusMessage('No account found for this key.');
+      } else if (message.includes('403') || message.includes('forbidden')) {
+        console.log('[CreatorLogin] Access forbidden');
+        toast.error('Access denied. Key may not be whitelisted.');
+        setAccountStatus('not_registered');
+        setStatusMessage('Key not whitelisted or access denied.');
+      } else if (message.includes('network') || message.includes('fetch')) {
+        console.log('[CreatorLogin] Network error');
+        toast.error('Network error. Please check your connection.');
       } else {
-        toast.error(message || 'Login failed. Check your private key.');
+        toast.error(error instanceof Error ? error.message : 'Login failed. Check your private key.');
       }
     } finally {
       setIsLoading(false);
+      console.log('[CreatorLogin] Login flow completed');
     }
   };
 
