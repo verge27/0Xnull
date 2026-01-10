@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,11 +19,8 @@ const CreatorTerms = () => {
           <CardContent className="prose prose-invert max-w-none p-6 md:p-8">
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">1. Agreement to Terms</h2>
-              <p className="text-muted-foreground mb-4">
-                By accessing or using 0xNull Creators ("the Platform," "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, do not use the Platform.
-              </p>
               <p className="text-muted-foreground">
-                The Platform is operated by Margin Syndicate Limited ("Company," "we," "us," "our"), a company registered in the United Kingdom.
+                By accessing or using 0xNull Creators ("the Platform," "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, do not use the Platform.
               </p>
             </section>
 
@@ -169,7 +167,7 @@ const CreatorTerms = () => {
               <h3 className="text-lg font-medium mt-4 mb-2">6.2 Platform Fees</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4 mb-4">
                 <li>Free content: No fees</li>
-                <li>Paid content: Platform fee on successful transactions</li>
+                <li>Paid content: Platform fee on successful transactions (see current fee schedule)</li>
               </ul>
 
               <h3 className="text-lg font-medium mt-4 mb-2">6.3 Creator Payouts</h3>
@@ -201,8 +199,7 @@ const CreatorTerms = () => {
                 We respect intellectual property rights. If you believe content infringes your copyright, submit a DMCA takedown notice to:
               </p>
               <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                <p className="font-medium">DMCA Agent:</p>
-                <p className="text-muted-foreground">Email: dmca@0xnull.io</p>
+                <p className="text-muted-foreground">Email: <a href="mailto:dmca@0xnull.io" className="text-[#FF6600] hover:underline">dmca@0xnull.io</a></p>
               </div>
               <p className="text-muted-foreground mb-2">Your notice must include:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
@@ -228,7 +225,7 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">8. Privacy</h2>
               <p className="text-muted-foreground">
-                Our collection and use of information is governed by our Privacy Policy, incorporated herein by reference.
+                Our collection and use of information is governed by our <Link to="/creator/privacy" className="text-[#FF6600] hover:underline">Privacy Policy</Link>, incorporated herein by reference.
               </p>
             </section>
 
@@ -258,17 +255,17 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">10. Limitation of Liability</h2>
               <p className="text-muted-foreground mb-4 uppercase text-sm">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE COMPANY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY.
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE PLATFORM OPERATORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY.
               </p>
               <p className="text-muted-foreground uppercase text-sm">
-                OUR TOTAL LIABILITY FOR ANY CLAIMS ARISING FROM YOUR USE OF THE PLATFORM SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE PAST 12 MONTHS, IF ANY.
+                TOTAL LIABILITY FOR ANY CLAIMS ARISING FROM YOUR USE OF THE PLATFORM SHALL NOT EXCEED THE AMOUNT YOU PAID IN THE PAST 12 MONTHS, IF ANY.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">11. Indemnification</h2>
               <p className="text-muted-foreground mb-2">
-                You agree to indemnify and hold harmless the Company, its officers, directors, employees, and agents from any claims, damages, losses, or expenses (including legal fees) arising from:
+                You agree to indemnify and hold harmless the Platform operators from any claims, damages, losses, or expenses (including legal fees) arising from:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                 <li>Your use of the Platform</li>
@@ -309,19 +306,14 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">13. Dispute Resolution</h2>
               
-              <h3 className="text-lg font-medium mt-4 mb-2">13.1 Governing Law</h3>
+              <h3 className="text-lg font-medium mt-4 mb-2">13.1 Informal Resolution</h3>
               <p className="text-muted-foreground mb-4">
-                These Terms are governed by the laws of England and Wales.
+                Before filing any legal claim, you agree to attempt informal resolution by contacting us at <a href="mailto:legal@0xnull.io" className="text-[#FF6600] hover:underline">legal@0xnull.io</a>.
               </p>
 
-              <h3 className="text-lg font-medium mt-4 mb-2">13.2 Jurisdiction</h3>
-              <p className="text-muted-foreground mb-4">
-                Any disputes shall be resolved in the courts of England and Wales.
-              </p>
-
-              <h3 className="text-lg font-medium mt-4 mb-2">13.3 Informal Resolution</h3>
+              <h3 className="text-lg font-medium mt-4 mb-2">13.2 Arbitration</h3>
               <p className="text-muted-foreground">
-                Before filing any legal claim, you agree to attempt informal resolution by contacting us at legal@0xnull.io.
+                Any disputes shall be resolved through binding arbitration rather than in court, except where prohibited by law.
               </p>
             </section>
 
@@ -342,7 +334,7 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">16. Entire Agreement</h2>
               <p className="text-muted-foreground">
-                These Terms, together with the Privacy Policy and Content Policy, constitute the entire agreement between you and the Company regarding the Platform.
+                These Terms, together with the <Link to="/creator/privacy" className="text-[#FF6600] hover:underline">Privacy Policy</Link> and <Link to="/creator/content-policy" className="text-[#FF6600] hover:underline">Content Policy</Link>, constitute the entire agreement regarding the Platform.
               </p>
             </section>
 
