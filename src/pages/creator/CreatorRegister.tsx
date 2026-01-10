@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X, Import } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -65,9 +65,11 @@ const parseRegistrationError = (error: unknown): RegistrationError => {
   };
 };
 
+type KeypairMode = 'generate' | 'import';
+
 const CreatorRegister = () => {
   const navigate = useNavigate();
-  const { generatedKeypair, generateNewKeypair, clearKeypair, hasStoredKeypair, register } = useCreatorAuth();
+  const { generatedKeypair, generateNewKeypair, importKeypair, clearKeypair, hasStoredKeypair, register } = useCreatorAuth();
   
   const [step, setStep] = useState<Step>('generate');
   const [copiedPublic, setCopiedPublic] = useState(false);
@@ -80,6 +82,34 @@ const CreatorRegister = () => {
   const [whitelistStatus, setWhitelistStatus] = useState<WhitelistStatus>('unchecked');
   const [whitelistMessage, setWhitelistMessage] = useState<string>('');
   const [showRestoredNotice, setShowRestoredNotice] = useState(true);
+  
+  // Import mode state
+  const [keypairMode, setKeypairMode] = useState<KeypairMode>('generate');
+  const [importPrivateKey, setImportPrivateKey] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const handleImportKeypair = () => {
+    setImportError(null);
+    const trimmedKey = importPrivateKey.trim().toLowerCase();
+    
+    if (!trimmedKey) {
+      setImportError('Please enter your private key');
+      return;
+    }
+    
+    if (!/^[a-f0-9]{128}$/.test(trimmedKey)) {
+      setImportError('Invalid format. Private key must be 128 hexadecimal characters.');
+      return;
+    }
+    
+    try {
+      importKeypair(trimmedKey);
+      setImportPrivateKey('');
+      toast.success('Private key imported successfully!');
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Failed to import key');
+    }
+  };
 
   const checkWhitelistStatus = async () => {
     if (!generatedKeypair) return;
@@ -221,14 +251,80 @@ const CreatorRegister = () => {
             <CardContent className="space-y-6">
               {!generatedKeypair ? (
                 <div className="space-y-4">
-                  <Button
-                    onClick={handleGenerate}
-                    className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
-                    size="lg"
-                  >
-                    <Key className="w-4 h-4 mr-2" />
-                    Generate New Identity
-                  </Button>
+                  {/* Mode Toggle */}
+                  <div className="flex rounded-lg border border-border/50 p-1 bg-muted/30">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setKeypairMode('generate');
+                        setImportError(null);
+                      }}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                        keypairMode === 'generate'
+                          ? 'bg-[#FF6600] text-white'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Key className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
+                      Generate New
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setKeypairMode('import');
+                        setImportError(null);
+                      }}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                        keypairMode === 'import'
+                          ? 'bg-[#FF6600] text-white'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Import className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
+                      Import Existing
+                    </button>
+                  </div>
+
+                  {keypairMode === 'generate' ? (
+                    <Button
+                      onClick={handleGenerate}
+                      className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
+                      size="lg"
+                    >
+                      <Key className="w-4 h-4 mr-2" />
+                      Generate New Identity
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Your Private Key</label>
+                        <Input
+                          type="password"
+                          value={importPrivateKey}
+                          onChange={(e) => {
+                            setImportPrivateKey(e.target.value);
+                            setImportError(null);
+                          }}
+                          placeholder="Enter your 128-character private key..."
+                          className={`font-mono text-xs ${importError ? 'border-destructive' : ''}`}
+                        />
+                        {importError && (
+                          <p className="text-xs text-destructive">{importError}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          If you already have an approved keypair, paste your private key here.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleImportKeypair}
+                        className="w-full bg-[#FF6600] hover:bg-[#FF6600]/90"
+                        disabled={!importPrivateKey.trim()}
+                      >
+                        <Import className="w-4 h-4 mr-2" />
+                        Import Private Key
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
