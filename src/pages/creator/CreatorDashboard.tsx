@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Eye, Unlock, Coins, Settings, LogOut, 
-  MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon
+  MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon,
+  Upload, ExternalLink, Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,6 +98,14 @@ const CreatorDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.open(`/creator/${creator.id}`, '_blank')}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View Page
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/creator/settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
@@ -107,6 +116,33 @@ const CreatorDashboard = () => {
             </Button>
           </div>
         </div>
+
+        {/* Quick Actions */}
+        <Card className="mb-8 border-[#FF6600]/30 bg-gradient-to-r from-[#FF6600]/5 to-transparent">
+          <CardContent className="py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#FF6600]/20 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-[#FF6600]" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Upload New Content</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Share photos or videos with your audience
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate('/creator/upload')}
+                className="bg-[#FF6600] hover:bg-[#FF6600]/90"
+                size="lg"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Upload Content
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

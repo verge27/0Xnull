@@ -76,6 +76,8 @@ const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 const CreatorRegister = lazy(() => import("./pages/creator/CreatorRegister"));
 const CreatorLogin = lazy(() => import("./pages/creator/CreatorLogin"));
 const CreatorDashboard = lazy(() => import("./pages/creator/CreatorDashboard"));
+const CreatorUpload = lazy(() => import("./pages/creator/CreatorUpload"));
+const CreatorSettings = lazy(() => import("./pages/creator/CreatorSettings"));
 const CreatorsHub = lazy(() => import("./pages/creator/CreatorsHub"));
 const CreatorProfile = lazy(() => import("./pages/creator/CreatorProfile"));
 const ContentView = lazy(() => import("./pages/creator/ContentView"));
@@ -186,6 +188,8 @@ const App = () => (
                   <Route path="/creator/register" element={<CreatorRegister />} />
                   <Route path="/creator/login" element={<CreatorLogin />} />
                   <Route path="/creator/dashboard" element={<CreatorDashboard />} />
+                  <Route path="/creator/upload" element={<CreatorUpload />} />
+                  <Route path="/creator/settings" element={<CreatorSettings />} />
                   <Route path="/creator/terms" element={<CreatorTerms />} />
                   <Route path="/creator/privacy" element={<CreatorPrivacy />} />
                   <Route path="/creator/content-policy" element={<CreatorContentPolicy />} />
