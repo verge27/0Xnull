@@ -7,6 +7,7 @@ import {
   isValidPrivateKey,
   truncateKey 
 } from '@/lib/creatorCrypto';
+import { normalizeCreatorStats } from '@/lib/creatorHelpers';
 
 interface CreatorUser {
   id: string;
@@ -87,15 +88,12 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
       if (creatorApi.isAuthenticated()) {
         try {
           const profile = await creatorApi.getMyProfile();
+          const stats = normalizeCreatorStats(profile);
           setCreator({
-            id: profile.id,
-            publicKey: profile.pubkey,
-            displayName: profile.display_name,
-            stats: {
-              total_earnings_xmr: profile.total_earnings_xmr,
-              total_views: profile.total_views,
-              total_unlocks: profile.total_unlocks,
-            },
+            id: profile.id || '',
+            publicKey: profile.pubkey || '',
+            displayName: profile.display_name || 'Unknown',
+            stats,
           });
         } catch (error) {
           console.error('Failed to fetch creator profile:', error);
@@ -178,16 +176,13 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     
     // Fetch full profile
     const profile = await creatorApi.getMyProfile();
+    const stats = normalizeCreatorStats(profile);
     
     setCreator({
       id: creatorId,
       publicKey,
-      displayName: profile.display_name,
-      stats: {
-        total_earnings_xmr: profile.total_earnings_xmr,
-        total_views: profile.total_views,
-        total_unlocks: profile.total_unlocks,
-      },
+      displayName: profile.display_name || 'Unknown',
+      stats,
     });
     
     // Clear generated keypair from memory and storage
@@ -211,17 +206,14 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
 
     // Fetch profile
     const profile = await creatorApi.getMyProfile();
+    const stats = normalizeCreatorStats(profile);
     console.log('[CreatorAuth] login: profile fetched');
 
     setCreator({
       id: creatorId,
       publicKey,
-      displayName: profile.display_name,
-      stats: {
-        total_earnings_xmr: profile.total_earnings_xmr,
-        total_views: profile.total_views,
-        total_unlocks: profile.total_unlocks,
-      },
+      displayName: profile.display_name || 'Unknown',
+      stats,
     });
 
     console.log('[CreatorAuth] login:state set');
@@ -239,14 +231,11 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     
     try {
       const profile = await creatorApi.getMyProfile();
+      const stats = normalizeCreatorStats(profile);
       setCreator(prev => prev ? {
         ...prev,
-        displayName: profile.display_name,
-        stats: {
-          total_earnings_xmr: profile.total_earnings_xmr,
-          total_views: profile.total_views,
-          total_unlocks: profile.total_unlocks,
-        },
+        displayName: profile.display_name || 'Unknown',
+        stats,
       } : null);
     } catch (error) {
       console.error('Failed to refresh profile:', error);

@@ -94,7 +94,7 @@ const CreatorDashboard = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold">{creator.displayName}</h1>
+            <h1 className="text-2xl font-bold">{creator.displayName || 'Unknown'}</h1>
             <p className="text-sm text-muted-foreground font-mono">
               {truncateKey(creator.publicKey, 8, 8)}
             </p>
@@ -234,13 +234,19 @@ const CreatorDashboard = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {content.map((item) => (
+            {content.map((item) => {
+              const priceXmr = item.price_xmr ?? 0;
+              const viewCount = item.view_count ?? 0;
+              const unlockCount = item.unlock_count ?? 0;
+              const earningsXmr = item.earnings_xmr ?? 0;
+
+              return (
               <Card key={item.id} className="overflow-hidden group">
                 <div className="relative aspect-video bg-muted">
                   {item.thumbnail_url ? (
                     <img
                       src={creatorApi.getMediaUrl(item.thumbnail_url)}
-                      alt={item.title}
+                      alt={item.title || 'Content'}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -255,22 +261,22 @@ const CreatorDashboard = () => {
                         : 'bg-green-600 text-white'
                     }`}
                   >
-                    {item.tier === 'paid' ? `${item.price_xmr} XMR` : 'Free'}
+                    {item.tier === 'paid' ? `${priceXmr} XMR` : 'Free'}
                   </Badge>
                 </div>
                 <CardContent className="p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h3 className="font-medium truncate">{item.title}</h3>
+                      <h3 className="font-medium truncate">{item.title || 'Untitled'}</h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> {item.view_count}
+                          <Eye className="w-3 h-3" /> {viewCount}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Unlock className="w-3 h-3" /> {item.unlock_count}
+                          <Unlock className="w-3 h-3" /> {unlockCount}
                         </span>
                         <span className="flex items-center gap-1 text-[#FF6600]">
-                          <Coins className="w-3 h-3" /> {item.earnings_xmr.toFixed(4)}
+                          <Coins className="w-3 h-3" /> {earningsXmr.toFixed(4)}
                         </span>
                       </div>
                     </div>
@@ -301,7 +307,8 @@ const CreatorDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

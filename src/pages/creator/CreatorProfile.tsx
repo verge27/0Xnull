@@ -100,19 +100,19 @@ const CreatorProfile = () => {
                 {profile.avatar_url ? (
                   <img
                     src={creatorApi.getMediaUrl(profile.avatar_url)}
-                    alt={profile.display_name}
+                    alt={profile.display_name || 'Creator'}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-[#FF6600]/20 flex items-center justify-center text-4xl font-bold text-[#FF6600]">
-                    {profile.display_name.charAt(0).toUpperCase()}
+                    {(profile.display_name || 'U').charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
 
               {/* Info */}
               <div className="pt-4 sm:pt-16">
-                <h1 className="text-2xl font-bold">{profile.display_name}</h1>
+                <h1 className="text-2xl font-bold">{profile.display_name || 'Unknown'}</h1>
                 <p className="text-sm text-muted-foreground font-mono">
                   {truncateKey(profile.pubkey, 8, 8)}
                 </p>
@@ -120,8 +120,8 @@ const CreatorProfile = () => {
                   <p className="text-muted-foreground mt-2 max-w-xl">{profile.bio}</p>
                 )}
                 <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-                  <span><strong className="text-foreground">{profile.content_count}</strong> content</span>
-                  <span><strong className="text-foreground">{profile.subscriber_count}</strong> subscribers</span>
+                  <span><strong className="text-foreground">{profile.content_count ?? 0}</strong> content</span>
+                  <span><strong className="text-foreground">{profile.subscriber_count ?? 0}</strong> subscribers</span>
                 </div>
               </div>
             </div>
@@ -149,7 +149,7 @@ const CreatorProfile = () => {
                       {item.thumbnail_url ? (
                         <img
                           src={creatorApi.getMediaUrl(item.thumbnail_url)}
-                          alt={item.title}
+                          alt={item.title || 'Content'}
                           className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
                             item.tier === 'paid' ? 'blur-lg' : ''
                           }`}
@@ -166,7 +166,7 @@ const CreatorProfile = () => {
                           <div className="text-center">
                             <Lock className="w-6 h-6 mx-auto mb-1 text-[#FF6600]" />
                             <Badge className="bg-[#FF6600] text-white">
-                              {item.price_xmr} XMR
+                              {item.price_xmr ?? 0} XMR
                             </Badge>
                           </div>
                         </div>
@@ -181,10 +181,10 @@ const CreatorProfile = () => {
                     </div>
                     <CardContent className="p-2">
                       <p className="text-sm font-medium truncate group-hover:text-[#FF6600] transition-colors">
-                        {item.title}
+                        {item.title || 'Untitled'}
                       </p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Eye className="w-3 h-3" /> {item.view_count}
+                        <Eye className="w-3 h-3" /> {item.view_count ?? 0}
                       </p>
                     </CardContent>
                   </Card>

@@ -3,6 +3,14 @@
  * Routes through edge function proxy to avoid CORS issues
  */
 
+import {
+  normalizeCreatorProfile,
+  normalizeCreatorProfiles,
+  normalizeCreatorStats,
+  normalizeContentItem,
+  normalizeContentItems,
+} from '@/lib/creatorHelpers';
+
 // Use the proxy edge function to avoid CORS
 const getProxyUrl = (path: string) => {
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'qjkojiamexufuxsrupjq';
@@ -142,7 +150,11 @@ class CreatorApiClient {
   // ============ Public Endpoints ============
 
   async browseCreators(limit = 20, offset = 0): Promise<{ creators: CreatorProfile[]; total: number }> {
-    return this.request(`/browse?limit=${limit}&offset=${offset}`);
+    const raw = await this.request<{ creators?: unknown; total?: number }>(`/browse?limit=${limit}&offset=${offset}`);
+    return {
+      creators: normalizeCreatorProfiles(raw?.creators),
+      total: typeof raw?.total === 'number' ? raw.total : 0,
+    };
   }
 
   async searchContent(params: {
@@ -159,15 +171,25 @@ class CreatorApiClient {
     searchParams.set('page', String(params.page || 1));
     searchParams.set('limit', String(params.limit || 20));
     
-    return this.request(`/search?${searchParams.toString()}`);
+    const raw = await this.request<{ content?: unknown; total?: number }>(`/search?${searchParams.toString()}`);
+    return {
+      content: normalizeContentItems(raw?.content),
+      total: typeof raw?.total === 'number' ? raw.total : 0,
+    };
   }
 
   async getCreatorProfile(creatorId: string): Promise<CreatorProfile> {
-    return this.request(`/profile/${creatorId}`);
+    const raw = await this.request(`/profile/${creatorId}`);
+    return normalizeCreatorProfile(raw);
   }
 
   async getContent(contentId: string): Promise<ContentItem & { is_unlocked: boolean }> {
-    return this.request(`/content/${contentId}`);
+    const raw = await this.request<Record<string, unknown>>(`/content/${contentId}`);
+    const normalized = normalizeContentItem(raw);
+    return {
+      ...normalized,
+      is_unlocked: raw?.is_unlocked === true,
+    };
   }
 
   getMediaUrl(hash: string): string {
@@ -232,7 +254,10 @@ class CreatorApiClient {
   // ============ Creator Endpoints (Auth Required) ============
 
   async getMyProfile(): Promise<CreatorProfile & CreatorStats> {
-    return this.request('/profile/me');
+    const raw = await this.request<Record<string, unknown>>('/profile/me');
+    const profile = normalizeCreatorProfile(raw);
+    const stats = normalizeCreatorStats(raw);
+    return { ...profile, ...stats };
   }
 
   async updateMyProfile(updates: {
@@ -241,14 +266,19 @@ class CreatorApiClient {
     avatar_url?: string;
     banner_url?: string;
   }): Promise<CreatorProfile> {
-    return this.request('/profile/me', {
+    const raw = await this.request('/profile/me', {
       method: 'PUT',
       body: JSON.stringify(updates),
     });
+    return normalizeCreatorProfile(raw);
   }
 
   async getMyContent(page = 1, limit = 20): Promise<{ content: ContentItem[]; total: number }> {
-    return this.request(`/my/content?page=${page}&limit=${limit}`);
+    const raw = await this.request<{ content?: unknown; total?: number }>(`/my/content?page=${page}&limit=${limit}`);
+    return {
+      content: normalizeContentItems(raw?.content),
+      total: typeof raw?.total === 'number' ? raw.total : 0,
+    };
   }
 
   async uploadContent(formData: FormData): Promise<ContentItem> {
@@ -269,7 +299,8 @@ class CreatorApiClient {
       throw new Error(errorData.error || 'Upload failed');
     }
 
-    return response.json();
+    const raw = await response.json();
+    return normalizeContentItem(raw);
   }
 
   async deleteContent(contentId: string): Promise<void> {
