@@ -360,6 +360,12 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   </>
                 )}
+                <NavbarIdentitySection 
+                  keys={identity.keys}
+                  onGenerate={identity.generate}
+                  onLogin={identity.login}
+                  onLogout={identity.logout}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
 
