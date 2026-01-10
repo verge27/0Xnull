@@ -17,6 +17,7 @@ import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
+import { optimizeVideo, isCompressibleVideo, type VideoCompressionProgress } from '@/lib/videoCompression';
 import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -44,6 +45,7 @@ const CreatorUpload = () => {
   // Upload state with retry tracking
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState<VideoCompressionProgress | null>(null);
   const [uploadState, setUploadState] = useState<UploadProgress>({
     status: 'idle',
     progress: 0,
@@ -90,6 +92,7 @@ const CreatorUpload = () => {
     setUiError(null);
     setOriginalFile(selectedFile);
     setCompressionSavings(null);
+    setCompressionProgress(null);
 
     // Compress images before upload
     if (isCompressibleImage(selectedFile)) {
@@ -108,7 +111,7 @@ const CreatorUpload = () => {
         reader.onload = (e) => setPreview(e.target?.result as string);
         reader.readAsDataURL(result.file);
       } catch (err) {
-        console.error('[CreatorUpload] Compression failed:', err);
+        console.error('[CreatorUpload] Image compression failed:', err);
         setFile(selectedFile);
         const reader = new FileReader();
         reader.onload = (e) => setPreview(e.target?.result as string);
@@ -116,8 +119,36 @@ const CreatorUpload = () => {
       } finally {
         setIsCompressing(false);
       }
+    } else if (isCompressibleVideo(selectedFile)) {
+      // Compress videos before upload
+      setIsCompressing(true);
+      try {
+        const result = await optimizeVideo(selectedFile, {
+          onProgress: setCompressionProgress,
+        });
+        setFile(result.file);
+        
+        if (result.compressionRatio < 1) {
+          const savings = Math.round((1 - result.compressionRatio) * 100);
+          setCompressionSavings(savings);
+        }
+
+        // Generate preview from compressed file
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.readAsDataURL(result.file);
+      } catch (err) {
+        console.error('[CreatorUpload] Video compression failed:', err);
+        setFile(selectedFile);
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.readAsDataURL(selectedFile);
+      } finally {
+        setIsCompressing(false);
+        setCompressionProgress(null);
+      }
     } else {
-      // Videos and GIFs - no compression
+      // GIFs and unsupported formats - no compression
       setFile(selectedFile);
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target?.result as string);
@@ -366,11 +397,33 @@ const CreatorUpload = () => {
               <Card>
                 <CardContent className="py-6">
                   <div className="flex items-center gap-4">
-                    <Zap className="w-5 h-5 animate-pulse text-[#FF6600]" />
+                    {compressionProgress ? (
+                      <Film className="w-5 h-5 animate-pulse text-[#FF6600]" />
+                    ) : (
+                      <Zap className="w-5 h-5 animate-pulse text-[#FF6600]" />
+                    )}
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Optimizing image...</p>
-                      <p className="text-xs text-muted-foreground">Reducing file size for faster upload</p>
+                      {compressionProgress ? (
+                        <>
+                          <p className="text-sm font-medium mb-2">
+                            {compressionProgress.message}
+                          </p>
+                          {compressionProgress.stage === 'compressing' && (
+                            <Progress value={compressionProgress.progress} className="h-2" />
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium">Optimizing image...</p>
+                          <p className="text-xs text-muted-foreground">Reducing file size for faster upload</p>
+                        </>
+                      )}
                     </div>
+                    {compressionProgress && compressionProgress.stage === 'compressing' && (
+                      <span className="text-sm text-muted-foreground">
+                        {compressionProgress.progress}%
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
