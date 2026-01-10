@@ -134,13 +134,18 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>8. Payments</CardTitle>
+                <CardTitle>8. Payments & Fees</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
                   All transactions are conducted in Monero (XMR) or via compatible cryptocurrency 
                   payment methods. Cryptocurrency transactions are final, irreversible, and 
                   non-refundable.
+                </p>
+                <p className="font-medium">
+                  Platform Fee: 0xNull Marketplace charges a <strong>0.4% fee</strong> on all sales. 
+                  This fee is automatically deducted from the sale amount before funds are released 
+                  to the seller.
                 </p>
                 <p>
                   Users are solely responsible for any tax obligations arising from cryptocurrency 
