@@ -21,9 +21,10 @@ interface CreatorAuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   
-  // Keypair generation
+  // Keypair generation/import
   generatedKeypair: { publicKey: string; privateKey: string } | null;
   generateNewKeypair: () => { publicKey: string; privateKey: string };
+  importKeypair: (privateKey: string) => { publicKey: string; privateKey: string };
   clearKeypair: () => void;
   hasStoredKeypair: boolean;
   
@@ -109,6 +110,17 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
 
   const generateNewKeypair = useCallback(() => {
     const keypair = generateKeypair();
+    setGeneratedKeypair(keypair);
+    storeKeypair(keypair);
+    return keypair;
+  }, []);
+
+  const importKeypair = useCallback((privateKeyHex: string) => {
+    if (!isValidPrivateKey(privateKeyHex)) {
+      throw new Error('Invalid private key format. Expected 128 hex characters.');
+    }
+    const publicKey = getPubkeyFromPrivate(privateKeyHex);
+    const keypair = { publicKey, privateKey: privateKeyHex };
     setGeneratedKeypair(keypair);
     storeKeypair(keypair);
     return keypair;
@@ -236,6 +248,7 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
         isAuthenticated: !!creator,
         generatedKeypair,
         generateNewKeypair,
+        importKeypair,
         clearKeypair,
         hasStoredKeypair,
         register,
