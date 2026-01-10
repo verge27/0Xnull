@@ -197,7 +197,7 @@ const CreatorSettings = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/creator/dashboard')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -208,6 +208,20 @@ const CreatorSettings = () => {
             </p>
           </div>
         </div>
+
+        {uiMessage && (
+          <div className="mb-6 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground flex items-center justify-between">
+            <span>{uiMessage}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 shrink-0"
+              onClick={() => setUiMessage(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         <div className="space-y-6">
           {/* Profile Preview */}
