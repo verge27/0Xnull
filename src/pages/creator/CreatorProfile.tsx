@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, Lock, Loader2, ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { 
+  Eye, 
+  Lock, 
+  Loader2, 
+  ArrowLeft, 
+  Grid3X3, 
+  LayoutList,
+  Crown,
+  MessageCircle,
+  Share2,
+  Copy,
+  Check
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { creatorApi, CreatorProfile as CreatorProfileType, ContentItem } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { ContentFeedItem } from '@/components/creator/ContentFeedItem';
+import { MediaGrid } from '@/components/creator/MediaGrid';
+import { SubscriptionCard } from '@/components/creator/SubscriptionCard';
+import { toast } from 'sonner';
 
 const CreatorProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +34,9 @@ const CreatorProfile = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'feed' | 'grid'>('feed');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -26,18 +46,19 @@ const CreatorProfile = () => {
         const profileData = await creatorApi.getCreatorProfile(id);
         setProfile(profileData);
         
-        // Content is included in the profile response or we need to fetch separately
-        // For now, search with creator filter
+        // Fetch creator's content
         try {
           const contentData = await creatorApi.searchContent({ 
             q: '', 
             page: 1, 
             limit: 50 
           });
-          // Filter content by creator
-          setContent(contentData.content.filter(c => c.creator_id === id));
+          // Filter content by creator and sort by newest first
+          const creatorContent = contentData.content
+            .filter(c => c.creator_id === id)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          setContent(creatorContent);
         } catch {
-          // Content fetch failed, show empty
           setContent([]);
         }
       } catch (err) {
@@ -50,6 +71,28 @@ const CreatorProfile = () => {
 
     fetchProfile();
   }, [id]);
+
+  const freeContent = content.filter(c => c.tier === 'free');
+  const paidContent = content.filter(c => c.tier === 'paid');
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: profile?.display_name || 'Creator',
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        toast.success('Link copied to clipboard');
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -89,14 +132,15 @@ const CreatorProfile = () => {
               className="w-full h-full object-cover"
             />
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
 
         <div className="container mx-auto px-4">
           {/* Profile Header */}
-          <div className="relative -mt-16 mb-8">
+          <div className="relative -mt-16 mb-6">
             <div className="flex flex-col sm:flex-row items-start gap-4">
               {/* Avatar */}
-              <div className="w-32 h-32 rounded-full bg-background border-4 border-background overflow-hidden shrink-0">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-background border-4 border-background overflow-hidden shrink-0 ring-4 ring-[#FF6600]/20">
                 {profile.avatar_url ? (
                   <img
                     src={creatorApi.getMediaUrl(profile.avatar_url)}
@@ -111,86 +155,204 @@ const CreatorProfile = () => {
               </div>
 
               {/* Info */}
-              <div className="pt-4 sm:pt-16">
-                <h1 className="text-2xl font-bold">{profile.display_name || 'Unknown'}</h1>
-                <p className="text-sm text-muted-foreground font-mono">
-                  {truncateKey(profile.pubkey, 8, 8)}
-                </p>
+              <div className="flex-1 pt-0 sm:pt-16">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold">{profile.display_name || 'Unknown'}</h1>
+                    <p className="text-sm text-muted-foreground font-mono">
+                      {truncateKey(profile.pubkey, 8, 8)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={handleShare}>
+                      {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                
                 {profile.bio && (
-                  <p className="text-muted-foreground mt-2 max-w-xl">{profile.bio}</p>
+                  <p className="text-muted-foreground mt-3 max-w-xl">{profile.bio}</p>
                 )}
-                <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-                  <span><strong className="text-foreground">{profile.content_count ?? 0}</strong> content</span>
-                  <span><strong className="text-foreground">{profile.subscriber_count ?? 0}</strong> subscribers</span>
+                
+                {/* Stats */}
+                <div className="flex items-center gap-6 mt-4">
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{profile.content_count ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Posts</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{profile.subscriber_count ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Subscribers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{freeContent.length}</p>
+                    <p className="text-xs text-muted-foreground">Free</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{paidContent.length}</p>
+                    <p className="text-xs text-muted-foreground">Exclusive</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Content Grid */}
-          <div className="pb-12">
-            <h2 className="text-lg font-semibold mb-4">Content</h2>
-            
-            {content.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">No content yet</p>
+          {/* Main content area */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+            {/* Left sidebar - Subscription (mobile: top) */}
+            <div className="lg:order-2 space-y-4">
+              <SubscriptionCard 
+                creator={profile} 
+                isSubscribed={isSubscribed}
+                subscriptionPrice={0.5}
+                onSubscribe={() => setIsSubscribed(true)}
+              />
+              
+              {/* Quick stats card */}
+              <Card>
+                <CardContent className="p-4 space-y-3">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                    About
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Joined</span>
+                      <span>{new Date(profile.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Posts</span>
+                      <span>{content.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Free Content</span>
+                      <span>{freeContent.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Paid Content</span>
+                      <span>{paidContent.length}</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {content.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="overflow-hidden cursor-pointer group"
-                    onClick={() => navigate(`/content/${item.id}`)}
-                  >
-                    <div className="relative aspect-square bg-muted">
-                      {item.thumbnail_url ? (
-                        <img
-                          src={creatorApi.getMediaUrl(item.thumbnail_url)}
-                          alt={item.title || 'Content'}
-                          className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
-                            item.tier === 'paid' ? 'blur-lg' : ''
-                          }`}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Eye className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      {/* Paid overlay */}
-                      {item.tier === 'paid' && (
-                        <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                          <div className="text-center">
-                            <Lock className="w-6 h-6 mx-auto mb-1 text-[#FF6600]" />
-                            <Badge className="bg-[#FF6600] text-white">
-                              {item.price_xmr ?? 0} XMR
-                            </Badge>
-                          </div>
-                        </div>
-                      )}
+            </div>
 
-                      {/* Free badge */}
-                      {item.tier === 'free' && (
-                        <Badge className="absolute top-2 right-2 bg-green-600 text-white">
-                          Free
-                        </Badge>
-                      )}
+            {/* Main content - Timeline */}
+            <div className="lg:col-span-2 lg:order-1">
+              <Tabs defaultValue="posts" className="w-full">
+                <div className="flex items-center justify-between mb-4">
+                  <TabsList>
+                    <TabsTrigger value="posts">Posts</TabsTrigger>
+                    <TabsTrigger value="media">Media</TabsTrigger>
+                    <TabsTrigger value="free">Free</TabsTrigger>
+                    <TabsTrigger value="paid">
+                      <Lock className="w-3 h-3 mr-1" />
+                      Paid
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  {/* View toggle */}
+                  <div className="flex items-center gap-1 border rounded-lg p-1">
+                    <Button
+                      variant={viewMode === 'feed' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setViewMode('feed')}
+                    >
+                      <LayoutList className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* All Posts */}
+                <TabsContent value="posts" className="mt-0">
+                  {content.length === 0 ? (
+                    <Card className="border-dashed">
+                      <CardContent className="py-12 text-center">
+                        <p className="text-muted-foreground">No posts yet</p>
+                      </CardContent>
+                    </Card>
+                  ) : viewMode === 'feed' ? (
+                    <div className="space-y-4">
+                      {content.map((item) => (
+                        <ContentFeedItem 
+                          key={item.id} 
+                          content={item} 
+                          creator={profile}
+                          isSubscribed={isSubscribed}
+                        />
+                      ))}
                     </div>
-                    <CardContent className="p-2">
-                      <p className="text-sm font-medium truncate group-hover:text-[#FF6600] transition-colors">
-                        {item.title || 'Untitled'}
-                      </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Eye className="w-3 h-3" /> {item.view_count ?? 0}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                  ) : (
+                    <MediaGrid content={content} isSubscribed={isSubscribed} />
+                  )}
+                </TabsContent>
+
+                {/* Media only */}
+                <TabsContent value="media" className="mt-0">
+                  <MediaGrid content={content} isSubscribed={isSubscribed} />
+                </TabsContent>
+
+                {/* Free content */}
+                <TabsContent value="free" className="mt-0">
+                  {freeContent.length === 0 ? (
+                    <Card className="border-dashed">
+                      <CardContent className="py-12 text-center">
+                        <p className="text-muted-foreground">No free content yet</p>
+                      </CardContent>
+                    </Card>
+                  ) : viewMode === 'feed' ? (
+                    <div className="space-y-4">
+                      {freeContent.map((item) => (
+                        <ContentFeedItem 
+                          key={item.id} 
+                          content={item} 
+                          creator={profile}
+                          isSubscribed={true} // Free content is always accessible
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <MediaGrid content={freeContent} isSubscribed={true} />
+                  )}
+                </TabsContent>
+
+                {/* Paid content */}
+                <TabsContent value="paid" className="mt-0">
+                  {paidContent.length === 0 ? (
+                    <Card className="border-dashed">
+                      <CardContent className="py-12 text-center">
+                        <Crown className="w-12 h-12 mx-auto mb-4 text-[#FF6600]/50" />
+                        <p className="text-muted-foreground">No exclusive content yet</p>
+                      </CardContent>
+                    </Card>
+                  ) : viewMode === 'feed' ? (
+                    <div className="space-y-4">
+                      {paidContent.map((item) => (
+                        <ContentFeedItem 
+                          key={item.id} 
+                          content={item} 
+                          creator={profile}
+                          isSubscribed={isSubscribed}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <MediaGrid content={paidContent} isSubscribed={isSubscribed} />
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
       </main>
