@@ -1,17 +1,66 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2 } from 'lucide-react';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
 type Step = 'generate' | 'profile' | 'confirm';
+
+type ErrorType = 'whitelist' | 'network' | 'unknown' | null;
+
+interface RegistrationError {
+  type: ErrorType;
+  message: string;
+}
+
+const parseRegistrationError = (error: unknown): RegistrationError => {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  const lowerMessage = message.toLowerCase();
+  
+  // Whitelist/authorization errors
+  if (
+    lowerMessage.includes('403') ||
+    lowerMessage.includes('whitelist') ||
+    lowerMessage.includes('not approved') ||
+    lowerMessage.includes('unauthorized') ||
+    lowerMessage.includes('forbidden')
+  ) {
+    return {
+      type: 'whitelist',
+      message: 'Your public key is not yet whitelisted. Please send your public key to an admin for approval before registering.',
+    };
+  }
+  
+  // Network errors
+  if (
+    lowerMessage.includes('network') ||
+    lowerMessage.includes('fetch') ||
+    lowerMessage.includes('timeout') ||
+    lowerMessage.includes('cors') ||
+    lowerMessage.includes('failed to fetch') ||
+    lowerMessage.includes('connection') ||
+    lowerMessage.includes('proxy error')
+  ) {
+    return {
+      type: 'network',
+      message: 'Unable to connect to the server. Please check your internet connection and try again.',
+    };
+  }
+  
+  // Unknown error
+  return {
+    type: 'unknown',
+    message: message || 'An unexpected error occurred. Please try again.',
+  };
+};
 
 const CreatorRegister = () => {
   const navigate = useNavigate();
@@ -24,6 +73,7 @@ const CreatorRegister = () => {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationError, setRegistrationError] = useState<RegistrationError | null>(null);
 
   const handleGenerate = () => {
     generateNewKeypair();
@@ -64,13 +114,21 @@ const CreatorRegister = () => {
     if (!generatedKeypair) return;
     
     setIsSubmitting(true);
+    setRegistrationError(null);
+    
     try {
       await register(generatedKeypair.privateKey, displayName, bio || undefined);
       toast.success('Creator account created successfully!');
       navigate('/creator/dashboard');
     } catch (error) {
       console.error('Registration failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Registration failed');
+      const parsedError = parseRegistrationError(error);
+      setRegistrationError(parsedError);
+      
+      // Show toast for network errors (they might be transient)
+      if (parsedError.type === 'network') {
+        toast.error('Connection failed - please try again');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -309,6 +367,69 @@ const CreatorRegister = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Error Display */}
+              {registrationError && (
+                <Alert 
+                  variant={registrationError.type === 'whitelist' ? 'default' : 'destructive'}
+                  className={registrationError.type === 'whitelist' 
+                    ? 'border-amber-500/50 bg-amber-500/10' 
+                    : registrationError.type === 'network'
+                    ? 'border-blue-500/50 bg-blue-500/10'
+                    : ''
+                  }
+                >
+                  {registrationError.type === 'whitelist' ? (
+                    <ShieldX className="h-4 w-4 text-amber-500" />
+                  ) : registrationError.type === 'network' ? (
+                    <WifiOff className="h-4 w-4 text-blue-500" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4" />
+                  )}
+                  <AlertTitle className={
+                    registrationError.type === 'whitelist' 
+                      ? 'text-amber-500' 
+                      : registrationError.type === 'network'
+                      ? 'text-blue-500'
+                      : ''
+                  }>
+                    {registrationError.type === 'whitelist' 
+                      ? 'Not Whitelisted' 
+                      : registrationError.type === 'network'
+                      ? 'Connection Error'
+                      : 'Registration Failed'}
+                  </AlertTitle>
+                  <AlertDescription className={
+                    registrationError.type === 'whitelist' 
+                      ? 'text-amber-400' 
+                      : registrationError.type === 'network'
+                      ? 'text-blue-400'
+                      : ''
+                  }>
+                    {registrationError.message}
+                    {registrationError.type === 'whitelist' && generatedKeypair && (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs">Your public key to share:</p>
+                        <code className="block text-xs bg-background/50 p-2 rounded break-all">
+                          {generatedKeypair.publicKey}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedKeypair.publicKey);
+                            toast.success('Public key copied!');
+                          }}
+                        >
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copy Public Key
+                        </Button>
+                      </div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="bg-muted/30 rounded-lg p-4 space-y-3">
                 <div>
                   <span className="text-xs text-muted-foreground">Creator ID</span>
