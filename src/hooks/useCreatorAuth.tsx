@@ -1,0 +1,205 @@
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { creatorApi, CreatorProfile, CreatorStats } from '@/services/creatorApi';
+import { 
+  generateKeypair, 
+  getPubkeyFromPrivate, 
+  signChallenge, 
+  isValidPrivateKey,
+  truncateKey 
+} from '@/lib/creatorCrypto';
+
+interface CreatorUser {
+  id: string;
+  publicKey: string;
+  displayName: string;
+  stats?: CreatorStats;
+}
+
+interface CreatorAuthContextType {
+  // State
+  creator: CreatorUser | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  
+  // Keypair generation
+  generatedKeypair: { publicKey: string; privateKey: string } | null;
+  generateNewKeypair: () => { publicKey: string; privateKey: string };
+  
+  // Auth actions
+  register: (privateKey: string, displayName: string, bio?: string) => Promise<void>;
+  login: (privateKey: string) => Promise<void>;
+  logout: () => void;
+  
+  // Profile
+  refreshProfile: () => Promise<void>;
+  
+  // Helpers
+  truncateKey: typeof truncateKey;
+}
+
+const CreatorAuthContext = createContext<CreatorAuthContextType | undefined>(undefined);
+
+const PRIVATE_KEY_STORAGE = 'creator_private_key_encrypted';
+
+export const CreatorAuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [creator, setCreator] = useState<CreatorUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [generatedKeypair, setGeneratedKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
+
+  // Initialize - check for existing session
+  useEffect(() => {
+    const initAuth = async () => {
+      if (creatorApi.isAuthenticated()) {
+        try {
+          const profile = await creatorApi.getMyProfile();
+          setCreator({
+            id: profile.id,
+            publicKey: profile.pubkey,
+            displayName: profile.display_name,
+            stats: {
+              total_earnings_xmr: profile.total_earnings_xmr,
+              total_views: profile.total_views,
+              total_unlocks: profile.total_unlocks,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to fetch creator profile:', error);
+          creatorApi.clearSession();
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, []);
+
+  const generateNewKeypair = useCallback(() => {
+    const keypair = generateKeypair();
+    setGeneratedKeypair(keypair);
+    return keypair;
+  }, []);
+
+  const performAuth = async (privateKey: string, publicKey: string): Promise<string> => {
+    // Get challenge
+    const { challenge } = await creatorApi.getChallenge(publicKey);
+    
+    // Sign challenge
+    const signature = signChallenge(privateKey, challenge);
+    
+    // Verify and get token
+    const { token, creator_id } = await creatorApi.verifySignature(publicKey, signature);
+    
+    // Store session
+    creatorApi.setToken(token, creator_id);
+    
+    return creator_id;
+  };
+
+  const register = async (privateKey: string, displayName: string, bio?: string) => {
+    if (!isValidPrivateKey(privateKey)) {
+      throw new Error('Invalid private key format');
+    }
+
+    const publicKey = getPubkeyFromPrivate(privateKey);
+    
+    // Register profile
+    await creatorApi.register(publicKey, displayName, bio);
+    
+    // Authenticate
+    const creatorId = await performAuth(privateKey, publicKey);
+    
+    // Fetch full profile
+    const profile = await creatorApi.getMyProfile();
+    
+    setCreator({
+      id: creatorId,
+      publicKey,
+      displayName: profile.display_name,
+      stats: {
+        total_earnings_xmr: profile.total_earnings_xmr,
+        total_views: profile.total_views,
+        total_unlocks: profile.total_unlocks,
+      },
+    });
+    
+    // Clear generated keypair from memory
+    setGeneratedKeypair(null);
+  };
+
+  const login = async (privateKey: string) => {
+    if (!isValidPrivateKey(privateKey)) {
+      throw new Error('Invalid private key format. Expected 128 hex characters.');
+    }
+
+    const publicKey = getPubkeyFromPrivate(privateKey);
+    
+    // Authenticate
+    const creatorId = await performAuth(privateKey, publicKey);
+    
+    // Fetch profile
+    const profile = await creatorApi.getMyProfile();
+    
+    setCreator({
+      id: creatorId,
+      publicKey,
+      displayName: profile.display_name,
+      stats: {
+        total_earnings_xmr: profile.total_earnings_xmr,
+        total_views: profile.total_views,
+        total_unlocks: profile.total_unlocks,
+      },
+    });
+  };
+
+  const logout = () => {
+    creatorApi.clearSession();
+    setCreator(null);
+    setGeneratedKeypair(null);
+  };
+
+  const refreshProfile = async () => {
+    if (!creatorApi.isAuthenticated()) return;
+    
+    try {
+      const profile = await creatorApi.getMyProfile();
+      setCreator(prev => prev ? {
+        ...prev,
+        displayName: profile.display_name,
+        stats: {
+          total_earnings_xmr: profile.total_earnings_xmr,
+          total_views: profile.total_views,
+          total_unlocks: profile.total_unlocks,
+        },
+      } : null);
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+    }
+  };
+
+  return (
+    <CreatorAuthContext.Provider
+      value={{
+        creator,
+        isLoading,
+        isAuthenticated: !!creator,
+        generatedKeypair,
+        generateNewKeypair,
+        register,
+        login,
+        logout,
+        refreshProfile,
+        truncateKey,
+      }}
+    >
+      {children}
+    </CreatorAuthContext.Provider>
+  );
+};
+
+export const useCreatorAuth = () => {
+  const context = useContext(CreatorAuthContext);
+  if (context === undefined) {
+    throw new Error('useCreatorAuth must be used within a CreatorAuthProvider');
+  }
+  return context;
+};

@@ -65,6 +65,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "tweetnacl": "^1.0.3",
     "use-debounce": "^10.0.6",
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.2.0",
