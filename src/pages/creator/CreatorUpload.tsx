@@ -18,6 +18,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
 import { optimizeVideo, isCompressibleVideo, type VideoCompressionProgress } from '@/lib/videoCompression';
+import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -32,6 +33,7 @@ const CreatorUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [compressionSavings, setCompressionSavings] = useState<number | null>(null);
   
   // Form state
@@ -122,6 +124,7 @@ const CreatorUpload = () => {
     } else if (isCompressibleVideo(selectedFile)) {
       // Compress videos before upload
       setIsCompressing(true);
+      setVideoThumbnail(null);
       try {
         const result = await optimizeVideo(selectedFile, {
           onProgress: setCompressionProgress,
@@ -133,16 +136,31 @@ const CreatorUpload = () => {
           setCompressionSavings(savings);
         }
 
-        // Generate preview from compressed file
-        const reader = new FileReader();
-        reader.onload = (e) => setPreview(e.target?.result as string);
-        reader.readAsDataURL(result.file);
+        // Generate thumbnail from the video for better preview
+        try {
+          const thumbnail = await extractVideoThumbnail(result.file, { time: 1 });
+          setVideoThumbnail(thumbnail.dataUrl);
+          setPreview(thumbnail.dataUrl);
+        } catch (thumbErr) {
+          console.warn('[CreatorUpload] Thumbnail extraction failed:', thumbErr);
+          // Fallback to video data URL (less efficient but works)
+          const reader = new FileReader();
+          reader.onload = (e) => setPreview(e.target?.result as string);
+          reader.readAsDataURL(result.file);
+        }
       } catch (err) {
         console.error('[CreatorUpload] Video compression failed:', err);
         setFile(selectedFile);
-        const reader = new FileReader();
-        reader.onload = (e) => setPreview(e.target?.result as string);
-        reader.readAsDataURL(selectedFile);
+        // Try to get thumbnail from original
+        try {
+          const thumbnail = await extractVideoThumbnail(selectedFile, { time: 1 });
+          setVideoThumbnail(thumbnail.dataUrl);
+          setPreview(thumbnail.dataUrl);
+        } catch {
+          const reader = new FileReader();
+          reader.onload = (e) => setPreview(e.target?.result as string);
+          reader.readAsDataURL(selectedFile);
+        }
       } finally {
         setIsCompressing(false);
         setCompressionProgress(null);
@@ -177,6 +195,7 @@ const CreatorUpload = () => {
     setFile(null);
     setOriginalFile(null);
     setPreview(null);
+    setVideoThumbnail(null);
     setCompressionSavings(null);
   };
 
@@ -347,11 +366,35 @@ const CreatorUpload = () => {
               <Card className="overflow-hidden">
                 <div className="relative">
                   {isVideo ? (
-                    <video
-                      src={preview || undefined}
-                      className="w-full aspect-video object-contain bg-black"
-                      controls
-                    />
+                    <>
+                      {/* Show thumbnail as poster, with video on hover/click */}
+                      {videoThumbnail ? (
+                        <div className="relative group">
+                          <img
+                            src={videoThumbnail}
+                            alt="Video thumbnail"
+                            className="w-full aspect-video object-contain bg-black"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+                            <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                              <Film className="w-8 h-8 text-black ml-1" />
+                            </div>
+                          </div>
+                          <Badge 
+                            variant="secondary" 
+                            className="absolute bottom-2 left-2 bg-black/70 text-white"
+                          >
+                            Video
+                          </Badge>
+                        </div>
+                      ) : (
+                        <video
+                          src={preview || undefined}
+                          className="w-full aspect-video object-contain bg-black"
+                          controls
+                        />
+                      )}
+                    </>
                   ) : (
                     <img
                       src={preview || undefined}
