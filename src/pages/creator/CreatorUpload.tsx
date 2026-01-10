@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Upload, ImageIcon, Film, Loader2, ArrowLeft, 
-  X, Check, DollarSign, Tag, AlertCircle
+  X, Check, DollarSign, Tag, AlertCircle, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
@@ -26,7 +27,9 @@ const CreatorUpload = () => {
   
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [compressionSavings, setCompressionSavings] = useState<number | null>(null);
   
   // Form state
   const [title, setTitle] = useState('');
@@ -38,6 +41,7 @@ const CreatorUpload = () => {
   
   // Upload state
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uiError, setUiError] = useState<string | null>(null);
 
@@ -68,7 +72,7 @@ const CreatorUpload = () => {
     return null;
   };
 
-  const handleFileSelect = useCallback((selectedFile: File) => {
+  const handleFileSelect = useCallback(async (selectedFile: File) => {
     const error = validateFile(selectedFile);
     if (error) {
       console.warn('[CreatorUpload] File validation failed:', error);
@@ -77,12 +81,41 @@ const CreatorUpload = () => {
     }
 
     setUiError(null);
-    setFile(selectedFile);
+    setOriginalFile(selectedFile);
+    setCompressionSavings(null);
 
-    // Generate preview
-    const reader = new FileReader();
-    reader.onload = (e) => setPreview(e.target?.result as string);
-    reader.readAsDataURL(selectedFile);
+    // Compress images before upload
+    if (isCompressibleImage(selectedFile)) {
+      setIsCompressing(true);
+      try {
+        const result = await optimizeImage(selectedFile);
+        setFile(result.file);
+        
+        if (result.compressionRatio < 1) {
+          const savings = Math.round((1 - result.compressionRatio) * 100);
+          setCompressionSavings(savings);
+        }
+
+        // Generate preview from compressed file
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.readAsDataURL(result.file);
+      } catch (err) {
+        console.error('[CreatorUpload] Compression failed:', err);
+        setFile(selectedFile);
+        const reader = new FileReader();
+        reader.onload = (e) => setPreview(e.target?.result as string);
+        reader.readAsDataURL(selectedFile);
+      } finally {
+        setIsCompressing(false);
+      }
+    } else {
+      // Videos and GIFs - no compression
+      setFile(selectedFile);
+      const reader = new FileReader();
+      reader.onload = (e) => setPreview(e.target?.result as string);
+      reader.readAsDataURL(selectedFile);
+    }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -104,7 +137,9 @@ const CreatorUpload = () => {
 
   const clearFile = () => {
     setFile(null);
+    setOriginalFile(null);
     setPreview(null);
+    setCompressionSavings(null);
   };
 
   const addTag = () => {
@@ -280,9 +315,37 @@ const CreatorUpload = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium truncate">{file.name}</span>
-                    <Badge variant="secondary">
-                      {(file.size / (1024 * 1024)).toFixed(1)} MB
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {compressionSavings !== null && compressionSavings > 0 && (
+                        <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10">
+                          <Zap className="w-3 h-3 mr-1" />
+                          {compressionSavings}% smaller
+                        </Badge>
+                      )}
+                      <Badge variant="secondary">
+                        {(file.size / (1024 * 1024)).toFixed(1)} MB
+                      </Badge>
+                    </div>
+                  </div>
+                  {originalFile && compressionSavings !== null && compressionSavings > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Original: {(originalFile.size / (1024 * 1024)).toFixed(1)} MB → Optimized: {(file.size / (1024 * 1024)).toFixed(1)} MB
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Compression Progress */}
+            {isCompressing && (
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center gap-4">
+                    <Zap className="w-5 h-5 animate-pulse text-[#FF6600]" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Optimizing image...</p>
+                      <p className="text-xs text-muted-foreground">Reducing file size for faster upload</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
