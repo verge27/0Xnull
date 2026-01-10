@@ -53,8 +53,8 @@ const CreatorsHub = () => {
 
   const filteredCreators = creators.filter(
     (creator) =>
-      creator.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      creator.pubkey.toLowerCase().includes(searchQuery.toLowerCase())
+      (creator.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (creator.pubkey || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const { isVerified, showModal, verify, decline } = useCreatorAgeGate();
@@ -148,7 +148,7 @@ const CreatorsHub = () => {
                           />
                         ) : (
                           <div className="w-full h-full bg-[#FF6600]/20 flex items-center justify-center text-xl font-bold text-[#FF6600]">
-                            {creator.display_name.charAt(0).toUpperCase()}
+                            {(creator.display_name || 'U').charAt(0).toUpperCase()}
                           </div>
                         )}
                       </div>
@@ -157,7 +157,7 @@ const CreatorsHub = () => {
 
                   <CardContent className="pt-10 pb-4">
                     <h3 className="font-semibold group-hover:text-[#FF6600] transition-colors">
-                      {creator.display_name}
+                      {creator.display_name || 'Unknown'}
                     </h3>
                     <p className="text-xs text-muted-foreground font-mono">
                       {truncateKey(creator.pubkey, 6, 6)}
@@ -168,8 +168,8 @@ const CreatorsHub = () => {
                       </p>
                     )}
                     <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                      <span>{creator.content_count} content</span>
-                      <span>{creator.subscriber_count} subscribers</span>
+                      <span>{creator.content_count ?? 0} content</span>
+                      <span>{creator.subscriber_count ?? 0} subscribers</span>
                     </div>
                   </CardContent>
                 </Card>

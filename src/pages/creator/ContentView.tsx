@@ -151,7 +151,7 @@ const ContentView = () => {
               {content.thumbnail_url && (
                 <img
                   src={creatorApi.getMediaUrl(content.thumbnail_url)}
-                  alt={content.title}
+                  alt={content.title || 'Content'}
                   className="w-full h-full object-cover blur-2xl scale-110"
                 />
               )}
@@ -159,7 +159,7 @@ const ContentView = () => {
                 <Lock className="w-12 h-12 mb-4 text-[#FF6600]" />
                 <p className="text-lg font-medium mb-2">This content is locked</p>
                 <Badge className="bg-[#FF6600] text-white text-lg px-4 py-1 mb-4">
-                  {content.price_xmr} XMR
+                  {content.price_xmr ?? 0} XMR
                 </Badge>
                 <Button
                   onClick={handleUnlock}
@@ -184,14 +184,14 @@ const ContentView = () => {
                 ) : (
                   <img
                     src={creatorApi.getMediaUrl(content.media_hash)}
-                    alt={content.title}
+                    alt={content.title || 'Content'}
                     className="w-full h-full object-contain bg-black"
                   />
                 )
               ) : content.thumbnail_url ? (
                 <img
                   src={creatorApi.getMediaUrl(content.thumbnail_url)}
-                  alt={content.title}
+                  alt={content.title || 'Content'}
                   className="w-full h-full object-contain bg-black"
                 />
               ) : (
@@ -207,13 +207,13 @@ const ContentView = () => {
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">{content.title}</h1>
+              <h1 className="text-2xl font-bold">{content.title || 'Untitled'}</h1>
               <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Eye className="w-4 h-4" /> {content.view_count} views
+                  <Eye className="w-4 h-4" /> {content.view_count ?? 0} views
                 </span>
                 <Badge variant={content.tier === 'paid' ? 'default' : 'secondary'}>
-                  {content.tier === 'paid' ? `${content.price_xmr} XMR` : 'Free'}
+                  {content.tier === 'paid' ? `${content.price_xmr ?? 0} XMR` : 'Free'}
                 </Badge>
               </div>
             </div>
@@ -233,8 +233,8 @@ const ContentView = () => {
           {/* Tags */}
           {content.tags && content.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {content.tags.map((tag) => (
-                <Badge key={tag} variant="outline">
+              {content.tags.map((tag, index) => (
+                <Badge key={tag || index} variant="outline">
                   {tag}
                 </Badge>
               ))}
