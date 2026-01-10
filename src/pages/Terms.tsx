@@ -143,9 +143,12 @@ const Terms = () => {
                   non-refundable.
                 </p>
                 <p className="font-medium">
-                  Platform Fee: 0xNull Marketplace charges a <strong>0.4% fee</strong> on all sales. 
-                  This fee is automatically deducted from the sale amount before funds are released 
-                  to the seller.
+                  Marketplace Fees: The 0xNull Marketplace charges <strong>no fees</strong> on 
+                  marketplace sales. Sellers receive 100% of the sale amount.
+                </p>
+                <p className="font-medium">
+                  Prediction Markets Fee: A <strong>0.4% fee</strong> is applied to winnings only 
+                  on prediction markets. This fee is automatically deducted from payouts.
                 </p>
                 <p>
                   Users are solely responsible for any tax obligations arising from cryptocurrency 
