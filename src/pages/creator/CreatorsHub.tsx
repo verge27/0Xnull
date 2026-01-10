@@ -8,6 +8,8 @@ import { creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CreatorAgeGate } from '@/components/creator/CreatorAgeGate';
+import { useCreatorAgeGate } from '@/hooks/useCreatorAgeGate';
 
 const LIMIT = 20;
 
@@ -55,8 +57,11 @@ const CreatorsHub = () => {
       creator.pubkey.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const { isVerified, showModal, verify, decline } = useCreatorAgeGate();
+
   return (
     <div className="min-h-screen bg-background">
+      <CreatorAgeGate open={showModal} onVerified={verify} onDeclined={decline} />
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
