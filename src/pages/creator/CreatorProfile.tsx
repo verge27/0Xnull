@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { creatorApi, CreatorProfile as CreatorProfileType, ContentItem } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 const CreatorProfile = () => {
   const { id } = useParams<{ id: string }>();

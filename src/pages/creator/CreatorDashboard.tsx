@@ -16,8 +16,8 @@ import {
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import CreatorUploadModal from '@/components/creator/CreatorUploadModal';
 
 const CreatorDashboard = () => {
