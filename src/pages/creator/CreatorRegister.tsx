@@ -15,7 +15,7 @@ import { Footer } from '@/components/Footer';
 
 type Step = 'generate' | 'profile' | 'confirm';
 
-type ErrorType = 'whitelist' | 'network' | 'unknown' | null;
+type ErrorType = 'whitelist' | 'conflict' | 'network' | 'unknown' | null;
 
 interface RegistrationError {
   type: ErrorType;
@@ -27,7 +27,24 @@ type WhitelistStatus = 'unchecked' | 'checking' | 'approved' | 'pending' | 'erro
 const parseRegistrationError = (error: unknown): RegistrationError => {
   const message = error instanceof Error ? error.message : 'Unknown error';
   const lowerMessage = message.toLowerCase();
-  
+
+  console.log('[CreatorRegister] parseRegistrationError:', message);
+
+  // Conflict errors (409 - already registered)
+  if (
+    lowerMessage.includes('409') ||
+    lowerMessage.includes('conflict') ||
+    lowerMessage.includes('already registered') ||
+    lowerMessage.includes('already exists') ||
+    lowerMessage.includes('duplicate')
+  ) {
+    return {
+      type: 'conflict',
+      message:
+        'This public key is already registered. Use “Sign in” with the same private key instead of registering again.',
+    };
+  }
+
   // Whitelist/authorization errors
   if (
     lowerMessage.includes('403') ||
@@ -38,10 +55,11 @@ const parseRegistrationError = (error: unknown): RegistrationError => {
   ) {
     return {
       type: 'whitelist',
-      message: 'Your public key is not yet whitelisted. Please send your public key to an admin for approval before registering.',
+      message:
+        'Your public key is not yet whitelisted. Please send your public key to an admin for approval before registering.',
     };
   }
-  
+
   // Network errors
   if (
     lowerMessage.includes('network') ||
@@ -57,7 +75,7 @@ const parseRegistrationError = (error: unknown): RegistrationError => {
       message: 'Unable to connect to the server. Please check your internet connection and try again.',
     };
   }
-  
+
   // Unknown error
   return {
     type: 'unknown',
@@ -106,8 +124,8 @@ const CreatorRegister = () => {
     try {
       const keypair = importKeypair(trimmedKey);
       setImportPrivateKey('');
-      toast.success('Private key imported successfully!');
-      
+      console.log('[CreatorRegister] Private key imported, pubkey:', keypair.publicKey.slice(0, 16) + '...');
+
       // Auto-check whitelist status
       if (keypair?.publicKey) {
         setWhitelistStatus('checking');
@@ -117,43 +135,47 @@ const CreatorRegister = () => {
           if (result.whitelisted) {
             setWhitelistStatus('approved');
             setWhitelistMessage('Your public key is approved! You can proceed with registration.');
-            toast.success('Public key is whitelisted!');
+            console.log('[CreatorRegister] Public key is whitelisted');
           } else {
             setWhitelistStatus('pending');
             setWhitelistMessage(result.message || 'Your public key is not yet approved. Please contact admin via SimpleX.');
+            console.warn('[CreatorRegister] Public key not whitelisted');
           }
         } catch (checkError) {
-          console.error('Whitelist check failed:', checkError);
+          console.error('[CreatorRegister] Whitelist check failed:', checkError);
           setWhitelistStatus('error');
           setWhitelistMessage('Unable to check whitelist status. Please try again or proceed with registration.');
         }
       }
     } catch (error) {
       setImportError(error instanceof Error ? error.message : 'Failed to import key');
+      console.error('[CreatorRegister] Import key error:', error);
     }
   };
 
   const checkWhitelistStatus = async () => {
     if (!generatedKeypair) return;
-    
+
     setWhitelistStatus('checking');
     setWhitelistMessage('');
-    
+
+    console.log('[CreatorRegister] Checking whitelist for pubkey:', generatedKeypair.publicKey.slice(0, 16) + '...');
+
     try {
       const result = await creatorApi.checkWhitelist(generatedKeypair.publicKey);
       if (result.whitelisted) {
         setWhitelistStatus('approved');
         setWhitelistMessage('Your public key is approved! You can proceed with registration.');
-        toast.success('Public key is whitelisted!');
+        console.log('[CreatorRegister] Public key is whitelisted');
       } else {
         setWhitelistStatus('pending');
         setWhitelistMessage(result.message || 'Your public key is not yet approved. Please contact admin via SimpleX.');
+        console.warn('[CreatorRegister] Public key not whitelisted');
       }
     } catch (error) {
-      console.error('Whitelist check failed:', error);
+      console.error('[CreatorRegister] Whitelist check failed:', error);
       setWhitelistStatus('error');
       setWhitelistMessage('Unable to check whitelist status. Please try again or proceed with registration.');
-      toast.error('Could not check whitelist status');
     }
   };
 
@@ -176,44 +198,46 @@ const CreatorRegister = () => {
       setCopiedPrivate(true);
       setTimeout(() => setCopiedPrivate(false), 2000);
     }
-    toast.success(`${type === 'public' ? 'Public' : 'Private'} key copied`);
+    console.log('[CreatorRegister] Copied', type, 'key to clipboard');
   };
 
   const handleContinueToProfile = () => {
     if (!savedKey) {
-      toast.error('Please confirm you have saved your private key');
+      console.warn('[CreatorRegister] User tried to continue without confirming saved key');
       return;
     }
+    console.log('[CreatorRegister] Advancing to profile step');
     setStep('profile');
   };
 
   const handleCreateProfile = () => {
     if (!displayName.trim()) {
-      toast.error('Display name is required');
+      console.warn('[CreatorRegister] Display name is required');
       return;
     }
+    console.log('[CreatorRegister] Advancing to confirm step');
     setStep('confirm');
   };
 
   const handleConfirmRegistration = async () => {
     if (!generatedKeypair) return;
-    
+
+    console.log('[CreatorRegister] Starting registration for pubkey:', generatedKeypair.publicKey.slice(0, 16) + '...');
+
     setIsSubmitting(true);
     setRegistrationError(null);
-    
+
     try {
       await register(generatedKeypair.privateKey, displayName, bio || undefined);
+      console.log('[CreatorRegister] Registration successful!');
       toast.success('Creator account created successfully!');
       navigate('/creator/dashboard');
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('[CreatorRegister] Registration failed:', error);
       const parsedError = parseRegistrationError(error);
       setRegistrationError(parsedError);
-      
-      // Show toast for network errors (they might be transient)
-      if (parsedError.type === 'network') {
-        toast.error('Connection failed - please try again');
-      }
+
+      // Suppressed: Don't show toast for network errors, inline message is enough
     } finally {
       setIsSubmitting(false);
     }
@@ -651,9 +675,11 @@ const CreatorRegister = () => {
               {/* Error Display */}
               {registrationError && (
                 <Alert 
-                  variant={registrationError.type === 'whitelist' ? 'default' : 'destructive'}
+                  variant={registrationError.type === 'whitelist' || registrationError.type === 'conflict' || registrationError.type === 'network' ? 'default' : 'destructive'}
                   className={`relative pr-10 ${registrationError.type === 'whitelist' 
                     ? 'border-amber-500/50 bg-amber-500/10' 
+                    : registrationError.type === 'conflict'
+                    ? 'border-border bg-muted/30'
                     : registrationError.type === 'network'
                     ? 'border-blue-500/50 bg-blue-500/10'
                     : ''
@@ -673,6 +699,8 @@ const CreatorRegister = () => {
                     <ShieldX className="h-4 w-4 text-amber-500" />
                   ) : registrationError.type === 'network' ? (
                     <WifiOff className="h-4 w-4 text-blue-500" />
+                  ) : registrationError.type === 'conflict' ? (
+                    <CheckCircle2 className="h-4 w-4 text-foreground" />
                   ) : (
                     <AlertTriangle className="h-4 w-4" />
                   )}
@@ -685,6 +713,8 @@ const CreatorRegister = () => {
                   }>
                     {registrationError.type === 'whitelist' 
                       ? 'Not Whitelisted' 
+                      : registrationError.type === 'conflict'
+                      ? 'Already Registered'
                       : registrationError.type === 'network'
                       ? 'Connection Error'
                       : 'Registration Failed'}
@@ -697,6 +727,20 @@ const CreatorRegister = () => {
                       : ''
                   }>
                     {registrationError.message}
+
+                    {registrationError.type === 'conflict' && (
+                      <div className="mt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => navigate('/creator/login')}
+                        >
+                          Go to Sign In
+                        </Button>
+                      </div>
+                    )}
+
                     {registrationError.type === 'whitelist' && generatedKeypair && (
                       <div className="mt-3 space-y-2">
                         <p className="text-xs">Your public key to share:</p>
@@ -710,7 +754,7 @@ const CreatorRegister = () => {
                             className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
                             onClick={() => {
                               navigator.clipboard.writeText(generatedKeypair.publicKey);
-                              toast.success('Public key copied!');
+                              console.log('[CreatorRegister] Copied public key from error panel');
                             }}
                           >
                             <Copy className="w-3 h-3 mr-1" />
@@ -720,7 +764,12 @@ const CreatorRegister = () => {
                             size="sm"
                             variant="outline"
                             className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                            onClick={() => window.open('https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D', '_blank')}
+                            onClick={() =>
+                              window.open(
+                                'https://simplex.chat/contact#/?v=2-7&smp=smp%3A%2F%2FenEkec4hlR3UtKx2NMpOUK_K4ZuDxjWBO1d9Y7YXXy4%3D%40smp14.simplex.im%2FzPXIhGKAhSsWPtQVEiQvXvqQ27HaVCss%23%2F%3Fv%3D1-3%26dh%3DMCowBQYDK2VuAyEAn8fKbHOG24kMr9y5TkzKMYNTTdI60txZjq1Wg3PEk3E%253D%26srv%3Daspkyu2sopsnizbyfabtsicikr2s4r3ti35jogbceez4wxqovh77b2ad.onion&data=%7B%22groupLinkId%22%3A%223xzimhfYFqYT5wY-9HZ1QA%3D%3D%22%7D',
+                                '_blank'
+                              )
+                            }
                           >
                             Contact Admin via SimpleX
                           </Button>
