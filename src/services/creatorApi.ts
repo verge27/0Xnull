@@ -113,13 +113,26 @@ class CreatorApiClient {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(getProxyUrl(endpoint), {
+    const url = getProxyUrl(endpoint);
+    const method = (options.method || 'GET').toUpperCase();
+
+    console.log('[CreatorApi] request:start', { method, endpoint });
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
 
+    console.log('[CreatorApi] request:response', {
+      method,
+      endpoint,
+      status: response.status,
+      ok: response.ok,
+    });
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('[CreatorApi] request:errorBody', { method, endpoint, errorData });
       throw new Error(errorData.error || errorData.message || `Request failed: ${response.status}`);
     }
 

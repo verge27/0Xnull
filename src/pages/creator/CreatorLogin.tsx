@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { isValidPrivateKey, getPubkeyFromPrivate } from '@/lib/creatorCrypto';
 import { creatorApi } from '@/services/creatorApi';
-import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
@@ -35,9 +34,11 @@ const CreatorLogin = () => {
 
   const checkAccountStatus = async () => {
     const cleanKey = privateKey.trim().toLowerCase();
-    
+
     if (!isValidPrivateKey(cleanKey)) {
-      toast.error('Invalid private key format. Expected 128 hex characters.');
+      console.warn('[CreatorLogin] Check status: invalid private key format');
+      setAccountStatus('error');
+      setStatusMessage('Invalid private key format. Expected 128 hex characters.');
       return;
     }
 
@@ -47,28 +48,32 @@ const CreatorLogin = () => {
     try {
       const publicKey = getPubkeyFromPrivate(cleanKey);
       setDerivedPublicKey(publicKey);
-      
-      // Check if account exists by trying to get a challenge
+
+      console.log('[CreatorLogin] Check status: requesting challenge for pubkey', publicKey);
+
       // If we can get a challenge, the account exists
       await creatorApi.getChallenge(publicKey);
       setAccountStatus('registered');
       setStatusMessage('Account found! You can sign in.');
-      toast.success('Account found!');
+      console.log('[CreatorLogin] Check status: account found');
     } catch (error) {
-      console.error('Check status error:', error);
+      console.error('[CreatorLogin] Check status error:', error);
       const message = error instanceof Error ? error.message.toLowerCase() : '';
+
       if (message.includes('404') || message.includes('not found') || message.includes('no creator')) {
         setAccountStatus('not_registered');
         setStatusMessage('No account found for this key. You may need to register first.');
-        toast.info('No account found for this key');
+        console.warn('[CreatorLogin] Check status: no account found');
       } else if (message.includes('403') || message.includes('forbidden') || message.includes('whitelist')) {
         setAccountStatus('not_registered');
         setStatusMessage('Key not whitelisted. You may need to get approved first.');
-        toast.info('Key not whitelisted');
+        console.warn('[CreatorLogin] Check status: key not whitelisted / forbidden');
       } else {
         setAccountStatus('error');
-        setStatusMessage(`Unable to check account status: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        toast.error('Failed to check account status');
+        setStatusMessage(
+          `Unable to check account status: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+        console.warn('[CreatorLogin] Check status: unknown error');
       }
     }
   };
@@ -98,7 +103,6 @@ const CreatorLogin = () => {
       console.log('[CreatorLogin] Calling login()...');
       await login(cleanKey);
       console.log('[CreatorLogin] Login successful!');
-      toast.success('Welcome back!');
       navigate('/creator/dashboard');
     } catch (error) {
       console.error('[CreatorLogin] Login failed:', error);

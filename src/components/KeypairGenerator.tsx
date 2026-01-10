@@ -55,9 +55,11 @@ export function KeypairGenerator() {
 
   const handleLogin = () => {
     const trimmedKey = loginKey.trim().toLowerCase();
-    
+
+    console.log('[KeypairGenerator] Login attempt. keyLength=', trimmedKey.length);
+
     if (!isValidPrivateKey(trimmedKey)) {
-      toast.error('Invalid private key format (expected 128 hex characters)');
+      console.warn('[KeypairGenerator] Invalid private key format (expected 128 hex characters)');
       return;
     }
 
@@ -73,8 +75,9 @@ export function KeypairGenerator() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storedKeys));
       setLoginKey('');
       toast.success('Logged in successfully');
+      console.log('[KeypairGenerator] Logged in successfully. pubkey=', publicKey);
     } catch (error) {
-      toast.error('Invalid private key');
+      console.error('[KeypairGenerator] Invalid private key:', error);
     } finally {
       setIsLoggingIn(false);
     }

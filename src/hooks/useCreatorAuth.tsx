@@ -135,18 +135,24 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
   const hasStoredKeypair = generatedKeypair !== null;
 
   const performAuth = async (privateKey: string, publicKey: string): Promise<string> => {
+    console.log('[CreatorAuth] performAuth:start', { publicKey: truncateKey(publicKey, 10, 10) });
+
     // Get challenge
     const { challenge } = await creatorApi.getChallenge(publicKey);
-    
+    console.log('[CreatorAuth] performAuth:challenge received');
+
     // Sign challenge
     const signature = signChallenge(privateKey, challenge);
-    
+    console.log('[CreatorAuth] performAuth:challenge signed');
+
     // Verify and get token
     const { token, creator_id } = await creatorApi.verifySignature(publicKey, signature);
-    
+    console.log('[CreatorAuth] performAuth:signature verified, token received');
+
     // Store session with pubkey (per spec: store pubkey, not creator_id)
     creatorApi.setToken(token, publicKey);
-    
+    console.log('[CreatorAuth] performAuth:session stored');
+
     return creator_id;
   };
 
@@ -190,18 +196,23 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
   };
 
   const login = async (privateKey: string) => {
+    console.log('[CreatorAuth] login:start');
+
     if (!isValidPrivateKey(privateKey)) {
+      console.warn('[CreatorAuth] login: invalid private key format');
       throw new Error('Invalid private key format. Expected 128 hex characters.');
     }
 
     const publicKey = getPubkeyFromPrivate(privateKey);
-    
+    console.log('[CreatorAuth] login: derived pubkey', truncateKey(publicKey, 10, 10));
+
     // Authenticate
     const creatorId = await performAuth(privateKey, publicKey);
-    
+
     // Fetch profile
     const profile = await creatorApi.getMyProfile();
-    
+    console.log('[CreatorAuth] login: profile fetched');
+
     setCreator({
       id: creatorId,
       publicKey,
@@ -212,6 +223,8 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
         total_unlocks: profile.total_unlocks,
       },
     });
+
+    console.log('[CreatorAuth] login:state set');
   };
 
   const logout = () => {
