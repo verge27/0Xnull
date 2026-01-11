@@ -721,33 +721,14 @@ export const ContentFeedItem = ({
             {/* Video controls - left side (pause) */}
             {isPlaying && (
               <div
-                className="absolute bottom-8 left-4 flex gap-2"
+                className="absolute bottom-8 left-4 flex gap-2 z-10"
                 data-video-control
-                onClickCapture={(e) => e.stopPropagation()}
-                onPointerDownCapture={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onTouchStartCapture={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
               >
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-background/80 hover:bg-background"
-                  onPointerDownCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onTouchStartCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onPointerDown={togglePlayPause}
+                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  onTouchEnd={togglePlayPause}
                   onClick={togglePlayPause}
                 >
                   <Pause className="w-4 h-4" />
@@ -759,33 +740,14 @@ export const ContentFeedItem = ({
             {isPlaying && (
               <div
                 ref={controlsRef}
-                className="absolute bottom-8 right-4 flex gap-2"
+                className="absolute bottom-8 right-4 flex gap-2 z-10"
                 data-video-control
-                onClickCapture={(e) => e.stopPropagation()}
-                onPointerDownCapture={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onTouchStartCapture={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
               >
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-background/80 hover:bg-background"
-                  onPointerDownCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onTouchStartCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onPointerDown={toggleMute}
+                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  onTouchEnd={toggleMute}
                   onClick={toggleMute}
                 >
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -793,18 +755,8 @@ export const ContentFeedItem = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-background/80 hover:bg-background"
-                  onPointerDownCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onTouchStartCapture={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    lastTapRef.current = null;
-                  }}
-                  onPointerDown={toggleFullscreen}
+                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  onTouchEnd={toggleFullscreen}
                   onClick={toggleFullscreen}
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
