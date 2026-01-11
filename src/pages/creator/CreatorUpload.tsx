@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Upload, ImageIcon, Film, Loader2, ArrowLeft, 
   X, Check, DollarSign, Tag, AlertCircle, Zap, RefreshCw, Clock, Image as ImageIcon2,
-  Calendar, Plus, Trash2, CheckCircle2, XCircle
+  Calendar, Plus, Trash2, CheckCircle2, XCircle, Wifi
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,6 +83,8 @@ const CreatorUpload = () => {
     maxAttempts: MAX_UPLOAD_ATTEMPTS,
   });
   const [uiError, setUiError] = useState<string | null>(null);
+  const [testUploadStatus, setTestUploadStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [testUploadMessage, setTestUploadMessage] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -519,6 +521,70 @@ const CreatorUpload = () => {
     }
   };
 
+  // Test upload function - creates a tiny 1KB test image and tries to upload
+  const handleTestUpload = async () => {
+    setTestUploadStatus('testing');
+    setTestUploadMessage('Creating test file...');
+    
+    try {
+      // Create a tiny 1x1 red PNG (about 70 bytes)
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not create canvas context');
+      ctx.fillStyle = '#FF6600';
+      ctx.fillRect(0, 0, 1, 1);
+      
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create test blob'));
+        }, 'image/png');
+      });
+      
+      const testFile = new File([blob], `test-upload-${Date.now()}.png`, { type: 'image/png' });
+      console.log('[TestUpload] Created test file:', testFile.size, 'bytes');
+      
+      setTestUploadMessage(`Uploading ${testFile.size} bytes...`);
+      
+      const formData = new FormData();
+      formData.append('file', testFile);
+      formData.append('title', `Test Upload ${new Date().toISOString()}`);
+      formData.append('tier', 'free');
+      
+      const result = await creatorApi.uploadContent(formData);
+      console.log('[TestUpload] Success:', result);
+      
+      setTestUploadStatus('success');
+      setTestUploadMessage(`Server connection OK! Test content created (ID: ${result.id?.slice(0, 8)}...)`);
+      
+      // Optionally delete the test content after a few seconds
+      setTimeout(async () => {
+        try {
+          await creatorApi.deleteContent(result.id);
+          console.log('[TestUpload] Cleaned up test content');
+        } catch (e) {
+          console.warn('[TestUpload] Could not clean up test content:', e);
+        }
+      }, 3000);
+      
+    } catch (err) {
+      console.error('[TestUpload] Failed:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setTestUploadStatus('error');
+      
+      // Provide helpful context based on error
+      if (errorMsg.includes('413') || errorMsg.toLowerCase().includes('too large')) {
+        setTestUploadMessage(`Server error: Even tiny files are rejected. The server's upload limit may be set to 0 or misconfigured.`);
+      } else if (errorMsg.includes('401') || errorMsg.includes('403')) {
+        setTestUploadMessage(`Auth error: ${errorMsg}`);
+      } else {
+        setTestUploadMessage(`Upload failed: ${errorMsg}`);
+      }
+    }
+  };
+
   const handleUpload = async () => {
     if (!file || !title.trim()) {
       const msg = 'Please provide a file and title';
@@ -615,6 +681,20 @@ const CreatorUpload = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTestUpload}
+              disabled={isUploading || testUploadStatus === 'testing'}
+              className="text-xs"
+            >
+              {testUploadStatus === 'testing' ? (
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              ) : (
+                <Wifi className="w-3 h-3 mr-1" />
+              )}
+              Test Upload
+            </Button>
+            <Button
               variant={isBulkMode ? 'default' : 'outline'}
               size="sm"
               onClick={() => {
@@ -645,6 +725,35 @@ const CreatorUpload = () => {
           <div className="mb-6 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{fileSizeWarning}</span>
+          </div>
+        )}
+
+        {/* Test Upload Status */}
+        {testUploadStatus !== 'idle' && testUploadMessage && (
+          <div className={`mb-6 rounded-lg border p-3 text-sm flex items-center gap-2 ${
+            testUploadStatus === 'success' 
+              ? 'border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400'
+              : testUploadStatus === 'error'
+                ? 'border-destructive/50 bg-destructive/10 text-destructive'
+                : 'border-blue-500/50 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+          }`}>
+            {testUploadStatus === 'testing' && <Loader2 className="w-4 h-4 shrink-0 animate-spin" />}
+            {testUploadStatus === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+            {testUploadStatus === 'error' && <XCircle className="w-4 h-4 shrink-0" />}
+            <span>{testUploadMessage}</span>
+            {testUploadStatus !== 'testing' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto h-6 px-2 text-xs"
+                onClick={() => {
+                  setTestUploadStatus('idle');
+                  setTestUploadMessage(null);
+                }}
+              >
+                Dismiss
+              </Button>
+            )}
           </div>
         )}
 
