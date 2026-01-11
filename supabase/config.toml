@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.creator-proxy]
 verify_jwt = false
+
+[functions.creator-og]
+verify_jwt = false
