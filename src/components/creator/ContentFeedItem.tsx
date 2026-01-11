@@ -189,12 +189,7 @@ export const ContentFeedItem = ({
     }
   }, []);
 
-  // Toggle play/pause via button
-  const togglePlayPause = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    lastTapRef.current = null;
-
+  const doTogglePlayPause = () => {
     if (isVideo && videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -204,6 +199,14 @@ export const ContentFeedItem = ({
         setIsPlaying(true);
       }
     }
+  };
+
+  // Toggle play/pause via explicit button (never via tap)
+  const togglePlayPause = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    lastTapRef.current = null;
+    doTogglePlayPause();
   };
 
   // Handle video area click - double-tap seek only, no pause on single tap
@@ -404,14 +407,7 @@ export const ContentFeedItem = ({
     setIsSeeking(false);
   }, []);
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // If a single-tap timer is pending (from the play/pause tap handler), cancel it.
-    // Otherwise tapping mute within that 300ms window can trigger a pause.
-    lastTapRef.current = null;
-
+  const doToggleMute = () => {
     const el = videoRef.current;
     if (!el) return;
 
@@ -436,33 +432,35 @@ export const ContentFeedItem = ({
     }
   };
 
-  const toggleFullscreen = async (e: React.MouseEvent) => {
+  const toggleMute = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Cancel any double-tap detection so a UI tap can't be interpreted as a video tap.
     lastTapRef.current = null;
 
+    doToggleMute();
+  };
+
+  const doToggleFullscreen = async () => {
     const el = videoRef.current;
     const wasPlaying = !!el && !el.paused && !el.ended;
     wasPlayingBeforeFullscreenRef.current = wasPlaying;
 
     try {
       if (!document.fullscreenElement) {
-        // Enter fullscreen - use the video element directly for better mobile support
         if (el) {
-          // Try standard fullscreen first
           if (el.requestFullscreen) {
             await el.requestFullscreen();
           } else if ((el as any).webkitEnterFullscreen) {
-            // iOS Safari
             (el as any).webkitEnterFullscreen();
           }
           setIsFullscreen(true);
 
-          // Android/Chrome can pause when entering fullscreen; resume if we were playing.
           if (wasPlaying) {
             queueMicrotask(() => {
               el.play().then(() => setIsPlaying(true)).catch(() => {
-                // ignore - user gesture policy / browser quirks
+                // ignore
               });
             });
           }
@@ -474,6 +472,13 @@ export const ContentFeedItem = ({
     } catch (err) {
       console.error('Fullscreen error:', err);
     }
+  };
+
+  const toggleFullscreen = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    lastTapRef.current = null;
+    void doToggleFullscreen();
   };
 
   // Listen for fullscreen changes
@@ -742,6 +747,7 @@ export const ContentFeedItem = ({
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
+                  onPointerDown={togglePlayPause}
                   onClick={togglePlayPause}
                 >
                   <Pause className="w-4 h-4" />
@@ -779,6 +785,7 @@ export const ContentFeedItem = ({
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
+                  onPointerDown={toggleMute}
                   onClick={toggleMute}
                 >
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -797,6 +804,7 @@ export const ContentFeedItem = ({
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
+                  onPointerDown={toggleFullscreen}
                   onClick={toggleFullscreen}
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
