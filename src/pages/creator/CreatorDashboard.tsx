@@ -222,13 +222,6 @@ const CreatorDashboard = () => {
         {/* Content Grid */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Your Content</h2>
-          <Button 
-            onClick={() => setIsUploadOpen(true)}
-            className="bg-[#FF6600] hover:bg-[#FF6600]/90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Upload
-          </Button>
         </div>
 
         {isLoadingContent ? (
@@ -270,8 +263,7 @@ const CreatorDashboard = () => {
               return (
               <Card 
                 key={item.id} 
-                className="overflow-hidden group cursor-pointer hover:ring-2 hover:ring-[#FF6600]/50 transition-all"
-                onClick={() => navigate(`/content/${item.id}`)}
+                className="overflow-hidden group"
               >
                 <div className="relative aspect-video bg-muted">
                   {isVideo && thumbnailSrc ? (
@@ -338,8 +330,9 @@ const CreatorDashboard = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <h3 
-                        className="font-medium truncate hover:text-[#FF6600] transition-colors"
+                        className="font-medium truncate hover:text-[#FF6600] transition-colors cursor-pointer"
                         title={item.title || 'Untitled'}
+                        onClick={() => navigate(`/content/${item.id}`)}
                       >
                         {item.title || 'Untitled'}
                       </h3>

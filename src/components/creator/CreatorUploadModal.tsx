@@ -22,9 +22,12 @@ interface CreatorUploadModalProps {
 
 const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPaid, setIsPaid] = useState(false);
@@ -36,6 +39,8 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
   const resetForm = () => {
     setFile(null);
     setPreview(null);
+    setThumbnail(null);
+    setThumbnailPreview(null);
     setTitle('');
     setDescription('');
     setIsPaid(false);
@@ -69,6 +74,32 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    // Validate file type - only images for thumbnails
+    if (!selectedFile.type.startsWith('image/')) {
+      setUiError('Thumbnail must be an image');
+      return;
+    }
+
+    // Validate file size (max 10MB for thumbnails)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setUiError('Thumbnail must be less than 10MB');
+      return;
+    }
+
+    setUiError(null);
+    setThumbnail(selectedFile);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setThumbnailPreview(reader.result as string);
     };
     reader.readAsDataURL(selectedFile);
   };
@@ -114,6 +145,7 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
       formData.append('tier', isPaid ? 'paid' : 'free');
       if (isPaid) formData.append('price_xmr', price);
       if (tags.trim()) formData.append('tags', tags.trim());
+      if (thumbnail) formData.append('thumbnail', thumbnail);
 
       const content = await creatorApi.uploadContent(formData);
       console.log('[CreatorUploadModal] Upload successful:', content.id);
@@ -189,6 +221,46 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
                 {isVideo ? <Video className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
                 {file.name}
               </div>
+            </div>
+          )}
+
+          {/* Thumbnail Upload - only show for videos */}
+          {isVideo && file && (
+            <div className="space-y-2">
+              <Label>Thumbnail (optional)</Label>
+              <p className="text-xs text-muted-foreground">
+                Upload a custom thumbnail for your video
+              </p>
+              {!thumbnailPreview ? (
+                <div
+                  onClick={() => thumbnailInputRef.current?.click()}
+                  className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-[#FF6600]/50 transition-colors"
+                >
+                  <input
+                    ref={thumbnailInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleThumbnailSelect}
+                    className="hidden"
+                  />
+                  <ImageIcon className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm">Click to add thumbnail</p>
+                </div>
+              ) : (
+                <div className="relative">
+                  <div className="aspect-video rounded-lg overflow-hidden bg-muted max-w-[200px]">
+                    <img src={thumbnailPreview} alt="Thumbnail" className="w-full h-full object-cover" />
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={() => { setThumbnail(null); setThumbnailPreview(null); }}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
