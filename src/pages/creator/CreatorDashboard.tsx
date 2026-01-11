@@ -104,7 +104,7 @@ const CreatorDashboard = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => window.open(`/creator/${creator.publicKey}`, '_blank')}
+              onClick={() => window.open(`/creator/${creator.id}`, '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View Page
@@ -112,10 +112,14 @@ const CreatorDashboard = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => {
-                const url = `${window.location.origin}/creator/${creator.publicKey}`;
-                navigator.clipboard.writeText(url);
-                toast.success('Profile URL copied to clipboard!');
+              onClick={async () => {
+                const url = `${window.location.origin}/creator/${creator.id}`;
+                try {
+                  await navigator.clipboard.writeText(url);
+                  toast.success('Profile URL copied to clipboard!');
+                } catch {
+                  toast.error('Failed to copy link');
+                }
               }}
             >
               <Share2 className="w-4 h-4 mr-2" />
