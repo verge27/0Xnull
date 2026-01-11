@@ -185,6 +185,7 @@ const App = () => (
                   
                   {/* Creators */}
                   <Route path="/creators" element={<CreatorsHub />} />
+                  <Route path="/creator" element={<Navigate to="/creators" replace />} />
                   <Route path="/creator/register" element={<CreatorRegister />} />
                   <Route path="/creator/login" element={<CreatorLogin />} />
                   <Route path="/creator/dashboard" element={<CreatorDashboard />} />
