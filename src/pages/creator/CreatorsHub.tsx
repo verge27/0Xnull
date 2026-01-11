@@ -126,7 +126,7 @@ const CreatorsHub = () => {
                 <Card
                   key={creator.id}
                   className="overflow-hidden cursor-pointer hover:border-[#FF6600]/50 transition-colors group"
-                  onClick={() => navigate(`/creator/${creator.id}`)}
+                  onClick={() => navigate(`/creator/${creator.pubkey}`)}
                 >
                   {/* Banner */}
                   <div className="h-24 bg-gradient-to-br from-[#FF6600]/20 to-[#FF6600]/5 relative">
