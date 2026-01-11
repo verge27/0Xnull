@@ -189,7 +189,15 @@ export const ContentFeedItem = ({
     }
   }, []);
 
+  // Haptic feedback for mobile
+  const hapticFeedback = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10); // Short 10ms pulse
+    }
+  };
+
   const doTogglePlayPause = () => {
+    hapticFeedback();
     if (isVideo && videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -408,6 +416,7 @@ export const ContentFeedItem = ({
   }, []);
 
   const doToggleMute = () => {
+    hapticFeedback();
     const el = videoRef.current;
     if (!el) return;
 
@@ -435,14 +444,12 @@ export const ContentFeedItem = ({
   const toggleMute = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // Cancel any double-tap detection so a UI tap can't be interpreted as a video tap.
     lastTapRef.current = null;
-
     doToggleMute();
   };
 
   const doToggleFullscreen = async () => {
+    hapticFeedback();
     const el = videoRef.current;
     const wasPlaying = !!el && !el.paused && !el.ended;
     wasPlayingBeforeFullscreenRef.current = wasPlaying;
