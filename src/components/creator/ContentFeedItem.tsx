@@ -189,6 +189,12 @@ export const ContentFeedItem = ({
   // Toggle inline video play/pause with double-tap seek support
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // If the click originated from player UI controls, ignore it.
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('[data-video-control], [data-progress]')) {
+      return;
+    }
     
     if (isLocked) {
       if (!isPlaying && isVideo) {
@@ -585,7 +591,10 @@ export const ContentFeedItem = ({
             {isPlaying && !isLocked && duration > 0 && (
               <div 
                 className="absolute bottom-0 left-0 right-0 px-2 pb-1 pt-6 bg-gradient-to-t from-black/60 to-transparent"
-                onClick={(e) => e.stopPropagation()}
+                data-progress
+                onClickCapture={(e) => e.stopPropagation()}
+                onPointerDownCapture={(e) => e.stopPropagation()}
+                onTouchStartCapture={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center gap-2 text-white text-xs">
                   <span className="min-w-[36px]">{formatTime(currentTime)}</span>
@@ -615,7 +624,13 @@ export const ContentFeedItem = ({
             
             {/* Video controls */}
             {isPlaying && (
-              <div className="absolute bottom-8 right-4 flex gap-2" data-video-control>
+              <div
+                className="absolute bottom-8 right-4 flex gap-2"
+                data-video-control
+                onClickCapture={(e) => e.stopPropagation()}
+                onPointerDownCapture={(e) => e.stopPropagation()}
+                onTouchStartCapture={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="ghost"
                   size="icon"
