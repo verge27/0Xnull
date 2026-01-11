@@ -110,7 +110,15 @@ export function normalizeContentItem(raw: unknown): ContentItem {
     ),
 
     // Title/caption sometimes comes back as name/caption
-    title: safeString(data.title ?? data.caption ?? data.name, DEFAULT_CONTENT_ITEM.title),
+    // Handle "null" string explicitly, as API sometimes returns the literal string "null"
+    title: (() => {
+      const rawTitle = data.title ?? data.caption ?? data.name;
+      if (rawTitle === null || rawTitle === undefined || rawTitle === 'null' || rawTitle === '') {
+        return DEFAULT_CONTENT_ITEM.title;
+      }
+      const str = String(rawTitle).trim();
+      return str || DEFAULT_CONTENT_ITEM.title;
+    })(),
     description: safeStringOptional(data.description ?? data.text ?? data.body),
 
     // Thumbnail can be returned as hash OR as a direct URL

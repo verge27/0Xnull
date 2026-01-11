@@ -188,6 +188,15 @@ const CreatorUpload = () => {
     // Compress images before upload
     if (isCompressibleImage(selectedFile)) {
       setIsCompressing(true);
+      
+      // Generate early preview from original file so user sees something immediately
+      const earlyPreviewReader = new FileReader();
+      earlyPreviewReader.onload = (e) => {
+        // Only set if we don't have a preview yet
+        setPreview((prev) => prev ?? (e.target?.result as string));
+      };
+      earlyPreviewReader.readAsDataURL(selectedFile);
+      
       try {
         const result = await optimizeImage(selectedFile, { preset: quality });
         setFile(result.file);
@@ -204,9 +213,7 @@ const CreatorUpload = () => {
       } catch (err) {
         console.error('[CreatorUpload] Image compression failed:', err);
         setFile(selectedFile);
-        const reader = new FileReader();
-        reader.onload = (e) => setPreview(e.target?.result as string);
-        reader.readAsDataURL(selectedFile);
+        // Preview was already set above, no need to re-read
       } finally {
         setIsCompressing(false);
       }
@@ -214,6 +221,21 @@ const CreatorUpload = () => {
       // Compress videos before upload
       setIsCompressing(true);
       setVideoThumbnail(null);
+      
+      // Generate early thumbnail from original so user sees something immediately
+      extractVideoThumbnail(selectedFile, { time: 1 })
+        .then((thumb) => {
+          // Only set if we don't have thumbnails yet
+          setVideoThumbnail((prev) => prev ?? thumb.dataUrl);
+          setPreview((prev) => prev ?? thumb.dataUrl);
+        })
+        .catch(() => {
+          // Fallback: just generate data URL preview
+          const reader = new FileReader();
+          reader.onload = (e) => setPreview((prev) => prev ?? (e.target?.result as string));
+          reader.readAsDataURL(selectedFile);
+        });
+      
       try {
         const result = await optimizeVideo(selectedFile, {
           preset: quality,
@@ -233,24 +255,12 @@ const CreatorUpload = () => {
           setPreview(thumbnail.dataUrl);
         } catch (thumbErr) {
           console.warn('[CreatorUpload] Thumbnail extraction failed:', thumbErr);
-          // Fallback to video data URL (less efficient but works)
-          const reader = new FileReader();
-          reader.onload = (e) => setPreview(e.target?.result as string);
-          reader.readAsDataURL(result.file);
+          // Keep the early preview we generated
         }
       } catch (err) {
         console.error('[CreatorUpload] Video compression failed:', err);
         setFile(selectedFile);
-        // Try to get thumbnail from original
-        try {
-          const thumbnail = await extractVideoThumbnail(selectedFile, { time: 1 });
-          setVideoThumbnail(thumbnail.dataUrl);
-          setPreview(thumbnail.dataUrl);
-        } catch {
-          const reader = new FileReader();
-          reader.onload = (e) => setPreview(e.target?.result as string);
-          reader.readAsDataURL(selectedFile);
-        }
+        // Keep the early preview/thumbnail we generated above
       } finally {
         setIsCompressing(false);
         setCompressionProgress(null);
@@ -989,20 +999,34 @@ const CreatorUpload = () => {
                             Video
                           </Badge>
                         </div>
-                      ) : (
+                      ) : preview ? (
                         <video
-                          src={preview || undefined}
+                          src={preview}
                           className="w-full aspect-video object-contain bg-black"
                           controls
                         />
+                      ) : (
+                        <div className="w-full aspect-video bg-muted flex items-center justify-center">
+                          <div className="text-center">
+                            <Film className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">Generating preview...</p>
+                          </div>
+                        </div>
                       )}
                     </>
-                  ) : (
+                  ) : preview ? (
                     <img
-                      src={preview || undefined}
+                      src={preview}
                       alt="Preview"
                       className="w-full aspect-video object-contain bg-muted"
                     />
+                  ) : (
+                    <div className="w-full aspect-video bg-muted flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageIcon className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Generating preview...</p>
+                      </div>
+                    </div>
                   )}
                   <Button
                     variant="destructive"
