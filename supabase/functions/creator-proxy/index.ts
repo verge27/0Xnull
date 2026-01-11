@@ -87,6 +87,11 @@ serve(async (req) => {
       let responseBody: unknown;
       try {
         responseBody = JSON.parse(responseText);
+        
+        // Log content data for debugging titles/thumbnails
+        if (path.includes('/my/content') || path.includes('/content')) {
+          console.log('[creator-proxy] Content response sample:', JSON.stringify(responseBody).slice(0, 2000));
+        }
       } catch {
         responseBody = { message: responseText };
       }
