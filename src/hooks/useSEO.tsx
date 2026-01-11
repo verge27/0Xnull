@@ -180,6 +180,22 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Login - 0xNull',
     description: 'Sign in to 0xNull. Access your marketplace and prediction market accounts.',
   },
+  '/creators': {
+    title: '0xNull Creators - Privacy-First Creator Platform',
+    description: 'Discover creators on 0xNull. A privacy-first creator platform with no email, no password, no KYC. Just cryptographic identity and Monero payments.',
+  },
+  '/creator/register': {
+    title: 'Become a Creator - 0xNull Creators',
+    description: 'Join 0xNull Creators. Create content, earn Monero, maintain your privacy.',
+  },
+  '/creator/login': {
+    title: 'Creator Login - 0xNull Creators',
+    description: 'Sign in to your 0xNull creator account with your private key.',
+  },
+  '/creator/dashboard': {
+    title: 'Creator Dashboard - 0xNull Creators',
+    description: 'Manage your content, view earnings, and connect with subscribers.',
+  },
 };
 
 // Breadcrumb configuration for pages

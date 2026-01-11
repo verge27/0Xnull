@@ -32,6 +32,45 @@ import { CreatorDMPanel } from '@/components/creator/CreatorDMPanel';
 import { BundlesSection } from '@/components/creator/BundlesSection';
 import { toast } from 'sonner';
 
+// Helper to update document meta tags for creator profiles
+const updateCreatorMeta = (profile: CreatorProfileType | null) => {
+  if (!profile) return;
+  
+  const title = `${profile.display_name} - 0xNull Creators`;
+  const description = profile.bio || `Check out ${profile.display_name} on 0xNull Creators. ${profile.content_count} posts, ${profile.subscriber_count} subscribers.`;
+  const url = `https://0xnull.io/creator/${profile.id}`;
+  const image = profile.avatar_url 
+    ? creatorApi.getMediaUrl(profile.avatar_url) 
+    : 'https://0xnull.io/og-image.png';
+
+  // Update document title
+  document.title = title;
+
+  // Helper to set or create meta tag
+  const setMeta = (property: string, content: string, isName = false) => {
+    const attr = isName ? 'name' : 'property';
+    let tag = document.querySelector(`meta[${attr}="${property}"]`);
+    if (!tag) {
+      tag = document.createElement('meta');
+      tag.setAttribute(attr, property);
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+  };
+
+  // Update meta tags
+  setMeta('description', description, true);
+  setMeta('og:title', title);
+  setMeta('og:description', description);
+  setMeta('og:url', url);
+  setMeta('og:image', image);
+  setMeta('og:type', 'profile');
+  setMeta('og:site_name', '0xNull Creators');
+  setMeta('twitter:title', title);
+  setMeta('twitter:description', description);
+  setMeta('twitter:image', image);
+};
+
 const CreatorProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -52,6 +91,9 @@ const CreatorProfile = () => {
       try {
         const profileData = await creatorApi.getCreatorProfile(id);
         setProfile(profileData);
+        
+        // Update page SEO/meta tags with creator info
+        updateCreatorMeta(profileData);
         
         // Fetch creator's content
         try {
