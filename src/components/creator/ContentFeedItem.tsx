@@ -263,12 +263,17 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
               </div>
             )}
           </>
-        ) : (
+        ) : content.media_hash ? (
+          // For non-video content with media_hash, try to display it
           <img
-            src={content.thumbnail_url ? creatorApi.getMediaUrl(content.thumbnail_url) : '/placeholder.svg'}
+            src={creatorApi.getMediaUrl(content.thumbnail_url || content.media_hash)}
             alt={content.title || 'Content'}
             className={`w-full aspect-video object-cover ${isLocked ? 'blur-md' : ''}`}
           />
+        ) : (
+          <div className="w-full aspect-video bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground">No preview</span>
+          </div>
         )}
 
         {/* Locked overlay */}

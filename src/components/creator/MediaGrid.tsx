@@ -67,14 +67,26 @@ export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGri
             className="relative aspect-square cursor-pointer group overflow-hidden rounded-sm"
             onClick={() => navigate(`/content/${item.id}`)}
           >
-            {/* Thumbnail */}
-            <img
-              src={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : '/placeholder.svg'}
-              alt={item.title || 'Video content'}
-              className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
-                isLocked ? 'blur-sm' : ''
-              }`}
-            />
+            {/* Thumbnail - for videos without thumbnails, use the video element */}
+            {isVideo && !item.thumbnail_url && item.media_hash ? (
+              <video
+                src={creatorApi.getMediaUrl(item.media_hash)}
+                className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                  isLocked ? 'blur-sm' : ''
+                }`}
+                muted
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <img
+                src={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : '/placeholder.svg'}
+                alt={item.title || 'Content'}
+                className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                  isLocked ? 'blur-sm' : ''
+                }`}
+              />
+            )}
 
             {/* Hover overlay with share button */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
