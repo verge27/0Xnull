@@ -382,10 +382,29 @@ export const ContentFeedItem = ({
   const toggleMute = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const el = videoRef.current;
+    if (!el) return;
+
+    const wasPlaying = !el.paused && !el.ended;
     const newMuted = !isMuted;
+
+    console.log('[ContentFeedItem] toggleMute', { wasPlaying, from: isMuted, to: newMuted });
+
     setIsMuted(newMuted);
-    if (videoRef.current) {
-      videoRef.current.muted = newMuted;
+    el.muted = newMuted;
+
+    // iOS/Safari can briefly pause when toggling muted; ensure playback resumes.
+    if (wasPlaying) {
+      // Ensure we have a non-zero volume when unmuting
+      if (!newMuted && el.volume === 0) {
+        el.volume = Math.max(0.2, volume);
+        setVolume(el.volume);
+      }
+
+      queueMicrotask(() => {
+        el.play().catch((err) => console.warn('[ContentFeedItem] play() after toggleMute failed', err));
+      });
     }
   };
 
@@ -598,6 +617,8 @@ export const ContentFeedItem = ({
                   variant="ghost"
                   size="icon"
                   className="bg-background/80 hover:bg-background"
+                  onPointerDownCapture={(ev) => ev.stopPropagation()}
+                  onTouchStartCapture={(ev) => ev.stopPropagation()}
                   onClick={toggleMute}
                 >
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -606,6 +627,8 @@ export const ContentFeedItem = ({
                   variant="ghost"
                   size="icon"
                   className="bg-background/80 hover:bg-background"
+                  onPointerDownCapture={(ev) => ev.stopPropagation()}
+                  onTouchStartCapture={(ev) => ev.stopPropagation()}
                   onClick={toggleFullscreen}
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
