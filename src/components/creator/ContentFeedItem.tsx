@@ -705,18 +705,28 @@ export const ContentFeedItem = ({
                 className="absolute bottom-8 right-4 flex gap-2"
                 data-video-control
                 onClickCapture={(e) => e.stopPropagation()}
-                onPointerDownCapture={(e) => e.stopPropagation()}
-                onTouchStartCapture={(e) => e.stopPropagation()}
+                onPointerDownCapture={(e) => {
+                  // On Android, a touch can synthesize a later "click" that bubbles to the
+                  // video container; preventDefault here helps avoid ghost-taps toggling pause.
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onTouchStartCapture={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
                 <Button
                   variant="ghost"
                   size="icon"
                   className="bg-background/80 hover:bg-background"
                   onPointerDownCapture={(ev) => {
+                    ev.preventDefault();
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
                   onTouchStartCapture={(ev) => {
+                    ev.preventDefault();
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
@@ -729,10 +739,12 @@ export const ContentFeedItem = ({
                   size="icon"
                   className="bg-background/80 hover:bg-background"
                   onPointerDownCapture={(ev) => {
+                    ev.preventDefault();
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
                   onTouchStartCapture={(ev) => {
+                    ev.preventDefault();
                     ev.stopPropagation();
                     lastTapRef.current = null;
                   }}
