@@ -47,13 +47,18 @@ export const CreatorAgeGate = ({
   };
 
   const handleExit = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = "https://google.com";
-    }
+    onDeclined();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onDeclined()}>
+    <Dialog
+      open={open}
+      // Don't treat closing the modal (escape/X) as a "decline".
+      // Only the explicit EXIT button should decline.
+      onOpenChange={(_isOpen) => {
+        /* intentionally controlled by parent */
+      }}
+    >
       <DialogContent className="sm:max-w-lg" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
