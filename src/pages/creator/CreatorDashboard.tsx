@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Eye, Unlock, Coins, Settings, LogOut, 
   MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon,
-  Upload, ExternalLink, Share2
+  Upload, ExternalLink, Share2, Check, Copy
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -107,6 +108,18 @@ const CreatorDashboard = () => {
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View Page
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                const url = `${window.location.origin}/creator/${creator.publicKey}`;
+                navigator.clipboard.writeText(url);
+                toast.success('Profile URL copied to clipboard!');
+              }}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/creator/settings')}>
               <Settings className="w-4 h-4 mr-2" />
