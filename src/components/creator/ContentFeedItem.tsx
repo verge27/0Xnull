@@ -320,7 +320,7 @@ export const ContentFeedItem = ({
   const handleProgressBarInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    lastTapRef.current = null;
     if (!progressBarRef.current || !videoRef.current) return;
     
     const rect = progressBarRef.current.getBoundingClientRect();
@@ -383,6 +383,10 @@ export const ContentFeedItem = ({
     e.preventDefault();
     e.stopPropagation();
 
+    // If a single-tap timer is pending (from the play/pause tap handler), cancel it.
+    // Otherwise tapping mute within that 300ms window can trigger a pause.
+    lastTapRef.current = null;
+
     const el = videoRef.current;
     if (!el) return;
 
@@ -394,9 +398,8 @@ export const ContentFeedItem = ({
     setIsMuted(newMuted);
     el.muted = newMuted;
 
-    // iOS/Safari can briefly pause when toggling muted; ensure playback resumes.
+    // Some browsers can briefly pause when toggling muted; ensure playback resumes.
     if (wasPlaying) {
-      // Ensure we have a non-zero volume when unmuting
       if (!newMuted && el.volume === 0) {
         el.volume = Math.max(0.2, volume);
         setVolume(el.volume);
@@ -612,13 +615,19 @@ export const ContentFeedItem = ({
             
             {/* Video controls */}
             {isPlaying && (
-              <div className="absolute bottom-8 right-4 flex gap-2">
+              <div className="absolute bottom-8 right-4 flex gap-2" data-video-control>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="bg-background/80 hover:bg-background"
-                  onPointerDownCapture={(ev) => ev.stopPropagation()}
-                  onTouchStartCapture={(ev) => ev.stopPropagation()}
+                  onPointerDownCapture={(ev) => {
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
+                  onTouchStartCapture={(ev) => {
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
                   onClick={toggleMute}
                 >
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -627,8 +636,14 @@ export const ContentFeedItem = ({
                   variant="ghost"
                   size="icon"
                   className="bg-background/80 hover:bg-background"
-                  onPointerDownCapture={(ev) => ev.stopPropagation()}
-                  onTouchStartCapture={(ev) => ev.stopPropagation()}
+                  onPointerDownCapture={(ev) => {
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
+                  onTouchStartCapture={(ev) => {
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
                   onClick={toggleFullscreen}
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
