@@ -97,6 +97,8 @@ export const ContentFeedItem = ({
   const lastTapRef = useRef<{ time: number; x: number } | null>(null);
   const touchStartRef = useRef<{ y: number; volume: number } | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const progressContainerRef = useRef<HTMLDivElement>(null);
   
   // Like state
   const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
@@ -194,6 +196,14 @@ export const ContentFeedItem = ({
     // If the click originated from player UI controls, ignore it completely.
     const target = e.target as HTMLElement | null;
     if (target?.closest('[data-video-control], [data-progress], button')) {
+      return;
+    }
+
+    // Extra safety: check refs directly (Android touch event quirks)
+    if (
+      controlsRef.current?.contains(target) ||
+      progressContainerRef.current?.contains(target)
+    ) {
       return;
     }
     
@@ -655,6 +665,7 @@ export const ContentFeedItem = ({
             {/* Progress bar */}
             {isPlaying && !isLocked && duration > 0 && (
               <div 
+                ref={progressContainerRef}
                 className="absolute bottom-0 left-0 right-0 px-2 pb-1 pt-6 bg-gradient-to-t from-black/60 to-transparent"
                 data-progress
                 onClickCapture={(e) => e.stopPropagation()}
@@ -690,6 +701,7 @@ export const ContentFeedItem = ({
             {/* Video controls */}
             {isPlaying && (
               <div
+                ref={controlsRef}
                 className="absolute bottom-8 right-4 flex gap-2"
                 data-video-control
                 onClickCapture={(e) => e.stopPropagation()}
