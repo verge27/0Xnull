@@ -196,6 +196,7 @@ const App = () => (
                   <Route path="/creator/content-policy" element={<CreatorContentPolicy />} />
                   <Route path="/creator/2257" element={<Creator2257 />} />
                   <Route path="/creator/:id" element={<CreatorProfile />} />
+                  <Route path="/creator/:creatorId/content/:contentId" element={<ContentView />} />
                   <Route path="/content/:id" element={<ContentView />} />
                   <Route path="/content/search" element={<ContentSearch />} />
                   

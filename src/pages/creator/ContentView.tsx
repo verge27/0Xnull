@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Lock, Unlock, Loader2, ArrowLeft, Eye, Clock, Copy, Check } from 'lucide-react';
+import { Lock, Unlock, Loader2, ArrowLeft, Eye, Clock, Copy, Check, Heart, Share2, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -12,44 +13,135 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { creatorApi, ContentItem, UnlockResponse } from '@/services/creatorApi';
+import { creatorApi, ContentItem, CreatorProfile as CreatorProfileType } from '@/services/creatorApi';
 import { useToken } from '@/hooks/useToken';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { toast } from 'sonner';
+
+// Simple localStorage-based likes (persistent per-browser)
+const getLikedContentIds = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem('liked_content');
+    return new Set(stored ? JSON.parse(stored) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const setLikedContentIds = (ids: Set<string>) => {
+  localStorage.setItem('liked_content', JSON.stringify([...ids]));
+};
 
 const ContentView = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, creatorId, contentId } = useParams<{ id?: string; creatorId?: string; contentId?: string }>();
   const navigate = useNavigate();
   const { token } = useToken();
   
+  // Support both /content/:id and /creator/:creatorId/content/:contentId routes
+  const actualContentId = contentId || id;
+  
   const [content, setContent] = useState<(ContentItem & { is_unlocked: boolean }) | null>(null);
+  const [creator, setCreator] = useState<CreatorProfileType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Like state
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  
+  // Share state
+  const [shareCopied, setShareCopied] = useState(false);
+  
   // Payment flow
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [paymentInfo, setPaymentInfo] = useState<UnlockResponse | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<import('@/services/creatorApi').UnlockResponse | null>(null);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const fetchContent = useCallback(async () => {
-    if (!id) return;
+    if (!actualContentId) return;
     
     try {
-      const data = await creatorApi.getContent(id);
+      const data = await creatorApi.getContent(actualContentId);
       setContent(data);
+      setLikeCount(data.unlock_count || 0); // Use unlock_count as base for likes display
+      
+      // Check if user has liked this content
+      const likedIds = getLikedContentIds();
+      setIsLiked(likedIds.has(actualContentId));
+      
+      // Fetch creator profile if we have creatorId or from content
+      const cId = creatorId || data.creator_id;
+      if (cId) {
+        try {
+          const creatorData = await creatorApi.getCreatorProfile(cId);
+          setCreator(creatorData);
+        } catch (err) {
+          console.warn('Failed to fetch creator:', err);
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch content:', err);
       setError('Content not found');
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [actualContentId, creatorId]);
 
   useEffect(() => {
     fetchContent();
   }, [fetchContent]);
+
+  const handleLike = () => {
+    if (!actualContentId) return;
+    
+    const likedIds = getLikedContentIds();
+    
+    if (isLiked) {
+      likedIds.delete(actualContentId);
+      setLikeCount(prev => Math.max(0, prev - 1));
+      setIsLiked(false);
+      toast.success('Removed from favorites');
+    } else {
+      likedIds.add(actualContentId);
+      setLikeCount(prev => prev + 1);
+      setIsLiked(true);
+      toast.success('Added to favorites');
+    }
+    
+    setLikedContentIds(likedIds);
+  };
+
+  const handleShare = async () => {
+    const cId = creatorId || content?.creator_id;
+    const shareUrl = cId 
+      ? `${window.location.origin}/creator/${cId}/content/${actualContentId}`
+      : `${window.location.origin}/content/${actualContentId}`;
+    const shareTitle = content?.title 
+      ? `${content.title}${creator ? ` by ${creator.display_name}` : ''}`
+      : 'Content on 0xNull Creators';
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: shareTitle, url: shareUrl });
+        return;
+      }
+    } catch (err) {
+      console.warn('[ContentView] navigator.share failed:', err);
+    }
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopied(true);
+      toast.success('Link copied to clipboard');
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch (err) {
+      console.error('[ContentView] copy failed:', err);
+      toast.error('Could not copy link');
+    }
+  };
 
   const handleUnlock = async () => {
     if (!token) {
@@ -58,10 +150,10 @@ const ContentView = () => {
       return;
     }
 
-    if (!id) return;
+    if (!actualContentId) return;
 
     try {
-      const payment = await creatorApi.unlockContent(id, token);
+      const payment = await creatorApi.unlockContent(actualContentId, token);
       setPaymentInfo(payment);
       setPaymentMessage(null);
       setIsPaymentOpen(true);
@@ -72,11 +164,11 @@ const ContentView = () => {
   };
 
   const checkPaymentStatus = async () => {
-    if (!id || !token) return;
+    if (!actualContentId || !token) return;
 
     setIsCheckingPayment(true);
     try {
-      const { unlocked } = await creatorApi.checkUnlockStatus(id, token);
+      const { unlocked } = await creatorApi.checkUnlockStatus(actualContentId, token);
       if (unlocked) {
         console.log('[ContentView] Payment confirmed - content unlocked');
         setPaymentMessage('Payment confirmed! Content unlocked.');
@@ -203,10 +295,39 @@ const ContentView = () => {
           )}
         </div>
 
+        {/* Creator Info Card */}
+        {creator && (
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <Link 
+                to={`/creator/${creator.id}`}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              >
+                <Avatar className="w-12 h-12">
+                  {creator.avatar_url ? (
+                    <AvatarImage src={creatorApi.getMediaUrl(creator.avatar_url)} />
+                  ) : null}
+                  <AvatarFallback className="bg-[#FF6600]/20 text-[#FF6600]">
+                    {(creator.display_name || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold hover:text-[#FF6600] transition-colors">
+                    {creator.display_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {creator.subscriber_count ?? 0} subscribers • {creator.content_count ?? 0} posts
+                  </p>
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Content Info */}
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-2xl font-bold">{content.title || 'Untitled'}</h1>
               <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -217,18 +338,46 @@ const ContentView = () => {
                 </Badge>
               </div>
             </div>
+            
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLike}
+                className={isLiked ? 'text-red-500 border-red-500/50' : ''}
+              >
+                <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-red-500' : ''}`} />
+                {likeCount}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+              >
+                {shareCopied ? (
+                  <Check className="w-4 h-4 mr-1 text-green-500" />
+                ) : (
+                  <Share2 className="w-4 h-4 mr-1" />
+                )}
+                Share
+              </Button>
+            </div>
           </div>
 
           {content.description && (
             <p className="text-muted-foreground">{content.description}</p>
           )}
 
-          <Link
-            to={`/creator/${content.creator_id}`}
-            className="inline-block text-[#FF6600] hover:underline"
-          >
-            View Creator Profile →
-          </Link>
+          {!creator && (
+            <Link
+              to={`/creator/${content.creator_id}`}
+              className="inline-flex items-center gap-2 text-[#FF6600] hover:underline"
+            >
+              <User className="w-4 h-4" />
+              View Creator Profile →
+            </Link>
+          )}
 
           {/* Tags */}
           {content.tags && content.tags.length > 0 && (

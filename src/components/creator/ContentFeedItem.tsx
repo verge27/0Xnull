@@ -30,6 +30,20 @@ interface ContentFeedItemProps {
 
 const TEASER_DURATION = 10; // 10 second teaser for paid content
 
+// Simple localStorage-based likes (persistent per-browser)
+const getLikedContentIds = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem('liked_content');
+    return new Set(stored ? JSON.parse(stored) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const setLikedContentIds = (ids: Set<string>) => {
+  localStorage.setItem('liked_content', JSON.stringify([...ids]));
+};
+
 export const ContentFeedItem = ({ content, creator, isSubscribed = false }: ContentFeedItemProps) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -38,10 +52,33 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
   const [showTeaserOverlay, setShowTeaserOverlay] = useState(false);
   const [teaserTimeLeft, setTeaserTimeLeft] = useState(TEASER_DURATION);
   const [copied, setCopied] = useState(false);
+  
+  // Like state
+  const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
+  const [likeCount, setLikeCount] = useState(content.unlock_count || 0);
 
   const isPaid = content.tier === 'paid';
   const isLocked = isPaid && !isSubscribed;
   const isVideo = content.media_hash?.match(/\.(mp4|webm|mov)$/i);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const likedIds = getLikedContentIds();
+    
+    if (isLiked) {
+      likedIds.delete(content.id);
+      setLikeCount(prev => Math.max(0, prev - 1));
+      setIsLiked(false);
+      toast.success('Removed from favorites');
+    } else {
+      likedIds.add(content.id);
+      setLikeCount(prev => prev + 1);
+      setIsLiked(true);
+      toast.success('Added to favorites');
+    }
+    
+    setLikedContentIds(likedIds);
+  };
   
   // Teaser countdown for paid video content
   useEffect(() => {
@@ -265,9 +302,12 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
         )}
         
         <div className="flex items-center gap-4 text-muted-foreground">
-          <button className="flex items-center gap-1 hover:text-[#FF6600] transition-colors">
-            <Heart className="w-5 h-5" />
-            <span className="text-sm">{content.unlock_count || 0}</span>
+          <button 
+            className={`flex items-center gap-1 hover:text-[#FF6600] transition-colors ${isLiked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500' : ''}`} />
+            <span className="text-sm">{likeCount}</span>
           </button>
           <button className="flex items-center gap-1 hover:text-[#FF6600] transition-colors">
             <MessageCircle className="w-5 h-5" />
