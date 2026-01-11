@@ -90,8 +90,12 @@ export const ContentFeedItem = ({
   const [seekIndicator, setSeekIndicator] = useState<'forward' | 'backward' | null>(null);
   const [volume, setVolume] = useState(1);
   const [showVolumeIndicator, setShowVolumeIndicator] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
   const lastTapRef = useRef<{ time: number; x: number } | null>(null);
   const touchStartRef = useRef<{ y: number; volume: number } | null>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   
   // Like state
   const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
@@ -290,6 +294,91 @@ export const ContentFeedItem = ({
     }
   };
 
+  // Format time as mm:ss
+  const formatTime = (seconds: number) => {
+    if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle video time update
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current && !isSeeking) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  }, [isSeeking]);
+
+  // Handle video metadata loaded
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  }, []);
+
+  // Handle progress bar click/drag
+  const handleProgressBarInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!progressBarRef.current || !videoRef.current) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const position = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const newTime = position * duration;
+    
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  }, [duration]);
+
+  const handleProgressBarMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsSeeking(true);
+    handleProgressBarInteraction(e);
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!progressBarRef.current || !videoRef.current) return;
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const position = Math.max(0, Math.min(1, (moveEvent.clientX - rect.left) / rect.width));
+      const newTime = position * duration;
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    };
+    
+    const handleMouseUp = () => {
+      setIsSeeking(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [duration, handleProgressBarInteraction]);
+
+  const handleProgressBarTouchStart = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    setIsSeeking(true);
+    handleProgressBarInteraction(e);
+  }, [handleProgressBarInteraction]);
+
+  const handleProgressBarTouchMove = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (!progressBarRef.current || !videoRef.current || !isSeeking) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const position = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+    const newTime = position * duration;
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  }, [duration, isSeeking]);
+
+  const handleProgressBarTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    setIsSeeking(false);
+  }, []);
+
   const toggleMute = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -466,11 +555,45 @@ export const ContentFeedItem = ({
               playsInline
               loop={!isLocked}
               onEnded={() => setIsPlaying(false)}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
             />
+            
+            {/* Progress bar */}
+            {isPlaying && !isLocked && duration > 0 && (
+              <div 
+                className="absolute bottom-0 left-0 right-0 px-2 pb-1 pt-6 bg-gradient-to-t from-black/60 to-transparent"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-2 text-white text-xs">
+                  <span className="min-w-[36px]">{formatTime(currentTime)}</span>
+                  <div
+                    ref={progressBarRef}
+                    className="flex-1 h-1 bg-white/30 rounded-full cursor-pointer relative group"
+                    onMouseDown={handleProgressBarMouseDown}
+                    onTouchStart={handleProgressBarTouchStart}
+                    onTouchMove={handleProgressBarTouchMove}
+                    onTouchEnd={handleProgressBarTouchEnd}
+                  >
+                    {/* Progress fill */}
+                    <div 
+                      className="absolute top-0 left-0 h-full bg-[#FF6600] rounded-full transition-all duration-100"
+                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                    />
+                    {/* Scrubber handle */}
+                    <div 
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ left: `calc(${(currentTime / duration) * 100}% - 6px)` }}
+                    />
+                  </div>
+                  <span className="min-w-[36px] text-right">{formatTime(duration)}</span>
+                </div>
+              </div>
+            )}
             
             {/* Video controls */}
             {isPlaying && (
-              <div className="absolute bottom-4 right-4 flex gap-2">
+              <div className="absolute bottom-8 right-4 flex gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
