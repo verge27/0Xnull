@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, Users, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -160,7 +160,7 @@ const CreatorsHub = () => {
                       {creator.display_name || 'Unknown'}
                     </h3>
                     <p className="text-xs text-muted-foreground font-mono">
-                      {truncateKey(creator.pubkey, 6, 6)}
+                      {truncateKey(creator.pubkey || creator.id, 6, 6)}
                     </p>
                     {creator.bio && (
                       <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
@@ -171,6 +171,17 @@ const CreatorsHub = () => {
                       <span>{creator.content_count ?? 0} content</span>
                       <span>{creator.subscriber_count ?? 0} subscribers</span>
                     </div>
+                    <Button
+                      size="sm"
+                      className="w-full mt-4 bg-[#FF6600] hover:bg-[#FF6600]/90"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/creator/${creator.id}`);
+                      }}
+                    >
+                      <ExternalLink className="w-3 h-3 mr-2" />
+                      View Profile
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
