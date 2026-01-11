@@ -307,9 +307,21 @@ class CreatorApiClient {
       console.log('[CreatorApi] uploadContent: response status', response.status);
 
       if (!response.ok) {
+        // Handle 413 Payload Too Large specifically
+        if (response.status === 413) {
+          throw new Error('File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.');
+        }
+        
         const errorData = await response.json().catch(() => ({}));
         console.error('[CreatorApi] uploadContent: error', errorData);
-        throw new Error(errorData.error || errorData.message || `Upload failed: ${response.status}`);
+        
+        // Also check for 413-related error messages in the response
+        const errorMsg = errorData.error || errorData.message || '';
+        if (errorMsg.toLowerCase().includes('too large') || errorMsg.toLowerCase().includes('entity too large')) {
+          throw new Error('File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.');
+        }
+        
+        throw new Error(errorMsg || `Upload failed: ${response.status}`);
       }
 
       const raw = await response.json();
@@ -317,6 +329,10 @@ class CreatorApiClient {
       return normalizeContentItem(raw);
     } catch (err) {
       console.error('[CreatorApi] uploadContent: exception', err);
+      // Re-throw with better message if it's a network error that might be 413-related
+      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+        throw new Error('Upload failed. This may be due to file size limits or network issues. Try a smaller file.');
+      }
       throw err;
     }
   }

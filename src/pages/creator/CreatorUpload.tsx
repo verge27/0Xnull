@@ -24,6 +24,7 @@ import { extractVideoThumbnail, getVideoDuration } from '@/lib/videoThumbnail';
 import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const WARN_FILE_SIZE = 50 * 1024 * 1024; // 50MB - warn about potential server limits
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
 const MAX_UPLOAD_ATTEMPTS = 3;
 const MAX_BULK_FILES = 10;
@@ -100,23 +101,37 @@ const CreatorUpload = () => {
     setIsDragging(false);
   }, []);
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = (file: File): { error: string | null; warning: string | null } => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, MP4, WebM, MOV';
+      return { error: 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, MP4, WebM, MOV', warning: null };
     }
     if (file.size > MAX_FILE_SIZE) {
-      return 'File too large. Maximum size is 100MB';
+      return { error: 'File too large. Maximum size is 100MB', warning: null };
     }
-    return null;
+    // Warn about files that might exceed server limits
+    if (file.size > WARN_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      return { 
+        error: null, 
+        warning: `Large file (${sizeMB}MB). If upload fails, try compressing the file first.` 
+      };
+    }
+    return { error: null, warning: null };
   };
 
+  // State for file size warning
+  const [fileSizeWarning, setFileSizeWarning] = useState<string | null>(null);
+
   const handleFileSelect = useCallback(async (selectedFile: File, forceSkipCompression = false) => {
-    const error = validateFile(selectedFile);
+    const { error, warning } = validateFile(selectedFile);
     if (error) {
       console.warn('[CreatorUpload] File validation failed:', error);
       setUiError(error);
       return;
     }
+    
+    // Set warning but allow upload to proceed
+    setFileSizeWarning(warning);
 
     setUiError(null);
     setOriginalFile(selectedFile);
@@ -263,6 +278,7 @@ const CreatorUpload = () => {
     setCompressionSavings(null);
     setVideoDuration(null);
     setThumbnailTime(1);
+    setFileSizeWarning(null);
   };
 
   // Handle thumbnail time change
@@ -329,7 +345,7 @@ const CreatorUpload = () => {
     
     for (let i = 0; i < Math.min(files.length, remaining); i++) {
       const file = files[i];
-      const error = validateFile(file);
+      const { error } = validateFile(file);
       if (error) {
         console.warn('[CreatorUpload] Skipping invalid file:', file.name, error);
         continue;
@@ -621,7 +637,14 @@ const CreatorUpload = () => {
         {uiError && (
           <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
-            {uiError}
+            <span>{uiError}</span>
+          </div>
+        )}
+        
+        {fileSizeWarning && !uiError && (
+          <div className="mb-6 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{fileSizeWarning}</span>
           </div>
         )}
 
