@@ -88,7 +88,10 @@ export const ContentFeedItem = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [seekIndicator, setSeekIndicator] = useState<'forward' | 'backward' | null>(null);
+  const [volume, setVolume] = useState(1);
+  const [showVolumeIndicator, setShowVolumeIndicator] = useState(false);
   const lastTapRef = useRef<{ time: number; x: number } | null>(null);
+  const touchStartRef = useRef<{ y: number; volume: number } | null>(null);
   
   // Like state
   const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
@@ -231,6 +234,43 @@ export const ContentFeedItem = ({
       }
     }, 300);
   };
+
+  // Touch handlers for volume swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!isPlaying || !isVideo || isLocked) return;
+    
+    const touch = e.touches[0];
+    touchStartRef.current = { y: touch.clientY, volume };
+  }, [isPlaying, isVideo, isLocked, volume]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || !videoRef.current || !isPlaying) return;
+    
+    const touch = e.touches[0];
+    const deltaY = touchStartRef.current.y - touch.clientY;
+    const sensitivity = 200; // pixels for full volume range
+    
+    // Calculate new volume based on swipe distance
+    const volumeChange = deltaY / sensitivity;
+    const newVolume = Math.max(0, Math.min(1, touchStartRef.current.volume + volumeChange));
+    
+    setVolume(newVolume);
+    videoRef.current.volume = newVolume;
+    
+    // Unmute if adjusting volume
+    if (newVolume > 0 && isMuted) {
+      setIsMuted(false);
+      videoRef.current.muted = false;
+    }
+    
+    setShowVolumeIndicator(true);
+  }, [isPlaying, isMuted]);
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+    // Hide volume indicator after a delay
+    setTimeout(() => setShowVolumeIndicator(false), 800);
+  }, []);
   
   // Handle delete
   const handleDelete = async () => {
@@ -411,6 +451,9 @@ export const ContentFeedItem = ({
       <div 
         className="relative cursor-pointer"
         onClick={handleVideoClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {isVideo ? (
           <>
@@ -460,6 +503,28 @@ export const ContentFeedItem = ({
                     {seekIndicator === 'backward' ? '-10s' : '+10s'}
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* Volume indicator */}
+            {showVolumeIndicator && isPlaying && (
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
+                <div className="bg-background/80 rounded-full p-2">
+                  {volume === 0 ? (
+                    <VolumeX className="w-5 h-5 text-white" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-white" />
+                  )}
+                </div>
+                <div className="h-24 w-1 bg-white/30 rounded-full overflow-hidden rotate-180">
+                  <div 
+                    className="w-full bg-[#FF6600] rounded-full transition-all duration-100"
+                    style={{ height: `${volume * 100}%` }}
+                  />
+                </div>
+                <span className="text-white text-xs font-medium">
+                  {Math.round(volume * 100)}%
+                </span>
               </div>
             )}
             
