@@ -192,16 +192,30 @@ class CreatorApiClient {
 
   async getContent(contentId: string): Promise<ContentItem & { is_unlocked: boolean }> {
     const raw = await this.request<Record<string, unknown>>(`/content/${contentId}`);
-    const normalized = normalizeContentItem(raw);
+
+    // Some endpoints wrap the content item
+    const payload = (raw?.content ?? raw?.item ?? raw?.data ?? raw) as Record<string, unknown>;
+    const normalized = normalizeContentItem(payload);
+
     return {
       ...normalized,
       is_unlocked: raw?.is_unlocked === true,
     };
   }
 
-  getMediaUrl(hash: string): string {
-    // Media URLs need direct access (no CORS issue for media)
-    return `https://api.0xnull.io/api/creator/media/${hash}`;
+  getMediaUrl(hashOrUrl: string): string {
+    // Upstream may return a direct URL (or already-prefixed path). If so, use as-is.
+    if (/^(https?:)?\/\//i.test(hashOrUrl) || hashOrUrl.startsWith('data:')) {
+      return hashOrUrl;
+    }
+
+    // Some responses return "/api/creator/media/..."; keep it working.
+    if (hashOrUrl.startsWith('/')) {
+      return `https://api.0xnull.io${hashOrUrl}`;
+    }
+
+    // Otherwise treat it as a media hash.
+    return `https://api.0xnull.io/api/creator/media/${hashOrUrl}`;
   }
 
   // ============ Auth Endpoints ============
@@ -296,7 +310,7 @@ class CreatorApiClient {
     // Don't set Content-Type for FormData - browser will set it with boundary
 
     console.log('[CreatorApi] uploadContent: starting upload');
-    
+
     try {
       const response = await fetch(getProxyUrl('/content/upload'), {
         method: 'POST',
@@ -309,24 +323,34 @@ class CreatorApiClient {
       if (!response.ok) {
         // Handle 413 Payload Too Large specifically
         if (response.status === 413) {
-          throw new Error('File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.');
+          throw new Error(
+            'File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.'
+          );
         }
-        
+
         const errorData = await response.json().catch(() => ({}));
         console.error('[CreatorApi] uploadContent: error', errorData);
-        
+
         // Also check for 413-related error messages in the response
         const errorMsg = errorData.error || errorData.message || '';
-        if (errorMsg.toLowerCase().includes('too large') || errorMsg.toLowerCase().includes('entity too large')) {
-          throw new Error('File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.');
+        if (
+          errorMsg.toLowerCase().includes('too large') ||
+          errorMsg.toLowerCase().includes('entity too large')
+        ) {
+          throw new Error(
+            'File too large for server. The server rejected this file due to size limits. Try compressing the file or uploading a smaller version.'
+          );
         }
-        
+
         throw new Error(errorMsg || `Upload failed: ${response.status}`);
       }
 
       const raw = await response.json();
       console.log('[CreatorApi] uploadContent: success', raw);
-      return normalizeContentItem(raw);
+
+      // API sometimes wraps the item in { content: {...} } / { item: {...} }
+      const payload = (raw?.content ?? raw?.item ?? raw?.data ?? raw) as unknown;
+      return normalizeContentItem(payload);
     } catch (err) {
       console.error('[CreatorApi] uploadContent: exception', err);
       // Re-throw with better message if it's a network error that might be 413-related
