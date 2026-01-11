@@ -79,6 +79,7 @@ export const ContentFeedItem = ({
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wasPlayingBeforeFullscreenRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -413,19 +414,33 @@ export const ContentFeedItem = ({
   const toggleFullscreen = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    lastTapRef.current = null;
+
+    const el = videoRef.current;
+    const wasPlaying = !!el && !el.paused && !el.ended;
+    wasPlayingBeforeFullscreenRef.current = wasPlaying;
+
     try {
       if (!document.fullscreenElement) {
         // Enter fullscreen - use the video element directly for better mobile support
-        if (videoRef.current) {
-          // Try video element first (better for mobile)
-          if (videoRef.current.requestFullscreen) {
-            await videoRef.current.requestFullscreen();
-          } else if ((videoRef.current as any).webkitEnterFullscreen) {
+        if (el) {
+          // Try standard fullscreen first
+          if (el.requestFullscreen) {
+            await el.requestFullscreen();
+          } else if ((el as any).webkitEnterFullscreen) {
             // iOS Safari
-            (videoRef.current as any).webkitEnterFullscreen();
+            (el as any).webkitEnterFullscreen();
           }
           setIsFullscreen(true);
+
+          // Android/Chrome can pause when entering fullscreen; resume if we were playing.
+          if (wasPlaying) {
+            queueMicrotask(() => {
+              el.play().then(() => setIsPlaying(true)).catch(() => {
+                // ignore - user gesture policy / browser quirks
+              });
+            });
+          }
         }
       } else {
         await document.exitFullscreen();
@@ -439,12 +454,24 @@ export const ContentFeedItem = ({
   // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isFs = !!document.fullscreenElement;
+      setIsFullscreen(isFs);
+
+      // Some Android browsers pause the element during the fullscreen transition.
+      if (isFs && wasPlayingBeforeFullscreenRef.current && videoRef.current) {
+        videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {
+          // ignore
+        });
+      }
+
+      if (!isFs) {
+        wasPlayingBeforeFullscreenRef.current = false;
+      }
     };
-    
+
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
