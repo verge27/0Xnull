@@ -13,8 +13,24 @@ import {
   Copy,
   Check,
   Heart,
-  Package
+  Package,
+  Users
 } from 'lucide-react';
+
+// Safe date formatting helper
+const formatJoinDate = (dateStr: string | undefined | null): string => {
+  if (!dateStr) return 'Unknown';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short' 
+    });
+  } catch {
+    return 'Unknown';
+  }
+};
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -181,8 +197,19 @@ const CreatorProfile = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main>
+        {/* Browse link */}
+        <div className="container mx-auto px-4 pt-4">
+          <Link 
+            to="/creators" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Users className="w-4 h-4" />
+            Browse Creators
+          </Link>
+        </div>
+
         {/* Banner */}
-        <div className="h-48 md:h-64 bg-gradient-to-br from-[#FF6600]/30 to-[#FF6600]/5 relative">
+        <div className="h-48 md:h-64 bg-gradient-to-br from-[#FF6600]/30 to-[#FF6600]/5 relative mt-2">
           {profile.banner_url && (
             <img
               src={creatorApi.getMediaUrl(profile.banner_url)}
@@ -290,14 +317,7 @@ const CreatorProfile = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Joined</span>
-                      <span>
-                        {profile.created_at 
-                          ? new Date(profile.created_at).toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'short' 
-                            })
-                          : 'Unknown'}
-                      </span>
+                      <span>{formatJoinDate(profile.created_at)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Posts</span>
