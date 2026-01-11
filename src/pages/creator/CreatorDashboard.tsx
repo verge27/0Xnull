@@ -340,12 +340,16 @@ const CreatorDashboard = () => {
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" /> {viewCount}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Unlock className="w-3 h-3" /> {unlockCount}
-                        </span>
-                        <span className="flex items-center gap-1 text-[#FF6600]">
-                          <Coins className="w-3 h-3" /> {earningsXmr.toFixed(4)}
-                        </span>
+                        {item.tier === 'paid' && (
+                          <span className="flex items-center gap-1">
+                            <Unlock className="w-3 h-3" /> {unlockCount}
+                          </span>
+                        )}
+                        {item.tier === 'paid' && (
+                          <span className="flex items-center gap-1 text-[#FF6600]">
+                            <Coins className="w-3 h-3" /> {earningsXmr.toFixed(4)}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <DropdownMenu>
