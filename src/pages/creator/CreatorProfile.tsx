@@ -290,7 +290,14 @@ const CreatorProfile = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Joined</span>
-                      <span>{new Date(profile.created_at).toLocaleDateString()}</span>
+                      <span>
+                        {profile.created_at 
+                          ? new Date(profile.created_at).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short' 
+                            })
+                          : 'Unknown'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Posts</span>
