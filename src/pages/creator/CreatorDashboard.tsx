@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Eye, Unlock, Coins, Settings, LogOut, 
   MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon,
-  Upload, ExternalLink, Share2, Check, Copy
+  Upload, ExternalLink, Share2, Check, Copy, Play, Film
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -256,15 +256,68 @@ const CreatorDashboard = () => {
               const viewCount = item.view_count ?? 0;
               const unlockCount = item.unlock_count ?? 0;
               const earningsXmr = item.earnings_xmr ?? 0;
+              const isVideo = item.media_type?.startsWith('video/') || 
+                             item.media_hash?.includes('.mp4') ||
+                             item.media_hash?.includes('.webm');
+              
+              // Determine thumbnail/preview URL
+              const thumbnailSrc = item.thumbnail_url 
+                ? creatorApi.getMediaUrl(item.thumbnail_url)
+                : item.media_hash
+                  ? creatorApi.getMediaUrl(item.media_hash)
+                  : null;
 
               return (
-              <Card key={item.id} className="overflow-hidden group">
+              <Card 
+                key={item.id} 
+                className="overflow-hidden group cursor-pointer hover:ring-2 hover:ring-[#FF6600]/50 transition-all"
+                onClick={() => navigate(`/content/${item.id}`)}
+              >
                 <div className="relative aspect-video bg-muted">
-                  {item.thumbnail_url ? (
+                  {isVideo && thumbnailSrc ? (
+                    // For videos, show thumbnail with play overlay, or inline video preview
+                    <div className="relative w-full h-full">
+                      <video
+                        src={creatorApi.getMediaUrl(item.media_hash || '')}
+                        poster={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : undefined}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                        onMouseEnter={(e) => {
+                          const video = e.currentTarget;
+                          video.play().catch(() => {});
+                        }}
+                        onMouseLeave={(e) => {
+                          const video = e.currentTarget;
+                          video.pause();
+                          video.currentTime = 0;
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/content/${item.id}`);
+                        }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                        <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white fill-white" />
+                        </div>
+                      </div>
+                      <Badge className="absolute top-2 left-2 bg-black/60 text-white">
+                        <Film className="w-3 h-3 mr-1" />
+                        Video
+                      </Badge>
+                    </div>
+                  ) : thumbnailSrc ? (
                     <img
-                      src={creatorApi.getMediaUrl(item.thumbnail_url)}
+                      src={thumbnailSrc}
                       alt={item.title || 'Content'}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -283,8 +336,13 @@ const CreatorDashboard = () => {
                 </div>
                 <CardContent className="p-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-medium truncate">{item.title || 'Untitled'}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 
+                        className="font-medium truncate hover:text-[#FF6600] transition-colors"
+                        title={item.title || 'Untitled'}
+                      >
+                        {item.title || 'Untitled'}
+                      </h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" /> {viewCount}
@@ -299,23 +357,33 @@ const CreatorDashboard = () => {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/content/${item.id}`)}>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/content/${item.id}`);
+                        }}>
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
                           toast.info('Edit feature coming soon');
                         }}>
                           <Pencil className="w-4 h-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             if (confirm('Are you sure you want to delete this content?')) {
                               await handleDeleteContent(item.id);
                               toast.success('Content deleted');
