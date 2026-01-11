@@ -138,25 +138,35 @@ const CreatorSettings = () => {
     try {
       // Upload avatar if changed
       let avatarUrl: string | undefined;
+      let avatarUploadError: string | null = null;
       if (avatarFile) {
         try {
           setUiMessage('Uploading avatar...');
-          avatarUrl = await creatorApi.uploadProfileImage(avatarFile, 'avatar');
+          const result = await creatorApi.uploadProfileImage(avatarFile, 'avatar');
+          // __attached__ means the image was uploaded but we don't get a URL back
+          // The refresh will pick it up
+          if (result && result !== '__attached__') {
+            avatarUrl = result;
+          }
         } catch (error) {
           console.error('Avatar upload failed:', error);
-          setUiMessage('Failed to upload avatar. Continuing with other changes...');
+          avatarUploadError = error instanceof Error ? error.message : 'Avatar upload failed';
         }
       }
 
       // Upload banner if changed
       let bannerUrl: string | undefined;
+      let bannerUploadError: string | null = null;
       if (bannerFile) {
         try {
           setUiMessage('Uploading banner...');
-          bannerUrl = await creatorApi.uploadProfileImage(bannerFile, 'banner');
+          const result = await creatorApi.uploadProfileImage(bannerFile, 'banner');
+          if (result && result !== '__attached__') {
+            bannerUrl = result;
+          }
         } catch (error) {
           console.error('Banner upload failed:', error);
-          setUiMessage('Failed to upload banner. Continuing with other changes...');
+          bannerUploadError = error instanceof Error ? error.message : 'Banner upload failed';
         }
       }
 
@@ -173,7 +183,18 @@ const CreatorSettings = () => {
       await creatorApi.updateMyProfile(updatePayload);
 
       await refreshProfile();
-      setUiMessage('Profile updated successfully.');
+      
+      // Build success/warning message
+      const errors = [avatarUploadError, bannerUploadError].filter(Boolean);
+      if (errors.length > 0) {
+        setUiMessage(`Profile saved. Note: ${errors.join('. ')}`);
+      } else {
+        setUiMessage('Profile updated successfully!');
+      }
+      
+      // Clear file state after successful save
+      setAvatarFile(null);
+      setBannerFile(null);
     } catch (error) {
       console.error('Failed to save profile:', error);
       setUiMessage(error instanceof Error ? error.message : 'Failed to save profile');
