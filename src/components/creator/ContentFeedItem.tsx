@@ -190,9 +190,9 @@ export const ContentFeedItem = ({
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // If the click originated from player UI controls, ignore it.
+    // If the click originated from player UI controls, ignore it completely.
     const target = e.target as HTMLElement | null;
-    if (target?.closest('[data-video-control], [data-progress]')) {
+    if (target?.closest('[data-video-control], [data-progress], button')) {
       return;
     }
     
@@ -220,29 +220,22 @@ export const ContentFeedItem = ({
       return;
     }
 
-    // Record this tap
+    // Record this tap for double-tap detection
     lastTapRef.current = { time: now, x: clickX };
 
-    // Delay single-tap action to detect potential double-tap
-    setTimeout(() => {
-      // Only execute single-tap if this tap wasn't followed by another
-      if (lastTapRef.current && lastTapRef.current.time === now) {
-        // For unlocked content - play/pause inline
-        if (isVideo && videoRef.current) {
-          if (isPlaying) {
-            videoRef.current.pause();
-            setIsPlaying(false);
-          } else {
-            videoRef.current.play();
-            setIsPlaying(true);
-          }
-        } else {
-          // For non-video content, navigate to detail
-          navigate(`/content/${content.id}`);
-        }
-        lastTapRef.current = null;
+    // For single tap - toggle play/pause immediately (no delay)
+    if (isVideo && videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
       }
-    }, 300);
+    } else {
+      // For non-video content, navigate to detail
+      navigate(`/content/${content.id}`);
+    }
   };
 
   // Touch handlers for volume swipe
