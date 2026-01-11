@@ -118,7 +118,9 @@ export function normalizeContentItem(raw: unknown): ContentItem {
         data.thumbnail ??
         data.thumbnail_hash ??
         data.thumb_hash ??
-        data.thumb
+        data.thumb ??
+        data.preview_url ??
+        data.preview
     ),
 
     // Media can be returned as hash OR as a direct URL
