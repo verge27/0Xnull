@@ -18,8 +18,8 @@ import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { optimizeImage, isCompressibleImage } from '@/lib/imageCompression';
-import { optimizeVideo, isCompressibleVideo, type VideoCompressionProgress } from '@/lib/videoCompression';
+import { optimizeImage, isCompressibleImage, IMAGE_QUALITY_PRESETS, type CompressionQuality } from '@/lib/imageCompression';
+import { optimizeVideo, isCompressibleVideo, VIDEO_QUALITY_PRESETS, type VideoCompressionProgress } from '@/lib/videoCompression';
 import { extractVideoThumbnail, getVideoDuration } from '@/lib/videoThumbnail';
 import { withRetry, createProgressTracker, type UploadProgress } from '@/lib/uploadRetry';
 
@@ -50,6 +50,7 @@ const CreatorUpload = () => {
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [compressionSavings, setCompressionSavings] = useState<number | null>(null);
   const [skipCompression, setSkipCompression] = useState(false);
+  const [compressionQuality, setCompressionQuality] = useState<CompressionQuality>('medium');
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [thumbnailTime, setThumbnailTime] = useState<number>(1);
   const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
@@ -124,7 +125,11 @@ const CreatorUpload = () => {
   // State for file size warning
   const [fileSizeWarning, setFileSizeWarning] = useState<string | null>(null);
 
-  const handleFileSelect = useCallback(async (selectedFile: File, forceSkipCompression = false) => {
+  const handleFileSelect = useCallback(async (
+    selectedFile: File, 
+    forceSkipCompression = false,
+    qualityOverride?: CompressionQuality
+  ) => {
     const { error, warning } = validateFile(selectedFile);
     if (error) {
       console.warn('[CreatorUpload] File validation failed:', error);
@@ -134,6 +139,9 @@ const CreatorUpload = () => {
     
     // Set warning but allow upload to proceed
     setFileSizeWarning(warning);
+
+    // Use quality override if provided, otherwise use current state
+    const quality = qualityOverride ?? compressionQuality;
 
     setUiError(null);
     setOriginalFile(selectedFile);
@@ -181,7 +189,7 @@ const CreatorUpload = () => {
     if (isCompressibleImage(selectedFile)) {
       setIsCompressing(true);
       try {
-        const result = await optimizeImage(selectedFile);
+        const result = await optimizeImage(selectedFile, { preset: quality });
         setFile(result.file);
         
         if (result.compressionRatio < 1) {
@@ -208,6 +216,7 @@ const CreatorUpload = () => {
       setVideoThumbnail(null);
       try {
         const result = await optimizeVideo(selectedFile, {
+          preset: quality,
           onProgress: setCompressionProgress,
         });
         setFile(result.file);
@@ -253,7 +262,7 @@ const CreatorUpload = () => {
       reader.onload = (e) => setPreview(e.target?.result as string);
       reader.readAsDataURL(selectedFile);
     }
-  }, [skipCompression]);
+  }, [skipCompression, compressionQuality]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -1268,7 +1277,54 @@ const CreatorUpload = () => {
                     disabled={isCompressing || isUploading}
                   />
                 </div>
+                
+                {/* Quality Presets */}
                 {!skipCompression && (
+                  <div className="space-y-3 pt-3 border-t">
+                    <Label className="text-sm font-medium">Compression Quality</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['low', 'medium', 'high'] as CompressionQuality[]).map((quality) => {
+                        const imagePreset = IMAGE_QUALITY_PRESETS[quality];
+                        const videoPreset = VIDEO_QUALITY_PRESETS[quality];
+                        const isVideo = originalFile?.type.startsWith('video/');
+                        const preset = isVideo ? videoPreset : imagePreset;
+                        
+                        return (
+                          <button
+                            key={quality}
+                            type="button"
+                            onClick={() => {
+                              setCompressionQuality(quality);
+                              // Re-process file if one is selected with the new quality
+                              if (originalFile && !skipCompression) {
+                                handleFileSelect(originalFile, false, quality);
+                              }
+                            }}
+                            disabled={isCompressing || isUploading}
+                            className={`p-3 rounded-lg border text-left transition-all ${
+                              compressionQuality === quality
+                                ? 'border-[#FF6600] bg-[#FF6600]/10 ring-1 ring-[#FF6600]'
+                                : 'border-border hover:border-[#FF6600]/50'
+                            } ${(isCompressing || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <p className="font-medium text-sm">{preset.label}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {preset.description}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {originalFile?.type.startsWith('video/') 
+                        ? `Video will be resized to max ${VIDEO_QUALITY_PRESETS[compressionQuality].maxWidth}x${VIDEO_QUALITY_PRESETS[compressionQuality].maxHeight}`
+                        : `Image will be resized to max ${IMAGE_QUALITY_PRESETS[compressionQuality].maxDimension}px`
+                      }
+                    </p>
+                  </div>
+                )}
+                
+                {!skipCompression && !originalFile && (
                   <div className="bg-[#FF6600]/10 border border-[#FF6600]/20 rounded-lg p-3">
                     <p className="text-sm text-[#FF6600] flex items-center gap-2">
                       <Zap className="w-4 h-4" />

@@ -2,9 +2,36 @@
  * Image compression utility for reducing file size before upload
  */
 
-const MAX_DIMENSION = 1920; // Max width/height
-const JPEG_QUALITY = 0.85;
-const WEBP_QUALITY = 0.85;
+export type CompressionQuality = 'low' | 'medium' | 'high';
+
+// Quality presets for images
+export const IMAGE_QUALITY_PRESETS: Record<CompressionQuality, {
+  maxDimension: number;
+  quality: number;
+  label: string;
+  description: string;
+}> = {
+  low: {
+    maxDimension: 1280,
+    quality: 0.6,
+    label: 'Low',
+    description: 'Smallest file size, reduced quality',
+  },
+  medium: {
+    maxDimension: 1920,
+    quality: 0.75,
+    label: 'Medium',
+    description: 'Balanced quality and file size',
+  },
+  high: {
+    maxDimension: 2560,
+    quality: 0.9,
+    label: 'High',
+    description: 'Best quality, larger file size',
+  },
+};
+
+const DEFAULT_QUALITY: CompressionQuality = 'medium';
 
 export interface CompressionResult {
   file: File;
@@ -72,11 +99,13 @@ export const compressImage = async (
     maxDimension?: number;
     quality?: number;
     outputFormat?: 'image/jpeg' | 'image/webp';
+    preset?: CompressionQuality;
   } = {}
 ): Promise<CompressionResult> => {
+  const preset = options.preset ? IMAGE_QUALITY_PRESETS[options.preset] : null;
   const {
-    maxDimension = MAX_DIMENSION,
-    quality = JPEG_QUALITY,
+    maxDimension = preset?.maxDimension ?? IMAGE_QUALITY_PRESETS[DEFAULT_QUALITY].maxDimension,
+    quality = preset?.quality ?? IMAGE_QUALITY_PRESETS[DEFAULT_QUALITY].quality,
     outputFormat = 'image/jpeg',
   } = options;
 

@@ -5,6 +5,49 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
+export type CompressionQuality = 'low' | 'medium' | 'high';
+
+// Quality presets for videos
+export const VIDEO_QUALITY_PRESETS: Record<CompressionQuality, {
+  maxWidth: number;
+  maxHeight: number;
+  videoBitrate: string;
+  audioBitrate: string;
+  crf: number;
+  label: string;
+  description: string;
+}> = {
+  low: {
+    maxWidth: 854,
+    maxHeight: 480,
+    videoBitrate: '800k',
+    audioBitrate: '96k',
+    crf: 32,
+    label: 'Low (480p)',
+    description: 'Smallest file, 480p resolution',
+  },
+  medium: {
+    maxWidth: 1280,
+    maxHeight: 720,
+    videoBitrate: '1500k',
+    audioBitrate: '128k',
+    crf: 28,
+    label: 'Medium (720p)',
+    description: 'Balanced quality, 720p resolution',
+  },
+  high: {
+    maxWidth: 1920,
+    maxHeight: 1080,
+    videoBitrate: '3000k',
+    audioBitrate: '192k',
+    crf: 23,
+    label: 'High (1080p)',
+    description: 'Best quality, 1080p resolution',
+  },
+};
+
+const DEFAULT_QUALITY: CompressionQuality = 'medium';
+
 export interface VideoCompressionResult {
   file: File;
   originalSize: number;
@@ -100,20 +143,24 @@ export const compressVideo = async (
     maxHeight?: number;
     videoBitrate?: string;
     audioBitrate?: string;
+    crf?: number;
+    preset?: CompressionQuality;
     onProgress?: (progress: VideoCompressionProgress) => void;
   } = {}
 ): Promise<VideoCompressionResult> => {
+  const qualityPreset = options.preset ? VIDEO_QUALITY_PRESETS[options.preset] : null;
   const {
-    maxWidth = 1280,
-    maxHeight = 720,
-    videoBitrate = '1500k',
-    audioBitrate = '128k',
+    maxWidth = qualityPreset?.maxWidth ?? VIDEO_QUALITY_PRESETS[DEFAULT_QUALITY].maxWidth,
+    maxHeight = qualityPreset?.maxHeight ?? VIDEO_QUALITY_PRESETS[DEFAULT_QUALITY].maxHeight,
+    videoBitrate = qualityPreset?.videoBitrate ?? VIDEO_QUALITY_PRESETS[DEFAULT_QUALITY].videoBitrate,
+    audioBitrate = qualityPreset?.audioBitrate ?? VIDEO_QUALITY_PRESETS[DEFAULT_QUALITY].audioBitrate,
+    crf = qualityPreset?.crf ?? VIDEO_QUALITY_PRESETS[DEFAULT_QUALITY].crf,
     onProgress,
   } = options;
 
   const originalSize = file.size;
 
-  console.log(`[videoCompression] Starting compression for ${file.name} (${(originalSize / (1024 * 1024)).toFixed(1)} MB)`);
+  console.log(`[videoCompression] Starting compression for ${file.name} (${(originalSize / (1024 * 1024)).toFixed(1)} MB) with preset: ${options.preset || 'default'}`);
 
   const ffmpeg = await getFFmpeg(onProgress);
 
@@ -135,15 +182,13 @@ export const compressVideo = async (
     message: 'Compressing video...',
   });
 
-  // Run compression
-  // Scale to fit within maxWidth x maxHeight while maintaining aspect ratio
-  // -crf 28 is a good balance between quality and file size
+  // Run compression with quality preset CRF
   await ffmpeg.exec([
     '-i', inputName,
     '-vf', `scale='min(${maxWidth},iw)':'min(${maxHeight},ih)':force_original_aspect_ratio=decrease`,
     '-c:v', 'libx264',
     '-preset', 'fast',
-    '-crf', '28',
+    '-crf', String(crf),
     '-b:v', videoBitrate,
     '-maxrate', videoBitrate,
     '-bufsize', `${parseInt(videoBitrate) * 2}k`,
