@@ -314,12 +314,13 @@ export const ContentFeedItem = ({
   
   // Handle delete
   const handleDelete = async () => {
-    if (!onDelete) return;
-    
     setIsDeleting(true);
     try {
       await creatorApi.deleteContent(content.id);
-      onDelete(content.id);
+      // Call the callback if provided
+      if (onDelete) {
+        onDelete(content.id);
+      }
       toast.success('Content deleted');
     } catch (error) {
       console.error('Failed to delete:', error);
