@@ -54,9 +54,9 @@ export const useCreatorAgeGate = () => {
   }, []);
 
   const decline = useCallback(() => {
-    // Redirect away from the site
+    // Exit creators content but keep user in-app (avoid cross-origin navigation issues, esp. Safari)
     if (typeof window !== 'undefined') {
-      window.location.href = "https://google.com";
+      window.location.href = "/";
     }
   }, []);
 

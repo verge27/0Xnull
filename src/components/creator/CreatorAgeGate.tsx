@@ -53,13 +53,18 @@ export const CreatorAgeGate = ({
   return (
     <Dialog
       open={open}
-      // Don't treat closing the modal (escape/X) as a "decline".
-      // Only the explicit EXIT button should decline.
+      // Age gate must be explicit; don't allow dismiss via overlay/escape/X.
       onOpenChange={(_isOpen) => {
         /* intentionally controlled by parent */
       }}
     >
-      <DialogContent className="sm:max-w-lg" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-lg"
+        hideClose
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-destructive/10">
