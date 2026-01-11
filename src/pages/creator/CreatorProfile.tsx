@@ -111,20 +111,29 @@ const CreatorProfile = () => {
         // Update page SEO/meta tags with creator info
         updateCreatorMeta(profileData);
         
-        // Fetch creator's content
-        try {
-          const contentData = await creatorApi.searchContent({ 
-            q: '', 
-            page: 1, 
-            limit: 50 
-          });
-          // Filter content by creator and sort by newest first
-          const creatorContent = contentData.content
-            .filter(c => c.creator_id === id)
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          setContent(creatorContent);
-        } catch {
-          setContent([]);
+        // Use embedded content from profile response if available
+        if (profileData.content && profileData.content.length > 0) {
+          // Sort by newest first
+          const sorted = [...profileData.content].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          setContent(sorted);
+        } else {
+          // Fallback: fetch via search if profile didn't include content
+          try {
+            const contentData = await creatorApi.searchContent({ 
+              q: '', 
+              page: 1, 
+              limit: 50 
+            });
+            // Filter content by creator and sort by newest first
+            const creatorContent = contentData.content
+              .filter(c => c.creator_id === id)
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            setContent(creatorContent);
+          } catch {
+            setContent([]);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch profile:', err);

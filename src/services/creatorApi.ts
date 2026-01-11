@@ -185,9 +185,24 @@ class CreatorApiClient {
     };
   }
 
-  async getCreatorProfile(creatorId: string): Promise<CreatorProfile> {
-    const raw = await this.request(`/profile/${creatorId}`);
-    return normalizeCreatorProfile(raw);
+  async getCreatorProfile(creatorId: string): Promise<CreatorProfile & { content?: ContentItem[] }> {
+    const raw = await this.request<Record<string, unknown>>(`/profile/${creatorId}`);
+    const profile = normalizeCreatorProfile(raw);
+    
+    // API embeds content array directly in profile response
+    let embeddedContent: ContentItem[] = [];
+    if (Array.isArray(raw?.content)) {
+      embeddedContent = (raw.content as unknown[]).map((item) => {
+        const normalized = normalizeContentItem(item);
+        // Ensure creator_id is set from the profile
+        if (!normalized.creator_id) {
+          normalized.creator_id = creatorId;
+        }
+        return normalized;
+      });
+    }
+    
+    return { ...profile, content: embeddedContent };
   }
 
   async getContent(contentId: string): Promise<ContentItem & { is_unlocked: boolean }> {
