@@ -94,22 +94,51 @@ export function normalizeContentItem(raw: unknown): ContentItem {
     return { ...DEFAULT_CONTENT_ITEM };
   }
 
-  const data = raw as Record<string, unknown>;
+  // Some endpoints wrap the item under { content: {...} } or { item: {...} }
+  const maybeWrapped = raw as Record<string, unknown>;
+  const data = (maybeWrapped.content ?? maybeWrapped.item ?? maybeWrapped.data ?? maybeWrapped) as Record<
+    string,
+    unknown
+  >;
 
   return {
-    id: safeString(data.id, DEFAULT_CONTENT_ITEM.id),
-    creator_id: safeString(data.creator_id, DEFAULT_CONTENT_ITEM.creator_id),
-    title: safeString(data.title, DEFAULT_CONTENT_ITEM.title),
-    description: safeStringOptional(data.description),
-    thumbnail_url: safeStringOptional(data.thumbnail_url),
-    media_hash: safeStringOptional(data.media_hash),
-    tier: safeTier(data.tier),
-    price_xmr: safeNumberOptional(data.price_xmr),
-    tags: safeStringArray(data.tags),
-    view_count: safeNumber(data.view_count, DEFAULT_CONTENT_ITEM.view_count),
-    unlock_count: safeNumber(data.unlock_count, DEFAULT_CONTENT_ITEM.unlock_count),
-    earnings_xmr: safeNumber(data.earnings_xmr, DEFAULT_CONTENT_ITEM.earnings_xmr),
-    created_at: safeString(data.created_at, DEFAULT_CONTENT_ITEM.created_at),
+    id: safeString(data.id ?? data.content_id ?? data.uuid, DEFAULT_CONTENT_ITEM.id),
+    creator_id: safeString(
+      data.creator_id ?? data.creatorId ?? data.creator ?? data.creator_uuid,
+      DEFAULT_CONTENT_ITEM.creator_id
+    ),
+
+    // Title/caption sometimes comes back as name/caption
+    title: safeString(data.title ?? data.caption ?? data.name, DEFAULT_CONTENT_ITEM.title),
+    description: safeStringOptional(data.description ?? data.text ?? data.body),
+
+    // Thumbnail can be returned as hash OR as a direct URL
+    thumbnail_url: safeStringOptional(
+      data.thumbnail_url ??
+        data.thumbnail ??
+        data.thumbnail_hash ??
+        data.thumb_hash ??
+        data.thumb
+    ),
+
+    // Media can be returned as hash OR as a direct URL
+    media_hash: safeStringOptional(
+      data.media_hash ?? data.media ?? data.media_url ?? data.file_hash ?? data.hash
+    ),
+
+    tier: safeTier(data.tier ?? data.access ?? data.visibility),
+    price_xmr: safeNumberOptional(data.price_xmr ?? data.price ?? data.priceXmr),
+    tags: safeStringArray(data.tags ?? data.tag_list ?? data.tagList),
+
+    view_count: safeNumber(data.view_count ?? data.views, DEFAULT_CONTENT_ITEM.view_count),
+    unlock_count: safeNumber(
+      data.unlock_count ?? data.unlocks ?? data.likes,
+      DEFAULT_CONTENT_ITEM.unlock_count
+    ),
+    earnings_xmr: safeNumberOptional(data.earnings_xmr ?? data.earnings ?? data.earningsXmr) ??
+      DEFAULT_CONTENT_ITEM.earnings_xmr,
+
+    created_at: safeString(data.created_at ?? data.createdAt, DEFAULT_CONTENT_ITEM.created_at),
   };
 }
 
