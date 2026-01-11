@@ -332,7 +332,7 @@ const CreatorProfile = () => {
               <SubscriptionCard 
                 creator={profile} 
                 isSubscribed={isSubscribed}
-                subscriptionPrice={0.5}
+                subscriptionPrice={0.02}
                 onSubscribe={() => setIsSubscribed(true)}
               />
               
