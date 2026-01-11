@@ -310,6 +310,41 @@ class CreatorApiClient {
     return normalizeCreatorProfile(raw);
   }
 
+  /**
+   * Upload a profile image (avatar or banner)
+   * Returns the URL/hash to use in updateMyProfile
+   */
+  async uploadProfileImage(file: File, type: 'avatar' | 'banner'): Promise<string> {
+    const headers: HeadersInit = {};
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    console.log(`[CreatorApi] uploadProfileImage: uploading ${type}`);
+
+    const response = await fetch(getProxyUrl('/profile/image'), {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[CreatorApi] uploadProfileImage: error', errorData);
+      throw new Error(errorData.error || errorData.message || `Upload failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('[CreatorApi] uploadProfileImage: success', data);
+    
+    // API may return { url, hash, avatar_url, banner_url, etc. }
+    return data.url || data.hash || data[`${type}_url`] || data[`${type}_hash`] || '';
+  }
+
   async getMyContent(page = 1, limit = 20): Promise<{ content: ContentItem[]; total: number }> {
     const raw = await this.request<{ content?: unknown; total?: number }>(`/my/content?page=${page}&limit=${limit}`);
     return {

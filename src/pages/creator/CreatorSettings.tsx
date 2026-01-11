@@ -139,28 +139,38 @@ const CreatorSettings = () => {
       // Upload avatar if changed
       let avatarUrl: string | undefined;
       if (avatarFile) {
-        const formData = new FormData();
-        formData.append('file', avatarFile);
-        formData.append('type', 'avatar');
-        // The API should handle avatar uploads - for now we include it in profile update
+        try {
+          setUiMessage('Uploading avatar...');
+          avatarUrl = await creatorApi.uploadProfileImage(avatarFile, 'avatar');
+        } catch (error) {
+          console.error('Avatar upload failed:', error);
+          setUiMessage('Failed to upload avatar. Continuing with other changes...');
+        }
       }
 
       // Upload banner if changed
       let bannerUrl: string | undefined;
       if (bannerFile) {
-        const formData = new FormData();
-        formData.append('file', bannerFile);
-        formData.append('type', 'banner');
-        // The API should handle banner uploads
+        try {
+          setUiMessage('Uploading banner...');
+          bannerUrl = await creatorApi.uploadProfileImage(bannerFile, 'banner');
+        } catch (error) {
+          console.error('Banner upload failed:', error);
+          setUiMessage('Failed to upload banner. Continuing with other changes...');
+        }
       }
 
-      // Update profile
-      await creatorApi.updateMyProfile({
+      setUiMessage('Saving profile...');
+
+      // Update profile - only send avatar/banner if we got new URLs
+      const updatePayload: Parameters<typeof creatorApi.updateMyProfile>[0] = {
         display_name: displayName.trim(),
         bio: bio.trim() || undefined,
-        avatar_url: avatarUrl,
-        banner_url: bannerUrl,
-      });
+      };
+      if (avatarUrl) updatePayload.avatar_url = avatarUrl;
+      if (bannerUrl) updatePayload.banner_url = bannerUrl;
+      
+      await creatorApi.updateMyProfile(updatePayload);
 
       await refreshProfile();
       setUiMessage('Profile updated successfully.');
@@ -271,7 +281,12 @@ const CreatorSettings = () => {
                 {/* Avatar positioned at bottom */}
                 <div className="absolute -bottom-10 left-4">
                   <div className="relative">
-                    <div className="w-20 h-20 rounded-full bg-background border-4 border-background overflow-hidden">
+                    {/* Make the entire avatar clickable on mobile */}
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="w-20 h-20 md:w-20 md:h-20 rounded-full bg-background border-4 border-background overflow-hidden cursor-pointer touch-manipulation active:scale-95 transition-transform"
+                    >
                       {avatarPreview ? (
                         <img
                           src={avatarPreview}
@@ -283,7 +298,7 @@ const CreatorSettings = () => {
                           {displayName.charAt(0).toUpperCase() || '?'}
                         </div>
                       )}
-                    </div>
+                    </button>
                     <input
                       ref={avatarInputRef}
                       type="file"
@@ -291,14 +306,12 @@ const CreatorSettings = () => {
                       className="hidden"
                       onChange={handleAvatarChange}
                     />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full"
-                      onClick={() => avatarInputRef.current?.click()}
+                    {/* Camera icon overlay - always visible on mobile */}
+                    <div 
+                      className="absolute -bottom-1 -right-1 w-8 h-8 md:w-7 md:h-7 rounded-full bg-secondary flex items-center justify-center pointer-events-none"
                     >
-                      <Camera className="w-3 h-3" />
-                    </Button>
+                      <Camera className="w-4 h-4 md:w-3 md:h-3" />
+                    </div>
                   </div>
                 </div>
               </div>

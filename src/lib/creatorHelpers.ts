@@ -109,11 +109,12 @@ export function normalizeContentItem(raw: unknown): ContentItem {
       DEFAULT_CONTENT_ITEM.creator_id
     ),
 
-    // Title/caption sometimes comes back as name/caption
+    // Title/caption sometimes comes back as name/caption or headline
     // Handle "null" string explicitly, as API sometimes returns the literal string "null"
     title: (() => {
-      const rawTitle = data.title ?? data.caption ?? data.name;
-      if (rawTitle === null || rawTitle === undefined || rawTitle === 'null' || rawTitle === '') {
+      const rawTitle = data.title ?? data.caption ?? data.name ?? data.headline ?? data.subject;
+      console.log('[creatorHelpers] normalizeContentItem title:', { rawTitle, id: data.id });
+      if (rawTitle === null || rawTitle === undefined || rawTitle === 'null' || rawTitle === '' || rawTitle === 'Untitled') {
         return DEFAULT_CONTENT_ITEM.title;
       }
       const str = String(rawTitle).trim();
