@@ -731,14 +731,13 @@ export const ContentFeedItem = ({
                 className="absolute bottom-8 left-4 flex gap-2 z-10"
                 data-video-control
               >
-                <Button
-                  variant="ghost"
-                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
-                  onTouchEnd={togglePlayPause}
+                <button
+                  type="button"
+                  className="h-12 w-12 flex items-center justify-center bg-background/80 hover:bg-background active:scale-95 touch-manipulation rounded-full transition-transform cursor-pointer select-none"
                   onClick={togglePlayPause}
                 >
                   <Pause className="w-5 h-5" />
-                </Button>
+                </button>
               </div>
             )}
 
@@ -749,22 +748,20 @@ export const ContentFeedItem = ({
                 className="absolute bottom-8 right-4 flex gap-2 z-10"
                 data-video-control
               >
-                <Button
-                  variant="ghost"
-                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
-                  onTouchEnd={toggleMute}
+                <button
+                  type="button"
+                  className="h-12 w-12 flex items-center justify-center bg-background/80 hover:bg-background active:scale-95 touch-manipulation rounded-full transition-transform cursor-pointer select-none"
                   onClick={toggleMute}
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
-                  onTouchEnd={toggleFullscreen}
+                </button>
+                <button
+                  type="button"
+                  className="h-12 w-12 flex items-center justify-center bg-background/80 hover:bg-background active:scale-95 touch-manipulation rounded-full transition-transform cursor-pointer select-none"
                   onClick={toggleFullscreen}
                 >
                   {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-                </Button>
+                </button>
               </div>
             )}
             
