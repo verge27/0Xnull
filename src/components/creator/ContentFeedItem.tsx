@@ -15,7 +15,9 @@ import {
   Check,
   MoreVertical,
   Trash2,
-  Loader2
+  Loader2,
+  Maximize,
+  Minimize
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -74,8 +76,10 @@ export const ContentFeedItem = ({
 }: ContentFeedItemProps) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showTeaserOverlay, setShowTeaserOverlay] = useState(false);
   const [teaserTimeLeft, setTeaserTimeLeft] = useState(TEASER_DURATION);
   const [copied, setCopied] = useState(false);
@@ -213,6 +217,47 @@ export const ContentFeedItem = ({
     }
   };
 
+  const toggleFullscreen = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      if (!document.fullscreenElement) {
+        // Enter fullscreen - use the video element directly for better mobile support
+        if (videoRef.current) {
+          // Try video element first (better for mobile)
+          if (videoRef.current.requestFullscreen) {
+            await videoRef.current.requestFullscreen();
+          } else if ((videoRef.current as any).webkitEnterFullscreen) {
+            // iOS Safari
+            (videoRef.current as any).webkitEnterFullscreen();
+          }
+          setIsFullscreen(true);
+        }
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   const handleUnlock = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/content/${content.id}`);
@@ -339,14 +384,24 @@ export const ContentFeedItem = ({
             
             {/* Video controls */}
             {isPlaying && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute bottom-4 right-4 bg-background/80 hover:bg-background"
-                onClick={toggleMute}
-              >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </Button>
+              <div className="absolute bottom-4 right-4 flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background"
+                  onClick={toggleMute}
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background"
+                  onClick={toggleFullscreen}
+                >
+                  {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                </Button>
+              </div>
             )}
             
             {/* Teaser countdown */}
