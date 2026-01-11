@@ -35,13 +35,21 @@ export const CreatorAgeGate = ({
 
   const handleVerify = () => {
     if (allAgreed) {
-      sessionStorage.setItem("creator_age_verified", "true");
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem("creator_age_verified", "true");
+        }
+      } catch (e) {
+        console.warn('[CreatorAgeGate] sessionStorage write failed:', e);
+      }
       onVerified();
     }
   };
 
   const handleExit = () => {
-    window.location.href = "https://google.com";
+    if (typeof window !== 'undefined') {
+      window.location.href = "https://google.com";
+    }
   };
 
   return (
