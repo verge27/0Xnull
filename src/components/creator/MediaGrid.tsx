@@ -1,15 +1,49 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Play, Eye, Image as ImageIcon } from 'lucide-react';
+import { Lock, Play, Eye, Image as ImageIcon, Share2, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ContentItem, creatorApi } from '@/services/creatorApi';
+import { toast } from 'sonner';
 
 interface MediaGridProps {
   content: ContentItem[];
   isSubscribed?: boolean;
+  creatorId?: string;
 }
 
-export const MediaGrid = ({ content, isSubscribed = false }: MediaGridProps) => {
+export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGridProps) => {
   const navigate = useNavigate();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleShare = async (e: React.MouseEvent, item: ContentItem) => {
+    e.stopPropagation();
+    const cId = creatorId || item.creator_id;
+    const shareUrl = cId 
+      ? `${window.location.origin}/creator/${cId}/content/${item.id}`
+      : `${window.location.origin}/content/${item.id}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: item.title || 'Content on 0xNull Creators',
+          url: shareUrl,
+        });
+        return;
+      }
+    } catch (err) {
+      console.warn('[MediaGrid] navigator.share failed:', err);
+    }
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedId(item.id);
+      toast.success('Link copied to clipboard');
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('[MediaGrid] copy failed:', err);
+      toast.error('Could not copy link');
+    }
+  };
 
   if (content.length === 0) {
     return (
@@ -42,13 +76,23 @@ export const MediaGrid = ({ content, isSubscribed = false }: MediaGridProps) => 
               }`}
             />
 
-            {/* Hover overlay */}
+            {/* Hover overlay with share button */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               <div className="flex items-center gap-4 text-white">
                 <span className="flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   {item.view_count || 0}
                 </span>
+                <button
+                  onClick={(e) => handleShare(e, item)}
+                  className="flex items-center gap-1 hover:text-[#FF6600] transition-colors bg-black/50 rounded-full px-2 py-1"
+                >
+                  {copiedId === item.id ? (
+                    <Check className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <Share2 className="w-4 h-4" />
+                  )}
+                </button>
               </div>
             </div>
 
