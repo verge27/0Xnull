@@ -93,21 +93,21 @@ const CreatorDashboard = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold">{creator.displayName || 'Unknown'}</h1>
             <p className="text-sm text-muted-foreground font-mono">
               {truncateKey(creator.publicKey, 8, 8)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => window.open(`/creator/${creator.id}`, '_blank')}
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              View Page
+              <ExternalLink className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">View Page</span>
             </Button>
             <Button 
               variant="outline" 
@@ -122,16 +122,16 @@ const CreatorDashboard = () => {
                 }
               }}
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
+              <Share2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Share</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/creator/settings')}>
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+              <Settings className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Settings</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <LogOut className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
@@ -308,12 +308,19 @@ const CreatorDashboard = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          toast.info('Edit feature coming soon');
+                        }}>
                           <Pencil className="w-4 h-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleDeleteContent(item.id)}
+                          onClick={async () => {
+                            if (confirm('Are you sure you want to delete this content?')) {
+                              await handleDeleteContent(item.id);
+                              toast.success('Content deleted');
+                            }
+                          }}
                           className="text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
