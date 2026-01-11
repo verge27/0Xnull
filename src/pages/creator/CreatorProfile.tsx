@@ -84,20 +84,29 @@ const CreatorProfile = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
+
+    // Prefer native share when available, but ALWAYS fallback to clipboard if share is denied.
     try {
       if (navigator.share) {
         await navigator.share({
           title: profile?.display_name || 'Creator',
           url,
         });
-      } else {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        toast.success('Link copied to clipboard');
-        setTimeout(() => setCopied(false), 2000);
+        return;
       }
     } catch (err) {
-      console.error('Share failed:', err);
+      // Some environments throw NotAllowedError even though share() exists.
+      console.warn('[CreatorProfile] navigator.share failed, falling back to clipboard', err);
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success('Link copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('[CreatorProfile] copy failed:', err);
+      toast.error('Could not copy link. Please copy from the address bar.');
     }
   };
 
