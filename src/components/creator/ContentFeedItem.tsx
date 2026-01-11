@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { 
@@ -17,7 +17,9 @@ import {
   Trash2,
   Loader2,
   Maximize,
-  Minimize
+  Minimize,
+  RotateCcw,
+  RotateCw
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -85,6 +87,8 @@ export const ContentFeedItem = ({
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [seekIndicator, setSeekIndicator] = useState<'forward' | 'backward' | null>(null);
+  const lastTapRef = useRef<{ time: number; x: number } | null>(null);
   
   // Like state
   const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
@@ -163,7 +167,19 @@ export const ContentFeedItem = ({
     }
   };
 
-  // Toggle inline video play/pause
+  // Seek video by amount in seconds
+  const seekVideo = useCallback((seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.max(0, Math.min(
+        videoRef.current.duration || 0,
+        videoRef.current.currentTime + seconds
+      ));
+      setSeekIndicator(seconds > 0 ? 'forward' : 'backward');
+      setTimeout(() => setSeekIndicator(null), 500);
+    }
+  }, []);
+
+  // Toggle inline video play/pause with double-tap seek support
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -173,20 +189,47 @@ export const ContentFeedItem = ({
       }
       return;
     }
-    
-    // For unlocked content - play/pause inline
-    if (isVideo && videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
+
+    const now = Date.now();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const isLeftSide = clickX < rect.width / 2;
+
+    // Check for double-tap (within 300ms)
+    if (lastTapRef.current && now - lastTapRef.current.time < 300 && isPlaying && isVideo) {
+      // Double-tap detected while playing
+      if (isLeftSide) {
+        seekVideo(-10);
       } else {
-        videoRef.current.play();
-        setIsPlaying(true);
+        seekVideo(10);
       }
-    } else {
-      // For non-video content, navigate to detail
-      navigate(`/content/${content.id}`);
+      lastTapRef.current = null;
+      return;
     }
+
+    // Record this tap
+    lastTapRef.current = { time: now, x: clickX };
+
+    // Delay single-tap action to detect potential double-tap
+    setTimeout(() => {
+      // Only execute single-tap if this tap wasn't followed by another
+      if (lastTapRef.current && lastTapRef.current.time === now) {
+        // For unlocked content - play/pause inline
+        if (isVideo && videoRef.current) {
+          if (isPlaying) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+          } else {
+            videoRef.current.play();
+            setIsPlaying(true);
+          }
+        } else {
+          // For non-video content, navigate to detail
+          navigate(`/content/${content.id}`);
+        }
+        lastTapRef.current = null;
+      }
+    }, 300);
   };
   
   // Handle delete
@@ -401,6 +444,22 @@ export const ContentFeedItem = ({
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
                 </Button>
+              </div>
+            )}
+            
+            {/* Seek indicator */}
+            {seekIndicator && (
+              <div className={`absolute top-1/2 -translate-y-1/2 ${seekIndicator === 'backward' ? 'left-8' : 'right-8'} animate-pulse`}>
+                <div className="bg-background/80 rounded-full p-3">
+                  {seekIndicator === 'backward' ? (
+                    <RotateCcw className="w-8 h-8 text-white" />
+                  ) : (
+                    <RotateCw className="w-8 h-8 text-white" />
+                  )}
+                  <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-white text-xs font-medium whitespace-nowrap">
+                    {seekIndicator === 'backward' ? '-10s' : '+10s'}
+                  </span>
+                </div>
               </div>
             )}
             
