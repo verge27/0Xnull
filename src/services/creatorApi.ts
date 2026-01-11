@@ -150,10 +150,17 @@ class CreatorApiClient {
   // ============ Public Endpoints ============
 
   async browseCreators(limit = 20, offset = 0): Promise<{ creators: CreatorProfile[]; total: number }> {
-    const raw = await this.request<{ creators?: unknown; total?: number }>(`/browse?limit=${limit}&offset=${offset}`);
+    // API sometimes returns { creators: [...], count } instead of { creators: [...], total }
+    const raw = await this.request<{ creators?: unknown; total?: number; count?: number }>(`/browse?limit=${limit}&offset=${offset}`);
+    const total = typeof raw?.total === 'number'
+      ? raw.total
+      : typeof raw?.count === 'number'
+        ? raw.count
+        : 0;
+
     return {
       creators: normalizeCreatorProfiles(raw?.creators),
-      total: typeof raw?.total === 'number' ? raw.total : 0,
+      total,
     };
   }
 

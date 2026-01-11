@@ -52,13 +52,17 @@ export function normalizeCreatorProfile(raw: unknown): CreatorProfile {
   const data = raw as Record<string, unknown>;
   
   return {
-    id: safeString(data.id, DEFAULT_CREATOR_PROFILE.id),
-    pubkey: safeString(data.pubkey, DEFAULT_CREATOR_PROFILE.pubkey),
+    // API sometimes returns creator_id instead of id
+    id: safeString(data.id ?? data.creator_id, DEFAULT_CREATOR_PROFILE.id),
+    // API returns pubkey on profile endpoints; keep fallbacks for alternate shapes
+    pubkey: safeString((data.pubkey ?? data.public_key ?? data.pubKey) as unknown, DEFAULT_CREATOR_PROFILE.pubkey),
     display_name: safeString(data.display_name, DEFAULT_CREATOR_PROFILE.display_name),
     bio: safeStringOptional(data.bio),
-    avatar_url: safeStringOptional(data.avatar_url),
-    banner_url: safeStringOptional(data.banner_url),
-    content_count: safeNumber(data.content_count, DEFAULT_CREATOR_PROFILE.content_count),
+    // API may return avatar_hash/banner_hash in list endpoints
+    avatar_url: safeStringOptional(data.avatar_url ?? data.avatar_hash),
+    banner_url: safeStringOptional(data.banner_url ?? data.banner_hash),
+    // API may return total_content instead of content_count
+    content_count: safeNumber(data.content_count ?? data.total_content, DEFAULT_CREATOR_PROFILE.content_count),
     subscriber_count: safeNumber(data.subscriber_count, DEFAULT_CREATOR_PROFILE.subscriber_count),
     created_at: safeString(data.created_at, DEFAULT_CREATOR_PROFILE.created_at),
   };
