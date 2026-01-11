@@ -189,7 +189,24 @@ export const ContentFeedItem = ({
     }
   }, []);
 
-  // Toggle inline video play/pause with double-tap seek support
+  // Toggle play/pause via button
+  const togglePlayPause = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    lastTapRef.current = null;
+
+    if (isVideo && videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  // Handle video area click - double-tap seek only, no pause on single tap
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -214,14 +231,20 @@ export const ContentFeedItem = ({
       return;
     }
 
+    // If video is not playing, start it on tap
+    if (!isPlaying && isVideo && videoRef.current) {
+      videoRef.current.play();
+      setIsPlaying(true);
+      return;
+    }
+
     const now = Date.now();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const isLeftSide = clickX < rect.width / 2;
 
-    // Check for double-tap (within 300ms)
+    // Check for double-tap (within 300ms) - seek only while playing
     if (lastTapRef.current && now - lastTapRef.current.time < 300 && isPlaying && isVideo) {
-      // Double-tap detected while playing
       if (isLeftSide) {
         seekVideo(-10);
       } else {
@@ -234,16 +257,8 @@ export const ContentFeedItem = ({
     // Record this tap for double-tap detection
     lastTapRef.current = { time: now, x: clickX };
 
-    // For single tap - toggle play/pause immediately (no delay)
-    if (isVideo && videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    } else {
+    // Single tap on playing video does nothing - use pause button instead
+    if (!isVideo) {
       // For non-video content, navigate to detail
       navigate(`/content/${content.id}`);
     }
@@ -698,7 +713,43 @@ export const ContentFeedItem = ({
               </div>
             )}
             
-            {/* Video controls */}
+            {/* Video controls - left side (pause) */}
+            {isPlaying && (
+              <div
+                className="absolute bottom-8 left-4 flex gap-2"
+                data-video-control
+                onClickCapture={(e) => e.stopPropagation()}
+                onPointerDownCapture={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onTouchStartCapture={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background"
+                  onPointerDownCapture={(ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
+                  onTouchStartCapture={(ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    lastTapRef.current = null;
+                  }}
+                  onClick={togglePlayPause}
+                >
+                  <Pause className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Video controls - right side (mute, fullscreen) */}
             {isPlaying && (
               <div
                 ref={controlsRef}
@@ -706,8 +757,6 @@ export const ContentFeedItem = ({
                 data-video-control
                 onClickCapture={(e) => e.stopPropagation()}
                 onPointerDownCapture={(e) => {
-                  // On Android, a touch can synthesize a later "click" that bubbles to the
-                  // video container; preventDefault here helps avoid ghost-taps toggling pause.
                   e.preventDefault();
                   e.stopPropagation();
                 }}
