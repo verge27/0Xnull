@@ -292,9 +292,9 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
 
       {/* Footer - Engagement */}
       <CardContent className="p-4">
-        {content.title && (
-          <h3 className="font-semibold mb-2">{content.title}</h3>
-        )}
+        <h3 className="font-semibold mb-2">
+          {content.title || `Post from ${formatDistanceToNow(new Date(content.created_at), { addSuffix: true })}`}
+        </h3>
         {content.description && (
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
             {content.description}

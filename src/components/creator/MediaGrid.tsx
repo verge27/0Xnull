@@ -70,7 +70,7 @@ export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGri
             {/* Thumbnail */}
             <img
               src={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : '/placeholder.svg'}
-              alt={item.title || 'Content'}
+              alt={item.title || 'Video content'}
               className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
                 isLocked ? 'blur-sm' : ''
               }`}
