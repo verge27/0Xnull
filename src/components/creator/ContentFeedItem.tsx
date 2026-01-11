@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { 
   Lock, 
   Play, 
+  Pause,
   Eye, 
   Heart, 
   MessageCircle, 
@@ -11,13 +12,31 @@ import {
   Volume2,
   VolumeX,
   Gift,
-  Copy,
-  Check
+  Check,
+  MoreVertical,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ContentItem, creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { TipModal } from './TipModal';
 import { toast } from 'sonner';
@@ -26,6 +45,8 @@ interface ContentFeedItemProps {
   content: ContentItem;
   creator: CreatorProfile;
   isSubscribed?: boolean;
+  isOwner?: boolean;
+  onDelete?: (contentId: string) => void;
 }
 
 const TEASER_DURATION = 10; // 10 second teaser for paid content
@@ -44,7 +65,13 @@ const setLikedContentIds = (ids: Set<string>) => {
   localStorage.setItem('liked_content', JSON.stringify([...ids]));
 };
 
-export const ContentFeedItem = ({ content, creator, isSubscribed = false }: ContentFeedItemProps) => {
+export const ContentFeedItem = ({ 
+  content, 
+  creator, 
+  isSubscribed = false,
+  isOwner = false,
+  onDelete 
+}: ContentFeedItemProps) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -52,6 +79,8 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
   const [showTeaserOverlay, setShowTeaserOverlay] = useState(false);
   const [teaserTimeLeft, setTeaserTimeLeft] = useState(TEASER_DURATION);
   const [copied, setCopied] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Like state
   const [isLiked, setIsLiked] = useState(() => getLikedContentIds().has(content.id));
@@ -60,6 +89,21 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
   const isPaid = content.tier === 'paid';
   const isLocked = isPaid && !isSubscribed;
   const isVideo = content.media_type?.startsWith('video/') || content.media_hash?.match(/\.(mp4|webm|mov)$/i);
+  
+  // Format title - handle null/undefined/"null" cases
+  const displayTitle = (() => {
+    if (content.title && content.title !== 'null' && content.title.trim()) {
+      return content.title;
+    }
+    try {
+      const ts = content.created_at;
+      const date = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
+      if (isNaN(date.getTime())) return 'Untitled';
+      return `Post from ${formatDistanceToNow(date, { addSuffix: true })}`;
+    } catch {
+      return 'Untitled';
+    }
+  })();
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -115,13 +159,47 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
     }
   };
 
-  const handleVideoClick = () => {
+  // Toggle inline video play/pause
+  const handleVideoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
     if (isLocked) {
       if (!isPlaying && isVideo) {
         handlePlayTeaser();
       }
+      return;
+    }
+    
+    // For unlocked content - play/pause inline
+    if (isVideo && videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
     } else {
+      // For non-video content, navigate to detail
       navigate(`/content/${content.id}`);
+    }
+  };
+  
+  // Handle delete
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await creatorApi.deleteContent(content.id);
+      onDelete(content.id);
+      toast.success('Content deleted');
+    } catch (error) {
+      console.error('Failed to delete:', error);
+      toast.error('Failed to delete content');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -213,6 +291,30 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
             {content.price_xmr} XMR
           </Badge>
         )}
+        
+        {/* Owner dropdown menu */}
+        {isOwner && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate(`/content/${content.id}`)}>
+                <Eye className="w-4 h-4 mr-2" />
+                View
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Content */}
@@ -254,8 +356,22 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
               </div>
             )}
 
-            {/* Play button for video */}
-            {!isPlaying && !showTeaserOverlay && (
+            {/* Play/Pause button for video */}
+            {!showTeaserOverlay && !isLocked && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:opacity-100 transition-opacity"
+                   style={{ opacity: isPlaying ? 0 : 1 }}>
+                <div className="w-16 h-16 rounded-full bg-[#FF6600] flex items-center justify-center">
+                  {isPlaying ? (
+                    <Pause className="w-8 h-8 text-white fill-white" />
+                  ) : (
+                    <Play className="w-8 h-8 text-white fill-white ml-1" />
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Play button for locked content */}
+            {!isPlaying && !showTeaserOverlay && isLocked && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                 <div className="w-16 h-16 rounded-full bg-[#FF6600] flex items-center justify-center">
                   <Play className="w-8 h-8 text-white fill-white ml-1" />
@@ -309,18 +425,7 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
 
       {/* Footer - Engagement */}
       <CardContent className="p-4">
-        <h3 className="font-semibold mb-2">
-          {content.title || (() => {
-            try {
-              const ts = content.created_at;
-              const date = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
-              if (isNaN(date.getTime())) return 'Untitled post';
-              return `Post from ${formatDistanceToNow(date, { addSuffix: true })}`;
-            } catch {
-              return 'Untitled post';
-            }
-          })()}
-        </h3>
+        <h3 className="font-semibold mb-2">{displayTitle}</h3>
         {content.description && (
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
             {content.description}
@@ -373,6 +478,35 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
           </div>
         )}
       </CardContent>
+      
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Content</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{displayTitle}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
