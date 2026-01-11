@@ -733,12 +733,11 @@ export const ContentFeedItem = ({
               >
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
                   onTouchEnd={togglePlayPause}
                   onClick={togglePlayPause}
                 >
-                  <Pause className="w-4 h-4" />
+                  <Pause className="w-5 h-5" />
                 </Button>
               </div>
             )}
@@ -752,21 +751,19 @@ export const ContentFeedItem = ({
               >
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
                   onTouchEnd={toggleMute}
                   onClick={toggleMute}
                 >
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </Button>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="bg-background/80 hover:bg-background touch-manipulation"
+                  className="h-12 w-12 bg-background/80 hover:bg-background touch-manipulation rounded-full"
                   onTouchEnd={toggleFullscreen}
                   onClick={toggleFullscreen}
                 >
-                  {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
                 </Button>
               </div>
             )}
