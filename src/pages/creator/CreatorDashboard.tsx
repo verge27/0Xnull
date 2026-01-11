@@ -103,7 +103,7 @@ const CreatorDashboard = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => window.open(`/creator/${creator.id}`, '_blank')}
+              onClick={() => window.open(`/creator/${creator.publicKey}`, '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View Page
