@@ -169,11 +169,17 @@ const CreatorDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Stats */}
+        {/* Stats - calculate from content if API stats are 0 */}
         {(() => {
           const earnings = creator.stats?.total_earnings_xmr ?? 0;
-          const views = creator.stats?.total_views ?? 0;
-          const unlocks = creator.stats?.total_unlocks ?? 0;
+          // If API stats are 0, calculate from content items
+          const calculatedViews = content.reduce((sum, item) => sum + (item.view_count ?? 0), 0);
+          const calculatedUnlocks = content.reduce((sum, item) => sum + (item.unlock_count ?? 0), 0);
+          const calculatedEarnings = content.reduce((sum, item) => sum + (item.earnings_xmr ?? 0), 0);
+          
+          const views = (creator.stats?.total_views ?? 0) || calculatedViews;
+          const unlocks = (creator.stats?.total_unlocks ?? 0) || calculatedUnlocks;
+          const displayEarnings = earnings || calculatedEarnings;
 
           return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -186,7 +192,7 @@ const CreatorDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-[#FF6600]">
-                    {earnings.toFixed(4)} XMR
+                    {displayEarnings.toFixed(4)} XMR
                   </p>
                 </CardContent>
               </Card>
@@ -266,31 +272,25 @@ const CreatorDashboard = () => {
                 className="overflow-hidden group"
               >
                 <div className="relative aspect-video bg-muted">
-                  {isVideo && thumbnailSrc ? (
-                    // For videos, show thumbnail with play overlay, or inline video preview
+                  {isVideo ? (
+                    // For videos, show thumbnail with play overlay - no click navigation
                     <div className="relative w-full h-full">
-                      <video
-                        src={creatorApi.getMediaUrl(item.media_hash || '')}
-                        poster={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : undefined}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                        preload="metadata"
-                        onMouseEnter={(e) => {
-                          const video = e.currentTarget;
-                          video.play().catch(() => {});
-                        }}
-                        onMouseLeave={(e) => {
-                          const video = e.currentTarget;
-                          video.pause();
-                          video.currentTime = 0;
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/content/${item.id}`);
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                      {item.thumbnail_url ? (
+                        <img
+                          src={creatorApi.getMediaUrl(item.thumbnail_url)}
+                          alt={item.title || 'Video'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={creatorApi.getMediaUrl(item.media_hash || '')}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center">
                           <Play className="w-6 h-6 text-white fill-white" />
                         </div>
