@@ -100,51 +100,65 @@ const CreatorProfile = () => {
   // Check if current user is viewing their own profile
   const isOwner = loggedInCreator?.id === id;
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!id) return;
+  // Refetch profile and content
+  const fetchProfile = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      const profileData = await creatorApi.getCreatorProfile(id);
+      setProfile(profileData);
       
-      try {
-        const profileData = await creatorApi.getCreatorProfile(id);
-        setProfile(profileData);
-        
-        // Update page SEO/meta tags with creator info
-        updateCreatorMeta(profileData);
-        
-        // Use embedded content from profile response if available
-        if (profileData.content && profileData.content.length > 0) {
-          // Sort by newest first
-          const sorted = [...profileData.content].sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          setContent(sorted);
-        } else {
-          // Fallback: fetch via search if profile didn't include content
-          try {
-            const contentData = await creatorApi.searchContent({ 
-              q: '', 
-              page: 1, 
-              limit: 50 
-            });
-            // Filter content by creator and sort by newest first
-            const creatorContent = contentData.content
-              .filter(c => c.creator_id === id)
-              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-            setContent(creatorContent);
-          } catch {
-            setContent([]);
-          }
+      // Update page SEO/meta tags with creator info
+      updateCreatorMeta(profileData);
+      
+      // Use embedded content from profile response if available
+      if (profileData.content && profileData.content.length > 0) {
+        // Sort by newest first
+        const sorted = [...profileData.content].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setContent(sorted);
+      } else {
+        // Fallback: fetch via search if profile didn't include content
+        try {
+          const contentData = await creatorApi.searchContent({ 
+            q: '', 
+            page: 1, 
+            limit: 50 
+          });
+          // Filter content by creator and sort by newest first
+          const creatorContent = contentData.content
+            .filter(c => c.creator_id === id)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          setContent(creatorContent);
+        } catch {
+          setContent([]);
         }
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-        setError('Creator not found');
-      } finally {
-        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      setError('Creator not found');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  // Refetch on window focus (for when returning from upload page)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!isLoading && profile) {
+        fetchProfile();
       }
     };
-
-    fetchProfile();
-  }, [id]);
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchProfile, isLoading, profile]);
 
   const freeContent = content.filter(c => c.tier === 'free');
   const paidContent = content.filter(c => c.tier === 'paid');
