@@ -193,7 +193,19 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
             {creator.display_name}
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(content.created_at), { addSuffix: true })}
+            {(() => {
+              try {
+                // Handle Unix timestamp (seconds) or ISO string
+                const ts = content.created_at;
+                const date = typeof ts === 'number' 
+                  ? new Date(ts * 1000) 
+                  : new Date(ts);
+                if (isNaN(date.getTime())) return 'Recently';
+                return formatDistanceToNow(date, { addSuffix: true });
+              } catch {
+                return 'Recently';
+              }
+            })()}
           </p>
         </div>
         {isPaid && (
@@ -293,7 +305,16 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
       {/* Footer - Engagement */}
       <CardContent className="p-4">
         <h3 className="font-semibold mb-2">
-          {content.title || `Post from ${formatDistanceToNow(new Date(content.created_at), { addSuffix: true })}`}
+          {content.title || (() => {
+            try {
+              const ts = content.created_at;
+              const date = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
+              if (isNaN(date.getTime())) return 'Untitled post';
+              return `Post from ${formatDistanceToNow(date, { addSuffix: true })}`;
+            } catch {
+              return 'Untitled post';
+            }
+          })()}
         </h3>
         {content.description && (
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
