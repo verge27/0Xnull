@@ -59,7 +59,7 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
 
   const isPaid = content.tier === 'paid';
   const isLocked = isPaid && !isSubscribed;
-  const isVideo = content.media_hash?.match(/\.(mp4|webm|mov)$/i);
+  const isVideo = content.media_type?.startsWith('video/') || content.media_hash?.match(/\.(mp4|webm|mov)$/i);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -31,6 +31,7 @@ const DEFAULT_CONTENT_ITEM: ContentItem = {
   description: undefined,
   thumbnail_url: undefined,
   media_hash: undefined,
+  media_type: undefined,
   tier: 'free',
   price_xmr: undefined,
   tags: [],
@@ -127,6 +128,9 @@ export function normalizeContentItem(raw: unknown): ContentItem {
     media_hash: safeStringOptional(
       data.media_hash ?? data.media ?? data.media_url ?? data.file_hash ?? data.hash
     ),
+    
+    // Media type (e.g. "video/mp4", "image/jpeg")
+    media_type: safeStringOptional(data.media_type ?? data.content_type ?? data.mime_type),
 
     tier: safeTier(data.tier ?? data.access ?? data.visibility),
     price_xmr: safeNumberOptional(data.price_xmr ?? data.price ?? data.priceXmr),
