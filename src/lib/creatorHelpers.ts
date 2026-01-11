@@ -112,9 +112,22 @@ export function normalizeContentItem(raw: unknown): ContentItem {
     // Title/caption sometimes comes back as name/caption or headline
     // Handle "null" string explicitly, as API sometimes returns the literal string "null"
     title: (() => {
-      const rawTitle = data.title ?? data.caption ?? data.name ?? data.headline ?? data.subject;
-      console.log('[creatorHelpers] normalizeContentItem title:', { rawTitle, id: data.id });
+      // Log ALL possible title fields for debugging
+      console.log('[creatorHelpers] normalizeContentItem raw data for title:', {
+        id: data.id,
+        title: data.title,
+        caption: data.caption,
+        name: data.name,
+        headline: data.headline,
+        subject: data.subject,
+        text: data.text,
+        label: data.label,
+      });
+      
+      const rawTitle = data.title ?? data.caption ?? data.name ?? data.headline ?? data.subject ?? data.label;
+      
       if (rawTitle === null || rawTitle === undefined || rawTitle === 'null' || rawTitle === '' || rawTitle === 'Untitled') {
+        console.warn('[creatorHelpers] Title is empty/null, using default');
         return DEFAULT_CONTENT_ITEM.title;
       }
       const str = String(rawTitle).trim();

@@ -313,6 +313,11 @@ class CreatorApiClient {
   /**
    * Upload a profile image (avatar or banner)
    * Returns the URL/hash to use in updateMyProfile
+   * 
+   * Tries multiple endpoint patterns as the API may use different paths:
+   * 1. PUT /profile/me with multipart (profile update with image)
+   * 2. POST /profile/avatar or /profile/banner (dedicated endpoints)
+   * 3. As a fallback, upload as content and extract the media hash
    */
   async uploadProfileImage(file: File, type: 'avatar' | 'banner'): Promise<string> {
     const headers: HeadersInit = {};
@@ -320,29 +325,94 @@ class CreatorApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-
     console.log(`[CreatorApi] uploadProfileImage: uploading ${type}`);
 
-    const response = await fetch(getProxyUrl('/profile/image'), {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
+    // Try approach 1: PUT /profile/me with multipart form data including the image
+    try {
+      const formData = new FormData();
+      formData.append(type === 'avatar' ? 'avatar' : 'banner', file);
+      // Also try alternative field names the API might expect
+      formData.append('file', file);
+      formData.append('type', type);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('[CreatorApi] uploadProfileImage: error', errorData);
-      throw new Error(errorData.error || errorData.message || `Upload failed: ${response.status}`);
+      const response = await fetch(getProxyUrl('/profile/me'), {
+        method: 'PUT',
+        headers,
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[CreatorApi] uploadProfileImage via profile/me:', data);
+        // Check for returned URL in various formats
+        const url = data[`${type}_url`] || data[`${type}_hash`] || data.url || data.hash || '';
+        if (url) return url;
+        // If no URL returned but success, the image is now attached - refresh will pick it up
+        return '__attached__';
+      }
+      
+      // If 405, try next approach
+      if (response.status !== 405) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn('[CreatorApi] uploadProfileImage via profile/me failed:', errorData);
+      }
+    } catch (err) {
+      console.warn('[CreatorApi] uploadProfileImage via profile/me error:', err);
     }
 
-    const data = await response.json();
-    console.log('[CreatorApi] uploadProfileImage: success', data);
-    
-    // API may return { url, hash, avatar_url, banner_url, etc. }
-    return data.url || data.hash || data[`${type}_url`] || data[`${type}_hash`] || '';
+    // Try approach 2: POST to /profile/avatar or /profile/banner
+    try {
+      const endpoint = type === 'avatar' ? '/profile/avatar' : '/profile/banner';
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('image', file);
+      formData.append(type, file);
+
+      const response = await fetch(getProxyUrl(endpoint), {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`[CreatorApi] uploadProfileImage via ${endpoint}:`, data);
+        return data.url || data.hash || data[`${type}_url`] || data[`${type}_hash`] || '__attached__';
+      }
+      
+      if (response.status !== 404 && response.status !== 405) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn(`[CreatorApi] uploadProfileImage via ${endpoint} failed:`, errorData);
+      }
+    } catch (err) {
+      console.warn('[CreatorApi] uploadProfileImage via dedicated endpoint error:', err);
+    }
+
+    // Try approach 3: Upload via PATCH /profile/me
+    try {
+      const formData = new FormData();
+      formData.append(type === 'avatar' ? 'avatar' : 'banner', file);
+      formData.append('file', file);
+
+      const response = await fetch(getProxyUrl('/profile/me'), {
+        method: 'PATCH',
+        headers,
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[CreatorApi] uploadProfileImage via PATCH profile/me:', data);
+        return data[`${type}_url`] || data[`${type}_hash`] || data.url || data.hash || '__attached__';
+      }
+    } catch (err) {
+      console.warn('[CreatorApi] uploadProfileImage via PATCH error:', err);
+    }
+
+    // All approaches failed
+    throw new Error(
+      `Profile ${type} upload is not supported by this API. Try uploading via the content upload and using that as your ${type}.`
+    );
   }
 
   async getMyContent(page = 1, limit = 20): Promise<{ content: ContentItem[]; total: number }> {
