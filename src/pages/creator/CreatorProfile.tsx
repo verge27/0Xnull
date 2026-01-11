@@ -1,20 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  Eye, 
   Lock, 
   Loader2, 
-  ArrowLeft, 
   Grid3X3, 
   LayoutList,
   Crown,
   MessageCircle,
   Share2,
-  Copy,
   Check,
-  Heart,
-  Package,
-  Users
+  Users,
+  ArrowLeft
 } from 'lucide-react';
 
 // Safe date formatting helper
@@ -33,7 +29,6 @@ const formatJoinDate = (dateStr: string | undefined | null): string => {
 };
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { creatorApi, CreatorProfile as CreatorProfileType, ContentItem } from '@/services/creatorApi';
@@ -46,6 +41,7 @@ import { SubscriptionCard } from '@/components/creator/SubscriptionCard';
 import { TipModal } from '@/components/creator/TipModal';
 import { CreatorDMPanel } from '@/components/creator/CreatorDMPanel';
 import { BundlesSection } from '@/components/creator/BundlesSection';
+import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { toast } from 'sonner';
 
 // Helper to update document meta tags for creator profiles
@@ -90,6 +86,7 @@ const updateCreatorMeta = (profile: CreatorProfileType | null) => {
 const CreatorProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { creator: loggedInCreator } = useCreatorAuth();
   
   const [profile, setProfile] = useState<CreatorProfileType | null>(null);
   const [content, setContent] = useState<ContentItem[]>([]);
@@ -99,6 +96,9 @@ const CreatorProfile = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isDMOpen, setIsDMOpen] = useState(false);
+  
+  // Check if current user is viewing their own profile
+  const isOwner = loggedInCreator?.id === id;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -148,6 +148,11 @@ const CreatorProfile = () => {
 
   const freeContent = content.filter(c => c.tier === 'free');
   const paidContent = content.filter(c => c.tier === 'paid');
+  
+  // Handle content deletion
+  const handleDeleteContent = useCallback((contentId: string) => {
+    setContent(prev => prev.filter(c => c.id !== contentId));
+  }, []);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -398,6 +403,8 @@ const CreatorProfile = () => {
                           content={item} 
                           creator={profile}
                           isSubscribed={isSubscribed}
+                          isOwner={isOwner}
+                          onDelete={handleDeleteContent}
                         />
                       ))}
                     </div>
@@ -427,6 +434,8 @@ const CreatorProfile = () => {
                           content={item} 
                           creator={profile}
                           isSubscribed={true} // Free content is always accessible
+                          isOwner={isOwner}
+                          onDelete={handleDeleteContent}
                         />
                       ))}
                     </div>
@@ -452,6 +461,8 @@ const CreatorProfile = () => {
                           content={item} 
                           creator={profile}
                           isSubscribed={isSubscribed}
+                          isOwner={isOwner}
+                          onDelete={handleDeleteContent}
                         />
                       ))}
                     </div>
