@@ -267,11 +267,15 @@ const ContentView = () => {
             // Unlocked or free - show full content
             <div className="aspect-video">
               {content.media_hash ? (
-                content.media_hash.endsWith('.mp4') || content.media_hash.endsWith('.webm') ? (
+                // Check media_type first, then fall back to file extension check
+                content.media_type?.startsWith('video/') || 
+                content.media_hash.match(/\.(mp4|webm|mov)$/i) ? (
                   <video
                     src={creatorApi.getMediaUrl(content.media_hash)}
                     controls
                     className="w-full h-full"
+                    autoPlay
+                    playsInline
                   />
                 ) : (
                   <img

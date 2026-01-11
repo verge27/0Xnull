@@ -43,6 +43,7 @@ export interface ContentItem {
   description?: string;
   thumbnail_url?: string;
   media_hash?: string;
+  media_type?: string; // e.g. "video/mp4", "image/jpeg"
   tier: 'free' | 'paid';
   price_xmr?: number;
   tags: string[];

@@ -59,7 +59,7 @@ export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGri
       {content.map((item) => {
         const isPaid = item.tier === 'paid';
         const isLocked = isPaid && !isSubscribed;
-        const isVideo = item.media_hash?.match(/\.(mp4|webm|mov)$/i);
+        const isVideo = item.media_type?.startsWith('video/') || item.media_hash?.match(/\.(mp4|webm|mov)$/i);
 
         return (
           <div
