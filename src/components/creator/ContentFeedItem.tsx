@@ -478,6 +478,51 @@ export const ContentFeedItem = ({
     };
   }, []);
 
+  // Diagnostics (mobile fullscreen/control pause issues)
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    const log = (event: string, extra: Record<string, unknown> = {}) => {
+      console.log('[ContentFeedItem][video]', event, {
+        paused: el.paused,
+        ended: el.ended,
+        currentTime: el.currentTime,
+        readyState: el.readyState,
+        networkState: el.networkState,
+        muted: el.muted,
+        volume: el.volume,
+        fullscreen: !!document.fullscreenElement,
+        visibility: document.visibilityState,
+        ...extra,
+      });
+    };
+
+    const onPause = () => log('pause');
+    const onPlay = () => log('play');
+    const onPlaying = () => log('playing');
+    const onWaiting = () => log('waiting');
+    const onStalled = () => log('stalled');
+
+    const onVisibility = () => log('visibilitychange');
+
+    el.addEventListener('pause', onPause);
+    el.addEventListener('play', onPlay);
+    el.addEventListener('playing', onPlaying);
+    el.addEventListener('waiting', onWaiting);
+    el.addEventListener('stalled', onStalled);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      el.removeEventListener('pause', onPause);
+      el.removeEventListener('play', onPlay);
+      el.removeEventListener('playing', onPlaying);
+      el.removeEventListener('waiting', onWaiting);
+      el.removeEventListener('stalled', onStalled);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [content.id]);
+
   const handleUnlock = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/content/${content.id}`);
