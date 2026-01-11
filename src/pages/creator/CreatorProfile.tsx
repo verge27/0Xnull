@@ -370,13 +370,13 @@ const CreatorProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <MediaGrid content={content} isSubscribed={isSubscribed} />
+                    <MediaGrid content={content} isSubscribed={isSubscribed} creatorId={profile.id} />
                   )}
                 </TabsContent>
 
                 {/* Media only */}
                 <TabsContent value="media" className="mt-0">
-                  <MediaGrid content={content} isSubscribed={isSubscribed} />
+                  <MediaGrid content={content} isSubscribed={isSubscribed} creatorId={profile.id} />
                 </TabsContent>
 
                 {/* Free content */}
@@ -399,7 +399,7 @@ const CreatorProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <MediaGrid content={freeContent} isSubscribed={true} />
+                    <MediaGrid content={freeContent} isSubscribed={true} creatorId={profile.id} />
                   )}
                 </TabsContent>
 
@@ -424,7 +424,7 @@ const CreatorProfile = () => {
                       ))}
                     </div>
                   ) : (
-                    <MediaGrid content={paidContent} isSubscribed={isSubscribed} />
+                    <MediaGrid content={paidContent} isSubscribed={isSubscribed} creatorId={profile.id} />
                   )}
                 </TabsContent>
               </Tabs>

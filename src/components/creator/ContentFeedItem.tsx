@@ -10,7 +10,9 @@ import {
   Share2,
   Volume2,
   VolumeX,
-  Gift
+  Gift,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ContentItem, creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { TipModal } from './TipModal';
+import { toast } from 'sonner';
 
 interface ContentFeedItemProps {
   content: ContentItem;
@@ -34,6 +37,7 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
   const [isMuted, setIsMuted] = useState(true);
   const [showTeaserOverlay, setShowTeaserOverlay] = useState(false);
   const [teaserTimeLeft, setTeaserTimeLeft] = useState(TEASER_DURATION);
+  const [copied, setCopied] = useState(false);
 
   const isPaid = content.tier === 'paid';
   const isLocked = isPaid && !isSubscribed;
@@ -95,6 +99,38 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
   const handleUnlock = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/content/${content.id}`);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/creator/${creator.id}/content/${content.id}`;
+    const shareTitle = content.title 
+      ? `${content.title} by ${creator.display_name}`
+      : `Content by ${creator.display_name}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: content.description || `Check out this content on 0xNull Creators`,
+          url: shareUrl,
+        });
+        return;
+      }
+    } catch (err) {
+      // Share was cancelled or failed, fall back to clipboard
+      console.warn('[ContentFeedItem] navigator.share failed:', err);
+    }
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success('Link copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('[ContentFeedItem] copy failed:', err);
+      toast.error('Could not copy link');
+    }
   };
 
   return (
@@ -251,8 +287,12 @@ export const ContentFeedItem = ({ content, creator, isSubscribed = false }: Cont
               </button>
             }
           />
-          <button className="ml-auto hover:text-[#FF6600] transition-colors">
-            <Share2 className="w-5 h-5" />
+          <button 
+            className="ml-auto hover:text-[#FF6600] transition-colors flex items-center gap-1"
+            onClick={handleShare}
+          >
+            {copied ? <Check className="w-5 h-5 text-green-500" /> : <Share2 className="w-5 h-5" />}
+            <span className="text-sm hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
           </button>
         </div>
 
