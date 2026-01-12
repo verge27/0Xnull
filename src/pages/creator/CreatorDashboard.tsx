@@ -273,25 +273,36 @@ const CreatorDashboard = () => {
               >
                 <div className="relative aspect-video bg-muted">
                   {isVideo ? (
-                    // For videos, show thumbnail with play overlay - no click navigation
-                    <div className="relative w-full h-full">
-                      {item.thumbnail_url ? (
-                        <img
-                          src={creatorApi.getMediaUrl(item.thumbnail_url)}
-                          alt={item.title || 'Video'}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <video
-                          src={creatorApi.getMediaUrl(item.media_hash || '')}
-                          className="w-full h-full object-cover"
-                          muted
-                          playsInline
-                          preload="metadata"
-                        />
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center">
+                    // For videos, show clickable play overlay
+                    <div 
+                      className="relative w-full h-full cursor-pointer group/video"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const videoEl = e.currentTarget.querySelector('video');
+                        if (videoEl) {
+                          if (videoEl.paused) {
+                            videoEl.play().catch(() => {});
+                            e.currentTarget.querySelector('.play-overlay')?.classList.add('opacity-0');
+                          } else {
+                            videoEl.pause();
+                            e.currentTarget.querySelector('.play-overlay')?.classList.remove('opacity-0');
+                          }
+                        }
+                      }}
+                    >
+                      <video
+                        src={creatorApi.getMediaUrl(item.media_hash || '')}
+                        poster={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : undefined}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                        onEnded={(e) => {
+                          e.currentTarget.parentElement?.querySelector('.play-overlay')?.classList.remove('opacity-0');
+                        }}
+                      />
+                      <div className="play-overlay absolute inset-0 flex items-center justify-center transition-opacity duration-200">
+                        <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center group-hover/video:scale-110 transition-transform">
                           <Play className="w-6 h-6 text-white fill-white" />
                         </div>
                       </div>
