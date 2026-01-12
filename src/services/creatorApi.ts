@@ -43,7 +43,7 @@ export interface ContentItem {
   description?: string;
   thumbnail_url?: string;
   media_hash?: string;
-  media_type?: string; // e.g. "video/mp4", "image/jpeg"
+  media_type?: string; // e.g. "video/mp4", "image/jpeg", "text/post"
   tier: 'free' | 'paid';
   price_xmr?: number;
   tags: string[];
@@ -51,6 +51,8 @@ export interface ContentItem {
   unlock_count: number;
   earnings_xmr: number;
   created_at: string;
+  is_pinned?: boolean; // Client-side pinning support
+  post_type?: 'media' | 'text'; // text = text-only post
 }
 
 export interface UnlockResponse {
