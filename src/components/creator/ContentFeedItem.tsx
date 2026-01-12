@@ -43,12 +43,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ContentItem, creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { TipModal } from './TipModal';
+import { TierBadge, TierGatedOverlay } from './TierBadge';
+import { getContentTierAccessForCreator, checkTierAccess } from '@/hooks/useContentTierAccess';
 import { toast } from 'sonner';
 
 interface ContentFeedItemProps {
   content: ContentItem;
   creator: CreatorProfile;
   isSubscribed?: boolean;
+  subscribedTierId?: string | null; // The tier ID the user is subscribed to
+  subscribedTierPrice?: number; // The price of the subscribed tier
   isOwner?: boolean;
   onDelete?: (contentId: string) => void;
 }
@@ -73,6 +77,8 @@ export const ContentFeedItem = ({
   content, 
   creator, 
   isSubscribed = false,
+  subscribedTierId = null,
+  subscribedTierPrice = 0,
   isOwner = false,
   onDelete 
 }: ContentFeedItemProps) => {
@@ -105,7 +111,19 @@ export const ContentFeedItem = ({
   const [likeCount, setLikeCount] = useState(content.unlock_count || 0);
 
   const isPaid = content.tier === 'paid';
-  const isLocked = isPaid && !isSubscribed;
+  
+  // Check tier-gated access
+  const tierAccess = checkTierAccess(
+    creator.id,
+    content.id,
+    subscribedTierId,
+    subscribedTierPrice
+  );
+  
+  // Content is locked if: paid AND (not subscribed OR doesn't have tier access)
+  const isTierGated = !tierAccess.hasAccess && tierAccess.requiredTier !== null;
+  const isLocked = (isPaid && !isSubscribed) || (isPaid && isTierGated && !isOwner);
+  
   const isVideo = content.media_type?.startsWith('video/') || content.media_hash?.match(/\.(mp4|webm|mov)$/i);
   
   // Format title - handle null/undefined/"null" cases
@@ -636,11 +654,17 @@ export const ContentFeedItem = ({
             })()}
           </p>
         </div>
-        {isPaid && (
-          <Badge variant="outline" className="border-[#FF6600]/50 text-[#FF6600]">
-            {content.price_xmr} XMR
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Tier badge if tier-gated */}
+          {tierAccess.requiredTier && !isOwner && (
+            <TierBadge tier={tierAccess.requiredTier} size="sm" />
+          )}
+          {isPaid && (
+            <Badge variant="outline" className="border-[#FF6600]/50 text-[#FF6600]">
+              {content.price_xmr} XMR
+            </Badge>
+          )}
+        </div>
         
         {/* Owner dropdown menu */}
         {isOwner && (
@@ -849,27 +873,31 @@ export const ContentFeedItem = ({
           </div>
         )}
 
-        {/* Locked overlay */}
+        {/* Locked overlay - either payment lock or tier lock */}
         {(isLocked && (!isVideo || showTeaserOverlay || !isPlaying)) && (
-          <div className="absolute inset-0 bg-background/60 flex flex-col items-center justify-center">
-            <Lock className="w-10 h-10 mb-3 text-[#FF6600]" />
-            {isVideo && (
+          isTierGated && tierAccess.requiredTier ? (
+            <TierGatedOverlay requiredTier={tierAccess.requiredTier} />
+          ) : (
+            <div className="absolute inset-0 bg-background/60 flex flex-col items-center justify-center">
+              <Lock className="w-10 h-10 mb-3 text-[#FF6600]" />
+              {isVideo && (
+                <Button
+                  onClick={handlePlayTeaser}
+                  variant="outline"
+                  className="mb-3 border-[#FF6600] text-[#FF6600] hover:bg-[#FF6600] hover:text-white"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Watch {TEASER_DURATION}s Teaser
+                </Button>
+              )}
               <Button
-                onClick={handlePlayTeaser}
-                variant="outline"
-                className="mb-3 border-[#FF6600] text-[#FF6600] hover:bg-[#FF6600] hover:text-white"
+                onClick={handleUnlock}
+                className="bg-[#FF6600] hover:bg-[#FF6600]/90"
               >
-                <Play className="w-4 h-4 mr-2" />
-                Watch {TEASER_DURATION}s Teaser
+                Unlock for {content.price_xmr} XMR
               </Button>
-            )}
-            <Button
-              onClick={handleUnlock}
-              className="bg-[#FF6600] hover:bg-[#FF6600]/90"
-            >
-              Unlock for {content.price_xmr} XMR
-            </Button>
-          </div>
+            </div>
+          )
         )}
 
         {/* Free badge */}
