@@ -23,6 +23,7 @@ import { creatorApi, ContentItem } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import CreatorUploadModal from '@/components/creator/CreatorUploadModal';
+import { CreatorNotificationBell } from '@/components/creator/CreatorNotificationBell';
 
 const CreatorDashboard = () => {
   const navigate = useNavigate();
@@ -131,6 +132,7 @@ const CreatorDashboard = () => {
               <Share2 className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Share</span>
             </Button>
+            <CreatorNotificationBell creatorId={creator.id} />
             <Button variant="outline" size="sm" onClick={() => navigate('/creator/settings')}>
               <Settings className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Settings</span>
