@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Eye, Unlock, Coins, Settings, LogOut, 
   MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon,
-  Upload, ExternalLink, Share2, Check, Copy, Play, Film
+  Upload, ExternalLink, Share2, Check, Copy, Play, Film,
+  FileText, Pin, PinOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
+import { usePinnedPosts } from '@/hooks/usePinnedPosts';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -29,6 +32,9 @@ const CreatorDashboard = () => {
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  
+  // Pinned posts management
+  const { togglePin, isPinned, sortWithPinned, markPinned, pinnedCount } = usePinnedPosts(creator?.id);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -250,7 +256,7 @@ const CreatorDashboard = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {content.map((item) => {
+            {sortWithPinned(content).map((item) => {
               const priceXmr = item.price_xmr ?? 0;
               const viewCount = item.view_count ?? 0;
               const unlockCount = item.unlock_count ?? 0;
@@ -258,21 +264,31 @@ const CreatorDashboard = () => {
               const isVideo = item.media_type?.startsWith('video/') || 
                              item.media_hash?.includes('.mp4') ||
                              item.media_hash?.includes('.webm');
+              const isTextPost = item.post_type === 'text' || item.media_type === 'text/post';
+              const itemIsPinned = isPinned(item.id);
               
               // Determine thumbnail/preview URL
               const thumbnailSrc = item.thumbnail_url 
                 ? creatorApi.getMediaUrl(item.thumbnail_url)
-                : item.media_hash
+                : item.media_hash && !isTextPost
                   ? creatorApi.getMediaUrl(item.media_hash)
                   : null;
 
               return (
               <Card 
                 key={item.id} 
-                className="overflow-hidden group"
+                className={`overflow-hidden group ${itemIsPinned ? 'ring-2 ring-[#FF6600]/50 bg-[#FF6600]/5' : ''}`}
               >
                 <div className="relative aspect-video bg-muted">
-                  {isVideo ? (
+                  {isTextPost ? (
+                    // Text post preview
+                    <div className="w-full h-full p-4 flex flex-col justify-center bg-gradient-to-br from-muted to-muted/50">
+                      <FileText className="w-8 h-8 text-muted-foreground mb-2 mx-auto" />
+                      <p className="text-sm text-center text-muted-foreground line-clamp-3">
+                        {item.description || item.title || 'Text Post'}
+                      </p>
+                    </div>
+                  ) : isVideo ? (
                     // For videos, show clickable play overlay
                     <div 
                       className="relative w-full h-full cursor-pointer group/video"
@@ -327,6 +343,16 @@ const CreatorDashboard = () => {
                       <ImageIcon className="w-8 h-8 text-muted-foreground" />
                     </div>
                   )}
+                  
+                  {/* Pinned badge */}
+                  {itemIsPinned && (
+                    <Badge className="absolute top-2 left-2 bg-[#FF6600] text-white gap-1">
+                      <Pin className="w-3 h-3" />
+                      Pinned
+                    </Badge>
+                  )}
+                  
+                  {/* Price/Free badge */}
                   <Badge
                     className={`absolute top-2 right-2 ${
                       item.tier === 'paid' 
@@ -375,6 +401,24 @@ const CreatorDashboard = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          togglePin(item.id);
+                          toast.success(itemIsPinned ? 'Post unpinned' : 'Post pinned to top');
+                        }}>
+                          {itemIsPinned ? (
+                            <>
+                              <PinOff className="w-4 h-4 mr-2" />
+                              Unpin
+                            </>
+                          ) : (
+                            <>
+                              <Pin className="w-4 h-4 mr-2" />
+                              Pin to Top {pinnedCount >= 3 && '(will unpin oldest)'}
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/content/${item.id}`);
