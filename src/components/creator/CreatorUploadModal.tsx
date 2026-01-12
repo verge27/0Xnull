@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Video, Loader2, FileText } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Video, Loader2, FileText, Crown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,19 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { creatorApi, ContentItem } from '@/services/creatorApi';
+import { useCreatorAuth } from '@/hooks/useCreatorAuth';
+import { getCreatorTiers, TIER_COLORS } from '@/hooks/useSubscriptionTiers';
+import { useContentTierAccess } from '@/hooks/useContentTierAccess';
 
 interface CreatorUploadModalProps {
   open: boolean;
@@ -24,6 +35,10 @@ interface CreatorUploadModalProps {
 type PostType = 'media' | 'text';
 
 const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModalProps) => {
+  const { creator } = useCreatorAuth();
+  const { setContentTierAccess } = useContentTierAccess(creator?.id);
+  const tiersConfig = creator?.id ? getCreatorTiers(creator.id) : null;
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   
@@ -39,6 +54,9 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
   const [tags, setTags] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
+  
+  // Tier gating
+  const [selectedTierId, setSelectedTierId] = useState<string>('all'); // 'all' = accessible to all subscribers
 
   const resetForm = () => {
     setPostType('media');
@@ -51,6 +69,7 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
     setIsPaid(false);
     setPrice('');
     setTags('');
+    setSelectedTierId('all');
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,6 +197,14 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
       if (postType === 'text') {
         content.post_type = 'text';
         content.media_type = 'text/post';
+      }
+      
+      // Set tier access if a specific tier is selected
+      if (isPaid && selectedTierId !== 'all' && creator?.id) {
+        const selectedTier = tiersConfig?.tiers.find(t => t.id === selectedTierId);
+        if (selectedTier) {
+          setContentTierAccess(content.id, selectedTierId, selectedTier.priceXmr);
+        }
       }
       
       onSuccess(content);
@@ -383,23 +410,66 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
 
             {/* Price Input */}
             {isPaid && (
-              <div className="space-y-2">
-                <Label htmlFor="price">Price (XMR)</Label>
-                <div className="relative">
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.0001"
-                    min="0.0001"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0.01"
-                    className="pr-16"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    XMR
-                  </span>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (XMR)</Label>
+                  <div className="relative">
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.0001"
+                      min="0.0001"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="0.01"
+                      className="pr-16"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      XMR
+                    </span>
+                  </div>
                 </div>
+
+                {/* Tier Gating */}
+                {tiersConfig?.enableTiers && tiersConfig.tiers.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Crown className="w-4 h-4 text-[#FF6600]" />
+                      Restrict to Tier
+                    </Label>
+                    <Select value={selectedTierId} onValueChange={setSelectedTierId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select tier access" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <span>All Subscribers</span>
+                            <Badge variant="secondary" className="text-xs">Default</Badge>
+                          </div>
+                        </SelectItem>
+                        {tiersConfig.tiers.map((tier) => {
+                          const colors = TIER_COLORS[tier.color] || TIER_COLORS.orange;
+                          return (
+                            <SelectItem key={tier.id} value={tier.id}>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full ${colors.bg} border ${colors.border}`} />
+                                <span>{tier.name}</span>
+                                <span className="text-muted-foreground">({tier.priceXmr} XMR)</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedTierId === 'all' 
+                        ? 'All paying subscribers can access this content'
+                        : `Only ${tiersConfig.tiers.find(t => t.id === selectedTierId)?.name || 'selected tier'} subscribers and above can access`
+                      }
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
