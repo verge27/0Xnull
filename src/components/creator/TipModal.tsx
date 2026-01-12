@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { CreatorProfile } from '@/services/creatorApi';
 import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
+import { triggerCampaignUpdate } from '@/hooks/useCreatorCampaigns';
 import { toast } from 'sonner';
 
 interface TipModalProps {
@@ -80,6 +81,9 @@ export const TipModal = ({ creator, contentId, trigger }: TipModalProps) => {
       `Someone sent you a ${amount} XMR tip${message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : ''}`,
       { amount, message: message || undefined }
     );
+    
+    // Update campaign progress for tips
+    triggerCampaignUpdate(creator.id, 'tips', amount);
     
     toast.success('Tip sent successfully! 🎉');
     setIsOpen(false);

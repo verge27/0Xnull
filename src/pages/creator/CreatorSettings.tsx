@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Loader2, User, Image, Palette, Link2, 
   Save, Camera, X, Check, Copy, ExternalLink, MessageCircle,
-  Crown, Plus, Trash2, GripVertical
+  Crown, Plus, Trash2, GripVertical, Trophy, Pin, Users, DollarSign, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import {
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { useCreatorSettings } from '@/hooks/useCreatorSettings';
 import { useSubscriptionTiers, TIER_COLORS, SubscriptionTier } from '@/hooks/useSubscriptionTiers';
+import { useCreatorCampaigns, CampaignGoalType } from '@/hooks/useCreatorCampaigns';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -33,6 +35,14 @@ const CreatorSettings = () => {
   const { creator, isLoading: authLoading, isAuthenticated, refreshProfile, truncateKey } = useCreatorAuth();
   const { settings, updateMessageFee, toggleNonSubMessages } = useCreatorSettings(creator?.id);
   const { tiers, enableTiers, updateTier, addTier, removeTier, toggleTiers, resetToDefaults } = useSubscriptionTiers(creator?.id);
+  const { 
+    campaigns, 
+    activeCampaigns,
+    completedCampaigns,
+    createCampaign, 
+    deleteCampaign, 
+    togglePin 
+  } = useCreatorCampaigns(creator?.id);
   
   // Tier editing state
   const [editingTier, setEditingTier] = useState<string | null>(null);
@@ -40,6 +50,14 @@ const CreatorSettings = () => {
   const [newTierPrice, setNewTierPrice] = useState('0.05');
   const [newTierColor, setNewTierColor] = useState('orange');
   const [newTierBenefits, setNewTierBenefits] = useState('');
+  
+  // Campaign state
+  const [newCampaignTitle, setNewCampaignTitle] = useState('');
+  const [newCampaignDesc, setNewCampaignDesc] = useState('');
+  const [newCampaignGoalType, setNewCampaignGoalType] = useState<CampaignGoalType>('subscribers');
+  const [newCampaignTarget, setNewCampaignTarget] = useState('10');
+  const [newCampaignReward, setNewCampaignReward] = useState('');
+  
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   
@@ -788,6 +806,206 @@ const CreatorSettings = () => {
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Crowdfunding Campaigns */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-[#FF6600]" />
+                Crowdfunding Campaigns
+              </CardTitle>
+              <CardDescription>
+                Set goals and reward your audience when they're reached
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Existing campaigns */}
+              {campaigns.length > 0 && (
+                <div className="space-y-3">
+                  <Label>Your Campaigns</Label>
+                  {campaigns.map((campaign) => {
+                    const progress = Math.min((campaign.goal.current / campaign.goal.target) * 100, 100);
+                    const isCompleted = !campaign.isActive;
+                    
+                    return (
+                      <div
+                        key={campaign.id}
+                        className={`relative rounded-lg border p-4 ${
+                          isCompleted ? 'bg-green-500/10 border-green-500/20' : 'bg-muted/30'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            {campaign.isPinned && (
+                              <Badge variant="secondary" className="text-xs gap-1">
+                                <Pin className="w-3 h-3" />
+                              </Badge>
+                            )}
+                            <span className="font-medium">{campaign.title}</span>
+                            {isCompleted && (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                Completed
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => togglePin(campaign.id)}
+                              className={campaign.isPinned ? 'text-[#FF6600]' : ''}
+                            >
+                              <Pin className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => deleteCampaign(campaign.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {campaign.description && (
+                          <p className="text-sm text-muted-foreground mb-2">{campaign.description}</p>
+                        )}
+                        
+                        <Progress value={progress} className="h-2 mb-2" />
+                        
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            {campaign.goal.type === 'subscribers' && <Users className="w-3 h-3" />}
+                            {campaign.goal.type === 'tips' && <DollarSign className="w-3 h-3" />}
+                            {campaign.goal.type === 'messages' && <MessageSquare className="w-3 h-3" />}
+                            {campaign.goal.type === 'tips' 
+                              ? `${campaign.goal.current.toFixed(3)} / ${campaign.goal.target} XMR`
+                              : `${campaign.goal.current} / ${campaign.goal.target}`
+                            }
+                          </span>
+                          <span>🎁 {campaign.reward}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Create new campaign */}
+              <div className="border border-dashed rounded-lg p-4 space-y-3">
+                <Label>Create New Campaign</Label>
+                
+                <div className="space-y-2">
+                  <Label className="text-xs">Title *</Label>
+                  <Input
+                    placeholder="e.g., First 10 Subscribers Special!"
+                    value={newCampaignTitle}
+                    onChange={(e) => setNewCampaignTitle(e.target.value)}
+                    maxLength={60}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Description (optional)</Label>
+                  <Textarea
+                    placeholder="Tell your fans about this goal..."
+                    value={newCampaignDesc}
+                    onChange={(e) => setNewCampaignDesc(e.target.value)}
+                    rows={2}
+                    maxLength={200}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Goal Type</Label>
+                    <Select 
+                      value={newCampaignGoalType} 
+                      onValueChange={(v) => setNewCampaignGoalType(v as CampaignGoalType)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="subscribers">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            Subscribers
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="tips">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4" />
+                            Tips (XMR)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="messages">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Paid Messages
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">Target</Label>
+                    <Input
+                      type="number"
+                      placeholder={newCampaignGoalType === 'tips' ? '0.5' : '10'}
+                      value={newCampaignTarget}
+                      onChange={(e) => setNewCampaignTarget(e.target.value)}
+                      min={newCampaignGoalType === 'tips' ? '0.01' : '1'}
+                      step={newCampaignGoalType === 'tips' ? '0.01' : '1'}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Reward *</Label>
+                  <Input
+                    placeholder="e.g., Free 10min video for everyone!"
+                    value={newCampaignReward}
+                    onChange={(e) => setNewCampaignReward(e.target.value)}
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    What will your fans get when this goal is reached?
+                  </p>
+                </div>
+
+                <Button
+                  disabled={!newCampaignTitle.trim() || !newCampaignReward.trim() || !newCampaignTarget}
+                  onClick={() => {
+                    const target = parseFloat(newCampaignTarget);
+                    if (isNaN(target) || target <= 0) {
+                      toast.error('Please enter a valid target');
+                      return;
+                    }
+                    createCampaign(
+                      newCampaignTitle.trim(),
+                      newCampaignDesc.trim(),
+                      newCampaignGoalType,
+                      target,
+                      newCampaignReward.trim()
+                    );
+                    setNewCampaignTitle('');
+                    setNewCampaignDesc('');
+                    setNewCampaignTarget('10');
+                    setNewCampaignReward('');
+                    toast.success('Campaign created!');
+                  }}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Campaign
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

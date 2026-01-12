@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { CreatorProfile } from '@/services/creatorApi';
 import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
+import { triggerCampaignUpdate } from '@/hooks/useCreatorCampaigns';
 import { toast } from 'sonner';
 
 interface PayPerMessageModalProps {
@@ -67,6 +68,9 @@ export const PayPerMessageModal = ({
       `Someone sent you a paid message for ${messageFee} XMR`,
       { message: message.substring(0, 100), amount: messageFee }
     );
+    
+    // Update campaign progress for paid messages
+    triggerCampaignUpdate(creator.id, 'messages', 1);
     
     toast.success('Message sent successfully! 🎉');
     onMessageSent?.(message);
