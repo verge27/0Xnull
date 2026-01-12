@@ -5,7 +5,9 @@ import {
   Loader2, 
   ArrowLeft, 
   Lock,
-  Crown
+  Crown,
+  MessageCircle,
+  Coins
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +15,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { CreatorProfile, creatorApi } from '@/services/creatorApi';
+import { getCreatorSettings } from '@/hooks/useCreatorSettings';
+import { PayPerMessageModal } from './PayPerMessageModal';
 
 interface Message {
   id: string;
@@ -33,7 +37,12 @@ export const CreatorDMPanel = ({ creator, isSubscribed = false, onClose }: Creat
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [showPayPerMessage, setShowPayPerMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Get creator's message settings
+  const creatorSettings = getCreatorSettings(creator.id);
+  const canPayPerMessage = creatorSettings.allowNonSubMessages && creatorSettings.messageFeeXmr > 0;
 
   // Load messages
   useEffect(() => {
@@ -92,18 +101,93 @@ export const CreatorDMPanel = ({ creator, isSubscribed = false, onClose }: Creat
     }
   };
 
+  const handlePayPerMessageSent = (message: string) => {
+    // Add the message to the list after successful payment
+    const newMsg: Message = {
+      id: `paid-${Date.now()}`,
+      content: message,
+      sender_id: 'user',
+      created_at: new Date().toISOString(),
+      is_from_creator: false,
+    };
+    setMessages(prev => [...prev, newMsg]);
+  };
+
+  // Non-subscriber view with pay-per-message option
   if (!isSubscribed) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-        <Lock className="w-12 h-12 text-[#FF6600] mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Subscribe to Message</h3>
-        <p className="text-muted-foreground mb-4">
-          Subscribe to {creator.display_name} to send direct messages
-        </p>
-        <Badge variant="outline" className="gap-1">
-          <Crown className="w-3 h-3" />
-          Subscribers Only
-        </Badge>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center gap-3 p-4 border-b">
+          {onClose && (
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          )}
+          <Avatar className="w-10 h-10">
+            {creator.avatar_url ? (
+              <AvatarImage src={creatorApi.getMediaUrl(creator.avatar_url)} />
+            ) : null}
+            <AvatarFallback className="bg-[#FF6600]/20 text-[#FF6600]">
+              {(creator.display_name || 'U').charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <p className="font-semibold">{creator.display_name}</p>
+            <p className="text-xs text-muted-foreground">Direct Messages</p>
+          </div>
+        </div>
+
+        {/* Non-subscriber content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <Lock className="w-12 h-12 text-[#FF6600] mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Subscribe to Message</h3>
+          <p className="text-muted-foreground mb-4">
+            Subscribe to {creator.display_name} to send unlimited direct messages
+          </p>
+          <Badge variant="outline" className="gap-1 mb-6">
+            <Crown className="w-3 h-3" />
+            Subscribers Only
+          </Badge>
+
+          {/* Pay-per-message option */}
+          {canPayPerMessage && (
+            <div className="w-full max-w-xs">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => setShowPayPerMessage(true)}
+                variant="outline"
+                className="w-full gap-2 border-[#FF6600]/30 hover:bg-[#FF6600]/5"
+              >
+                <Coins className="w-4 h-4 text-[#FF6600]" />
+                <span>Send a Message</span>
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {creatorSettings.messageFeeXmr} XMR
+                </Badge>
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Pay per message to start a conversation
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Pay-per-message modal */}
+        <PayPerMessageModal
+          creator={creator}
+          messageFee={creatorSettings.messageFeeXmr}
+          isOpen={showPayPerMessage}
+          onClose={() => setShowPayPerMessage(false)}
+          onMessageSent={handlePayPerMessageSent}
+        />
       </div>
     );
   }

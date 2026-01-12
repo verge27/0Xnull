@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Loader2, User, Image, Palette, Link2, 
-  Save, Camera, X, Check, Copy, ExternalLink
+  Save, Camera, X, Check, Copy, ExternalLink, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
+import { useCreatorSettings } from '@/hooks/useCreatorSettings';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -19,6 +21,7 @@ import { Footer } from '@/components/Footer';
 const CreatorSettings = () => {
   const navigate = useNavigate();
   const { creator, isLoading: authLoading, isAuthenticated, refreshProfile, truncateKey } = useCreatorAuth();
+  const { settings, updateMessageFee, toggleNonSubMessages } = useCreatorSettings(creator?.id);
   
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -440,6 +443,73 @@ const CreatorSettings = () => {
                   Custom page names will be available soon. Contact admin to request yours.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Messaging Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-[#FF6600]" />
+                Messaging Settings
+              </CardTitle>
+              <CardDescription>
+                Configure how non-subscribers can message you
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Allow pay-per-message toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label htmlFor="allowMessages">Allow Pay-per-Message</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Let non-subscribers send you messages for a small fee
+                  </p>
+                </div>
+                <Switch
+                  id="allowMessages"
+                  checked={settings.allowNonSubMessages}
+                  onCheckedChange={toggleNonSubMessages}
+                />
+              </div>
+
+              {/* Message fee */}
+              {settings.allowNonSubMessages && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label htmlFor="messageFee">Message Fee (XMR)</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="messageFee"
+                        type="number"
+                        value={settings.messageFeeXmr}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val) && val > 0) {
+                            updateMessageFee(val);
+                          }
+                        }}
+                        min="0.001"
+                        step="0.001"
+                        className="max-w-[150px]"
+                      />
+                      <span className="text-sm text-muted-foreground">XMR per message</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Suggested: 0.01 XMR (~$1.50). Set higher to filter low-effort messages.
+                    </p>
+                  </div>
+
+                  {/* Preview */}
+                  <div className="p-4 rounded-lg bg-muted/50 border border-dashed">
+                    <p className="text-xs text-muted-foreground mb-1">Non-subscribers will see:</p>
+                    <p className="text-sm">
+                      "Send a message for <span className="font-bold text-[#FF6600]">{settings.messageFeeXmr} XMR</span>"
+                    </p>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
