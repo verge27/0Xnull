@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Loader2, User, Image, Palette, Link2, 
-  Save, Camera, X, Check, Copy, ExternalLink, MessageCircle
+  Save, Camera, X, Check, Copy, ExternalLink, MessageCircle,
+  Crown, Plus, Trash2, GripVertical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,17 +13,33 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { useCreatorSettings } from '@/hooks/useCreatorSettings';
+import { useSubscriptionTiers, TIER_COLORS, SubscriptionTier } from '@/hooks/useSubscriptionTiers';
 import { creatorApi } from '@/services/creatorApi';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { toast } from 'sonner';
 
 const CreatorSettings = () => {
   const navigate = useNavigate();
   const { creator, isLoading: authLoading, isAuthenticated, refreshProfile, truncateKey } = useCreatorAuth();
   const { settings, updateMessageFee, toggleNonSubMessages } = useCreatorSettings(creator?.id);
+  const { tiers, enableTiers, updateTier, addTier, removeTier, toggleTiers, resetToDefaults } = useSubscriptionTiers(creator?.id);
   
+  // Tier editing state
+  const [editingTier, setEditingTier] = useState<string | null>(null);
+  const [newTierName, setNewTierName] = useState('');
+  const [newTierPrice, setNewTierPrice] = useState('0.05');
+  const [newTierColor, setNewTierColor] = useState('orange');
+  const [newTierBenefits, setNewTierBenefits] = useState('');
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   
@@ -443,6 +460,267 @@ const CreatorSettings = () => {
                   Custom page names will be available soon. Contact admin to request yours.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription Tiers */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-[#FF6600]" />
+                Subscription Tiers
+              </CardTitle>
+              <CardDescription>
+                Configure subscription options for your fans
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Enable tiers toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label htmlFor="enableTiers">Enable Multiple Tiers</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Offer different subscription levels with varying benefits
+                  </p>
+                </div>
+                <Switch
+                  id="enableTiers"
+                  checked={enableTiers}
+                  onCheckedChange={toggleTiers}
+                />
+              </div>
+
+              {enableTiers && (
+                <>
+                  <Separator />
+                  
+                  {/* Existing tiers */}
+                  <div className="space-y-3">
+                    <Label>Your Tiers</Label>
+                    {tiers.map((tier) => {
+                      const colors = TIER_COLORS[tier.color] || TIER_COLORS.orange;
+                      const isEditing = editingTier === tier.id;
+                      
+                      return (
+                        <div
+                          key={tier.id}
+                          className={`relative rounded-lg border ${colors.border} p-4 ${colors.bg}`}
+                        >
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label className="text-xs">Name</Label>
+                                  <Input
+                                    defaultValue={tier.name}
+                                    onBlur={(e) => updateTier(tier.id, { name: e.target.value })}
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Price (XMR/month)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.001"
+                                    min="0.001"
+                                    defaultValue={tier.priceXmr}
+                                    onBlur={(e) => updateTier(tier.id, { priceXmr: parseFloat(e.target.value) || 0.01 })}
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Color</Label>
+                                <Select
+                                  defaultValue={tier.color}
+                                  onValueChange={(v) => updateTier(tier.id, { color: v })}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Object.keys(TIER_COLORS).map((color) => (
+                                      <SelectItem key={color} value={color}>
+                                        <div className="flex items-center gap-2">
+                                          <div className={`w-3 h-3 rounded-full ${TIER_COLORS[color].bg} border ${TIER_COLORS[color].border}`} />
+                                          {color.charAt(0).toUpperCase() + color.slice(1)}
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Benefits (one per line)</Label>
+                                <Textarea
+                                  defaultValue={tier.benefits.join('\n')}
+                                  rows={4}
+                                  onBlur={(e) => updateTier(tier.id, { 
+                                    benefits: e.target.value.split('\n').filter(b => b.trim()) 
+                                  })}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Badge (optional)</Label>
+                                <Input
+                                  defaultValue={tier.badge || ''}
+                                  placeholder="e.g., Popular, Best Value"
+                                  onBlur={(e) => updateTier(tier.id, { badge: e.target.value || undefined })}
+                                />
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => setEditingTier(null)}
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                Done
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-medium ${colors.text}`}>{tier.name}</span>
+                                    {tier.badge && (
+                                      <Badge variant="secondary" className="text-xs">{tier.badge}</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {tier.priceXmr} XMR/month • {tier.benefits.length} benefits
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingTier(tier.id)}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => {
+                                    if (tiers.length > 1) {
+                                      removeTier(tier.id);
+                                    } else {
+                                      toast.error('You need at least one tier');
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Add new tier */}
+                  <div className="border border-dashed rounded-lg p-4 space-y-3">
+                    <Label>Add New Tier</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">Name</Label>
+                        <Input
+                          placeholder="e.g., Gold"
+                          value={newTierName}
+                          onChange={(e) => setNewTierName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Price (XMR/month)</Label>
+                        <Input
+                          type="number"
+                          step="0.001"
+                          min="0.001"
+                          value={newTierPrice}
+                          onChange={(e) => setNewTierPrice(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Color</Label>
+                      <Select value={newTierColor} onValueChange={setNewTierColor}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(TIER_COLORS).map((color) => (
+                            <SelectItem key={color} value={color}>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full ${TIER_COLORS[color].bg} border ${TIER_COLORS[color].border}`} />
+                                {color.charAt(0).toUpperCase() + color.slice(1)}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Benefits (one per line)</Label>
+                      <Textarea
+                        placeholder="Access to premium content&#10;Direct messaging&#10;Early access"
+                        value={newTierBenefits}
+                        onChange={(e) => setNewTierBenefits(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (!newTierName.trim()) {
+                          toast.error('Please enter a tier name');
+                          return;
+                        }
+                        const price = parseFloat(newTierPrice);
+                        if (isNaN(price) || price <= 0) {
+                          toast.error('Please enter a valid price');
+                          return;
+                        }
+                        const benefits = newTierBenefits.split('\n').filter(b => b.trim());
+                        if (benefits.length === 0) {
+                          toast.error('Please add at least one benefit');
+                          return;
+                        }
+                        
+                        addTier({
+                          id: `tier-${Date.now()}`,
+                          name: newTierName.trim(),
+                          priceXmr: price,
+                          color: newTierColor,
+                          benefits,
+                        });
+                        
+                        setNewTierName('');
+                        setNewTierPrice('0.05');
+                        setNewTierBenefits('');
+                        toast.success('Tier added!');
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Tier
+                    </Button>
+                  </div>
+
+                  {/* Reset button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      resetToDefaults();
+                      toast.success('Tiers reset to defaults');
+                    }}
+                    className="text-muted-foreground"
+                  >
+                    Reset to Defaults
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
 
