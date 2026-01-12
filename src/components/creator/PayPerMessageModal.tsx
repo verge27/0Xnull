@@ -3,7 +3,6 @@ import { MessageCircle, Loader2, Copy, Check, Clock, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -13,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { CreatorProfile } from '@/services/creatorApi';
+import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
 import { toast } from 'sonner';
 
 interface PayPerMessageModalProps {
@@ -58,6 +58,16 @@ export const PayPerMessageModal = ({
     // Simulate payment check
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsProcessing(false);
+    
+    // Trigger notification for creator
+    triggerCreatorNotification(
+      creator.id,
+      'paid_message',
+      'New Paid Message',
+      `Someone sent you a paid message for ${messageFee} XMR`,
+      { message: message.substring(0, 100), amount: messageFee }
+    );
+    
     toast.success('Message sent successfully! 🎉');
     onMessageSent?.(message);
     handleClose();

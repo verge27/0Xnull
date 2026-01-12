@@ -36,6 +36,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
+import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
 import { toast } from 'sonner';
 
 interface Comment {
@@ -181,6 +182,18 @@ export const CreatorComments = ({ contentId, creatorId }: CreatorCommentsProps) 
         .insert(commentData);
 
       if (error) throw error;
+
+      // Trigger notification for content requests
+      if (isContentRequest && creatorId) {
+        const displayName = user ? 'A subscriber' : 'Someone';
+        triggerCreatorNotification(
+          creatorId,
+          'content_request',
+          'New Content Request',
+          `${displayName} requested: "${newComment.trim().substring(0, 50)}${newComment.length > 50 ? '...' : ''}"`,
+          { contentId, comment: newComment.trim() }
+        );
+      }
 
       setNewComment('');
       setIsContentRequest(false);

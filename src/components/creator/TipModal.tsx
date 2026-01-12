@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CreatorProfile } from '@/services/creatorApi';
+import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
 import { toast } from 'sonner';
 
 interface TipModalProps {
@@ -70,6 +71,16 @@ export const TipModal = ({ creator, contentId, trigger }: TipModalProps) => {
     // Simulate payment check
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsProcessing(false);
+    
+    // Trigger notification for creator
+    triggerCreatorNotification(
+      creator.id,
+      'tip',
+      'New Tip Received! 🎉',
+      `Someone sent you a ${amount} XMR tip${message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : ''}`,
+      { amount, message: message || undefined }
+    );
+    
     toast.success('Tip sent successfully! 🎉');
     setIsOpen(false);
     setShowPayment(false);
