@@ -41,6 +41,7 @@ import { SubscriptionCard } from '@/components/creator/SubscriptionCard';
 import { TipModal } from '@/components/creator/TipModal';
 import { CreatorDMPanel } from '@/components/creator/CreatorDMPanel';
 import { BundlesSection } from '@/components/creator/BundlesSection';
+import { CampaignsSection } from '@/components/creator/CampaignsSection';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
 import { toast } from 'sonner';
 
@@ -364,6 +365,9 @@ const CreatorProfile = () => {
                 creator={profile} 
                 content={content}
               />
+
+              {/* Campaigns Section */}
+              <CampaignsSection creatorId={profile.id} />
             </div>
 
             {/* Main content - Timeline */}
