@@ -17,6 +17,7 @@ import { creatorApi, ContentItem, CreatorProfile as CreatorProfileType } from '@
 import { useToken } from '@/hooks/useToken';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CreatorComments } from '@/components/creator/CreatorComments';
 import { toast } from 'sonner';
 
 // Simple localStorage-based likes (persistent per-browser)
@@ -392,6 +393,14 @@ const ContentView = () => {
                 </Badge>
               ))}
             </div>
+          )}
+
+          {/* Comments Section */}
+          {actualContentId && (
+            <CreatorComments 
+              contentId={actualContentId} 
+              creatorId={creatorId || content.creator_id} 
+            />
           )}
         </div>
       </main>

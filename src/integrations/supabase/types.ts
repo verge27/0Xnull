@@ -182,6 +182,64 @@ export type Database = {
           },
         ]
       }
+      creator_comments: {
+        Row: {
+          content: string
+          content_id: string
+          created_at: string
+          id: string
+          is_content_request: boolean | null
+          parent_id: string | null
+          pk_user_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          content_id: string
+          created_at?: string
+          id?: string
+          is_content_request?: boolean | null
+          parent_id?: string | null
+          pk_user_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          is_content_request?: boolean | null
+          parent_id?: string | null
+          pk_user_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "creator_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_comments_pk_user_id_fkey"
+            columns: ["pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_comments_pk_user_id_fkey"
+            columns: ["pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           currency_pair: string
