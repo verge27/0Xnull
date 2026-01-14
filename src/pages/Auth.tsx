@@ -36,9 +36,15 @@ const Auth = () => {
 
   const handleKeySignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const cleanedKey = privateKeyInput.trim();
+    
+    if (cleanedKey.length !== 64) {
+      return;
+    }
+    
     setIsLoading(true);
     
-    const success = await signInWithKey(privateKeyInput);
+    const success = await signInWithKey(cleanedKey);
     if (success) {
       navigate('/');
     }
@@ -111,7 +117,7 @@ const Auth = () => {
                         type="password"
                         placeholder="Enter your 64-character private key"
                         value={privateKeyInput}
-                        onChange={(e) => setPrivateKeyInput(e.target.value)}
+                        onChange={(e) => setPrivateKeyInput(e.target.value.trim())}
                         className="font-mono text-sm"
                       />
                       <Button
