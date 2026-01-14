@@ -101,8 +101,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Anonymous MMA and boxing betting. Predict UFC, boxing, and combat sports outcomes with Monero.',
   },
   '/cricket': {
-    title: 'Cricket Predictions - 0xNull',
-    description: 'Anonymous cricket betting with Monero. Predict IPL, international, and T20 match outcomes.',
+    title: 'Anonymous Cricket Prediction Markets | No-KYC Cricket Predictions – 0xNull',
+    description: 'Access anonymous cricket prediction markets on 0xNull. Make no-KYC cricket predictions using Monero and other cryptocurrencies on a privacy-first platform.',
   },
   '/starcraft': {
     title: 'StarCraft Predictions - 0xNull',
