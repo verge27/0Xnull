@@ -8,6 +8,7 @@ import { creatorApi, CreatorProfile } from '@/services/creatorApi';
 import { truncateKey } from '@/lib/creatorCrypto';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { SEORichText } from '@/components/SEORichText';
 import { CreatorAgeGate } from '@/components/creator/CreatorAgeGate';
 import { useCreatorAgeGate } from '@/hooks/useCreatorAgeGate';
 
@@ -209,6 +210,24 @@ const CreatorsHub = () => {
           </>
         )}
       </main>
+
+      <SEORichText
+        title="0xNull Creators — The Privacy-First Adult Content Platform"
+        content={`
+          <p>0xNull Creators is a privacy-first adult content platform that doesn't ask who you are. Built for creators and supporters who value anonymity, freedom, and censorship resistance, the platform removes traditional barriers like email signups, passwords, and identity verification.</p>
+          
+          <p>There are no accounts, no KYC, and no personal data. Your identity on 0xNull Creators is a cryptographic keypair generated directly in your browser. You own it entirely. There is no "forgot password" feature because there is no password—control stays with you at all times.</p>
+          
+          <p>Payments on 0xNull Creators are Monero-only, ensuring maximum financial privacy for both creators and supporters. There are no credit cards, no payment processors, and no banks monitoring or questioning transactions. Every payment is confidential, censorship-resistant, and crypto-native.</p>
+          
+          <p>The platform embraces creative freedom, including AI-generated content. Synthetic characters, fictional personas, and AI-generated art are welcome, allowing creators to experiment and publish without fear of sudden policy changes or platform shutdowns. 0xNull Creators is designed to be infrastructure—not a gatekeeper.</p>
+          
+          <p>By combining anonymous identities, Monero payments, and creator-first design, 0xNull Creators provides a safe, private alternative to mainstream adult platforms that rely on surveillance, moderation overreach, and centralized control.</p>
+          
+          <p>Create, publish, and support adult content on your terms—with privacy by default on 0xNull Creators.</p>
+        `}
+      />
+
       <Footer />
     </div>
   );
