@@ -517,7 +517,9 @@ const CreatorUpload = () => {
     refreshProfile();
 
     if (successCount === readyFiles.length) {
-      navigate('/creator/dashboard');
+      // Use window.location to force a fresh page load instead of SPA navigation
+      // This avoids Safari session storage issues with tab limits
+      window.location.href = '/creator/dashboard';
     }
   };
 
@@ -654,8 +656,9 @@ const CreatorUpload = () => {
       console.log('[CreatorUpload] Upload successful:', content.id);
       refreshProfile();
 
-      // Navigate to the content or dashboard
-      navigate(`/content/${content.id}`);
+      // Use window.location to force a fresh page load instead of SPA navigation
+      // This avoids Safari session storage issues with tab limits
+      window.location.href = `/content/${content.id}`;
     } catch (error) {
       console.error('Upload failed:', error);
       const errorMsg = error instanceof Error ? error.message : 'Upload failed';

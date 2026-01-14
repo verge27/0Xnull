@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { creatorApi } from "@/services/creatorApi";
 
 const STORAGE_KEY = "creator_age_verified";
 
@@ -35,17 +36,29 @@ const safeRemoveSessionItem = (key: string): void => {
 };
 
 export const useCreatorAgeGate = () => {
+  // Check if user is authenticated as a creator - skip age gate if so
+  const isCreatorAuthenticated = creatorApi.isAuthenticated();
+  
   const [isVerified, setIsVerified] = useState<boolean>(() => {
+    // Skip age gate for authenticated creators
+    if (isCreatorAuthenticated) return true;
     return safeGetSessionItem(STORAGE_KEY) === "true";
   });
   const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
+    // Skip age gate for authenticated creators
+    if (isCreatorAuthenticated) {
+      setIsVerified(true);
+      setShowModal(false);
+      return;
+    }
+    
     // Check on mount if verification is needed
     if (!isVerified) {
       setShowModal(true);
     }
-  }, [isVerified]);
+  }, [isVerified, isCreatorAuthenticated]);
 
   const verify = useCallback(() => {
     safeSetSessionItem(STORAGE_KEY, "true");
