@@ -35,6 +35,7 @@ import ExolixWidget from '@/components/ExolixWidget';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Radio } from 'lucide-react';
+import { SEORichText } from '@/components/SEORichText';
 
 export default function CricketPredictions() {
   useSEO();
@@ -1034,6 +1035,23 @@ export default function CricketPredictions() {
           fetchMarkets();
         }}
       />
+
+      <SEORichText
+        title="Anonymous Cricket Prediction Markets on 0xNull"
+        content={`
+          <p>0xNull offers anonymous cricket prediction markets with no KYC, no accounts, and no identity verification. Users can predict outcomes of major cricket matches and tournaments while maintaining full privacy and financial anonymity.</p>
+          
+          <p>Unlike traditional cricket betting platforms, 0xNull cricket predictions are built around privacy-first prediction markets. There is no registration process, no personal data collection, and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant transactions.</p>
+          
+          <p>Cricket prediction markets on 0xNull cover a wide range of events, including international matches, domestic leagues, and major tournaments. Users can predict match winners, series outcomes, and key cricket events without exposing their identity or relying on centralized operators.</p>
+          
+          <p>By combining no-KYC access, crypto-native payments, and transparent market mechanics, 0xNull creates a secure environment for anonymous cricket predictions. The platform is designed for users who want to participate in cricket markets without surveillance, restrictions, or personal data risks.</p>
+          
+          <p>Explore anonymous cricket prediction markets on 0xNull and predict cricket outcomes with full privacy—no KYC, no accounts, just crypto-powered markets.</p>
+        `}
+      />
+
+      <Footer />
     </div>
   );
 }
