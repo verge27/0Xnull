@@ -104,6 +104,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Anonymous Cricket Prediction Markets | No-KYC Cricket Predictions – 0xNull',
     description: 'Access anonymous cricket prediction markets on 0xNull. Make no-KYC cricket predictions using Monero and other cryptocurrencies on a privacy-first platform.',
   },
+  '/flash': {
+    title: 'Flash Markets | 5-Minute Crypto Prediction Markets (No KYC) – 0xNull',
+    description: 'Join Flash Markets on 0xNull—5-minute crypto prediction markets with Bull vs Bear outcomes. No KYC, no accounts, Monero-only, winners split the pool.',
+  },
   '/starcraft': {
     title: 'StarCraft Predictions - 0xNull',
     description: 'Anonymous StarCraft 2 betting. Predict GSL, ESL, and pro SC2 match outcomes with crypto.',
