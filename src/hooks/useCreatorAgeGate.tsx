@@ -39,26 +39,31 @@ export const useCreatorAgeGate = () => {
   // Check if user is authenticated as a creator - skip age gate if so
   const isCreatorAuthenticated = creatorApi.isAuthenticated();
   
+  // Check session storage on initial render only
   const [isVerified, setIsVerified] = useState<boolean>(() => {
     // Skip age gate for authenticated creators
     if (isCreatorAuthenticated) return true;
+    // Check if already verified this session
     return safeGetSessionItem(STORAGE_KEY) === "true";
   });
-  const [showModal, setShowModal] = useState<boolean>(false);
+  
+  // Only show modal if not verified - this state persists across navigation
+  const [showModal, setShowModal] = useState<boolean>(() => {
+    // If already verified in session, never show
+    if (safeGetSessionItem(STORAGE_KEY) === "true") return false;
+    // If authenticated creator, never show
+    if (isCreatorAuthenticated) return false;
+    // Otherwise, need to show
+    return true;
+  });
 
+  // Update if creator auth status changes (e.g., user logs in)
   useEffect(() => {
-    // Skip age gate for authenticated creators
-    if (isCreatorAuthenticated) {
+    if (isCreatorAuthenticated && !isVerified) {
       setIsVerified(true);
       setShowModal(false);
-      return;
     }
-    
-    // Check on mount if verification is needed
-    if (!isVerified) {
-      setShowModal(true);
-    }
-  }, [isVerified, isCreatorAuthenticated]);
+  }, [isCreatorAuthenticated, isVerified]);
 
   const verify = useCallback(() => {
     safeSetSessionItem(STORAGE_KEY, "true");
