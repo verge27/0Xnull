@@ -8,6 +8,7 @@ import { TrendingUp, TrendingDown, Timer, Zap, Volume2, VolumeX } from 'lucide-r
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { SEORichText } from '@/components/SEORichText';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import { playCountdownTick, playResolutionSound } from '@/lib/sounds';
@@ -669,6 +670,32 @@ export default function FlashMarkets() {
           )}
         </DialogContent>
       </Dialog>
+
+      <SEORichText
+        title="Flash Markets: Bull vs Bear 5-Minute Crypto Predictions"
+        content={`
+          <p>Flash Markets on 0xNull are anonymous, no-KYC crypto prediction markets designed for fast, high-signal outcomes. Each market runs on a simple Bull vs Bear format, allowing users to predict short-term price movement in just minutes—without accounts, identity verification, or tracking.</p>
+          
+          <h3>The concept is straightforward:</h3>
+          <p>Choose BTC, ETH, or XMR, pick UP (Bull) or DOWN (Bear), and place your prediction within a 5-minute window. Once the market closes, outcomes resolve in the next 5 minutes, and winners split the losers' pool automatically.</p>
+          
+          <p>Unlike traditional trading platforms or sportsbooks, Flash Markets are prediction-based, not leveraged trading. There are no order books, no liquidations, and no custodial risk. A 0.4% fee is applied only to winnings, ensuring fair participation and transparent settlement.</p>
+          
+          <p>All Flash Markets operate using Monero, reinforcing 0xNull's privacy-first approach. There is no KYC, no account creation, and no personal data collection—every interaction is crypto-native and anonymous by default.</p>
+          
+          <h3>Flash Markets are ideal for users who want:</h3>
+          <ul>
+            <li>Fast market resolution</li>
+            <li>Clear Bull vs Bear outcomes</li>
+            <li>No long-term exposure</li>
+            <li>Full privacy and anonymity</li>
+          </ul>
+          
+          <p>Participate in Flash Markets on 0xNull and experience 5-minute crypto prediction markets—no KYC, no accounts, just private, fast-settling outcomes.</p>
+        `}
+      />
+
+      <Footer />
     </div>
   );
 }
