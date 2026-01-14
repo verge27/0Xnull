@@ -910,7 +910,13 @@ export const ContentFeedItem = ({
 
       {/* Footer - Engagement */}
       <CardContent className="p-4">
-        <h3 className="font-semibold mb-2">{displayTitle}</h3>
+        {/* Clickable title that navigates to detail view */}
+        <h3 
+          className="font-semibold mb-2 cursor-pointer hover:text-[#FF6600] transition-colors"
+          onClick={(e) => { e.stopPropagation(); navigate(`/content/${content.id}`); }}
+        >
+          {displayTitle}
+        </h3>
         {content.description && (
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
             {content.description}
@@ -925,9 +931,13 @@ export const ContentFeedItem = ({
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500' : ''}`} />
             <span className="text-sm">{likeCount}</span>
           </button>
-          <button className="flex items-center gap-1 hover:text-[#FF6600] transition-colors">
+          {/* Comment button - navigates to detail view with comments */}
+          <button 
+            className="flex items-center gap-1 hover:text-[#FF6600] transition-colors"
+            onClick={(e) => { e.stopPropagation(); navigate(`/content/${content.id}`); }}
+          >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">0</span>
+            <span className="text-sm">Comment</span>
           </button>
           <button className="flex items-center gap-1 hover:text-[#FF6600] transition-colors">
             <Eye className="w-5 h-5" />

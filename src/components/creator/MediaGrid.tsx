@@ -60,6 +60,8 @@ export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGri
         const isPaid = item.tier === 'paid';
         const isLocked = isPaid && !isSubscribed;
         const isVideo = item.media_type?.startsWith('video/') || item.media_hash?.match(/\.(mp4|webm|mov)$/i);
+        const mediaUrl = item.media_hash ? creatorApi.getMediaUrl(item.media_hash) : null;
+        const thumbnailUrl = item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : null;
 
         return (
           <div
@@ -67,20 +69,33 @@ export const MediaGrid = ({ content, isSubscribed = false, creatorId }: MediaGri
             className="relative aspect-square cursor-pointer group overflow-hidden rounded-sm"
             onClick={() => navigate(`/content/${item.id}`)}
           >
-            {/* Thumbnail - for videos without thumbnails, use the video element */}
-            {isVideo && !item.thumbnail_url && item.media_hash ? (
+            {/* Thumbnail - prefer thumbnail_url, fall back to video poster or placeholder */}
+            {thumbnailUrl ? (
+              <img
+                src={thumbnailUrl}
+                alt={item.title || 'Content'}
+                className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                  isLocked ? 'blur-sm' : ''
+                }`}
+              />
+            ) : isVideo && mediaUrl ? (
               <video
-                src={creatorApi.getMediaUrl(item.media_hash)}
+                src={mediaUrl}
                 className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
                   isLocked ? 'blur-sm' : ''
                 }`}
                 muted
                 playsInline
                 preload="metadata"
+                // Use poster frame from video
+                onLoadedData={(e) => {
+                  const video = e.target as HTMLVideoElement;
+                  video.currentTime = 1; // Seek to 1 second for better thumbnail
+                }}
               />
             ) : (
               <img
-                src={item.thumbnail_url ? creatorApi.getMediaUrl(item.thumbnail_url) : '/placeholder.svg'}
+                src={mediaUrl || '/placeholder.svg'}
                 alt={item.title || 'Content'}
                 className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
                   isLocked ? 'blur-sm' : ''

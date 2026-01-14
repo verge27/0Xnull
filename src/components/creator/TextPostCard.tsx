@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Pin, 
@@ -62,6 +63,7 @@ export const TextPostCard = ({
   onDelete,
   onTogglePin
 }: TextPostCardProps) => {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -194,9 +196,14 @@ export const TextPostCard = ({
         </CardHeader>
         
         <CardContent className="pt-0">
-          {/* Title as heading if present */}
+          {/* Title as heading if present - clickable to detail view */}
           {content.title && content.title !== 'null' && content.title.trim() && (
-            <h3 className="font-semibold text-lg mb-2">{content.title}</h3>
+            <h3 
+              className="font-semibold text-lg mb-2 cursor-pointer hover:text-[#FF6600] transition-colors"
+              onClick={() => navigate(`/content/${content.id}`)}
+            >
+              {content.title}
+            </h3>
           )}
           
           {/* Main text content */}
@@ -227,9 +234,15 @@ export const TextPostCard = ({
               <span className="text-xs">{likeCount}</span>
             </Button>
             
-            <Button variant="ghost" size="sm" className="gap-1.5">
+            {/* Comment button - navigates to detail view */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => navigate(`/content/${content.id}`)}
+            >
               <MessageCircle className="w-4 h-4" />
-              <span className="text-xs">0</span>
+              <span className="text-xs">Comment</span>
             </Button>
             
             <Button
