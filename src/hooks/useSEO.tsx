@@ -61,8 +61,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments, and privacy-first virtual servers.',
   },
   '/phone': {
-    title: 'Anonymous eSIM - 0xNull',
-    description: 'Anonymous eSIM and phone services. Pay with crypto, no identity verification required.',
+    title: 'Anonymous Phone Numbers No KYC | Buy Private eSIMs with Crypto – 0xNull',
+    description: 'Buy anonymous phone numbers and eSIMs with no KYC on 0xNull. Instant activation, global coverage, and crypto payments including Monero and Lightning.',
   },
   '/cashout': {
     title: 'Cash Out Crypto - 0xNull',
