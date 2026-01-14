@@ -185,8 +185,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Sign in to 0xNull. Access your marketplace and prediction market accounts.',
   },
   '/creators': {
-    title: '0xNull Creators - Privacy-First Creator Platform',
-    description: 'Discover creators on 0xNull. A privacy-first creator platform with no email, no password, no KYC. Just cryptographic identity and Monero payments.',
+    title: '0xNull Creators | Anonymous Adult Content Platform (No KYC, Monero)',
+    description: '0xNull Creators is a privacy-first adult content platform with no KYC, no accounts, and Monero-only payments. Create and support content anonymously.',
   },
   '/creator/register': {
     title: 'Become a Creator - 0xNull Creators',
