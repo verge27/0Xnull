@@ -143,11 +143,15 @@ export default function EsportsPredictions() {
     return () => clearInterval(interval);
   }, [placingBet]);
 
-  // Auto-select Dota 2 for AWF viewers
+  // Auto-select Dota 2 for AWF viewers and show welcome toast
   useEffect(() => {
     if (isAWFViewer && selectedGame === 'all') {
       setSelectedGame('dota2');
       setSelectedCategory('moba');
+      toast.success('Добро пожаловать! AWF0XDOTA code applied', {
+        description: '17% lower fees • No KYC • XMR payouts',
+        duration: 5000,
+      });
     }
   }, [isAWFViewer, selectedGame]);
 
