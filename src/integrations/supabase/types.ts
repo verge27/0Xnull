@@ -1021,6 +1021,42 @@ export type Database = {
         }
         Relationships: []
       }
+      voucher_analytics: {
+        Row: {
+          bet_amount: number | null
+          created_at: string
+          event_type: string
+          id: string
+          market_id: string | null
+          metadata: Json | null
+          page: string | null
+          user_token: string | null
+          voucher_code: string
+        }
+        Insert: {
+          bet_amount?: number | null
+          created_at?: string
+          event_type: string
+          id?: string
+          market_id?: string | null
+          metadata?: Json | null
+          page?: string | null
+          user_token?: string | null
+          voucher_code: string
+        }
+        Update: {
+          bet_amount?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          market_id?: string | null
+          metadata?: Json | null
+          page?: string | null
+          user_token?: string | null
+          voucher_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_market_positions: {
