@@ -1004,22 +1004,40 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          pk_user_id: string | null
           role: Database["public"]["Enums"]["app_role"]
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
+          pk_user_id?: string | null
           role: Database["public"]["Enums"]["app_role"]
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          pk_user_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_pk_user_id_fkey"
+            columns: ["pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_pk_user_id_fkey"
+            columns: ["pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       voucher_analytics: {
         Row: {
@@ -1208,6 +1226,13 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role_by_pk: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          public_key_hex: string
         }
         Returns: boolean
       }
