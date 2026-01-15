@@ -30,7 +30,7 @@ interface CreatorAuthContextType {
   hasStoredKeypair: boolean;
   
   // Auth actions
-  register: (privateKey: string, displayName: string, bio?: string) => Promise<void>;
+  register: (privateKey: string, displayName: string, bio?: string, referralCode?: string) => Promise<void>;
   login: (privateKey: string) => Promise<void>;
   logout: () => void;
   
@@ -154,7 +154,7 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     return creator_id;
   };
 
-  const register = async (privateKey: string, displayName: string, bio?: string) => {
+  const register = async (privateKey: string, displayName: string, bio?: string, referralCode?: string) => {
     if (!isValidPrivateKey(privateKey)) {
       throw new Error('Invalid private key format');
     }
@@ -163,7 +163,7 @@ export const CreatorAuthProvider = ({ children }: { children: React.ReactNode })
     
     // Register profile (may fail with 403 if not whitelisted)
     try {
-      await creatorApi.register(publicKey, displayName, bio);
+      await creatorApi.register(publicKey, displayName, bio, referralCode);
     } catch (error) {
       if (error instanceof Error && error.message.includes('403')) {
         throw new Error('Not yet approved. Send your public key to admin for whitelist approval.');

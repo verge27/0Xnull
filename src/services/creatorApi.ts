@@ -268,14 +268,21 @@ class CreatorApiClient {
     }
   }
 
-  async register(pubkey: string, displayName: string, bio?: string): Promise<{ creator_id: string }> {
+  async register(pubkey: string, displayName: string, bio?: string, referralCode?: string): Promise<{ creator_id: string }> {
+    const payload: Record<string, string | undefined> = {
+      pubkey,
+      display_name: displayName,
+      bio,
+    };
+    
+    // Only include referral_code if provided
+    if (referralCode) {
+      payload.referral_code = referralCode;
+    }
+    
     return this.request('/register', {
       method: 'POST',
-      body: JSON.stringify({
-        pubkey,
-        display_name: displayName,
-        bio,
-      }),
+      body: JSON.stringify(payload),
     });
   }
 
