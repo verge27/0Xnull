@@ -71,6 +71,9 @@ export default function EsportsPredictions() {
   const { voucher: savedVoucher } = useVoucher();
   useVoucherFromUrl();
   
+  // Check for streamer-specific vouchers for welcome banners
+  const isAWFViewer = savedVoucher?.toUpperCase() === 'AWF0XDOTA';
+  
   // Multibet slip
   const betSlip = useMultibetSlip();
   const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
@@ -139,6 +142,14 @@ export default function EsportsPredictions() {
     
     return () => clearInterval(interval);
   }, [placingBet]);
+
+  // Auto-select Dota 2 for AWF viewers
+  useEffect(() => {
+    if (isAWFViewer && selectedGame === 'all') {
+      setSelectedGame('dota2');
+      setSelectedCategory('moba');
+    }
+  }, [isAWFViewer, selectedGame]);
 
   useEffect(() => {
     fetchMarkets();
@@ -634,6 +645,37 @@ export default function EsportsPredictions() {
               </Button>
             </div>
           </div>
+
+          {/* AWF Streamer Welcome Banner */}
+          {isAWFViewer && (
+            <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-purple-600/20 border border-purple-500/30">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎮</span>
+                  <div>
+                    <p className="font-bold text-lg text-purple-300">Добро пожаловать, зрители AWF!</p>
+                    <p className="text-sm text-muted-foreground">
+                      Bet on Dota 2 matches • No KYC • XMR payouts • 17% lower fees
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link to="/swaps">
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Get XMR
+                    </Button>
+                  </Link>
+                  <Link to="/how-betting-works">
+                    <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10">
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      How It Works
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Need XMR Banner */}
           <div className="mb-3 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
