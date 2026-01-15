@@ -20,7 +20,7 @@ export default function Payouts() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'single' | 'multibet' | 'refund'>('all');
+  const [filter, setFilter] = useState<'all' | 'wins' | 'losses' | 'refund'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -55,21 +55,32 @@ export default function Payouts() {
     return s;
   };
 
-  // Detect refunds: Trust outcome over payout_type
-  // If side matches outcome = WIN, if side doesn't match outcome = REFUND
+  // Detect TRUE refunds: Only when payout_type explicitly says refund
+  // (e.g., one-sided market refunds, cancelled markets)
   const isRefund = (payout: PayoutEntry) => {
-    // For single bets: trust side vs outcome comparison
-    if (payout.market_id !== 'multibet' && payout.side && payout.outcome) {
+    // True refunds are only when payout_type is explicitly 'refund' or contains 'refund'
+    const payoutType = payout.payout_type?.toLowerCase() || '';
+    return payoutType === 'refund' || 
+           payoutType === 'refund_one_sided' || 
+           payoutType === 'refund_all_losers' ||
+           payoutType.includes('refund');
+  };
+  
+  // Detect losses: side doesn't match outcome AND it's not a refund
+  const isLoss = (payout: PayoutEntry) => {
+    if (isRefund(payout)) return false;
+    
+    // For single bets: if side doesn't match outcome, it's a loss
+    if (payout.side && payout.outcome && payout.side !== 'MULTI') {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
-      // If side matches outcome, it's a WIN (not refund), regardless of payout_type
-      if (normalizedSide === normalizedOutcome) return false;
-      // If side doesn't match outcome, it's a REFUND
-      return true;
+      return normalizedSide !== normalizedOutcome;
     }
     
-    // For multibets or missing data, fall back to payout_type
-    return payout.payout_type === 'refund';
+    // For multibets/legs with known outcome
+    if ((payout as any)._legOutcome === 'lost') return true;
+    
+    return false;
   };
   
   // Expand multibets into individual leg entries
@@ -166,20 +177,35 @@ export default function Payouts() {
   // Calculate totals (use original payouts to avoid double-counting)
   const totalPaidOut = payouts.reduce((sum, p) => sum + p.payout_xmr, 0);
   
-  // isWin: trust outcome over payout_type - if side matches outcome, it's a win
+  // isWin: side matches outcome and not a refund
   const isWin = (payout: PayoutEntry) => {
     if (isRefund(payout)) return false;
+    if (isLoss(payout)) return false;
+    
     // For expanded legs and single bets
-    if (payout.side && payout.outcome) {
+    if (payout.side && payout.outcome && payout.side !== 'MULTI') {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
       if (normalizedSide === normalizedOutcome) return true;
     }
+    
+    // For multibets/legs with known outcome
+    if ((payout as any)._legOutcome === 'won') return true;
+    
     // Fall back to payout_type
     return payout.payout_type === 'win' || payout.payout_type === 'multibet_win';
   };
   
+  // Get status label and style for display
+  const getPayoutStatus = (payout: PayoutEntry) => {
+    if (isWin(payout)) return { label: 'Winner', color: 'bg-emerald-600', textColor: 'text-emerald-400' };
+    if (isLoss(payout)) return { label: 'Loss', color: 'bg-red-600', textColor: 'text-red-400' };
+    if (isRefund(payout)) return { label: 'Refund', color: 'bg-blue-600', textColor: 'text-blue-400' };
+    return { label: 'Unknown', color: 'bg-gray-600', textColor: 'text-gray-400' };
+  };
+  
   const winPayouts = expandedPayouts.filter(p => isWin(p));
+  const lossPayouts = expandedPayouts.filter(p => isLoss(p));
   const refundPayouts = expandedPayouts.filter(p => isRefund(p));
 
   // Filter payouts based on selected filter and date range
@@ -187,12 +213,11 @@ export default function Payouts() {
     // Type filter
     let matchesType = true;
     switch (filter) {
-      case 'single':
+      case 'wins':
         matchesType = isWin(payout);
         break;
-      case 'multibet':
-        // No longer used - fall through to all
-        matchesType = true;
+      case 'losses':
+        matchesType = isLoss(payout);
         break;
       case 'refund':
         matchesType = isRefund(payout);
@@ -346,7 +371,7 @@ export default function Payouts() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
-              {filter === 'all' ? 'All Payouts' : filter === 'single' ? 'Wins' : 'Refunds'} ({filteredPayouts.length})
+              {filter === 'all' ? 'All Payouts' : filter === 'wins' ? 'Wins' : filter === 'losses' ? 'Losses' : 'Refunds'} ({filteredPayouts.length})
             </h2>
             
             <div className="flex items-center gap-2 flex-wrap">
@@ -359,13 +384,22 @@ export default function Payouts() {
                 All
               </Button>
               <Button
-                variant={filter === 'single' ? 'default' : 'outline'}
+                variant={filter === 'wins' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handleFilterChange('single')}
-                className={filter === 'single' ? '' : 'hover:border-primary/50'}
+                onClick={() => handleFilterChange('wins')}
+                className={filter === 'wins' ? 'bg-emerald-600 hover:bg-emerald-700' : 'hover:border-emerald-500/50'}
               >
                 <Trophy className="w-3 h-3 mr-1" />
-                Wins
+                Wins ({winPayouts.length})
+              </Button>
+              <Button
+                variant={filter === 'losses' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleFilterChange('losses')}
+                className={filter === 'losses' ? 'bg-red-600 hover:bg-red-700' : 'hover:border-red-500/50'}
+              >
+                <X className="w-3 h-3 mr-1" />
+                Losses ({lossPayouts.length})
               </Button>
               <Button
                 variant={filter === 'refund' ? 'default' : 'outline'}
@@ -374,7 +408,7 @@ export default function Payouts() {
                 className={filter === 'refund' ? 'bg-blue-600 hover:bg-blue-700' : 'hover:border-blue-500/50'}
               >
                 <RefreshCw className="w-3 h-3 mr-1" />
-                Refunds
+                Refunds ({refundPayouts.length})
               </Button>
             </div>
           </div>
@@ -579,10 +613,10 @@ export default function Payouts() {
                                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                                         <Badge className={cn(
                                           "text-xs",
-                                          isLegWon ? 'bg-emerald-600' : 'bg-blue-600'
+                                          isLegWon ? 'bg-emerald-600' : isRefund(payout) ? 'bg-blue-600' : 'bg-red-600'
                                         )}>
                                           <CheckCircle className="w-3 h-3 mr-1" />
-                                          {isLegWon ? 'Won' : 'Refund'}
+                                          {isLegWon ? 'Won' : isRefund(payout) ? 'Refund' : 'Lost'}
                                         </Badge>
                                         {/* Show actual side if available */}
                                         {legSide && (
@@ -658,22 +692,29 @@ export default function Payouts() {
                     }
                     
                     // Render single items (non-grouped)
-                    return group.items.map(payout => (
+                    return group.items.map(payout => {
+                      const status = getPayoutStatus(payout);
+                      // For losses, payout is 0 and profit is -stake
+                      const displayPayout = isLoss(payout) ? 0 : payout.payout_xmr;
+                      const displayProfit = isLoss(payout) ? -payout.stake_xmr : payout.payout_xmr - payout.stake_xmr;
+                      
+                      return (
                       <Card 
                         key={payout.bet_id} 
-                        className={isWin(payout) 
-                          ? 'border-emerald-600/30 bg-emerald-950/10' 
-                          : 'border-blue-600/30 bg-blue-950/10'
-                        }
+                        className={cn(
+                          isWin(payout) && 'border-emerald-600/30 bg-emerald-950/10',
+                          isLoss(payout) && 'border-red-600/30 bg-red-950/10',
+                          isRefund(payout) && 'border-blue-600/30 bg-blue-950/10'
+                        )}
                       >
                         <CardContent className="py-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-4">
                             {/* Market Info */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <Badge className={isWin(payout) ? 'bg-emerald-600' : 'bg-blue-600'}>
+                                <Badge className={status.color}>
                                   <CheckCircle className="w-3 h-3 mr-1" />
-                                  {isWin(payout) ? 'Winner' : 'Refund'}
+                                  {status.label}
                                 </Badge>
                                 {payout.side && payout.side !== 'MULTI' && (
                                   <Badge variant={payout.side?.toUpperCase() === 'YES' ? 'default' : 'destructive'} className="text-xs">
@@ -708,21 +749,17 @@ export default function Payouts() {
                               <div className="text-right">
                                 <p className="text-xs text-muted-foreground">Payout</p>
                                 <p className="font-mono text-sm">
-                                  {payout.payout_xmr.toFixed(4)} XMR
+                                  {displayPayout.toFixed(4)} XMR
                                 </p>
                               </div>
                               <div className="text-right">
                                 <p className="text-xs text-muted-foreground">Profit/Loss</p>
-                                {(() => {
-                                  const profit = payout.payout_xmr - payout.stake_xmr;
-                                  const isProfit = profit > 0.00001;
-                                  const isLoss = profit < -0.00001;
-                                  return (
-                                    <p className={`font-mono text-sm font-bold ${isProfit ? 'text-emerald-400' : isLoss ? 'text-red-400' : 'text-muted-foreground'}`}>
-                                      {isProfit ? '+' : ''}{profit.toFixed(4)} XMR
-                                    </p>
-                                  );
-                                })()}
+                                <p className={cn(
+                                  "font-mono text-sm font-bold",
+                                  displayProfit > 0.00001 ? 'text-emerald-400' : displayProfit < -0.00001 ? 'text-red-400' : 'text-muted-foreground'
+                                )}>
+                                  {displayProfit > 0 ? '+' : ''}{displayProfit.toFixed(4)} XMR
+                                </p>
                               </div>
                             </div>
 
@@ -731,20 +768,35 @@ export default function Payouts() {
                               href={`${XMR_EXPLORER_URL}/${payout.tx_hash}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30"
+                              className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors group",
+                                isWin(payout) && "bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30",
+                                isLoss(payout) && "bg-red-600/20 hover:bg-red-600/30 border border-red-600/30",
+                                isRefund(payout) && "bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/30"
+                              )}
                             >
                               <div className="text-right">
                                 <p className="text-xs text-muted-foreground">Transaction ID</p>
-                                <p className="font-mono text-sm text-emerald-400 group-hover:text-emerald-300">
+                                <p className={cn(
+                                  "font-mono text-sm",
+                                  isWin(payout) && "text-emerald-400 group-hover:text-emerald-300",
+                                  isLoss(payout) && "text-red-400 group-hover:text-red-300",
+                                  isRefund(payout) && "text-blue-400 group-hover:text-blue-300"
+                                )}>
                                   {truncateTxid(payout.tx_hash)}
                                 </p>
                               </div>
-                              <ExternalLink className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+                              <ExternalLink className={cn(
+                                "w-4 h-4",
+                                isWin(payout) && "text-emerald-400 group-hover:text-emerald-300",
+                                isLoss(payout) && "text-red-400 group-hover:text-red-300",
+                                isRefund(payout) && "text-blue-400 group-hover:text-blue-300"
+                              )} />
                             </a>
                           </div>
                         </CardContent>
                       </Card>
-                    ));
+                    )});
                   });
                 })()}
               </div>
