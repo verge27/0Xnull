@@ -44,6 +44,7 @@ interface VoucherSummary {
 const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
 
 export default function VoucherAnalytics() {
+  // Temporarily disabled auth check for development
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,23 +55,17 @@ export default function VoucherAnalytics() {
     setLoading(true);
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const { data: session } = await supabase.auth.getSession();
-      const token = session?.session?.access_token;
       
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
       const startDate = subDays(new Date(), days).toISOString();
 
+      // Use anon key for public access (temporarily)
       const response = await fetch(
         `${supabaseUrl}/rest/v1/voucher_analytics?created_at=gte.${startDate}&order=created_at.desc`,
         {
           headers: {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
         }
       );
@@ -87,10 +82,9 @@ export default function VoucherAnalytics() {
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchAnalytics();
-    }
-  }, [isAdmin, dateRange]);
+    // Fetch analytics without admin check for now
+    fetchAnalytics();
+  }, [dateRange]);
 
   // Filter events by selected voucher
   const filteredEvents = useMemo(() => {
