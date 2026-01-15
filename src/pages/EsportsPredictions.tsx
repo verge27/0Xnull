@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { usePredictionBets, type PlaceBetResponse } from '@/hooks/usePredictionBets';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { useVoucherAnalytics } from '@/hooks/useVoucherAnalytics';
 import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 const esportsBackground = '/images/backgrounds/esports-background.webp';
 import { useEsportsEvents, ESPORTS_GAMES, ESPORTS_CATEGORIES, getGameLabel, getGameIcon, getCategoryLabel, getCategoryIcon, getGameDownloadUrl, type EsportsEvent } from '@/hooks/useEsportsEvents';
@@ -67,9 +68,10 @@ export default function EsportsPredictions() {
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
   
-  // Voucher support
+  // Voucher support with analytics
   const { voucher: savedVoucher } = useVoucher();
   useVoucherFromUrl();
+  const { trackView, trackBetPlaced } = useVoucherAnalytics();
   
   // Check for streamer-specific vouchers for welcome banners
   const isAWFViewer = savedVoucher?.toUpperCase() === 'AWF0XDOTA';
@@ -152,8 +154,10 @@ export default function EsportsPredictions() {
         description: '17% lower fees • No KYC • XMR payouts',
         duration: 5000,
       });
+      // Track view event for AWF analytics
+      trackView('/esports-predictions');
     }
-  }, [isAWFViewer, selectedGame]);
+  }, [isAWFViewer, selectedGame, trackView]);
 
   useEffect(() => {
     fetchMarkets();
@@ -342,6 +346,12 @@ export default function EsportsPredictions() {
       setDepositModalOpen(true);
       setBetAmountUsd('');
       setPayoutAddress('');
+      
+      // Track bet placed for voucher analytics
+      trackBetPlaced(selectedMarket.market_id, amountUsd, {
+        side: betSide,
+        market_id: selectedMarket.market_id,
+      });
       
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
