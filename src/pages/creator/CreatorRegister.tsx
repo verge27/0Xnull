@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X, Import, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Key, Shield, Copy, Check, AlertTriangle, User, ArrowRight, Loader2, WifiOff, ShieldX, CheckCircle2, XCircle, Search, Trash2, RotateCcw, X, Import, Eye, EyeOff, Percent, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -86,6 +86,7 @@ type KeypairMode = 'generate' | 'import';
 
 const CreatorRegister = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { generatedKeypair, generateNewKeypair, importKeypair, clearKeypair, hasStoredKeypair, register } = useCreatorAuth();
   
   const [step, setStep] = useState<Step>('generate');
@@ -105,6 +106,17 @@ const CreatorRegister = () => {
   const [importPrivateKey, setImportPrivateKey] = useState('');
   const [showImportKey, setShowImportKey] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  
+  // Referral code state
+  const [referralCode, setReferralCode] = useState('');
+  
+  // Check for ?ref= URL parameter on mount
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      setReferralCode(ref.toUpperCase());
+    }
+  }, [searchParams]);
 
   const handleImportKeypair = async () => {
     setImportError(null);
@@ -221,13 +233,13 @@ const CreatorRegister = () => {
   const handleConfirmRegistration = async () => {
     if (!generatedKeypair) return;
 
-    console.log('[CreatorRegister] Starting registration for pubkey:', generatedKeypair.publicKey.slice(0, 16) + '...');
+    console.log('[CreatorRegister] Starting registration for pubkey:', generatedKeypair.publicKey.slice(0, 16) + '...', 'referral:', referralCode || 'none');
 
     setIsSubmitting(true);
     setRegistrationError(null);
 
     try {
-      await register(generatedKeypair.privateKey, displayName, bio || undefined);
+      await register(generatedKeypair.privateKey, displayName, bio || undefined, referralCode || undefined);
       console.log('[CreatorRegister] Registration successful!');
       navigate('/creator/dashboard');
     } catch (error) {
@@ -641,6 +653,36 @@ const CreatorRegister = () => {
                 <p className="text-xs text-muted-foreground text-right">
                   {bio.length}/500
                 </p>
+              </div>
+
+              {/* Referral Code Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-muted-foreground" />
+                  Referral Code (Optional)
+                </label>
+                <Input
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  placeholder="Enter referral code"
+                  maxLength={20}
+                  className="font-mono uppercase tracking-wider"
+                />
+                
+                {/* Discount Badge */}
+                {referralCode && (
+                  <div className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <Percent className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    <div className="text-sm">
+                      <span className="text-emerald-500 font-medium">✓ 16.75% fee discount applied</span>
+                      <span className="text-emerald-400/80 ml-2">
+                        <span className="line-through text-muted-foreground">0.4%</span>
+                        {' → '}
+                        <span className="font-semibold">0.333%</span>
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3">
