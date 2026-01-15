@@ -145,19 +145,26 @@ export default function EsportsPredictions() {
     return () => clearInterval(interval);
   }, [placingBet]);
 
+  // Check for voucher from URL for immediate detection
+  const urlVoucher = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('voucher')?.toUpperCase() || null;
+  }, []);
+  
+  const effectiveVoucher = savedVoucher?.toUpperCase() || urlVoucher;
+  const isAWFViewerEffective = effectiveVoucher === 'AWF0XDOTA';
+
   // Auto-select Dota 2 for AWF viewers and show welcome toast
   useEffect(() => {
-    if (isAWFViewer && selectedGame === 'all') {
+    if (isAWFViewerEffective && selectedGame === 'all') {
       setSelectedGame('dota2');
       setSelectedCategory('moba');
       toast.success('Добро пожаловать! AWF0XDOTA code applied', {
         description: '17% lower fees • No KYC • XMR payouts',
         duration: 5000,
       });
-      // Track view event for AWF analytics
-      trackView('/esports-predictions');
     }
-  }, [isAWFViewer, selectedGame, trackView]);
+  }, [isAWFViewerEffective, selectedGame]);
 
   useEffect(() => {
     fetchMarkets();
@@ -332,12 +339,16 @@ export default function EsportsPredictions() {
     setElapsedSeconds(0);
     
     try {
+      // Use effective voucher (from URL or localStorage) for tracking
+      const voucherToSend = effectiveVoucher || undefined;
+      console.log('[EsportsPredictions] Placing bet with voucher:', voucherToSend);
+      
       const response = await api.placePredictionBet({
         market_id: selectedMarket.market_id,
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
-        voucher_code: savedVoucher || undefined,
+        voucher_code: voucherToSend,
       });
       
       storeBet(response);

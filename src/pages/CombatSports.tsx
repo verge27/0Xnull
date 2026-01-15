@@ -30,6 +30,8 @@ import { TrillerTVEmbed } from '@/components/TrillerTVEmbed';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { extractSportInfo } from '@/lib/sportLabels';
 import { toast } from 'sonner';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { useVoucherAnalytics } from '@/hooks/useVoucherAnalytics';
 const combatBackground = '/images/backgrounds/combat-background.webp';
 
 const COMBAT_SPORTS = ['ufc', 'boxing'];
@@ -38,6 +40,11 @@ export default function CombatSports() {
   useSEO();
   const location = useLocation();
   const path = location.pathname;
+  
+  // Voucher support
+  const { voucher: savedVoucher } = useVoucher();
+  useVoucherFromUrl();
+  const { trackBetPlaced } = useVoucherAnalytics();
   
   // Determine active filter from URL
   const getInitialFilter = () => {
@@ -378,6 +385,7 @@ export default function CombatSports() {
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
+        voucher_code: savedVoucher || undefined,
       });
       
       storeBet(response);
@@ -387,6 +395,7 @@ export default function CombatSports() {
       setBetAmountUsd('');
       setPayoutAddress('');
       
+      trackBetPlaced(selectedMarket.market_id, amountUsd, { side: betSide });
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to place bet';

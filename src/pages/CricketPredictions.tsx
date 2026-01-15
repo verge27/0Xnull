@@ -10,6 +10,8 @@ import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { useSEO, useEventListSEO } from '@/hooks/useSEO';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { useVoucherAnalytics } from '@/hooks/useVoucherAnalytics';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +48,11 @@ export default function CricketPredictions() {
   const betSlip = useMultibetSlip();
   const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
   
+  // Voucher support
+  const { voucher: savedVoucher } = useVoucher();
+  useVoucherFromUrl();
+  const { trackBetPlaced } = useVoucherAnalytics();
+
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMarket, setSelectedMarket] = useState<PredictionMarket | null>(null);
@@ -210,6 +217,7 @@ export default function CricketPredictions() {
         side: betSide.toUpperCase() as 'YES' | 'NO',
         amount_usd: amountUsd,
         payout_address: payoutAddress,
+        voucher_code: savedVoucher || undefined,
       });
       
       storeBet(response);
@@ -219,6 +227,7 @@ export default function CricketPredictions() {
       setBetAmountUsd('');
       setPayoutAddress('');
       
+      trackBetPlaced(selectedMarket.market_id, amountUsd, { side: betSide });
       toast.success('Bet created! Send XMR to confirm.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to place bet';
