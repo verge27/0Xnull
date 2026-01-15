@@ -71,6 +71,7 @@ const Influencer = lazy(() => import("./pages/Influencer"));
 const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
+const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 
 // Creator pages
 const CreatorRegister = lazy(() => import("./pages/creator/CreatorRegister"));
@@ -182,6 +183,9 @@ const App = () => (
                   
                   {/* Partner Earnings (private) */}
                   <Route path="/partners/earnings" element={<PartnerEarnings />} />
+                  
+                  {/* Admin Analytics */}
+                  <Route path="/admin/analytics" element={<VoucherAnalytics />} />
                   
                   {/* Creators */}
                   <Route path="/creators" element={<CreatorsHub />} />
