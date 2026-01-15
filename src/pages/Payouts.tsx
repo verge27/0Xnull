@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfDay, subDays } from 'date-fns';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter, ChevronLeft, ChevronRight, CalendarIcon, X } from 'lucide-react';
+import { Wallet, ExternalLink, Trophy, CheckCircle, ArrowLeft, Banknote, TrendingUp, RefreshCw, Layers, Filter, ChevronLeft, ChevronRight, CalendarIcon, X, BarChart3 } from 'lucide-react';
 import { api, type PayoutEntry } from '@/services/api';
 import { cn } from '@/lib/utils';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 
 const XMR_EXPLORER_URL = 'https://xmrchain.net/tx';
 
@@ -208,6 +209,40 @@ export default function Payouts() {
   const lossPayouts = expandedPayouts.filter(p => isLoss(p));
   const refundPayouts = expandedPayouts.filter(p => isRefund(p));
 
+  // Chart data: aggregate by day over last 30 days
+  const chartData = useMemo(() => {
+    const days = 30;
+    const now = new Date();
+    const data: { date: string; wins: number; losses: number; refunds: number }[] = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const day = startOfDay(subDays(now, i));
+      const dayEnd = new Date(day.getTime() + 86400000);
+      const dayLabel = format(day, 'MMM d');
+      
+      const dayPayouts = expandedPayouts.filter(p => {
+        const pDate = new Date(p.resolved_at * 1000);
+        return pDate >= day && pDate < dayEnd;
+      });
+      
+      data.push({
+        date: dayLabel,
+        wins: dayPayouts.filter(p => isWin(p)).length,
+        losses: dayPayouts.filter(p => isLoss(p)).length,
+        refunds: dayPayouts.filter(p => isRefund(p)).length,
+      });
+    }
+    
+    return data;
+  }, [expandedPayouts]);
+
+  // Pie chart data for distribution
+  const pieData = useMemo(() => [
+    { name: 'Wins', value: winPayouts.length, color: '#10b981' },
+    { name: 'Losses', value: lossPayouts.length, color: '#ef4444' },
+    { name: 'Refunds', value: refundPayouts.length, color: '#3b82f6' },
+  ].filter(d => d.value > 0), [winPayouts.length, lossPayouts.length, refundPayouts.length]);
+
   // Filter payouts based on selected filter and date range
   const filteredPayouts = expandedPayouts.filter(payout => {
     // Type filter
@@ -360,6 +395,158 @@ export default function Payouts() {
                   <p className="text-2xl font-bold text-blue-400">
                     {refundPayouts.length}
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          {/* Area Chart - Breakdown Over Time */}
+          <Card className="lg:col-span-2 bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                Results Over Last 30 Days
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorWins" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorLosses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorRefunds" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis 
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Legend 
+                      verticalAlign="top" 
+                      height={36}
+                      formatter={(value) => <span className="text-sm text-muted-foreground">{value}</span>}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="wins" 
+                      name="Wins"
+                      stroke="#10b981" 
+                      fillOpacity={1} 
+                      fill="url(#colorWins)" 
+                      strokeWidth={2}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="losses" 
+                      name="Losses"
+                      stroke="#ef4444" 
+                      fillOpacity={1} 
+                      fill="url(#colorLosses)" 
+                      strokeWidth={2}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="refunds" 
+                      name="Refunds"
+                      stroke="#3b82f6" 
+                      fillOpacity={1} 
+                      fill="url(#colorRefunds)" 
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pie Chart - Distribution */}
+          <Card className="bg-card/50 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Overall Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[250px]">
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          fontSize: '12px'
+                        }}
+                        formatter={(value: number) => [`${value} bets`, '']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    No data available
+                  </div>
+                )}
+              </div>
+              {/* Legend */}
+              <div className="flex justify-center gap-4 mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-sm text-muted-foreground">Wins</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-sm text-muted-foreground">Losses</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500" />
+                  <span className="text-sm text-muted-foreground">Refunds</span>
                 </div>
               </div>
             </CardContent>
