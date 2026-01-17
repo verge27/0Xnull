@@ -9,6 +9,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SEORichText } from '@/components/SEORichText';
+import { VoucherBadge } from '@/components/VoucherBadge';
+import { useVoucherFromUrl } from '@/hooks/useVoucher';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import { playCountdownTick, playResolutionSound } from '@/lib/sounds';
@@ -91,6 +93,8 @@ const Sparkline = ({ data, width = 120, height = 32 }: { data: number[]; width?:
 };
 
 export default function FlashMarkets() {
+  // Capture voucher from URL
+  useVoucherFromUrl();
   const [asset, setAsset] = useState('BTC');
   const [showBetModal, setShowBetModal] = useState(false);
   const [selectedSide, setSelectedSide] = useState<'up' | 'down'>('up');
@@ -370,10 +374,13 @@ export default function FlashMarkets() {
             >
               {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </Button>
-            <h1 className="text-3xl font-bold flex items-center justify-center gap-2 text-foreground">
-              <Zap className="h-8 w-8 text-purple-500" />
-              Bull vs Bear
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-3xl font-bold flex items-center gap-2 text-foreground">
+                <Zap className="h-8 w-8 text-purple-500" />
+                Bull vs Bear
+              </h1>
+              <VoucherBadge />
+            </div>
             <p className="text-muted-foreground mt-1">
               Predict UP or DOWN in 5 minutes
             </p>
