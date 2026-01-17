@@ -30,6 +30,7 @@ import { GameCommunityLinks } from '@/components/GameCommunityLinks';
 import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/components/BettingCountdown';
 import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
+import { VoucherBadge } from '@/components/VoucherBadge';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Wallet, ArrowRight, HelpCircle, ExternalLink, ChevronDown, Activity, Info, Lock } from 'lucide-react';
 import ExolixWidget from '@/components/ExolixWidget';
@@ -421,10 +422,13 @@ export default function CryptoPredictions() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <TrendingUp className="w-8 h-8 text-primary" />
-              Crypto Predictions
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <TrendingUp className="w-8 h-8 text-primary" />
+                Crypto Predictions
+              </h1>
+              <VoucherBadge />
+            </div>
             <p className="text-muted-foreground mt-1">Bet on price movements with XMR</p>
           </div>
           <div className="flex items-center gap-2">
