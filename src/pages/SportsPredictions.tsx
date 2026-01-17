@@ -42,6 +42,7 @@ import { RegionCollapsible, ExpandCollapseButtons } from '@/components/RegionCol
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock, Wallet, ChevronDown, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
 import ExolixWidget from '@/components/ExolixWidget';
+import { VoucherBadge } from '@/components/VoucherBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
 import { extractSportInfo } from '@/lib/sportLabels';
@@ -571,6 +572,7 @@ export default function SportsPredictions() {
               <h1 className="text-3xl font-bold flex items-center gap-3">
                 <Trophy className="w-8 h-8 text-primary" />
                 Sports Predictions
+                <VoucherBadge className="ml-2" />
               </h1>
               <p className="text-muted-foreground mt-1">Bet on sports events worldwide with XMR</p>
             </div>

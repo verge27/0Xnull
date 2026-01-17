@@ -38,6 +38,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Radio } from 'lucide-react';
 import { SEORichText } from '@/components/SEORichText';
+import { VoucherBadge } from '@/components/VoucherBadge';
 
 export default function CricketPredictions() {
   useSEO();
@@ -366,6 +367,7 @@ export default function CricketPredictions() {
               <h1 className="text-3xl font-bold flex items-center gap-3">
                 <span className="text-4xl">🏏</span>
                 Cricket Predictions
+                <VoucherBadge className="ml-2" />
               </h1>
               <p className="text-muted-foreground mt-1">Bet on Big Bash, T20 & Test matches with XMR</p>
             </div>

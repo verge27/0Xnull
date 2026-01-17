@@ -44,6 +44,7 @@ import { BackoffBadge } from '@/components/BackoffBadge';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock, Activity, Wallet, ChevronDown } from 'lucide-react';
 import ExolixWidget from '@/components/ExolixWidget';
+import { VoucherBadge } from '@/components/VoucherBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -644,6 +645,7 @@ export default function EsportsPredictions() {
               <h1 className="text-3xl font-bold flex items-center gap-3">
                 <Gamepad2 className="w-8 h-8 text-primary" />
                 Esports Predictions
+                <VoucherBadge className="ml-2" />
               </h1>
               <p className="text-muted-foreground mt-1">Bet on LoL, CS2, Dota 2, Valorant & more with XMR</p>
             </div>
