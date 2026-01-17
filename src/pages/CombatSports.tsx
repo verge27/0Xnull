@@ -31,6 +31,7 @@ import { BettingCountdown, isBettingOpen, isBettingClosingSoon } from '@/compone
 import { extractSportInfo } from '@/lib/sportLabels';
 import { toast } from 'sonner';
 import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
+import { VoucherBadge } from '@/components/VoucherBadge';
 import { useVoucherAnalytics } from '@/hooks/useVoucherAnalytics';
 const combatBackground = '/images/backgrounds/combat-background.webp';
 
@@ -481,6 +482,7 @@ export default function CombatSports() {
               <h1 className="text-3xl font-bold flex items-center gap-3">
                 <Swords className="w-8 h-8 text-red-500" />
                 Combat Sports
+                <VoucherBadge className="ml-2" />
               </h1>
               <p className="text-muted-foreground mt-1">UFC • Boxing • RIZIN • ONE • PFL • ACA • Bellator</p>
             </div>
