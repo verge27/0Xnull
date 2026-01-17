@@ -124,8 +124,9 @@ export const PrivateKeyAuthProvider = ({ children }: { children: ReactNode }) =>
     try {
       const publicKey = await derivePublicKey(privateKey);
       
-      const { data, error } = await (supabase as any)
-        .from('private_key_users')
+      // Use the public view which only exposes safe fields (excludes payment_token, pgp_encrypted_private_key)
+      const { data, error } = await supabase
+        .from('public_private_key_users')
         .select('*')
         .eq('public_key', publicKey)
         .maybeSingle();
