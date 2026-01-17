@@ -146,9 +146,10 @@ export default function EsportsPredictions() {
   }, [placingBet]);
 
   // Check for voucher from URL for immediate detection
+  // Check for voucher from URL for immediate detection (supports both ?voucher= and ?ref=)
   const urlVoucher = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('voucher')?.toUpperCase() || null;
+    return (params.get('voucher') || params.get('ref'))?.toUpperCase() || null;
   }, []);
   
   const effectiveVoucher = savedVoucher?.toUpperCase() || urlVoucher;
