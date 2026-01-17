@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
+import Papa from 'papaparse';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,29 +73,29 @@ export const CsvImportDialog = ({ onImport }: CsvImportDialogProps) => {
     if (!file) return;
 
     setFileName(file.name);
-    const reader = new FileReader();
 
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        const parsed = jsonData.map(validateRow);
-        setParsedData(parsed);
-        
-        const validCount = parsed.filter(r => r.isValid).length;
-        toast.info(`Parsed ${parsed.length} rows, ${validCount} valid`);
-      } catch (error) {
-        console.error('Error parsing file:', error);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        try {
+          const parsed = results.data.map(validateRow);
+          setParsedData(parsed);
+          
+          const validCount = parsed.filter(r => r.isValid).length;
+          toast.info(`Parsed ${parsed.length} rows, ${validCount} valid`);
+        } catch (error) {
+          console.error('Error parsing file:', error);
+          toast.error('Failed to parse file. Please check the format.');
+          setParsedData([]);
+        }
+      },
+      error: (error) => {
+        console.error('Error parsing CSV:', error);
         toast.error('Failed to parse file. Please check the format.');
         setParsedData([]);
       }
-    };
-
-    reader.readAsBinaryString(file);
+    });
   };
 
   const handleImport = async () => {
@@ -144,12 +144,12 @@ export const CsvImportDialog = ({ onImport }: CsvImportDialogProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <FileSpreadsheet className="w-4 h-4" />
-          Import CSV/XLS
+          Import CSV
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Import Listings from CSV/XLS</DialogTitle>
+          <DialogTitle>Import Listings from CSV</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
@@ -159,7 +159,7 @@ export const CsvImportDialog = ({ onImport }: CsvImportDialogProps) => {
               <Input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv,.xlsx,.xls"
+                accept=".csv"
                 onChange={handleFileUpload}
                 className="flex-1"
               />
