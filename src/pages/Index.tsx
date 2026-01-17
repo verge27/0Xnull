@@ -9,6 +9,7 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { SEORichText } from '@/components/SEORichText';
 import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
+import { useVoucherFromUrl } from '@/hooks/useVoucher';
 
 // Responsive hero background images for different screen sizes
 // Using 100vw sizing, browser selects based on viewport * DPR.
@@ -32,6 +33,10 @@ const Index = () => {
     title: '0xNull | Anonymous Prediction Markets & Crypto Marketplace',
     description: 'Discover 0xNull Marketplace, a privacy-first anonymous prediction markets and cryptocurrency marketplace. Access digital goods, services, and prediction markets with Monero and other crypto | no KYC, no tracking.',
   });
+  
+  // Capture voucher/ref from URL params (e.g., ?ref=AWF0XDOTA)
+  useVoucherFromUrl();
+  
   const features = [
     {
       icon: Target,

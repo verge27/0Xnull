@@ -129,24 +129,53 @@ export function useVoucher() {
 }
 
 // Hook to read voucher from URL params
+// Supports both ?voucher= and ?ref= parameters for flexibility
 export function useVoucherFromUrl() {
-  const { saveVoucher, validateVoucher } = useVoucher();
+  const { saveVoucher, validateVoucher, voucher: existingVoucher } = useVoucher();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const urlVoucher = params.get('voucher');
+    // Support both 'voucher' and 'ref' URL parameters
+    const urlVoucher = params.get('voucher') || params.get('ref');
+    const paramUsed = params.has('voucher') ? 'voucher' : params.has('ref') ? 'ref' : null;
 
+    // Only process if we have a URL param and it's different from existing (or no existing)
     if (urlVoucher && urlVoucher.length >= 4) {
+      const normalizedCode = urlVoucher.toUpperCase();
+      
+      // Skip if we already have this exact voucher saved
+      if (existingVoucher?.toUpperCase() === normalizedCode) {
+        // Still clean up URL
+        if (paramUsed) {
+          const newParams = new URLSearchParams(window.location.search);
+          newParams.delete('voucher');
+          newParams.delete('ref');
+          const newUrl = newParams.toString() 
+            ? `${window.location.pathname}?${newParams.toString()}`
+            : window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        }
+        return;
+      }
+      
+      console.log('[useVoucherFromUrl] Capturing voucher from URL:', normalizedCode, 'param:', paramUsed);
+      
       validateVoucher(urlVoucher).then((info) => {
         if (info) {
           saveVoucher(info.code, info);
           toast.success(`${info.influencer}'s code applied!`, {
             description: info.userBenefit,
           });
-          
-          // Remove voucher param from URL without reload
+          console.log('[useVoucherFromUrl] Voucher validated and saved:', info.code);
+        } else {
+          console.log('[useVoucherFromUrl] Voucher validation failed:', normalizedCode);
+        }
+        
+        // Remove voucher/ref param from URL without reload
+        if (paramUsed) {
           const newParams = new URLSearchParams(window.location.search);
           newParams.delete('voucher');
+          newParams.delete('ref');
           const newUrl = newParams.toString() 
             ? `${window.location.pathname}?${newParams.toString()}`
             : window.location.pathname;
@@ -154,5 +183,5 @@ export function useVoucherFromUrl() {
         }
       });
     }
-  }, [saveVoucher, validateVoucher]);
+  }, [saveVoucher, validateVoucher, existingVoucher]);
 }

@@ -18,10 +18,11 @@ function getAnonymousToken(): string {
 }
 
 // Get voucher directly from URL or localStorage for immediate tracking
+// Supports both ?voucher= and ?ref= parameters
 function getVoucherForTracking(): string | null {
   // First check URL params (highest priority - user just arrived)
   const params = new URLSearchParams(window.location.search);
-  const urlVoucher = params.get('voucher');
+  const urlVoucher = params.get('voucher') || params.get('ref');
   if (urlVoucher && urlVoucher.length >= 4) {
     return urlVoucher.toUpperCase();
   }
