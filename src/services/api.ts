@@ -295,7 +295,10 @@ export interface PayoutEntry {
   outcome: 'YES' | 'NO' | 'MULTI';
   stake_xmr: number;
   payout_xmr: number;
-  payout_type: 'win' | 'refund' | 'multibet_win' | 'refund_one_sided' | 'refund_all_losers';
+  // Per-bet type from API: 'win' or 'refund'
+  type?: 'win' | 'refund';
+  // Market-level payout type
+  payout_type: 'winner_takes_pool' | 'refund_one_sided' | 'refund_all_losers' | 'refund_draw' | 'win' | 'refund' | 'multibet_win';
   payout_address: string;
   tx_hash: string;
   resolved_at: number;
