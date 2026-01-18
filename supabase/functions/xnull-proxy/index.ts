@@ -81,6 +81,111 @@ serve(async (req) => {
     // Frontend should poll /api/predictions/pool/{market_id} to check if a market is resolved.
     // Removed soft-mode handling for these non-existent endpoints.
 
+    // Enrich payouts with pool info to detect unopposed bets
+    if (req.method === 'GET' && targetPath === '/api/predictions/payouts') {
+      console.log('Fetching payouts with pool enrichment...');
+      
+      try {
+        const payoutsRes = await fetch(`${API_BASE}${targetPath}`, { method: 'GET' });
+        if (!payoutsRes.ok) {
+          const errorText = await payoutsRes.text();
+          return new Response(JSON.stringify({ error: errorText }), {
+            status: payoutsRes.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const payoutsData = await payoutsRes.json();
+        const payouts = payoutsData.payouts || [];
+        
+        // Collect unique market IDs (skip multibets)
+        const marketIds = [...new Set(
+          payouts
+            .filter((p: { market_id: string }) => p.market_id && p.market_id !== 'multibet')
+            .map((p: { market_id: string }) => p.market_id)
+        )] as string[];
+        
+        // Fetch pool info for each market (in parallel, with timeout)
+        const poolCache: Record<string, { yes_pool_xmr: number; no_pool_xmr: number } | null> = {};
+        
+        await Promise.all(
+          marketIds.map(async (marketId) => {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 3000);
+              const poolRes = await fetch(`${API_BASE}/api/predictions/pool/${marketId}`, { 
+                signal: controller.signal 
+              });
+              clearTimeout(timeoutId);
+              
+              if (poolRes.ok) {
+                const pool = await poolRes.json();
+                poolCache[marketId] = {
+                  yes_pool_xmr: pool.yes_pool_xmr ?? 0,
+                  no_pool_xmr: pool.no_pool_xmr ?? 0,
+                };
+              } else {
+                poolCache[marketId] = null;
+              }
+            } catch {
+              poolCache[marketId] = null;
+            }
+          })
+        );
+        
+        // Enrich payouts with unopposed detection
+        const enrichedPayouts = payouts.map((payout: { 
+          market_id: string; 
+          side: string; 
+          stake_xmr: number;
+          payout_xmr: number;
+          payout_type?: string;
+        }) => {
+          const pool = poolCache[payout.market_id];
+          
+          if (pool) {
+            const opposingPool = payout.side === 'YES' ? pool.no_pool_xmr : pool.yes_pool_xmr;
+            const wasUnopposed = opposingPool === 0;
+            
+            // If it was unopposed AND payout equals stake, mark as refund
+            // Also mark as refund if unopposed regardless (they should have been refunded)
+            if (wasUnopposed) {
+              return {
+                ...payout,
+                was_unopposed: true,
+                yes_pool_xmr: pool.yes_pool_xmr,
+                no_pool_xmr: pool.no_pool_xmr,
+                // Override payout_type to refund if it was unopposed
+                payout_type: 'refund_one_sided',
+              };
+            }
+            
+            return {
+              ...payout,
+              was_unopposed: false,
+              yes_pool_xmr: pool.yes_pool_xmr,
+              no_pool_xmr: pool.no_pool_xmr,
+            };
+          }
+          
+          return payout;
+        });
+        
+        console.log(`Enriched ${enrichedPayouts.length} payouts with pool info`);
+        
+        return new Response(JSON.stringify({ 
+          payouts: enrichedPayouts, 
+          total: payoutsData.total || enrichedPayouts.length 
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        console.error('Payouts enrichment error:', e);
+        // Fall through to regular proxy on error
+      }
+    }
+
     // Build target URL with query params (excluding 'path' and 'soft_pool')
     const targetUrl = new URL(`${API_BASE}${targetPath}`);
     url.searchParams.forEach((value, key) => {

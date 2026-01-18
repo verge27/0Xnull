@@ -57,7 +57,7 @@ export default function Payouts() {
   };
 
   // Detect TRUE refunds: When payout_type explicitly says refund,
-  // OR when payout equals stake (indicates full refund from unopposed/one-sided market)
+  // OR when the bet was unopposed (no opposing pool), OR when payout equals stake
   const isRefund = (payout: PayoutEntry) => {
     // True refunds are when payout_type is explicitly 'refund' or contains 'refund'
     const payoutType = payout.payout_type?.toLowerCase() || '';
@@ -65,6 +65,11 @@ export default function Payouts() {
         payoutType === 'refund_one_sided' || 
         payoutType === 'refund_all_losers' ||
         payoutType.includes('refund')) {
+      return true;
+    }
+    
+    // Check if backend enriched this as unopposed (one-sided market)
+    if (payout.was_unopposed === true) {
       return true;
     }
     

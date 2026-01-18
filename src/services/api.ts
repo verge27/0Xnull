@@ -295,12 +295,16 @@ export interface PayoutEntry {
   outcome: 'YES' | 'NO' | 'MULTI';
   stake_xmr: number;
   payout_xmr: number;
-  payout_type: 'win' | 'refund' | 'multibet_win';
+  payout_type: 'win' | 'refund' | 'multibet_win' | 'refund_one_sided' | 'refund_all_losers';
   payout_address: string;
   tx_hash: string;
   resolved_at: number;
   // Optional structured leg data for multibets
   legs?: PayoutLeg[];
+  // Pool enrichment fields (added by proxy)
+  was_unopposed?: boolean;
+  yes_pool_xmr?: number;
+  no_pool_xmr?: number;
 }
 
 // Multibet types
