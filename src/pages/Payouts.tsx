@@ -56,44 +56,35 @@ export default function Payouts() {
     return s;
   };
 
-  // Detect TRUE refunds: When payout_type explicitly says refund,
-  // OR when the bet was unopposed (no opposing pool), OR when payout equals stake
+  // Simple refund detection using API's per-bet 'type' field
+  // API provides: type='win' or type='refund' per bet
+  // Also payout_type at market level: 'winner_takes_pool', 'refund_one_sided', 'refund_all_losers', 'refund_draw'
   const isRefund = (payout: PayoutEntry) => {
-    // True refunds are when payout_type is explicitly 'refund' or contains 'refund'
+    // Primary check: API's per-bet type field
+    if (payout.type === 'refund') return true;
+    
+    // Fallback: market-level payout_type contains 'refund'
     const payoutType = payout.payout_type?.toLowerCase() || '';
-    if (payoutType === 'refund' || 
-        payoutType === 'refund_one_sided' || 
-        payoutType === 'refund_all_losers' ||
-        payoutType.includes('refund')) {
-      return true;
-    }
+    if (payoutType.includes('refund')) return true;
     
-    // Check if backend enriched this as unopposed (one-sided market)
-    if (payout.was_unopposed === true) {
-      return true;
-    }
-    
-    // Also detect refund when payout equals stake (unopposed bet refund)
-    // This happens when there was no opposing pool - user gets their money back
-    if (payout.stake_xmr > 0 && Math.abs(payout.payout_xmr - payout.stake_xmr) < 0.0001) {
-      return true;
-    }
+    // Legacy fallback: was_unopposed flag from proxy enrichment
+    if (payout.was_unopposed === true) return true;
     
     return false;
   };
   
-  // Detect losses: side doesn't match outcome AND it's not a refund AND payout is 0
+  // Simple loss detection: not a win and not a refund
   const isLoss = (payout: PayoutEntry) => {
     if (isRefund(payout)) return false;
     
-    // For single bets: if side doesn't match outcome AND payout is 0, it's a loss
+    // If API says it's a win, it's not a loss
+    if (payout.type === 'win') return false;
+    
+    // For single bets without explicit type: check side vs outcome
     if (payout.side && payout.outcome && payout.side !== 'MULTI') {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
-      // Only a loss if side doesn't match outcome AND they got 0 payout
-      if (normalizedSide !== normalizedOutcome && payout.payout_xmr === 0) {
-        return true;
-      }
+      if (normalizedSide !== normalizedOutcome) return true;
     }
     
     // For multibets/legs with known outcome
