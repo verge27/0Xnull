@@ -56,26 +56,39 @@ export default function Payouts() {
     return s;
   };
 
-  // Detect TRUE refunds: Only when payout_type explicitly says refund
-  // (e.g., one-sided market refunds, cancelled markets)
+  // Detect TRUE refunds: When payout_type explicitly says refund,
+  // OR when payout equals stake (indicates full refund from unopposed/one-sided market)
   const isRefund = (payout: PayoutEntry) => {
-    // True refunds are only when payout_type is explicitly 'refund' or contains 'refund'
+    // True refunds are when payout_type is explicitly 'refund' or contains 'refund'
     const payoutType = payout.payout_type?.toLowerCase() || '';
-    return payoutType === 'refund' || 
-           payoutType === 'refund_one_sided' || 
-           payoutType === 'refund_all_losers' ||
-           payoutType.includes('refund');
+    if (payoutType === 'refund' || 
+        payoutType === 'refund_one_sided' || 
+        payoutType === 'refund_all_losers' ||
+        payoutType.includes('refund')) {
+      return true;
+    }
+    
+    // Also detect refund when payout equals stake (unopposed bet refund)
+    // This happens when there was no opposing pool - user gets their money back
+    if (payout.stake_xmr > 0 && Math.abs(payout.payout_xmr - payout.stake_xmr) < 0.0001) {
+      return true;
+    }
+    
+    return false;
   };
   
-  // Detect losses: side doesn't match outcome AND it's not a refund
+  // Detect losses: side doesn't match outcome AND it's not a refund AND payout is 0
   const isLoss = (payout: PayoutEntry) => {
     if (isRefund(payout)) return false;
     
-    // For single bets: if side doesn't match outcome, it's a loss
+    // For single bets: if side doesn't match outcome AND payout is 0, it's a loss
     if (payout.side && payout.outcome && payout.side !== 'MULTI') {
       const normalizedSide = normalizeSide(payout.side);
       const normalizedOutcome = normalizeSide(payout.outcome);
-      return normalizedSide !== normalizedOutcome;
+      // Only a loss if side doesn't match outcome AND they got 0 payout
+      if (normalizedSide !== normalizedOutcome && payout.payout_xmr === 0) {
+        return true;
+      }
     }
     
     // For multibets/legs with known outcome
