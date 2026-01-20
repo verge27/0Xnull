@@ -753,6 +753,16 @@ export default function EsportsPredictions() {
                   selectedGame={selectedGame} 
                   onActiveGameChange={setLivestreamGame}
                   onStreamChange={setActiveStream}
+                  onGameFilterChange={(gameKey) => {
+                    // Sync the market/events filter when user clicks a game in the stream strip
+                    setSelectedGame(gameKey);
+                    setSelectedCategory('all');
+                    if (gameKey === 'all') {
+                      fetchEvents();
+                    } else {
+                      fetchEvents(gameKey);
+                    }
+                  }}
                 />
               </div>
               {/* Desktop sidebar with scroll */}

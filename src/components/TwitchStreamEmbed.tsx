@@ -20,6 +20,7 @@ interface TwitchStreamEmbedProps {
   selectedGame: string;
   onActiveGameChange?: (gameSlug: string | null) => void;
   onStreamChange?: (streamInfo: StreamInfo | null) => void;
+  onGameFilterChange?: (gameKey: string) => void;
 }
 
 const GAME_FILTERS = [
@@ -76,7 +77,7 @@ const GAME_NAME_TO_SLUG: Record<string, string> = {
   'Apex Legends': 'apex',
 };
 
-export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChange, onStreamChange }: TwitchStreamEmbedProps) {
+export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChange, onStreamChange, onGameFilterChange }: TwitchStreamEmbedProps) {
   const [locationInfo, setLocationInfo] = useState<{
     hostname: string;
     host: string;
@@ -177,6 +178,8 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
   const handleFilterChange = (gameKey: string) => {
     if (gameKey !== activeFilter) {
       setActiveFilter(gameKey);
+      // Notify parent when user clicks a game filter
+      onGameFilterChange?.(gameKey);
     }
   };
 
