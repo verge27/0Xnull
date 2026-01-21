@@ -126,7 +126,7 @@ export default function Blog() {
               <BookOpen className="w-3 h-3 mr-1" />
               Insights & Analysis
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent leading-tight">
               0xNull Blog — Privacy-First Crypto & Prediction Market Insights
             </h1>
             <p className="text-lg text-muted-foreground">
