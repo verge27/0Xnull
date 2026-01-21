@@ -41,6 +41,7 @@ const staticPages = [
   { path: '/privacy', priority: '0.4', changefreq: 'yearly', lastmod: '2024-11-01' },
   { path: '/api-docs', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-15' },
   { path: '/influencer', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-15' },
+  { path: '/blog', priority: '0.8', changefreq: 'daily', lastmod: '2026-01-21' },
 ];
 
 Deno.serve(async (req) => {

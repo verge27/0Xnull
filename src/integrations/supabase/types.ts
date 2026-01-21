@@ -71,6 +71,94 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_name: string
+          author_pk_user_id: string | null
+          author_user_id: string | null
+          category: string | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          market_id: string | null
+          meta_description: string | null
+          published_at: string | null
+          slug: string
+          status: string
+          subcategory: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          author_name: string
+          author_pk_user_id?: string | null
+          author_user_id?: string | null
+          category?: string | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          market_id?: string | null
+          meta_description?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          subcategory?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          author_name?: string
+          author_pk_user_id?: string | null
+          author_user_id?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          market_id?: string | null
+          meta_description?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          subcategory?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_author_pk_user_id_fkey"
+            columns: ["author_pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_author_pk_user_id_fkey"
+            columns: ["author_pk_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_private_key_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coins: {
         Row: {
           id: string
@@ -1236,6 +1324,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_blog_views: { Args: { post_id: string }; Returns: undefined }
       increment_listing_views: {
         Args: { listing_id: string }
         Returns: undefined
