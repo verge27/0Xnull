@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { SEORichText } from '@/components/SEORichText';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,9 +20,20 @@ import {
   TrendingUp,
   Zap
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
+import { useSEO } from '@/hooks/useSEO';
+
+const BLOG_SEO_CONTENT = `
+<p>The 0xNull Blog is a privacy-first crypto blog dedicated to anonymous prediction markets, no-KYC platforms, and financial privacy. Here you'll find in-depth articles, guides, and explainers designed to help users understand how privacy-focused crypto services work—without hype, tracking, or data collection.</p>
+
+<p>As traditional financial platforms move toward increased surveillance and identity verification, privacy-first alternatives are becoming more important than ever. The 0xNull Blog explores topics such as anonymous crypto prediction markets, Monero-powered payments, no-KYC services, and the broader privacy-first ecosystem powering platforms like 0xNull.</p>
+
+<p>Our articles break down how prediction markets work, why no-KYC access matters, and how users can interact with crypto-native services without accounts or identity exposure. Whether you're learning about Flash Markets, anonymous sports predictions, crypto swaps, or privacy-preserving infrastructure, the blog is designed to educate—not persuade.</p>
+
+<p>You'll also find practical guides explaining how to use 0xNull safely and privately, insights into crypto privacy tools, and updates on new features across the 0xNull ecosystem. All content is written with clarity, neutrality, and user sovereignty in mind.</p>
+
+<p>Browse the 0xNull Blog to learn more about anonymous crypto prediction markets, privacy-first tools, and how to use no-KYC platforms responsibly.</p>
+`;
 
 interface BlogPost {
   id: string;
@@ -51,8 +64,8 @@ export default function Blog() {
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
 
   useSEO({
-    title: 'Blog | 0xNull - Prediction Market Insights & Analysis',
-    description: 'Expert analysis, betting strategies, and insights for esports, sports, and crypto prediction markets. Stay informed with the latest from 0xNull.',
+    title: '0xNull Blog | Privacy-First Crypto & No-KYC Prediction Markets',
+    description: 'Read the 0xNull Blog for insights on privacy-first crypto, anonymous prediction markets, Monero payments, and no-KYC platforms—guides, explainers, and updates.',
   });
 
   useEffect(() => {
@@ -105,19 +118,19 @@ export default function Blog() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+        <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-4">
-              <BookOpen className="w-4 h-4" />
-              0xNull Blog
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Prediction Market Insights
+            <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
+              <BookOpen className="w-3 h-3 mr-1" />
+              Insights & Analysis
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+              0xNull Blog — Privacy-First Crypto & Prediction Market Insights
             </h1>
             <p className="text-lg text-muted-foreground">
-              Expert analysis, betting strategies, and the latest news from esports, sports, and crypto markets.
+              Deep dives into prediction markets, crypto privacy, and the future of decentralized betting
             </p>
           </div>
         </div>
@@ -251,29 +264,39 @@ export default function Blog() {
         </Tabs>
       </section>
 
+      {/* SEO Rich Text */}
+      <SEORichText 
+        title="0xNull Blog — Privacy-First Crypto & Prediction Market Insights"
+        content={BLOG_SEO_CONTENT}
+      />
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-          <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-2">Ready to start predicting?</h2>
-            <p className="text-muted-foreground mb-6">
-              Put your insights to work with our prediction markets.
+        <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
+          <CardContent className="p-8 md:p-12 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              Ready to Start Predicting?
+            </h2>
+            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Put your knowledge to work. Make predictions on esports, sports, crypto, and more with complete privacy.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button asChild>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button asChild size="lg">
                 <Link to="/esports-predictions">
+                  <Gamepad2 className="w-4 h-4 mr-2" />
                   Esports Markets
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button asChild variant="outline" size="lg">
                 <Link to="/sports-predictions">
+                  <Trophy className="w-4 h-4 mr-2" />
                   Sports Markets
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button asChild variant="outline" size="lg">
                 <Link to="/predictions">
-                  Crypto Markets
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  All Markets
                 </Link>
               </Button>
             </div>
