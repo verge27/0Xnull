@@ -10,8 +10,10 @@ if ('serviceWorker' in navigator) {
   // Use requestIdleCallback to register SW when browser is idle
   const registerSW = () => {
     import('virtual:pwa-register').then(({ registerSW }) => {
-      registerSW({
-        immediate: false,
+      const updateSW = registerSW({
+        // Ensures new builds reliably replace old cached app shells.
+        // This fixes cases where routes/nav "disappear" due to an outdated service worker.
+        immediate: true,
         onRegisteredSW(swUrl, r) {
           // Check for updates periodically
           if (r) {
@@ -19,6 +21,10 @@ if ('serviceWorker' in navigator) {
               r.update();
             }, 60 * 60 * 1000); // Check hourly
           }
+        },
+        onNeedRefresh() {
+          // Auto-apply the update so users aren't stuck on an old cached version.
+          updateSW(true);
         },
         onOfflineReady() {
           console.log('App ready for offline use');
