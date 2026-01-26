@@ -22,8 +22,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { BlogPostContent } from '@/components/blog/BlogPostContent';
 
 interface BlogPostData {
   id: string;
@@ -267,11 +266,7 @@ export default function BlogPost() {
         )}
 
         {/* Content */}
-        <div className="prose prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-muted/50">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {post.content}
-          </ReactMarkdown>
-        </div>
+        <BlogPostContent content={post.content} />
 
         {/* CTA */}
         <Card className="mt-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
