@@ -22,6 +22,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface BlogPostData {
   id: string;
@@ -64,7 +66,8 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
 
   useSEO(post ? {
-    title: `${post.title} | 0xNull Blog`,
+    // Use the post title as-is (lets you control exact meta title per post)
+    title: post.title,
     description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
     image: post.featured_image || undefined,
   } : undefined);
@@ -264,10 +267,11 @@ export default function BlogPost() {
         )}
 
         {/* Content */}
-        <div 
-          className="prose prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-muted/50"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="prose prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-muted/50">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {post.content}
+          </ReactMarkdown>
+        </div>
 
         {/* CTA */}
         <Card className="mt-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
