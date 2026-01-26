@@ -25,6 +25,11 @@ function normalizeBlogMarkdown(input: string): string {
   // Normalize multiple blank lines.
   md = md.replace(/\n{3,}/g, "\n\n");
 
+  // Remove excessive blank lines inside lists coming from Google Docs export.
+  // Example: "- item\n\n- item" -> "- item\n- item"
+  md = md.replace(/\n\n(-\s+)/g, "\n$1");
+  md = md.replace(/\n\n(\d+\.\s+)/g, "\n$1");
+
   return md.trim();
 }
 

@@ -80,8 +80,21 @@ function htmlToCleanContent(html: string): string {
   // Convert italic
   content = content.replace(/<(i|em)[^>]*>([\s\S]*?)<\/(i|em)>/gi, '*$2*');
   
-  // Convert links
-  content = content.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
+  // Convert links (unwrap Google redirect URLs into the real target)
+  content = content.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href, text) => {
+    let url = String(href);
+    // Google Docs exports often wrap URLs like:
+    // https://www.google.com/url?q=https://example.com&sa=D&source=...
+    const qMatch = url.match(/https?:\/\/www\.google\.com\/url\?q=([^&]+)/i);
+    if (qMatch?.[1]) {
+      try {
+        url = decodeURIComponent(qMatch[1]);
+      } catch {
+        url = qMatch[1];
+      }
+    }
+    return `[${text}](${url})`;
+  });
   
   // Convert unordered lists
   content = content.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) => {
@@ -92,10 +105,18 @@ function htmlToCleanContent(html: string): string {
   let listCounter = 0;
   content = content.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     listCounter = 0;
-    return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, () => {
-      listCounter++;
-      return `${listCounter}. `;
-    }) + '\n';
+    return (
+      items
+        .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_li: string, liContent: string) => {
+          listCounter++;
+          // Preserve the actual list item text.
+          // At this point, we've already converted inline tags like <a>, <strong>, <em>.
+          // We still may have spans/divs/etc. inside the <li>, which will be stripped later.
+          return `${listCounter}. ${String(liContent).trim()}\n`;
+        })
+        .trim() +
+      '\n'
+    );
   });
   
   // Remove remaining HTML tags
@@ -108,8 +129,12 @@ function htmlToCleanContent(html: string): string {
   content = content.replace(/&gt;/g, '>');
   content = content.replace(/&quot;/g, '"');
   content = content.replace(/&#39;/g, "'");
+  content = content.replace(/&mdash;/g, '—');
+  content = content.replace(/&ndash;/g, '–');
   
   // Clean up whitespace
+  // Remove empty headings that can appear from odd export structures
+  content = content.replace(/^#{1,6}\s*$/gm, '');
   content = content.replace(/\n{3,}/g, '\n\n');
   content = content.trim();
   
