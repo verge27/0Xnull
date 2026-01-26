@@ -74,6 +74,7 @@ const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const BlogAdmin = lazy(() => import("./pages/BlogAdmin"));
 
 // Creator pages
 const CreatorRegister = lazy(() => import("./pages/creator/CreatorRegister"));
@@ -191,6 +192,7 @@ const App = () => (
                   
                   {/* Blog */}
                   <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/admin" element={<BlogAdmin />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   
                   {/* Creators */}
