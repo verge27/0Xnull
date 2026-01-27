@@ -25,10 +25,9 @@ function normalizeBlogMarkdown(input: string): string {
   // Normalize multiple blank lines.
   md = md.replace(/\n{3,}/g, "\n\n");
 
-  // Remove excessive blank lines inside lists coming from Google Docs export.
-  // Example: "- item\n\n- item" -> "- item\n- item"
-  md = md.replace(/\n\n(-\s+)/g, "\n$1");
-  md = md.replace(/\n\n(\d+\.\s+)/g, "\n$1");
+  // Keep lists tight (remove excessive blank lines inside lists)
+  md = md.replace(/(-\s+[^\n]+)\n\n(-\s+)/g, "$1\n$2");
+  md = md.replace(/(\d+\.\s+[^\n]+)\n\n(\d+\.\s+)/g, "$1\n$2");
 
   return md.trim();
 }
@@ -37,7 +36,20 @@ export function BlogPostContent({ content }: { content: string }) {
   const normalized = normalizeBlogMarkdown(content);
 
   return (
-    <div className="prose prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-muted/50 prose-hr:my-10 prose-hr:border-border/60">
+    <div className="prose prose-invert max-w-none 
+      prose-headings:font-bold prose-headings:text-foreground
+      prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+      prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+      prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
+      prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+      prose-strong:text-foreground prose-strong:font-semibold
+      prose-ul:my-4 prose-ul:pl-6 prose-ul:list-disc
+      prose-ol:my-4 prose-ol:pl-6 prose-ol:list-decimal
+      prose-li:text-muted-foreground prose-li:my-1 prose-li:leading-relaxed
+      prose-pre:bg-muted/50 
+      prose-hr:my-10 prose-hr:border-border/60
+      prose-img:rounded-lg prose-img:my-8"
+    >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalized}</ReactMarkdown>
     </div>
   );
