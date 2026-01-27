@@ -14,14 +14,9 @@ function normalizeBlogMarkdown(input: string): string {
   // Convert any markdown H1 into H2.
   md = md.replace(/^# (.+)$/gm, "## $1");
 
-  // Add separators between top-level sections (H2). The DOCX screenshot shows
-  // thin rules separating major blocks.
-  const parts = md.split(/\n(?=##\s+)/g);
-  if (parts.length > 1) {
-    md = parts
-      .map((p, idx) => (idx === 0 ? p.trim() : `---\n\n${p.trim()}`))
-      .join("\n\n");
-  }
+  // Remove duplicate horizontal rules (multiple --- in a row)
+  md = md.replace(/(\n---\n)+/g, "\n---\n");
+  md = md.replace(/---\n+---/g, "---");
 
   // Normalize multiple blank lines.
   md = md.replace(/\n{3,}/g, "\n\n");
@@ -61,18 +56,23 @@ const components: Components = {
       {children}
     </ul>
   ),
-  // Enhanced ordered list
+  // Enhanced ordered list - no bullets, just numbers
   ol: ({ children, ...props }) => (
-    <ol className="my-4 ml-6 space-y-3 list-decimal" {...props}>
+    <ol className="my-4 ml-6 space-y-3 list-decimal pl-4" {...props}>
       {children}
     </ol>
   ),
-  // Enhanced list items with visible bullets
-  li: ({ children, ...props }) => (
-    <li className="relative pl-6 text-muted-foreground leading-relaxed before:content-['•'] before:absolute before:left-0 before:text-primary before:font-bold" {...props}>
-      {children}
-    </li>
-  ),
+  // List items - only add bullets for unordered lists (handled via parent context)
+  li: ({ children, node, ...props }) => {
+    // Check if parent is ordered list by looking at sibling structure
+    const isOrderedList = node?.position?.start?.column === 1;
+    // We'll use CSS to handle this - ordered lists use list-decimal, unordered get custom bullets
+    return (
+      <li className="relative text-muted-foreground leading-relaxed [ul>&]:pl-6 [ul>&]:before:content-['•'] [ul>&]:before:absolute [ul>&]:before:left-0 [ul>&]:before:text-primary [ul>&]:before:font-bold" {...props}>
+        {children}
+      </li>
+    );
+  },
   // Strong text with high visibility
   strong: ({ children, ...props }) => (
     <strong className="text-foreground font-bold" {...props}>
