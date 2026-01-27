@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 
 function normalizeBlogMarkdown(input: string): string {
   if (!input) return "";
@@ -32,25 +33,88 @@ function normalizeBlogMarkdown(input: string): string {
   return md.trim();
 }
 
+// Custom components for enhanced rendering
+const components: Components = {
+  // Enhanced paragraph - detect bold-only paragraphs (sub-headers like "Traditional sportsbooks:")
+  p: ({ children, ...props }) => {
+    // Check if this is a bold-only paragraph (acts as a sub-header)
+    const childArray = Array.isArray(children) ? children : [children];
+    const isBoldOnly = childArray.length === 1 && 
+      typeof childArray[0] === 'object' && 
+      childArray[0] !== null &&
+      'type' in childArray[0] &&
+      childArray[0].type === 'strong';
+    
+    if (isBoldOnly) {
+      return (
+        <p className="text-foreground font-bold mt-6 mb-3" {...props}>
+          {children}
+        </p>
+      );
+    }
+    
+    return <p {...props}>{children}</p>;
+  },
+  // Enhanced unordered list with proper bullet styling
+  ul: ({ children, ...props }) => (
+    <ul className="my-4 ml-6 space-y-3 list-none" {...props}>
+      {children}
+    </ul>
+  ),
+  // Enhanced ordered list
+  ol: ({ children, ...props }) => (
+    <ol className="my-4 ml-6 space-y-3 list-decimal" {...props}>
+      {children}
+    </ol>
+  ),
+  // Enhanced list items with visible bullets
+  li: ({ children, ...props }) => (
+    <li className="relative pl-6 text-muted-foreground leading-relaxed before:content-['•'] before:absolute before:left-0 before:text-primary before:font-bold" {...props}>
+      {children}
+    </li>
+  ),
+  // Strong text with high visibility
+  strong: ({ children, ...props }) => (
+    <strong className="text-foreground font-bold" {...props}>
+      {children}
+    </strong>
+  ),
+  // H2 headers
+  h2: ({ children, ...props }) => (
+    <h2 className="text-2xl font-bold text-foreground mt-10 mb-4" {...props}>
+      {children}
+    </h2>
+  ),
+  // H3 headers
+  h3: ({ children, ...props }) => (
+    <h3 className="text-xl font-bold text-foreground mt-8 mb-3" {...props}>
+      {children}
+    </h3>
+  ),
+  // Horizontal rules
+  hr: () => (
+    <hr className="my-10 border-t border-border/60" />
+  ),
+  // Images
+  img: ({ src, alt, ...props }) => (
+    <img src={src} alt={alt || ""} className="rounded-lg my-8 max-w-full" {...props} />
+  ),
+  // Links
+  a: ({ children, href, ...props }) => (
+    <a href={href} className="text-primary hover:underline" {...props}>
+      {children}
+    </a>
+  ),
+};
+
 export function BlogPostContent({ content }: { content: string }) {
   const normalized = normalizeBlogMarkdown(content);
 
   return (
-    <div className="prose prose-invert max-w-none 
-      prose-headings:font-bold prose-headings:text-foreground
-      prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-      prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
-      prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
-      prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-      prose-strong:text-foreground prose-strong:font-semibold
-      prose-ul:my-4 prose-ul:pl-6 prose-ul:list-disc
-      prose-ol:my-4 prose-ol:pl-6 prose-ol:list-decimal
-      prose-li:text-muted-foreground prose-li:my-1 prose-li:leading-relaxed
-      prose-pre:bg-muted/50 
-      prose-hr:my-10 prose-hr:border-border/60
-      prose-img:rounded-lg prose-img:my-8"
-    >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalized}</ReactMarkdown>
+    <div className="prose prose-invert max-w-none">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {normalized}
+      </ReactMarkdown>
     </div>
   );
 }
