@@ -111,7 +111,7 @@ async function htmlToMarkdown(
     images.map(async ({ placeholder, src }) => {
       const img = await downloadImage(src);
       if (!img) {
-        uploadedMap[placeholder] = ""; // skip broken images
+        uploadedMap[placeholder] = "";
         return;
       }
       const fileName = `${slug}/${crypto.randomUUID()}.${img.ext}`;
@@ -135,11 +135,26 @@ async function htmlToMarkdown(
     /<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
     (_, href, text) => {
       const url = unwrapGoogleLink(String(href));
-      return `[${text}](${url})`;
+      const cleanText = text.replace(/<[^>]+>/g, "").trim();
+      return `[${cleanText}](${url})`;
     }
   );
 
-  // --- Bold / Italic ---
+  // --- Bold / Italic (handle nested spans with styles) ---
+  // Google Docs uses inline styles for bold/italic
+  content = content.replace(
+    /<span[^>]*font-weight:\s*700[^>]*>([\s\S]*?)<\/span>/gi,
+    "**$1**"
+  );
+  content = content.replace(
+    /<span[^>]*font-weight:\s*bold[^>]*>([\s\S]*?)<\/span>/gi,
+    "**$1**"
+  );
+  content = content.replace(
+    /<span[^>]*font-style:\s*italic[^>]*>([\s\S]*?)<\/span>/gi,
+    "*$1*"
+  );
+  // Standard HTML tags
   content = content.replace(
     /<(b|strong)[^>]*>([\s\S]*?)<\/(b|strong)>/gi,
     "**$2**"
@@ -153,28 +168,58 @@ async function htmlToMarkdown(
   content = content.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, "#### $1\n\n");
 
   // --- Lists ---
-  // Unordered
-  content = content.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) => {
-    return (
-      (items as string).replace(
-        /<li[^>]*>([\s\S]*?)<\/li>/gi,
-        "- $1\n"
-      ) + "\n"
-    );
-  });
-  // Ordered
-  content = content.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
-    let counter = 0;
-    return (
-      (items as string).replace(
-        /<li[^>]*>([\s\S]*?)<\/li>/gi,
-        (_li: string, liContent: string) => {
-          counter++;
-          return `${counter}. ${liContent.trim()}\n`;
+  // Process nested lists - handle ul/ol with proper indentation
+  function processLists(html: string, indent = 0): string {
+    const prefix = "  ".repeat(indent);
+    
+    // Unordered lists
+    html = html.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) => {
+      let result = "";
+      const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+      let match;
+      while ((match = liRegex.exec(items)) !== null) {
+        let liContent = match[1];
+        // Check for nested lists
+        if (/<[uo]l[^>]*>/i.test(liContent)) {
+          const nestedProcessed = processLists(liContent, indent + 1);
+          // Split into text before nested list and the nested list itself
+          const textPart = liContent.replace(/<[uo]l[^>]*>[\s\S]*<\/[uo]l>/gi, "").replace(/<[^>]+>/g, "").trim();
+          const nestedPart = nestedProcessed.replace(/^[^-\d]*/, "");
+          result += `${prefix}- ${textPart}\n${nestedPart}`;
+        } else {
+          const cleanContent = liContent.replace(/<[^>]+>/g, "").trim();
+          result += `${prefix}- ${cleanContent}\n`;
         }
-      ) + "\n"
-    );
-  });
+      }
+      return result;
+    });
+    
+    // Ordered lists
+    html = html.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
+      let result = "";
+      let counter = 0;
+      const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+      let match;
+      while ((match = liRegex.exec(items)) !== null) {
+        counter++;
+        let liContent = match[1];
+        if (/<[uo]l[^>]*>/i.test(liContent)) {
+          const nestedProcessed = processLists(liContent, indent + 1);
+          const textPart = liContent.replace(/<[uo]l[^>]*>[\s\S]*<\/[uo]l>/gi, "").replace(/<[^>]+>/g, "").trim();
+          const nestedPart = nestedProcessed.replace(/^[^-\d]*/, "");
+          result += `${prefix}${counter}. ${textPart}\n${nestedPart}`;
+        } else {
+          const cleanContent = liContent.replace(/<[^>]+>/g, "").trim();
+          result += `${prefix}${counter}. ${cleanContent}\n`;
+        }
+      }
+      return result;
+    });
+    
+    return html;
+  }
+  
+  content = processLists(content);
 
   // --- Paragraphs / line breaks ---
   content = content.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, "$1\n\n");
@@ -195,7 +240,11 @@ async function htmlToMarkdown(
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&mdash;/g, "—")
-    .replace(/&ndash;/g, "–");
+    .replace(/&ndash;/g, "–")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ldquo;/g, '"');
 
   // --- Put images back ---
   for (const { placeholder } of images) {
@@ -208,13 +257,17 @@ async function htmlToMarkdown(
   }
 
   // --- Cleanup ---
+  // Remove empty bold markers
+  content = content.replace(/\*\*\s*\*\*/g, "");
   // Remove empty headers
   content = content.replace(/^#{1,6}\s*$/gm, "");
-  // Collapse excessive blank lines
+  // Collapse excessive blank lines (more than 2 newlines -> 2)
   content = content.replace(/\n{3,}/g, "\n\n");
-  content = content.trim();
-
-  return content;
+  // Remove blank lines between list items (keep lists tight)
+  content = content.replace(/(-\s+[^\n]+)\n\n(-\s+)/g, "$1\n$2");
+  content = content.replace(/(\d+\.\s+[^\n]+)\n\n(\d+\.\s+)/g, "$1\n$2");
+  
+  return content.trim();
 }
 
 /** Generate URL-safe slug */
