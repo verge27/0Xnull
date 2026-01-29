@@ -802,8 +802,28 @@ const Swaps = () => {
                     <Label className="text-xs text-muted-foreground">Trade ID</Label>
                     <p className="font-mono text-sm">{trade.trade_id}</p>
                   </div>
+                  
+                  {/* Network Warning - Critical for multi-network coins */}
+                  {getNetworksForCoin(fromCoin).length > 1 && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                      <p className="text-destructive font-semibold text-sm flex items-center gap-2">
+                        ⚠️ SEND ON {fromNetwork.toUpperCase()} NETWORK ONLY
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        Sending on the wrong network will result in permanent loss of funds. Double-check your wallet is set to <strong>{fromNetwork}</strong> before sending.
+                      </p>
+                    </div>
+                  )}
+                  
                   <div>
-                    <Label className="text-xs text-muted-foreground">Send {amount} {fromCoin} to:</Label>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Label className="text-xs text-muted-foreground">Send {amount} {fromCoin.toUpperCase()}</Label>
+                      {getNetworksForCoin(fromCoin).length > 1 && (
+                        <Badge variant="outline" className="text-xs bg-primary/10 border-primary/30">
+                          {fromNetwork} network
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
                       <code className="flex-1 bg-background p-2 rounded text-sm break-all">{trade.address}</code>
                       <Button size="icon" variant="ghost" onClick={() => copyAddress(trade.address)}>
@@ -824,7 +844,7 @@ const Swaps = () => {
                   )}
                   <div className="flex justify-between text-sm">
                     <span>You receive:</span>
-                    <span className="font-semibold">{trade.amount_to} {toCoin}</span>
+                    <span className="font-semibold">{trade.amount_to} {toCoin.toUpperCase()}</span>
                   </div>
                   <div className="flex justify-between text-sm items-center">
                     <span>Status:</span>
