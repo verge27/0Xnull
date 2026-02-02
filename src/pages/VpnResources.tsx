@@ -8,32 +8,57 @@ import { Button } from "@/components/ui/button";
 
 const vpnServices = [
   {
-    name: "Cryptostorm",
-    url: "https://kycnot.me/service/cryptostorm",
-    description: "Privacy-hardened VPN service with token-based authentication and no logging",
-    features: ["Guaranteed no KYC", "Verified service", "Strict no-log policy", "Token-based authentication", "No account creation needed", "Cryptocurrency payments", "Open-source tools", "Has Onion or I2P URLs"],
-    rating: "Excellent Privacy"
-  },
-  {
-    name: "Xeovo",
-    url: "https://kycnot.me/service/xeovo",
-    description: "Protect your privacy and bypass restrictions with Xeovo VPN and stealth proxies. Self-funded VPN company based in Finland. In operation since 2016.",
-    features: ["Guaranteed no KYC", "Verified service", "Identity-free registration", "Strict no-log policy", "Accepts Monero payments", "Onion URL available", "Mature service since 2016"],
-    rating: "Excellent Privacy"
+    name: "LNVPN",
+    url: "https://lnvpn.net/?ref=0xnull",
+    description: "Token-style VPN access via Lightning Network and Monero. No account required — mirrors 0xNull's privacy-first model. Also offers eSIM and burner numbers.",
+    kycLevel: 0,
+    kycNote: "Explicit never",
+    acceptsXmr: true,
+    xmrNote: null,
+    accountType: "None required",
+    whyItFits: "Already our partner. Token-style access mirrors 0xNull's model. LN + XMR, $0.50/day, includes eSIM/burner numbers.",
+    features: ["Zero KYC ever", "Token-based access", "Lightning Network", "Accepts Monero", "eSIM available", "Burner numbers", "From $0.50/day"],
+    rating: "Partner Pick",
+    isPartner: true
   },
   {
     name: "Mullvad",
-    url: "https://kycnot.me/service/mullvad",
-    description: "Privacy-focused VPN with anonymous accounts and payment options including cash and cryptocurrency",
-    features: ["Guaranteed no KYC", "Verified service", "Identity-free registration", "Strict no-log policy", "No personal data required", "Cash payment accepted", "Accepts Monero payments", "Open-source clients", "WireGuard & OpenVPN support", "Has Onion or I2P URLs", "Mature service"],
-    rating: "Excellent Privacy"
+    url: "https://mullvad.net",
+    description: "The gold standard in privacy VPNs. Police raid in Sweden found zero user data. 16 years operational with DAITA anti-fingerprinting and Tor collaboration.",
+    kycLevel: 1,
+    kycNote: null,
+    acceptsXmr: true,
+    xmrNote: "10% discount",
+    accountType: "Numbered only",
+    whyItFits: "Gold standard. Police raid in Sweden found nothing. 16 years operational, DAITA anti-fingerprinting, Tor collab.",
+    features: ["Numbered accounts only", "10% XMR discount", "Proven no-logs (raided)", "DAITA anti-fingerprinting", "Tor integration", "WireGuard & OpenVPN", "16+ years operational"],
+    rating: "Gold Standard"
   },
   {
-    name: "NymVPN",
-    url: "https://kycnot.me/service/nymvpn",
-    description: "Next-generation mixnet VPN providing enhanced anonymity through multi-hop routing",
-    features: ["No KYC mention", "Mixnet technology", "Multi-hop routing", "Cryptocurrency payments", "Enhanced metadata protection", "Open-source code", "Decentralised network"],
-    rating: "Advanced Privacy"
+    name: "Cryptostorm",
+    url: "https://cryptostorm.is",
+    description: "Philosophically closest to 0xNull's model. Hash a token code, download config, connect. No email, no account, no identifiers whatsoever.",
+    kycLevel: 1,
+    kycNote: null,
+    acceptsXmr: true,
+    xmrNote: null,
+    accountType: "None — token-based",
+    whyItFits: "Philosophically closest to 0xNull's model. Hash a code, download config, connect. No email, no account, no identifiers. Tor/I2P.",
+    features: ["Token-based auth", "No account creation", "Hash your own token", "Accepts Monero", "Tor/I2P support", "Open-source tools", "Zero identifiers"],
+    rating: "Cypherpunk Choice"
+  },
+  {
+    name: "IVPN",
+    url: "https://ivpn.net",
+    description: "Open source, independently audited, and fully transparent. Anonymous signup with no personal data required. Slightly pricier but rock-solid reputation.",
+    kycLevel: 0,
+    kycNote: "Explicit never",
+    acceptsXmr: true,
+    xmrNote: "+ Lightning",
+    accountType: "Anonymous signup",
+    whyItFits: "Open source, audited, transparent. Slightly pricier but rock-solid reputation.",
+    features: ["Zero KYC ever", "Anonymous signup", "Accepts XMR + Lightning", "Open source", "Independent audits", "Transparent operations", "WireGuard support"],
+    rating: "Audited & Trusted"
   }
 ];
 
@@ -127,20 +152,21 @@ const VpnResources = () => {
             <h2 className="text-2xl font-bold mb-6">Recommended VPN Services</h2>
             <div className="grid gap-6">
               {vpnServices.map((vpn, index) => (
-                <Card key={index} className="hover:border-primary/50 transition-colors">
+                <Card key={index} className={`hover:border-primary/50 transition-colors ${vpn.isPartner ? 'border-primary/30 bg-primary/5' : ''}`}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between flex-wrap gap-2">
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <Shield className="h-5 w-5 text-primary" />
                           {vpn.name}
+                          {vpn.isPartner && <Badge className="bg-primary text-primary-foreground">Partner</Badge>}
                         </CardTitle>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="secondary">{vpn.rating}</Badge>
                         <Button variant="outline" size="sm" asChild>
                           <a href={vpn.url} target="_blank" rel="noopener noreferrer">
-                            View on KYCNOT.ME
+                            Visit {vpn.name}
                             <ExternalLink className="h-3 w-3 ml-1" />
                           </a>
                         </Button>
@@ -149,6 +175,37 @@ const VpnResources = () => {
                     <CardDescription className="mt-2">{vpn.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
+                      <div className="p-2 rounded bg-secondary/50">
+                        <div className="text-muted-foreground text-xs">KYC Level</div>
+                        <div className="font-semibold flex items-center gap-1">
+                          {vpn.kycLevel === 0 ? (
+                            <span className="text-primary">None</span>
+                          ) : (
+                            <span className="text-muted-foreground">Minimal</span>
+                          )}
+                          {vpn.kycNote && <span className="text-xs text-muted-foreground">({vpn.kycNote})</span>}
+                        </div>
+                      </div>
+                      <div className="p-2 rounded bg-secondary/50">
+                        <div className="text-muted-foreground text-xs">Accepts XMR</div>
+                        <div className="font-semibold text-primary">
+                          ✓ Yes {vpn.xmrNote && <span className="text-xs text-muted-foreground">({vpn.xmrNote})</span>}
+                        </div>
+                      </div>
+                      <div className="p-2 rounded bg-secondary/50 col-span-2">
+                        <div className="text-muted-foreground text-xs">Account</div>
+                        <div className="font-semibold">{vpn.accountType}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Why it fits */}
+                    <div className="p-3 rounded bg-primary/5 border border-primary/20 mb-4">
+                      <div className="text-xs text-primary font-medium mb-1">Why it fits 0xNull:</div>
+                      <p className="text-sm text-muted-foreground">{vpn.whyItFits}</p>
+                    </div>
+                    
                     <h4 className="text-sm font-semibold mb-3">Key Features:</h4>
                     <div className="flex flex-wrap gap-2">
                       {vpn.features.map((feature, featureIndex) => (
