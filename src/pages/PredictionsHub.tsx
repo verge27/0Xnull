@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Swords, Receipt, Zap } from 'lucide-react';
+import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Receipt, Zap, Gavel } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
@@ -46,6 +46,16 @@ const categories = [
       { name: 'Flash (5min)', href: '/flash', badge: 'NEW' },
     ],
   },
+  {
+    id: 'governance',
+    title: 'Governance',
+    description: 'Protocol upgrades & policy decisions',
+    icon: Gavel,
+    color: 'text-amber-500',
+    subCategories: [
+      { name: 'All Governance', href: '/governance-predictions' },
+    ],
+  },
 ];
 
 export default function PredictionsHub() {
@@ -81,18 +91,22 @@ export default function PredictionsHub() {
 
           {/* Category Tabs */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-              <TabsTrigger value="esports" className="gap-2">
+            <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
+              <TabsTrigger value="esports" className="gap-1 text-xs sm:text-sm sm:gap-2">
                 <Gamepad2 className="w-4 h-4" />
-                Esports
+                <span className="hidden sm:inline">Esports</span>
               </TabsTrigger>
-              <TabsTrigger value="sports" className="gap-2">
+              <TabsTrigger value="sports" className="gap-1 text-xs sm:text-sm sm:gap-2">
                 <Trophy className="w-4 h-4" />
-                Sports
+                <span className="hidden sm:inline">Sports</span>
               </TabsTrigger>
-              <TabsTrigger value="crypto" className="gap-2">
+              <TabsTrigger value="crypto" className="gap-1 text-xs sm:text-sm sm:gap-2">
                 <Bitcoin className="w-4 h-4" />
-                Crypto
+                <span className="hidden sm:inline">Crypto</span>
+              </TabsTrigger>
+              <TabsTrigger value="governance" className="gap-1 text-xs sm:text-sm sm:gap-2">
+                <Gavel className="w-4 h-4" />
+                <span className="hidden sm:inline">Governance</span>
               </TabsTrigger>
             </TabsList>
 
