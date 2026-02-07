@@ -34,10 +34,10 @@ type Aggregator = 'trocador' | 'exolix';
 
 // Popular coins with preferred networks - XMR FIRST
 // Using exact ticker/network values from Trocador API
-const POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
+const TROCADOR_POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
   { ticker: 'xmr', network: 'Mainnet', label: 'Monero' },
   { ticker: 'btc', network: 'Mainnet', label: 'Bitcoin' },
-  { ticker: 'eth', network: 'ERC20', label: 'Ethereum' },  // ETH Mainnet = ERC20 in Trocador
+  { ticker: 'eth', network: 'ERC20', label: 'Ethereum' },
   { ticker: 'usdt', network: 'ERC20', label: 'Tether' },
   { ticker: 'ltc', network: 'Mainnet', label: 'Litecoin' },
   { ticker: 'doge', network: 'Mainnet', label: 'Dogecoin' },
@@ -45,6 +45,20 @@ const POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
   { ticker: 'sol', network: 'Mainnet', label: 'Solana' },
   { ticker: 'usdc', network: 'ERC20', label: 'USD Coin' },
   { ticker: 'zec', network: 'Mainnet', label: 'Zcash' },
+];
+
+// Exolix popular coins (different network naming)
+const EXOLIX_POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
+  { ticker: 'xmr', network: 'XMR', label: 'Monero' },
+  { ticker: 'btc', network: 'BTC', label: 'Bitcoin' },
+  { ticker: 'eth', network: 'ETH', label: 'Ethereum' },
+  { ticker: 'usdt', network: 'ETH', label: 'Tether' },
+  { ticker: 'ltc', network: 'LTC', label: 'Litecoin' },
+  { ticker: 'doge', network: 'DOGE', label: 'Dogecoin' },
+  { ticker: 'bnb', network: 'BSC', label: 'Binance Coin' },
+  { ticker: 'sol', network: 'SOL', label: 'Solana' },
+  { ticker: 'usdc', network: 'ETH', label: 'USD Coin' },
+  { ticker: 'zec', network: 'ZEC', label: 'Zcash' },
 ];
 
 const PRIVACY_COINS = ['xmr', 'zec', 'dash'];
@@ -261,17 +275,21 @@ const Swaps = () => {
     return () => clearInterval(interval);
   }, [swapHistory]);
 
-  const COINS_CACHE_KEY = 'trocador_coins_cache';
+  const TROCADOR_CACHE_KEY = 'trocador_coins_cache';
+  const EXOLIX_CACHE_KEY = 'exolix_coins_cache';
   const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+
+  // Get the current aggregator's popular coins list
+  const getPopularCoins = () => aggregator === 'exolix' ? EXOLIX_POPULAR_COINS : TROCADOR_POPULAR_COINS;
 
   const fetchCoins = async () => {
     // Check localStorage cache first
     try {
-      const cached = localStorage.getItem(COINS_CACHE_KEY);
+      const cached = localStorage.getItem(TROCADOR_CACHE_KEY);
       if (cached) {
         const { coins: cachedCoins, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_DURATION_MS && cachedCoins?.length > 0) {
-          console.log('Using cached coins:', cachedCoins.length);
+          console.log('Using cached Trocador coins:', cachedCoins.length);
           setCoins(cachedCoins);
           setLoading(false);
           return;
@@ -282,7 +300,7 @@ const Swaps = () => {
     }
 
     // First fetch popular coins specifically to ensure they're loaded
-    const popularTickers = POPULAR_COINS.map(p => p.ticker.toLowerCase());
+    const popularTickers = TROCADOR_POPULAR_COINS.map(p => p.ticker.toLowerCase());
     
     const { data: popularData, error: popularError } = await supabase
       .from('coins')
@@ -332,20 +350,70 @@ const Swaps = () => {
 
       // Cache to localStorage
       try {
-        localStorage.setItem(COINS_CACHE_KEY, JSON.stringify({
+        localStorage.setItem(TROCADOR_CACHE_KEY, JSON.stringify({
           coins: combined,
           timestamp: Date.now()
         }));
       } catch (e) {
-        console.warn('Failed to cache coins:', e);
+        console.warn('Failed to cache Trocador coins:', e);
       }
     }
     setLoading(false);
   };
 
-  // Fetch Exolix coins
+  // Fetch Exolix coins from cached database table
   const fetchExolixCoins = async () => {
+    // Check localStorage cache first
     try {
+      const cached = localStorage.getItem(EXOLIX_CACHE_KEY);
+      if (cached) {
+        const { coins: cachedCoins, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_DURATION_MS && cachedCoins?.length > 0) {
+          console.log('Using cached Exolix coins:', cachedCoins.length);
+          setExolixCoins(cachedCoins);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to read Exolix coins cache:', e);
+    }
+
+    try {
+      // First try to fetch from cached database table
+      const { data: dbCoins, error: dbError } = await supabase
+        .from('exolix_coins')
+        .select('*')
+        .order('ticker');
+      
+      if (!dbError && dbCoins && dbCoins.length > 0) {
+        const mapped: Coin[] = dbCoins.map((c: { id: string; ticker: string; name: string; network: string; memo: boolean; image: string | null }) => ({
+          id: c.id,
+          ticker: c.ticker,
+          name: c.name,
+          network: c.network,
+          memo: c.memo,
+          image: c.image,
+          minimum: 0,
+          maximum: 999999,
+        }));
+        
+        console.log('Loaded Exolix coins from database:', mapped.length);
+        setExolixCoins(mapped);
+        
+        // Cache to localStorage
+        try {
+          localStorage.setItem(EXOLIX_CACHE_KEY, JSON.stringify({
+            coins: mapped,
+            timestamp: Date.now()
+          }));
+        } catch (e) {
+          console.warn('Failed to cache Exolix coins:', e);
+        }
+        return;
+      }
+      
+      // Fallback: Fetch directly from API if database is empty
+      console.log('No cached Exolix coins in DB, fetching from API...');
       const { data, error } = await supabase.functions.invoke('exolix-api', {
         body: { action: 'currencies' },
       });
@@ -356,7 +424,6 @@ const Swaps = () => {
       const mapped: Coin[] = [];
       
       currencies.forEach((c: { code: string; name: string; icon: string; networks?: Array<{ network: string; memoNeeded: boolean }> }) => {
-        // Each currency can have multiple networks
         const networks = c.networks || [{ network: c.code, memoNeeded: false }];
         networks.forEach((n: { network: string; memoNeeded: boolean }) => {
           mapped.push({
@@ -373,17 +440,32 @@ const Swaps = () => {
       });
       
       setExolixCoins(mapped);
+      
+      // Cache to localStorage
+      try {
+        localStorage.setItem(EXOLIX_CACHE_KEY, JSON.stringify({
+          coins: mapped,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Failed to cache Exolix coins:', e);
+      }
     } catch (error) {
       console.error('Error fetching Exolix coins:', error);
     }
   };
 
-  // Fetch Exolix coins when switching to Exolix
+  // Fetch Exolix coins when switching to Exolix or on mount
   useEffect(() => {
     if (aggregator === 'exolix' && exolixCoins.length === 0) {
       fetchExolixCoins();
     }
   }, [aggregator]);
+  
+  // Pre-fetch Exolix coins on initial load
+  useEffect(() => {
+    fetchExolixCoins();
+  }, []);
 
   const syncCoins = async () => {
     setLoading(true);
@@ -453,9 +535,10 @@ const Swaps = () => {
   // Get popular coins with their preferred networks
   const getPriorityCoins = () => {
     const activeCoins = getActiveCoins();
+    const popularList = getPopularCoins();
     const results: (Coin & { preferredLabel: string })[] = [];
     
-    for (const pc of POPULAR_COINS) {
+    for (const pc of popularList) {
       // Find exact ticker+network match (case-insensitive)
       const coin = activeCoins.find(c => 
         c.ticker.toLowerCase() === pc.ticker.toLowerCase() && 
@@ -472,7 +555,8 @@ const Swaps = () => {
 
   // Get coins that are not in the popular list
   const getOtherCoins = () => {
-    const popularTickers = POPULAR_COINS.map(p => p.ticker.toUpperCase());
+    const popularList = getPopularCoins();
+    const popularTickers = popularList.map(p => p.ticker.toUpperCase());
     return getUniqueCoins().filter(c => !popularTickers.includes(c.ticker.toUpperCase()));
   };
 
@@ -496,7 +580,8 @@ const Swaps = () => {
     const networks = getNetworksForCoin(ticker);
     
     // Check if this is a popular coin with a preferred network
-    const popularCoin = POPULAR_COINS.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
+    const popularList = getPopularCoins();
+    const popularCoin = popularList.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
     if (popularCoin) {
       const preferredNetwork = networks.find(n => n.network.toUpperCase() === popularCoin.network.toUpperCase());
       setFromNetwork(preferredNetwork?.network || (networks.length === 1 ? networks[0].network : ''));
@@ -516,7 +601,8 @@ const Swaps = () => {
     const networks = getNetworksForCoin(ticker);
     
     // Check if this is a popular coin with a preferred network
-    const popularCoin = POPULAR_COINS.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
+    const popularList = getPopularCoins();
+    const popularCoin = popularList.find(p => p.ticker.toUpperCase() === ticker.toUpperCase());
     if (popularCoin) {
       const preferredNetwork = networks.find(n => n.network.toUpperCase() === popularCoin.network.toUpperCase());
       setToNetwork(preferredNetwork?.network || (networks.length === 1 ? networks[0].network : ''));
