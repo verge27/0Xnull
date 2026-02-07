@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -136,6 +136,10 @@ export const Navbar = () => {
                     <span className="text-muted-foreground">Flash (5min)</span>
                     <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded">NEW</span>
                   </Link>
+                  <Link to="/governance-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Gavel className="w-5 h-5 text-amber-500" />
+                    <span>Governance</span>
+                  </Link>
                   <Link to="/my-slips" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Receipt className="w-5 h-5 text-primary" />
                     <span>My Slips</span>
@@ -256,6 +260,14 @@ export const Navbar = () => {
                   <Zap className="w-3 h-3 text-purple-500" />
                   Flash (5min)
                   <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded ml-auto">NEW</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs text-muted-foreground">Governance</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link to="/governance-predictions" className="cursor-pointer flex items-center gap-2">
+                  <Gavel className="w-3 h-3 text-amber-500" />
+                  All Governance
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
