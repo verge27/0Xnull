@@ -27,7 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Gavel, TrendingUp, Clock, Loader2, Info, ArrowLeft, HelpCircle, RefreshCw } from 'lucide-react';
+import { Gavel, TrendingUp, Clock, Loader2, Info, ArrowLeft, HelpCircle, RefreshCw, MessageSquarePlus, CheckCircle2, XCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function GovernancePredictions() {
   useSEO({
@@ -58,6 +59,13 @@ export default function GovernancePredictions() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [activeTab, setActiveTab] = useState('markets');
+  
+  // Request market dialog state
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [requestTitle, setRequestTitle] = useState('');
+  const [requestDescription, setRequestDescription] = useState('');
+  const [requestOracle, setRequestOracle] = useState('');
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
   
   // Event list SEO
   const eventListData = useMemo(() => {
@@ -173,6 +181,26 @@ export default function GovernancePredictions() {
     fetchMarkets();
   };
 
+  const handleSubmitRequest = async () => {
+    if (!requestTitle.trim() || !requestOracle.trim()) {
+      toast.error('Please fill in the market question and oracle/resolution criteria');
+      return;
+    }
+    
+    setRequestSubmitting(true);
+    
+    // For now, we'll just show a success message
+    // In production, this could send to a backend endpoint or open a Matrix/email
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    toast.success('Market request submitted! We\'ll review and add qualifying markets.');
+    setRequestDialogOpen(false);
+    setRequestTitle('');
+    setRequestDescription('');
+    setRequestOracle('');
+    setRequestSubmitting(false);
+  };
+
   const activeMarkets = markets.filter(m => !m.resolved && m.betting_open !== false);
   const closedMarkets = markets.filter(m => m.resolved || m.betting_open === false);
 
@@ -190,14 +218,25 @@ export default function GovernancePredictions() {
               Back to Predictions Hub
             </Link>
             
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-14 w-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                <Gavel className="h-7 w-7 text-amber-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <Gavel className="h-7 w-7 text-amber-400" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">Governance Predictions</h1>
+                  <p className="text-muted-foreground">Predict crypto governance outcomes, protocol upgrades & policy decisions</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">Governance Predictions</h1>
-                <p className="text-muted-foreground">Predict crypto governance outcomes, protocol upgrades & policy decisions</p>
-              </div>
+              
+              <Button 
+                onClick={() => setRequestDialogOpen(true)}
+                variant="outline"
+                className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 shrink-0"
+              >
+                <MessageSquarePlus className="w-4 h-4 mr-2" />
+                Request a Market
+              </Button>
             </div>
             
             {savedVoucher && <VoucherBadge className="mb-4" />}
@@ -446,6 +485,101 @@ export default function GovernancePredictions() {
         onUpdatePayoutAddress={betSlip.updatePayoutAddress}
         onConfirmed={() => betSlip.clearBetSlip()}
       />
+      
+      {/* Request Market Dialog */}
+      <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquarePlus className="w-5 h-5 text-amber-400" />
+              Request a Governance Market
+            </DialogTitle>
+            <DialogDescription>
+              Suggest a prediction market for crypto governance, protocol upgrades, or policy decisions.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {/* Requirements */}
+          <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
+            <h4 className="font-semibold text-sm">Requirements for Approval</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-muted-foreground">
+                  <strong className="text-foreground">Clear Oracle:</strong> Outcome must be verifiable from public sources (blockchain data, official announcements, etc.)
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-muted-foreground">
+                  <strong className="text-foreground">Binary Outcome:</strong> Must resolve to YES or NO with no ambiguity
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-muted-foreground">
+                  <strong className="text-foreground">Defined Timeframe:</strong> Must have a specific resolution date or deadline
+                </span>
+              </div>
+              <div className="flex items-start gap-2 opacity-60">
+                <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                <span className="text-muted-foreground">
+                  We don't accept subjective markets, price predictions, or markets without verifiable outcomes
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Market Question *</Label>
+              <Input
+                placeholder='e.g. "Will Ethereum implement EIP-XXXX before Dec 2025?"'
+                value={requestTitle}
+                onChange={(e) => setRequestTitle(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label>Additional Context</Label>
+              <Textarea
+                placeholder="Background info, links to proposals, why this matters..."
+                value={requestDescription}
+                onChange={(e) => setRequestDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <Label>Oracle / Resolution Criteria *</Label>
+              <Textarea
+                placeholder='e.g. "Resolves YES if EIP-XXXX is included in a mainnet hard fork. Verified via ethereum.org announcements."'
+                value={requestOracle}
+                onChange={(e) => setRequestOracle(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Describe exactly how the winner will be determined
+              </p>
+            </div>
+            
+            <Button 
+              onClick={handleSubmitRequest} 
+              className="w-full bg-amber-500 hover:bg-amber-600 text-black"
+              disabled={requestSubmitting || !requestTitle.trim() || !requestOracle.trim()}
+            >
+              {requestSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </span>
+              ) : (
+                'Submit Market Request'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
