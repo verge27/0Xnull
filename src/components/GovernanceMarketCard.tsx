@@ -10,6 +10,11 @@ import { TrendingUp, Users, Gavel, Info, ChevronDown, ChevronUp, Lock, CheckCirc
 import type { PredictionMarket } from '@/services/api';
 import { format } from 'date-fns';
 
+// Map market IDs to their feature images
+const MARKET_IMAGES: Record<string, string> = {
+  'btc_quantum_hardfork_2030': '/images/markets/btc-quantum-hardfork.png',
+};
+
 interface GovernanceMarketCardProps {
   market: PredictionMarket;
   onBetClick: (market: PredictionMarket, side: 'yes' | 'no') => void;
@@ -33,6 +38,9 @@ export function GovernanceMarketCard({
   // Check if betting is still open
   const now = Date.now() / 1000;
   const bettingClosed = market.resolved || (market.resolution_time && market.resolution_time <= now) || market.betting_open === false;
+  
+  // Get market image if available
+  const marketImage = MARKET_IMAGES[market.market_id];
   
   // Format resolution date nicely for long-term markets
   const formatResolutionDate = () => {
@@ -73,11 +81,23 @@ export function GovernanceMarketCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Feature Image */}
+      {marketImage && (
+        <div className="relative h-40 overflow-hidden">
+          <img 
+            src={marketImage} 
+            alt={market.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+        </div>
+      )}
+      
       {/* Category and Admin badge */}
-      <div className="absolute top-2 left-2 z-10 flex gap-1.5">
+      <div className={`absolute ${marketImage ? 'top-2' : 'top-2'} left-2 z-10 flex gap-1.5`}>
         <Badge
           variant="outline"
-          className="text-xs bg-amber-500/20 border-amber-500/40 text-amber-400"
+          className="text-xs bg-amber-500/20 border-amber-500/40 text-amber-400 backdrop-blur-sm"
         >
           <Gavel className="w-3 h-3 mr-1" />
           Governance
@@ -86,7 +106,7 @@ export function GovernanceMarketCard({
           <TooltipTrigger asChild>
             <Badge
               variant="outline"
-              className="text-xs bg-amber-600/20 border-amber-600/40 text-amber-300 cursor-help"
+              className="text-xs bg-amber-600/20 border-amber-600/40 text-amber-300 cursor-help backdrop-blur-sm"
             >
               Admin Resolved
               <Info className="w-3 h-3 ml-1" />
@@ -99,9 +119,9 @@ export function GovernanceMarketCard({
       </div>
 
       {/* Status badges */}
-      <div className="absolute top-2 right-2 flex gap-1 z-10">
+      <div className={`absolute ${marketImage ? 'top-2' : 'top-2'} right-2 flex gap-1 z-10`}>
         {bettingClosed && !market.resolved && market.resolution_time && market.resolution_time > now && (
-          <Badge className="bg-zinc-700 text-zinc-300">
+          <Badge className="bg-zinc-700 text-zinc-300 backdrop-blur-sm">
             <Lock className="w-3 h-3 mr-1" />
             CLOSED
           </Badge>
@@ -109,7 +129,7 @@ export function GovernanceMarketCard({
         {getStatusBadge()}
       </div>
 
-      <CardContent className="p-4 pt-12">
+      <CardContent className={`p-4 ${marketImage ? 'pt-4' : 'pt-12'}`}>
         {/* Market Question */}
         <h3 className="text-lg font-semibold mb-2 leading-tight">
           {market.title}
