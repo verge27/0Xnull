@@ -189,16 +189,29 @@ export default function GovernancePredictions() {
     
     setRequestSubmitting(true);
     
-    // For now, we'll just show a success message
-    // In production, this could send to a backend endpoint or open a Matrix/email
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success('Market request submitted! We\'ll review and add qualifying markets.');
-    setRequestDialogOpen(false);
-    setRequestTitle('');
-    setRequestDescription('');
-    setRequestOracle('');
-    setRequestSubmitting(false);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase.functions.invoke('send-market-request', {
+        body: {
+          title: requestTitle.trim(),
+          description: requestDescription.trim(),
+          oracle: requestOracle.trim(),
+        },
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Market request submitted! We\'ll review and add qualifying markets.');
+      setRequestDialogOpen(false);
+      setRequestTitle('');
+      setRequestDescription('');
+      setRequestOracle('');
+    } catch (error) {
+      console.error('Error submitting market request:', error);
+      toast.error('Failed to submit request. Please try again.');
+    } finally {
+      setRequestSubmitting(false);
+    }
   };
 
   const activeMarkets = markets.filter(m => !m.resolved && m.betting_open !== false);
