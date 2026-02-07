@@ -462,10 +462,12 @@ export const api = {
     });
   },
 
-  async getPredictionMarkets(includeResolved = false): Promise<{ markets: PredictionMarket[] }> {
-    const path = includeResolved 
-      ? '/api/predictions/markets?include_resolved=true' 
-      : '/api/predictions/markets';
+  async getPredictionMarkets(includeResolved = false, category?: string): Promise<{ markets: PredictionMarket[] }> {
+    const params = new URLSearchParams();
+    if (includeResolved) params.append('include_resolved', 'true');
+    if (category) params.append('category', category);
+    const queryString = params.toString();
+    const path = queryString ? `/api/predictions/markets?${queryString}` : '/api/predictions/markets';
     return proxyRequest<{ markets: PredictionMarket[] }>(path);
   },
 

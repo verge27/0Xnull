@@ -56,6 +56,7 @@ const SportsPredictions = lazy(() => import("./pages/SportsPredictions"));
 const EsportsPredictions = lazy(() => import("./pages/EsportsPredictions"));
 const CricketPredictions = lazy(() => import("./pages/CricketPredictions"));
 const StarcraftPredictions = lazy(() => import("./pages/StarcraftPredictions"));
+const GovernancePredictions = lazy(() => import("./pages/GovernancePredictions"));
 const CombatSports = lazy(() => import("./pages/CombatSports"));
 const Slap = lazy(() => import("./pages/Slap"));
 const PredictionsHub = lazy(() => import("./pages/PredictionsHub"));
@@ -138,6 +139,7 @@ const App = () => (
                   <Route path="/sports-predictions" element={<SportsPredictions />} />
                   <Route path="/esports-predictions" element={<EsportsPredictions />} />
                   <Route path="/cricket-predictions" element={<CricketPredictions />} />
+                  <Route path="/governance-predictions" element={<GovernancePredictions />} />
                   <Route path="/starcraft" element={<StarcraftPredictions />} />
                   
                   {/* Combat Sports */}
