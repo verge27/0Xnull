@@ -217,7 +217,9 @@ serve(async (req) => {
 
         fetchOptions.body = formData;
       } else {
-        fetchOptions.headers = { 'Content-Type': 'application/json' };
+        const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+        fetchOptions.headers = reqHeaders;
         try {
           const body = await req.text();
           if (body) fetchOptions.body = body;
@@ -226,7 +228,9 @@ serve(async (req) => {
         }
       }
     } else {
-      fetchOptions.headers = { 'Content-Type': 'application/json' };
+      const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+      fetchOptions.headers = reqHeaders;
     }
 
     console.log(`Proxying ${req.method} to: ${targetUrl.toString()}`);
