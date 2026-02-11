@@ -75,6 +75,14 @@ const LendingPool = () => {
             <div className="h-20 bg-secondary/50 rounded-lg animate-pulse" />
             <div className="h-40 bg-secondary/50 rounded-lg animate-pulse" />
           </div>
+        ) : error ? (
+          <div className="text-center py-16 space-y-4">
+            <AlertTriangle className="w-12 h-12 mx-auto text-destructive opacity-70" />
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={() => { setLoading(true); setError(null); fetchPool(); }} className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Retry
+            </Button>
+          </div>
         ) : pool ? (
           <div className="space-y-6">
             {/* Header */}
