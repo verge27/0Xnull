@@ -9,6 +9,7 @@ import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
 import { DepositFlow } from '@/components/lending/DepositFlow';
 import { BorrowFlow } from '@/components/lending/BorrowFlow';
+import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
   lendingApi, type LendingPoolDetail,
   parseAmount, parsePercent, formatUsd, sourceLabel, RISK_PARAMS, ASSET_META,
@@ -19,7 +20,7 @@ import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle } from 'lucide-r
 const LendingPool = () => {
   const { asset } = useParams<{ asset: string }>();
   const [searchParams] = useSearchParams();
-  const { token } = useToken();
+  const { token, setCustomToken } = useToken();
   const [pool, setPool] = useState<LendingPoolDetail | null>(null);
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -50,9 +51,14 @@ const LendingPool = () => {
 
   const risk = RISK_PARAMS[asset];
   const meta = ASSET_META[asset];
-  const price = parseAmount(prices[asset] || pool?.utilization?.replace('%', '') || '0');
-  const poolPrice = pool ? parseAmount(pool.total_deposits) : 0;
   const util = pool ? parsePercent(pool.utilization) : 0;
+  const hasAave = !!pool?.aave_supply_apy;
+
+  const handleAction = (action: 'supply' | 'borrow') => {
+    if (!token) return; // token prompt will show
+    if (action === 'supply') setShowDeposit(true);
+    else setShowBorrow(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,23 +87,45 @@ const LendingPool = () => {
               <Badge variant="outline">{sourceLabel(pool.source)}</Badge>
             </div>
 
-            {/* APY Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="py-4 text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Supply APY</p>
-                  <p className="text-3xl font-bold font-mono text-green-400">{pool.supply_apy}</p>
-                  <p className="text-xs text-muted-foreground">APR: {pool.supply_apr}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="py-4 text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Borrow APY</p>
-                  <p className="text-3xl font-bold font-mono text-amber-400">{pool.borrow_apy}</p>
-                  <p className="text-xs text-muted-foreground">APR: {pool.borrow_apr}</p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Rate Comparison Card */}
+            <Card className="border-primary/20">
+              <CardContent className="py-4">
+                <div className={`grid ${hasAave ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                  {hasAave && (
+                    <div className="text-center p-3 rounded-lg bg-secondary/30">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Aave V3 Rate</p>
+                      <div className="flex justify-center gap-6">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Supply</p>
+                          <p className="text-xl font-bold font-mono text-green-400/70">{pool.aave_supply_apy}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Borrow</p>
+                          <p className="text-xl font-bold font-mono text-amber-400/70">{pool.aave_borrow_apy}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">Live on-chain rate, updated every 60s</p>
+                    </div>
+                  )}
+                  <div className="text-center p-3 rounded-lg bg-primary/5">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">0xNull Rate</p>
+                    <div className="flex justify-center gap-6">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Supply</p>
+                        <p className="text-xl font-bold font-mono text-green-400">{pool.supply_apy}</p>
+                        <p className="text-xs text-muted-foreground">APR: {pool.supply_apr}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Borrow</p>
+                        <p className="text-xl font-bold font-mono text-amber-400">{pool.borrow_apy}</p>
+                        <p className="text-xs text-muted-foreground">APR: {pool.borrow_apr}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">What you earn/pay through 0xNull</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Pool Stats */}
             <Card>
@@ -169,15 +197,19 @@ const LendingPool = () => {
               </Card>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button size="lg" onClick={() => setShowDeposit(true)} className="flex-1">
-                Supply {asset}
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => setShowBorrow(true)} className="flex-1">
-                Borrow against {asset}
-              </Button>
-            </div>
+            {/* Token prompt or Actions */}
+            {!token ? (
+              <LendingTokenPrompt compact onSubmit={setCustomToken} />
+            ) : (
+              <div className="flex gap-3">
+                <Button size="lg" onClick={() => handleAction('supply')} className="flex-1">
+                  Supply {asset}
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => handleAction('borrow')} className="flex-1">
+                  Borrow against {asset}
+                </Button>
+              </div>
+            )}
 
             {/* Privacy Info */}
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 flex items-start gap-3">
@@ -188,6 +220,9 @@ const LendingPool = () => {
                   ? <p>Send Monero to a unique subaddress. Your deposit is credited after 10 confirmations. No wallet connection needed.</p>
                   : <p>Send tokens on Arbitrum. For maximum privacy, use Railgun's Railway Wallet to shield tokens first, then unshield to the deposit address.</p>
                 }
+                {hasAave && (
+                  <p className="text-xs mt-2">We display live Aave V3 rates alongside our own rates so you can see exactly what the underlying protocol pays. Our rates are derived from Aave's on-chain rates with a small spread that funds protocol operations.</p>
+                )}
               </div>
             </div>
           </div>

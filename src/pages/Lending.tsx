@@ -5,12 +5,15 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
+import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
   lendingApi, type LendingPool, type LendingStatus,
-  parseAmount, parsePercent, formatUsd, sourceLabel, ASSET_META,
+  parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
+import { useToken } from '@/hooks/useToken';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const Lending = () => {
@@ -18,6 +21,7 @@ const Lending = () => {
   const [status, setStatus] = useState<LendingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
@@ -68,6 +72,11 @@ const Lending = () => {
           </div>
         </div>
 
+        {/* Token Onboarding Banner */}
+        {!token && (
+          <LendingTokenPrompt compact onSubmit={setCustomToken} />
+        )}
+
         {/* TVL Banner */}
         <Card className="mb-6 bg-gradient-to-r from-primary/10 to-transparent border-primary/20">
           <CardContent className="py-4 flex items-center justify-between">
@@ -103,92 +112,112 @@ const Lending = () => {
 
         {/* Pools Table */}
         {!loading && pools.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                  <th className="text-left py-3 px-3">Asset</th>
-                  <th className="text-right py-3 px-3 hidden md:table-cell">Price</th>
-                  <th className="text-right py-3 px-3">Total Deposited</th>
-                  <th className="text-right py-3 px-3 hidden lg:table-cell">Total Borrowed</th>
-                  <th className="text-right py-3 px-3 hidden lg:table-cell">Available</th>
-                  <th className="py-3 px-3 w-32 hidden md:table-cell">Utilization</th>
-                  <th className="text-right py-3 px-3">Supply APY</th>
-                  <th className="text-right py-3 px-3">Borrow APY</th>
-                  <th className="text-right py-3 px-3 hidden sm:table-cell">Source</th>
-                  <th className="text-right py-3 px-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pools.map((pool) => {
-                  const price = parseAmount(pool.price_usd);
-                  const deposited = parseAmount(pool.total_deposits);
-                  const borrowed = parseAmount(pool.total_borrows);
-                  const available = parseAmount(pool.available_liquidity);
-                  const util = parsePercent(pool.utilization);
-                  const supplyApy = parsePercent(pool.supply_apy);
-                  const borrowApy = parsePercent(pool.borrow_apy);
+          <TooltipProvider>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+                    <th className="text-left py-3 px-3">Asset</th>
+                    <th className="text-right py-3 px-3 hidden md:table-cell">Price</th>
+                    <th className="text-right py-3 px-3">Total Deposited</th>
+                    <th className="text-right py-3 px-3 hidden lg:table-cell">Total Borrowed</th>
+                    <th className="text-right py-3 px-3 hidden lg:table-cell">Available</th>
+                    <th className="py-3 px-3 w-32 hidden md:table-cell">Utilization</th>
+                    <th className="text-right py-3 px-3 hidden xl:table-cell">
+                      <Tooltip>
+                        <TooltipTrigger className="cursor-help">Aave Rate</TooltipTrigger>
+                        <TooltipContent><p className="text-xs max-w-48">Live rate from Aave V3 on Arbitrum, updated every 60 seconds</p></TooltipContent>
+                      </Tooltip>
+                    </th>
+                    <th className="text-right py-3 px-3">
+                      <Tooltip>
+                        <TooltipTrigger className="cursor-help">0xNull Rate</TooltipTrigger>
+                        <TooltipContent><p className="text-xs max-w-48">Rate you earn/pay through 0xNull's privacy-preserving lending</p></TooltipContent>
+                      </Tooltip>
+                    </th>
+                    <th className="text-right py-3 px-3 hidden sm:table-cell">Source</th>
+                    <th className="text-right py-3 px-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pools.map((pool) => {
+                    const price = parseAmount(pool.price_usd);
+                    const deposited = parseAmount(pool.total_deposits);
+                    const borrowed = parseAmount(pool.total_borrows);
+                    const available = parseAmount(pool.available_liquidity);
+                    const util = parsePercent(pool.utilization);
+                    const supplyApy = parsePercent(pool.supply_apy);
+                    const borrowApy = parsePercent(pool.borrow_apy);
+                    const hasAave = !!pool.aave_supply_apy;
 
-                  return (
-                    <tr
-                      key={pool.asset}
-                      className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/lending/pool/${pool.asset}`)}
-                    >
-                      <td className="py-3 px-3">
-                        <AssetIcon asset={pool.asset} showName />
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
-                        ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <div className="font-mono">{deposited.toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)}</div>
-                      </td>
-                      <td className="py-3 px-3 text-right hidden lg:table-cell">
-                        <div className="font-mono">{borrowed.toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">{formatUsd(borrowed * price)}</div>
-                      </td>
-                      <td className="py-3 px-3 text-right hidden lg:table-cell font-mono">
-                        {available.toFixed(2)}
-                      </td>
-                      <td className="py-3 px-3 hidden md:table-cell">
-                        <UtilizationBar percent={util} />
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono text-green-400">
-                        {supplyApy.toFixed(2)}%
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono text-amber-400">
-                        {borrowApy.toFixed(2)}%
-                      </td>
-                      <td className="py-3 px-3 text-right hidden sm:table-cell">
-                        <Badge variant="outline" className="text-xs">
-                          {sourceLabel(pool.source)}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
-                          <Button size="sm" variant="default" asChild className="h-7 text-xs">
-                            <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
-                          </Button>
-                          <Button size="sm" variant="outline" asChild className="h-7 text-xs">
-                            <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Mobile Card View */}
-        {!loading && pools.length > 0 && (
-          <div className="md:hidden space-y-3 mt-4">
-            {/* Mobile cards are handled by the responsive table above */}
-          </div>
+                    return (
+                      <tr
+                        key={pool.asset}
+                        className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/lending/pool/${pool.asset}`)}
+                      >
+                        <td className="py-3 px-3">
+                          <AssetIcon asset={pool.asset} showName />
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
+                          ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-mono">{deposited.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)}</div>
+                        </td>
+                        <td className="py-3 px-3 text-right hidden lg:table-cell">
+                          <div className="font-mono">{borrowed.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground">{formatUsd(borrowed * price)}</div>
+                        </td>
+                        <td className="py-3 px-3 text-right hidden lg:table-cell font-mono">
+                          {available.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-3 hidden md:table-cell">
+                          <UtilizationBar percent={util} />
+                        </td>
+                        {/* Aave Rate Column */}
+                        <td className="py-3 px-3 text-right hidden xl:table-cell">
+                          {hasAave ? (
+                            <div>
+                              <span className="font-mono text-green-400/70 text-xs">{parsePercent(pool.aave_supply_apy!).toFixed(2)}%</span>
+                              <span className="text-muted-foreground mx-1">/</span>
+                              <span className="font-mono text-amber-400/70 text-xs">{parsePercent(pool.aave_borrow_apy!).toFixed(2)}%</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        {/* 0xNull Rate Column */}
+                        <td className="py-3 px-3 text-right">
+                          <div>
+                            <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
+                            <span className="text-muted-foreground mx-1">/</span>
+                            <span className="font-mono text-amber-400">{borrowApy.toFixed(2)}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-right hidden sm:table-cell">
+                          <Badge variant="outline" className="text-xs">
+                            {sourceLabel(pool.source)}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
+                            <Button size="sm" variant="default" asChild className="h-7 text-xs">
+                              <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
+                            </Button>
+                            <Button size="sm" variant="outline" asChild className="h-7 text-xs">
+                              <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </TooltipProvider>
         )}
 
         {/* Empty state */}
