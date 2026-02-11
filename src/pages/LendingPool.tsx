@@ -15,7 +15,7 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel, RISK_PARAMS, ASSET_META,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const LendingPool = () => {
   const { asset } = useParams<{ asset: string }>();
@@ -26,6 +26,7 @@ const LendingPool = () => {
   const [loading, setLoading] = useState(true);
   const [showDeposit, setShowDeposit] = useState(searchParams.get('action') === 'supply');
   const [showBorrow, setShowBorrow] = useState(searchParams.get('action') === 'borrow');
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPool = useCallback(async () => {
     if (!asset) return;
@@ -36,8 +37,9 @@ const LendingPool = () => {
       ]);
       setPool(poolData);
       setPrices(priceData);
-    } catch {
-      // handled by loading state
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load pool data');
     } finally {
       setLoading(false);
     }
@@ -72,6 +74,14 @@ const LendingPool = () => {
           <div className="space-y-4">
             <div className="h-20 bg-secondary/50 rounded-lg animate-pulse" />
             <div className="h-40 bg-secondary/50 rounded-lg animate-pulse" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 space-y-4">
+            <AlertTriangle className="w-12 h-12 mx-auto text-destructive opacity-70" />
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={() => { setLoading(true); setError(null); fetchPool(); }} className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Retry
+            </Button>
           </div>
         ) : pool ? (
           <div className="space-y-6">
