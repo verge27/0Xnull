@@ -188,12 +188,14 @@ async function lendingRequest<T>(
       headers: { ...headers, ...(options.headers as Record<string, string> || {}) },
     });
 
+    const text = await res.text();
+
     let data: any;
     try {
-      data = await res.json();
+      data = JSON.parse(text);
     } catch {
-      const text = await res.text();
-      throw new Error(text || 'Invalid response');
+      if (!res.ok) throw new Error(text || `Request failed (${res.status})`);
+      throw new Error('Invalid JSON response');
     }
 
     if (!res.ok) {
