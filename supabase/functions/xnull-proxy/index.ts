@@ -196,6 +196,9 @@ serve(async (req) => {
 
     const fetchOptions: RequestInit = { method: req.method };
 
+    // Forward X-0xNull-Token header for lending auth
+    const oxnullToken = req.headers.get('x-0xnull-token');
+
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers.get('content-type') || '';
 
