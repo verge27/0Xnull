@@ -15,6 +15,8 @@ export interface LendingPool {
   borrow_apy: string;
   price_usd: string;
   source: string;
+  aave_supply_apy?: string;
+  aave_borrow_apy?: string;
 }
 
 export interface LendingPoolDetail {
