@@ -164,6 +164,11 @@ const App = () => (
                   <Route path="/voice" element={<Voice />} />
                   <Route path="/kokoro" element={<Kokoro />} />
                   
+                  {/* Lending */}
+                  <Route path="/lending" element={<Lending />} />
+                  <Route path="/lending/pool/:asset" element={<LendingPool />} />
+                  <Route path="/lending/dashboard" element={<LendingDashboard />} />
+                  
                   {/* Infrastructure */}
                   <Route path="/infra" element={<InfraHub />} />
                   <Route path="/swaps" element={<Swaps />} />
