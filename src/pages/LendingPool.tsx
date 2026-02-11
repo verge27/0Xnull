@@ -26,6 +26,7 @@ const LendingPool = () => {
   const [loading, setLoading] = useState(true);
   const [showDeposit, setShowDeposit] = useState(searchParams.get('action') === 'supply');
   const [showBorrow, setShowBorrow] = useState(searchParams.get('action') === 'borrow');
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPool = useCallback(async () => {
     if (!asset) return;
@@ -36,8 +37,9 @@ const LendingPool = () => {
       ]);
       setPool(poolData);
       setPrices(priceData);
-    } catch {
-      // handled by loading state
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load pool data');
     } finally {
       setLoading(false);
     }
