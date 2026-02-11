@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-0xnull-token',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
@@ -196,6 +196,9 @@ serve(async (req) => {
 
     const fetchOptions: RequestInit = { method: req.method };
 
+    // Forward X-0xNull-Token header for lending auth
+    const oxnullToken = req.headers.get('x-0xnull-token');
+
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers.get('content-type') || '';
 
@@ -214,7 +217,9 @@ serve(async (req) => {
 
         fetchOptions.body = formData;
       } else {
-        fetchOptions.headers = { 'Content-Type': 'application/json' };
+        const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+        fetchOptions.headers = reqHeaders;
         try {
           const body = await req.text();
           if (body) fetchOptions.body = body;
@@ -223,7 +228,9 @@ serve(async (req) => {
         }
       }
     } else {
-      fetchOptions.headers = { 'Content-Type': 'application/json' };
+      const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+      fetchOptions.headers = reqHeaders;
     }
 
     console.log(`Proxying ${req.method} to: ${targetUrl.toString()}`);

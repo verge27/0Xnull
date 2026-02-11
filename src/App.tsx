@@ -73,6 +73,11 @@ const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
+
+// Lending
+const Lending = lazy(() => import("./pages/Lending"));
+const LendingPool = lazy(() => import("./pages/LendingPool"));
+const LendingDashboard = lazy(() => import("./pages/LendingDashboard"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const BlogAdmin = lazy(() => import("./pages/BlogAdmin"));
@@ -158,6 +163,11 @@ const App = () => (
                   <Route path="/ai" element={<AIHub />} />
                   <Route path="/voice" element={<Voice />} />
                   <Route path="/kokoro" element={<Kokoro />} />
+                  
+                  {/* Lending */}
+                  <Route path="/lending" element={<Lending />} />
+                  <Route path="/lending/pool/:asset" element={<LendingPool />} />
+                  <Route path="/lending/dashboard" element={<LendingDashboard />} />
                   
                   {/* Infrastructure */}
                   <Route path="/infra" element={<InfraHub />} />
