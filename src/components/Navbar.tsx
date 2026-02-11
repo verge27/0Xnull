@@ -298,6 +298,14 @@ export const Navbar = () => {
               </Link>
             </Button>
 
+            {/* Swaps Link */}
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/swaps">
+                <RefreshCw className="w-4 h-4" />
+                <span className="hidden md:inline">Swaps</span>
+              </Link>
+            </Button>
+
             {/* Blog Link */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
               <Link to="/blog">
@@ -306,21 +314,20 @@ export const Navbar = () => {
               </Link>
             </Button>
 
-            {/* AI Dropdown */}
+            {/* AI and Infra Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
                   <Bot className="w-4 h-4" />
-                  <span className="hidden md:inline">AI</span>
+                  <span className="hidden md:inline">AI & Infra</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuLabel className="text-xs text-muted-foreground">AI</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/ai" className="cursor-pointer">AI Hub</Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Services</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
                 </DropdownMenuItem>
@@ -341,31 +348,10 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
                 </DropdownMenuItem>
-                <NavbarIdentitySection 
-                  keys={identity.keys}
-                  onGenerate={identity.generate}
-                  onLogin={identity.login}
-                  onLogout={identity.logout}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Infra Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <Server className="w-4 h-4" />
-                  <span className="hidden md:inline">Infra</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Infrastructure</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/infra" className="cursor-pointer">Infrastructure Hub</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/swaps" className="cursor-pointer">Crypto Swaps</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/vps" className="cursor-pointer">Anonymous VPS</Link>
