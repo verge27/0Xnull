@@ -34,6 +34,8 @@ export interface LendingPoolDetail {
   liquidation_threshold: string;
   liquidation_penalty: string;
   source: string;
+  aave_supply_apy?: string;
+  aave_borrow_apy?: string;
 }
 
 export interface LendingStatus {
