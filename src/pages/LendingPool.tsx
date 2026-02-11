@@ -15,7 +15,7 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel, RISK_PARAMS, ASSET_META,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const LendingPool = () => {
   const { asset } = useParams<{ asset: string }>();
