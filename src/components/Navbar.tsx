@@ -280,6 +280,14 @@ export const Navbar = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
+            {/* Lending Link */}
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/lending">
+                <Landmark className="w-4 h-4" />
+                <span className="hidden md:inline">Lending</span>
+              </Link>
+            </Button>
+
             {/* Blog Link */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
               <Link to="/blog">
