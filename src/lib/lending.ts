@@ -160,7 +160,42 @@ export const RISK_PARAMS: Record<string, { ltv: number; liquidation_threshold: n
   wstETH: { ltv: 0.70, liquidation_threshold: 0.80, liquidation_penalty: 0.05, can_collateral: true,  can_borrow: true },
 };
 
+// ─── Cache helpers ──────────────────────────────────────
+
+const CACHE_PREFIX = 'lending_cache_';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes max staleness
+
+function cacheKey(path: string): string {
+  return `${CACHE_PREFIX}${path}`;
+}
+
+function writeCache(path: string, data: unknown): void {
+  try {
+    localStorage.setItem(cacheKey(path), JSON.stringify({ ts: Date.now(), data }));
+  } catch { /* quota exceeded – ignore */ }
+}
+
+function readCache<T>(path: string): { data: T; stale: boolean } | null {
+  try {
+    const raw = localStorage.getItem(cacheKey(path));
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) {
+      localStorage.removeItem(cacheKey(path));
+      return null;
+    }
+    return { data: data as T, stale: true };
+  } catch {
+    return null;
+  }
+}
+
 // ─── API Client ─────────────────────────────────────────
+
+export interface LendingResponse<T> {
+  data: T;
+  stale?: boolean;
+}
 
 async function lendingRequest<T>(
   path: string,
@@ -202,8 +237,23 @@ async function lendingRequest<T>(
       throw new Error(data?.detail || data?.error || `Request failed (${res.status})`);
     }
 
+    // Cache successful GET responses (no token = public data)
+    if (!token && (!options.method || options.method === 'GET')) {
+      writeCache(path, data);
+    }
+
     return data as T;
   } catch (e) {
+    // On failure, try to serve cached data
+    if (!token && (!options.method || options.method === 'GET')) {
+      const cached = readCache<T>(path);
+      if (cached) {
+        console.warn(`Lending API failed, serving cached data for ${path}`);
+        // Attach a _stale flag so consumers can detect it
+        return Object.assign({}, cached.data, { _stale: true });
+      }
+    }
+
     if (e instanceof DOMException && e.name === 'AbortError') {
       throw new Error('Request timed out');
     }

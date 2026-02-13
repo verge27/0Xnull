@@ -26,6 +26,8 @@ const Lending = () => {
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
 
+  const [isStale, setIsStale] = useState(false);
+
   const fetchData = useCallback(async () => {
     try {
       const [poolsRes, statusRes] = await Promise.all([
@@ -34,6 +36,7 @@ const Lending = () => {
       ]);
       setPools(poolsRes.pools || []);
       setStatus(statusRes);
+      setIsStale(!!(poolsRes as any)?._stale);
       setError(null);
 
       // Track when oracle degradation started
@@ -84,6 +87,15 @@ const Lending = () => {
               <p className="font-medium text-amber-300">Borrows temporarily paused</p>
               <p className="text-sm text-amber-400/80">{status.message || 'Oracle degraded — new borrows are halted until conditions stabilize.'}</p>
             </div>
+          </div>
+        )}
+        {isStale && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-sm mb-6">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <span className="text-amber-300">Showing cached data — live data temporarily unavailable.</span>
+            <Button variant="ghost" size="sm" onClick={() => { setLoading(true); setError(null); fetchData(); }} className="ml-auto gap-1 h-7 text-xs">
+              <RefreshCw className="w-3 h-3" /> Retry
+            </Button>
           </div>
         )}
 

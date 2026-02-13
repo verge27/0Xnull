@@ -27,6 +27,7 @@ const LendingPool = () => {
   const [showDeposit, setShowDeposit] = useState(searchParams.get('action') === 'supply');
   const [showBorrow, setShowBorrow] = useState(searchParams.get('action') === 'borrow');
   const [error, setError] = useState<string | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   const fetchPool = useCallback(async () => {
     if (!asset) return;
@@ -37,6 +38,7 @@ const LendingPool = () => {
       ]);
       setPool(poolData);
       setPrices(priceData);
+      setIsStale(!!(poolData as any)?._stale);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load pool data');
@@ -85,6 +87,15 @@ const LendingPool = () => {
           </div>
         ) : pool ? (
           <div className="space-y-6">
+            {isStale && (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span className="text-amber-300">Showing cached data — live data temporarily unavailable.</span>
+                <Button variant="ghost" size="sm" onClick={() => { setLoading(true); setError(null); fetchPool(); }} className="ml-auto gap-1 h-7 text-xs">
+                  <RefreshCw className="w-3 h-3" /> Retry
+                </Button>
+              </div>
+            )}
             {/* Header */}
             <div className="flex items-start justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
