@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { SEORichText } from '@/components/SEORichText';
+import { SwapPrivacyTiers } from '@/components/SwapPrivacyTiers';
 const swapsBackground = '/images/backgrounds/swaps-background.webp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1393,6 +1394,11 @@ const Swaps = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Privacy Tiers */}
+          <div className="mt-8">
+            <SwapPrivacyTiers />
+          </div>
 
           {/* Info Section */}
           <div className="mt-8 space-y-6">
