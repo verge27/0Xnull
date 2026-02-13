@@ -401,7 +401,15 @@ export const Navbar = () => {
             </DropdownMenu>
 
 
-            {/* Token Balance Badge - Only show when authenticated */}
+            {/* Token Dashboard + Badge */}
+            {isAuthenticated && (
+              <Button variant="ghost" size="sm" asChild className="gap-1">
+                <Link to="/dashboard">
+                  <Wallet className="w-4 h-4" />
+                  <span className="hidden md:inline">Dashboard</span>
+                </Link>
+              </Button>
+            )}
             {isAuthenticated && <TokenBadge />}
 
             {/* Bet Slip Counter */}

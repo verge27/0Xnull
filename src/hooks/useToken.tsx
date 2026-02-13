@@ -13,6 +13,7 @@ interface TokenContextType {
   hasToken: boolean;
   refreshBalance: () => Promise<number | undefined>;
   setCustomToken: (newToken: string) => Promise<boolean>;
+  clearToken: () => void;
 }
 
 const TokenContext = createContext<TokenContextType | undefined>(undefined);
@@ -169,6 +170,12 @@ export function TokenProvider({ children }: { children: ReactNode }) {
     }
   }, [user, privateKeyUser]);
 
+  const clearToken = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setToken(null);
+    setBalance(0);
+  }, []);
+
   return (
     <TokenContext.Provider value={{
       token,
@@ -177,6 +184,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
       hasToken: !!token,
       refreshBalance,
       setCustomToken,
+      clearToken,
     }}>
       {children}
     </TokenContext.Provider>
