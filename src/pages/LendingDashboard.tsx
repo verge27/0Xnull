@@ -17,7 +17,26 @@ import {
   parseAmount, formatUsd,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
+
+const PORTFOLIO_CACHE_KEY = 'lending_portfolio_cache';
+const PORTFOLIO_CACHE_TTL = 5 * 60 * 1000;
+
+function writePortfolioCache(token: string, data: Portfolio) {
+  try {
+    localStorage.setItem(PORTFOLIO_CACHE_KEY, JSON.stringify({ token, ts: Date.now(), data }));
+  } catch { /* ignore */ }
+}
+
+function readPortfolioCache(token: string): Portfolio | null {
+  try {
+    const raw = localStorage.getItem(PORTFOLIO_CACHE_KEY);
+    if (!raw) return null;
+    const { token: cachedToken, ts, data } = JSON.parse(raw);
+    if (cachedToken !== token || Date.now() - ts > PORTFOLIO_CACHE_TTL) return null;
+    return data as Portfolio;
+  } catch { return null; }
+}
 
 const LendingDashboard = () => {
   const { token, balance, setCustomToken } = useToken();
@@ -25,6 +44,7 @@ const LendingDashboard = () => {
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   // Modal states
   const [showDeposit, setShowDeposit] = useState(false);
@@ -38,7 +58,6 @@ const LendingDashboard = () => {
     try {
       const pricesPromise = lendingApi.getPrices().catch(() => ({}));
       
-      // Skip portfolio fetch for zero-balance tokens to avoid guaranteed 401
       let portfolioData: Portfolio | null = null;
       if (balance > 0) {
         portfolioData = await lendingApi.getPortfolio(token).catch(() => null);
@@ -48,14 +67,34 @@ const LendingDashboard = () => {
       
       if (portfolioData) {
         setPortfolio(portfolioData);
+        writePortfolioCache(token, portfolioData);
+        setIsStale(false);
       } else {
-        // Set empty portfolio for new users (only if not already set)
-        setPortfolio(prev => prev ?? { supplies: [], borrows: [] });
+        // Try cache fallback before showing empty state
+        const cached = readPortfolioCache(token);
+        if (cached && !portfolio) {
+          setPortfolio(cached);
+          setIsStale(true);
+        } else {
+          setPortfolio(prev => prev ?? { supplies: [], borrows: [] });
+          setIsStale(false);
+        }
       }
       setPrices(priceData as Record<string, string>);
       setError(null);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load portfolio';
+      // On error, try serving cached portfolio
+      if (!portfolio && token) {
+        const cached = readPortfolioCache(token);
+        if (cached) {
+          setPortfolio(cached);
+          setIsStale(true);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      }
       if (msg.includes('401') || msg.includes('Invalid') || msg.includes('expired')) {
         setError('Invalid or expired token');
       } else {
@@ -124,6 +163,16 @@ const LendingDashboard = () => {
             Refresh
           </Button>
         </div>
+
+        {isStale && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-sm mb-6">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <span className="text-amber-300">Showing cached data — live data temporarily unavailable.</span>
+            <Button variant="ghost" size="sm" onClick={fetchPortfolio} className="ml-auto gap-1 h-7 text-xs">
+              <RefreshCw className="w-3 h-3" /> Retry
+            </Button>
+          </div>
+        )}
 
         {error && (
           <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive mb-6">
