@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel, Landmark } from 'lucide-react';
+import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,21 @@ import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIde
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 import { toast } from 'sonner';
+
+const TokenDashboardBadge = () => {
+  const { token, balance, hasToken } = useToken();
+  if (!hasToken || !token) return null;
+  const truncated = `${token.slice(0, 8)}…${token.slice(-4)}`;
+  return (
+    <Button variant="ghost" size="sm" asChild className="gap-1.5 hidden sm:inline-flex">
+      <Link to="/dashboard">
+        <Key className="w-3.5 h-3.5 text-primary" />
+        <code className="font-mono text-xs text-muted-foreground hidden lg:inline">{truncated}</code>
+        <span className="font-mono text-xs font-semibold">${balance.toFixed(2)}</span>
+      </Link>
+    </Button>
+  );
+};
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -402,15 +418,7 @@ export const Navbar = () => {
 
 
             {/* Token Dashboard + Badge */}
-            {isAuthenticated && (
-              <Button variant="ghost" size="sm" asChild className="gap-1">
-                <Link to="/dashboard">
-                  <Wallet className="w-4 h-4" />
-                  <span className="hidden md:inline">Dashboard</span>
-                </Link>
-              </Button>
-            )}
-            {isAuthenticated && <TokenBadge />}
+            <TokenDashboardBadge />
 
             {/* Bet Slip Counter */}
             {betSlip.items.length > 0 && (
