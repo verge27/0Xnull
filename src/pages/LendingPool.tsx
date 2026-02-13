@@ -49,7 +49,12 @@ const LendingPool = () => {
 
   useEffect(() => {
     fetchPool();
-  }, [fetchPool]);
+    // Auto-retry every 10s when serving stale data
+    if (isStale) {
+      const interval = setInterval(fetchPool, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchPool, isStale]);
 
   if (!asset) return null;
 

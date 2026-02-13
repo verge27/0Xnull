@@ -56,9 +56,10 @@ const Lending = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    // Poll faster (10s) when serving stale cached data, normal (30s) otherwise
+    const interval = setInterval(fetchData, isStale ? 10000 : 30000);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [fetchData, isStale]);
 
   // Only show degraded banner after 60 seconds of continuous degradation
   useEffect(() => {
