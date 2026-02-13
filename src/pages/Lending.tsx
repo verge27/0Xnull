@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
+import { LendingPrivacyTiers } from '@/components/lending/LendingPrivacyTiers';
 import {
   lendingApi, type LendingPool, type LendingStatus,
   parseAmount, parsePercent, formatUsd, sourceLabel,
@@ -282,6 +283,11 @@ const Lending = () => {
             <p>No lending pools available</p>
           </div>
         )}
+
+        {/* Privacy Tiers */}
+        <div className="mt-10 mb-4">
+          <LendingPrivacyTiers />
+        </div>
       </main>
       <Footer />
     </div>
