@@ -157,6 +157,7 @@ const Dashboard = () => {
           lendingPortfolio={lendingPortfolio}
           lendingPrices={lendingPrices}
           lendingError={lendingError}
+          balance={balance}
         />
 
         {/* Token Security */}
