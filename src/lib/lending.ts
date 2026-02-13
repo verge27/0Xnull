@@ -166,7 +166,7 @@ async function lendingRequest<T>(
   path: string,
   options: RequestInit = {},
   token?: string | null,
-  timeoutMs = 15000
+  timeoutMs = 30000
 ): Promise<T> {
   const proxyUrl = new URL(PROXY_URL);
   proxyUrl.searchParams.set('path', `/api/lending${path}`);
