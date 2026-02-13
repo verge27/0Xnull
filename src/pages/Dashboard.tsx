@@ -29,18 +29,21 @@ const Dashboard = () => {
   const [isPolling, setIsPolling] = useState(false);
 
   // Fetch lending portfolio
+  // Skip portfolio fetch for zero-balance tokens to avoid a guaranteed 401
   const fetchLending = useCallback(async () => {
     if (!token) return;
     try {
-      const [portfolio, prices] = await Promise.all([
-        lendingApi.getPortfolio(token).catch((e) => {
-          // 401 is expected for tokens without lending positions — suppress
-          if (e?.message?.includes('Invalid token') || e?.message?.includes('401')) return null;
-          console.warn('Lending portfolio fetch failed:', e?.message);
-          return null;
-        }),
-        lendingApi.getPrices().catch(() => ({})),
-      ]);
+      // Always fetch prices; only fetch portfolio if user has a non-zero balance
+      // (zero-balance tokens have never deposited, so portfolio will 401)
+      const pricesPromise = lendingApi.getPrices().catch(() => ({}));
+      let portfolio: Portfolio | null = null;
+
+      if (balance > 0) {
+        portfolio = await lendingApi.getPortfolio(token).catch(() => null);
+      }
+
+      const prices = await pricesPromise;
+
       if (portfolio) {
         setLendingPortfolio(portfolio);
         setLendingError(false);
@@ -49,7 +52,7 @@ const Dashboard = () => {
     } catch {
       setLendingError(true);
     }
-  }, [token]);
+  }, [token, balance]);
 
   useEffect(() => {
     if (token) {
