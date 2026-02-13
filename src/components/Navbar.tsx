@@ -32,6 +32,23 @@ const TokenDashboardBadge = () => {
   );
 };
 
+const MobileTokenBadge = ({ onNavigate }: { onNavigate: () => void }) => {
+  const { token, balance, hasToken } = useToken();
+  if (!hasToken || !token) return null;
+  const truncated = `${token.slice(0, 8)}…${token.slice(-4)}`;
+  return (
+    <Link
+      to="/dashboard"
+      onClick={onNavigate}
+      className="flex items-center gap-2 px-3 py-2.5 mt-4 rounded-lg bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-colors"
+    >
+      <Key className="w-4 h-4 text-primary flex-shrink-0" />
+      <code className="font-mono text-xs text-muted-foreground truncate">{truncated}</code>
+      <span className="font-mono text-sm font-semibold ml-auto">${balance.toFixed(2)}</span>
+    </Link>
+  );
+};
+
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { privateKeyUser, signOut: pkSignOut, isAuthenticated: isPkAuthenticated, storedPrivateKey, clearStoredPrivateKey, savePrivateKey } = usePrivateKeyAuth();
@@ -117,8 +134,10 @@ export const Navbar = () => {
                     <span className="text-gradient">0xNull</span>
                   </SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-1 mt-6">
-                  {/* Get Started - First */}
+                {/* Mobile Token Badge */}
+                <MobileTokenBadge onNavigate={() => setMobileMenuOpen(false)} />
+
+                <nav className="flex flex-col gap-1 mt-2">
                   <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30 mb-4">
                     <Rocket className="w-5 h-5 text-primary" />
                     <span className="font-medium">Get Started</span>
