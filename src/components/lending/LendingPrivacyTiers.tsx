@@ -11,16 +11,16 @@ import {
 const tiers = [
   {
     name: 'Direct Deposit',
-    subtitle: 'Send crypto to a standard address',
-    badge: '🟡 Visible On-Chain',
+    subtitle: 'Mixer-level privacy — we break the link, but our bridgehead wallet is visible on-chain',
+    badge: '🟡 Moderate',
     badgeClass: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/40',
     icon: ShieldAlert,
     iconClass: 'text-yellow-400',
-    note: 'Deposit address is public on-chain',
+    note: 'Bridgehead address visible • chain link broken',
     flow: [
       { label: 'Your Wallet' },
-      { label: 'Send to 0x address', highlight: true },
-      { label: '0xNull Pool', sub: 'public deposit' },
+      { label: '0xNull Bridgehead', highlight: true, sub: 'visible on-chain' },
+      { label: 'Pool', sub: 'internal ledger' },
     ],
   },
   {
