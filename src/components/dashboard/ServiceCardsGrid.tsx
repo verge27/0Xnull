@@ -146,20 +146,21 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
           </Card>
 
           {/* Marketplace */}
-          <Card className="border-l-[3px] border-l-emerald-500/50 hover:border-l-emerald-400/50 transition-colors opacity-70">
+          <Card className="border-l-[3px] border-l-emerald-500 hover:border-l-emerald-400 transition-colors">
             <CardContent className="py-5 space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                  <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <ShoppingBag className="w-4 h-4 text-emerald-400" />
                 </div>
                 <span className="font-semibold">Marketplace</span>
-                <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/30 text-emerald-400/60 bg-emerald-500/5 px-1.5 py-0">
-                  TOKEN BALANCE · Soon
-                </Badge>
+                <TokenBadge />
               </div>
               <p className="text-xs text-muted-foreground">
-                Token-based marketplace integration coming soon.
+                Buy and sell products and services using your token balance.
               </p>
+              <Button size="sm" variant="outline" asChild className="w-full gap-1">
+                <Link to="/browse">Browse Market <ArrowRight className="w-3 h-3" /></Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
