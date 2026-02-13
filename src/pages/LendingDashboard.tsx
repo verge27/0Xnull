@@ -108,10 +108,11 @@ const LendingDashboard = () => {
   useEffect(() => {
     if (token) {
       fetchPortfolio();
-      const interval = setInterval(fetchPortfolio, 15000);
+      // Poll faster (10s) when stale, normal (15s) otherwise
+      const interval = setInterval(fetchPortfolio, isStale ? 10000 : 15000);
       return () => clearInterval(interval);
     }
-  }, [fetchPortfolio, token]);
+  }, [fetchPortfolio, token, isStale]);
 
   const handleTokenSubmit = async (newToken: string) => {
     await setCustomToken(newToken);
