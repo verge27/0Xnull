@@ -234,7 +234,11 @@ async function lendingRequest<T>(
     }
 
     if (!res.ok) {
-      throw new Error(data?.detail || data?.error || `Request failed (${res.status})`);
+      const msg = data?.detail || data?.error || `Request failed (${res.status})`;
+      if (res.status === 401) {
+        throw new Error('Token not recognized by lending service. Try generating a new token from the Dashboard.');
+      }
+      throw new Error(msg);
     }
 
     // Cache successful GET responses (no token = public data)
