@@ -21,6 +21,8 @@ const Lending = () => {
   const [status, setStatus] = useState<LendingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [degradedSince, setDegradedSince] = useState<number | null>(null);
+  const [showDegraded, setShowDegraded] = useState(false);
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
 
@@ -33,6 +35,15 @@ const Lending = () => {
       setPools(poolsRes.pools || []);
       setStatus(statusRes);
       setError(null);
+
+      // Track when oracle degradation started
+      const isDegraded = statusRes?.oracle_degraded || statusRes?.circuit_breaker;
+      if (isDegraded) {
+        setDegradedSince(prev => prev ?? Date.now());
+      } else {
+        setDegradedSince(null);
+        setShowDegraded(false);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load pools');
     } finally {
@@ -46,6 +57,18 @@ const Lending = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  // Only show degraded banner after 60 seconds of continuous degradation
+  useEffect(() => {
+    if (!degradedSince) return;
+    const elapsed = Date.now() - degradedSince;
+    if (elapsed >= 60000) {
+      setShowDegraded(true);
+      return;
+    }
+    const timer = setTimeout(() => setShowDegraded(true), 60000 - elapsed);
+    return () => clearTimeout(timer);
+  }, [degradedSince]);
+
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
   const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
 
@@ -53,8 +76,8 @@ const Lending = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Circuit Breaker Banner */}
-        {status && status.circuit_breaker && (
+        {/* Circuit Breaker Banner — only shown after 60s of degradation */}
+        {showDegraded && status?.circuit_breaker && (
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 mb-6">
             <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
             <div>
@@ -69,9 +92,9 @@ const Lending = () => {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">Lending Protocol</h1>
             {status && (
-              <Badge variant="outline" className={`gap-1 ${status.healthy ? 'border-green-500/50 text-green-400' : status.oracle_degraded ? 'border-amber-500/50 text-amber-400' : 'border-red-500/50 text-red-400'}`}>
+              <Badge variant="outline" className={`gap-1 ${!showDegraded || status.healthy ? 'border-green-500/50 text-green-400' : status.oracle_degraded ? 'border-amber-500/50 text-amber-400' : 'border-red-500/50 text-red-400'}`}>
                 <Activity className="w-3 h-3" />
-                {status.healthy ? 'Operational' : status.oracle_degraded ? 'Oracle Degraded' : 'Circuit Breaker'}
+                {!showDegraded || status.healthy ? 'Operational' : status.oracle_degraded ? 'Oracle Degraded' : 'Circuit Breaker'}
               </Badge>
             )}
           </div>
