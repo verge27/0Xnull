@@ -33,14 +33,19 @@ const Dashboard = () => {
     if (!token) return;
     try {
       const [portfolio, prices] = await Promise.all([
-        lendingApi.getPortfolio(token).catch(() => null),
+        lendingApi.getPortfolio(token).catch((e) => {
+          // 401 is expected for tokens without lending positions — suppress
+          if (e?.message?.includes('Invalid token') || e?.message?.includes('401')) return null;
+          console.warn('Lending portfolio fetch failed:', e?.message);
+          return null;
+        }),
         lendingApi.getPrices().catch(() => ({})),
       ]);
       if (portfolio) {
         setLendingPortfolio(portfolio);
         setLendingError(false);
       }
-      setLendingPrices(prices);
+      setLendingPrices(prices as Record<string, string>);
     } catch {
       setLendingError(true);
     }
