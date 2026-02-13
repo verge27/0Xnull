@@ -234,6 +234,9 @@ export const lendingApi = {
   getRiskParams: () =>
     lendingRequest<{ params: RiskParam[] }>('/risk-params'),
 
+  getLiquidatable: () =>
+    lendingRequest<{ positions: any[] }>('/liquidatable'),
+
   // ─── Authenticated endpoints ─────────────────────────
 
   getPortfolio: (token: string) =>

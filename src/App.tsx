@@ -78,6 +78,7 @@ const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 const Lending = lazy(() => import("./pages/Lending"));
 const LendingPool = lazy(() => import("./pages/LendingPool"));
 const LendingDashboard = lazy(() => import("./pages/LendingDashboard"));
+const LendingLiquidations = lazy(() => import("./pages/LendingLiquidations"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const BlogAdmin = lazy(() => import("./pages/BlogAdmin"));
@@ -167,7 +168,10 @@ const App = () => (
                   {/* Lending */}
                   <Route path="/lending" element={<Lending />} />
                   <Route path="/lending/pool/:asset" element={<LendingPool />} />
+                  <Route path="/lending/:asset" element={<LendingPool />} />
                   <Route path="/lending/dashboard" element={<LendingDashboard />} />
+                  <Route path="/lending/portfolio" element={<LendingDashboard />} />
+                  <Route path="/lending/liquidations" element={<LendingLiquidations />} />
                   
                   {/* Infrastructure */}
                   <Route path="/infra" element={<InfraHub />} />

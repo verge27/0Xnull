@@ -47,11 +47,23 @@ const Lending = () => {
   }, [fetchData]);
 
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
+  const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Circuit Breaker Banner */}
+        {status && status.circuit_breaker && (
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 mb-6">
+            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-amber-300">Borrows temporarily paused</p>
+              <p className="text-sm text-amber-400/80">{status.message || 'Oracle degraded — new borrows are halted until conditions stabilize.'}</p>
+            </div>
+          </div>
+        )}
+
         {/* Hero */}
         <div className="mb-8 space-y-4">
           <div className="flex items-center gap-3">
@@ -59,12 +71,12 @@ const Lending = () => {
             {status && (
               <Badge variant="outline" className={`gap-1 ${status.healthy ? 'border-green-500/50 text-green-400' : status.oracle_degraded ? 'border-amber-500/50 text-amber-400' : 'border-red-500/50 text-red-400'}`}>
                 <Activity className="w-3 h-3" />
-                {status.healthy ? 'Healthy' : status.oracle_degraded ? 'Oracle Degraded' : 'Circuit Breaker'}
+                {status.healthy ? 'Operational' : status.oracle_degraded ? 'Oracle Degraded' : 'Circuit Breaker'}
               </Badge>
             )}
           </div>
           <p className="text-muted-foreground max-w-2xl">
-            Privacy-preserving DeFi lending. Earn yield on deposits, borrow against collateral — all shielded via Railgun ZK-SNARKs on Arbitrum.
+            Privacy-first lending. No KYC. No account. Just your token.
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Shield className="w-3 h-3 text-primary" />
@@ -79,13 +91,20 @@ const Lending = () => {
 
         {/* TVL Banner */}
         <Card className="mb-6 bg-gradient-to-r from-primary/10 to-transparent border-primary/20">
-          <CardContent className="py-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Value Locked</p>
-              <p className="text-2xl font-bold font-mono">{formatUsd(totalTvl)}</p>
+          <CardContent className="py-4 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex gap-8">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Value Locked</p>
+                <p className="text-2xl font-bold font-mono">{formatUsd(totalTvl)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Borrowed</p>
+                <p className="text-2xl font-bold font-mono text-amber-400">{formatUsd(totalBorrowed)}</p>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <Button asChild><Link to="/lending/dashboard">Dashboard</Link></Button>
+            <div className="flex gap-2">
+              <Button asChild><Link to="/lending/portfolio">Dashboard</Link></Button>
+              <Button variant="outline" asChild><Link to="/lending/liquidations">Liquidations</Link></Button>
             </div>
           </CardContent>
         </Card>
