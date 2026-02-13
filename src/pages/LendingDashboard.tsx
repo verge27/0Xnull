@@ -20,7 +20,7 @@ import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus } from 'lucide-react';
 
 const LendingDashboard = () => {
-  const { token, setCustomToken } = useToken();
+  const { token, balance, setCustomToken } = useToken();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -36,12 +36,23 @@ const LendingDashboard = () => {
     if (!token) return;
     setLoading(true);
     try {
-      const [portfolioData, priceData] = await Promise.all([
-        lendingApi.getPortfolio(token),
-        lendingApi.getPrices().catch(() => ({})),
-      ]);
-      setPortfolio(portfolioData);
-      setPrices(priceData);
+      const pricesPromise = lendingApi.getPrices().catch(() => ({}));
+      
+      // Skip portfolio fetch for zero-balance tokens to avoid guaranteed 401
+      let portfolioData: Portfolio | null = null;
+      if (balance > 0) {
+        portfolioData = await lendingApi.getPortfolio(token).catch(() => null);
+      }
+      
+      const priceData = await pricesPromise;
+      
+      if (portfolioData) {
+        setPortfolio(portfolioData);
+      } else if (!portfolio) {
+        // Set empty portfolio for new users
+        setPortfolio({ supplies: [], borrows: [] });
+      }
+      setPrices(priceData as Record<string, string>);
       setError(null);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load portfolio';
@@ -53,7 +64,7 @@ const LendingDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, balance]);
 
   useEffect(() => {
     if (token) {
