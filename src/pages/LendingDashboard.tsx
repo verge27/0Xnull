@@ -48,9 +48,9 @@ const LendingDashboard = () => {
       
       if (portfolioData) {
         setPortfolio(portfolioData);
-      } else if (!portfolio) {
-        // Set empty portfolio for new users
-        setPortfolio({ supplies: [], borrows: [] });
+      } else {
+        // Set empty portfolio for new users (only if not already set)
+        setPortfolio(prev => prev ?? { supplies: [], borrows: [] });
       }
       setPrices(priceData as Record<string, string>);
       setError(null);
