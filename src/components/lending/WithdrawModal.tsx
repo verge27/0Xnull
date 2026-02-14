@@ -43,7 +43,7 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
   const liquidityNum = availableLiquidity ? parseAmount(availableLiquidity) : Infinity;
   const addrErr = addressError(asset, destination);
   const isValidAddr = destination.length > 0 && !addrErr;
-  const exceedsBalance = amountNum > balanceNum && balanceNum > 0;
+  const exceedsBalance = amountNum > balanceNum;
   const exceedsLiquidity = amountNum > liquidityNum && liquidityNum < Infinity;
 
   // Format balance for MAX button — trim trailing zeros but keep meaningful precision
