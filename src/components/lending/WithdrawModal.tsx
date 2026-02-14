@@ -43,10 +43,14 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
   const liquidityNum = availableLiquidity ? parseAmount(availableLiquidity) : Infinity;
   const addrErr = addressError(asset, destination);
   const isValidAddr = destination.length > 0 && !addrErr;
+  const exceedsBalance = amountNum > balanceNum && balanceNum > 0;
   const exceedsLiquidity = amountNum > liquidityNum && liquidityNum < Infinity;
 
+  // Format balance for MAX button — trim trailing zeros but keep meaningful precision
+  const maxAmount = balanceNum > 0 ? balanceNum.toString() : '0';
+
   const handleWithdraw = async () => {
-    if (!amount || amountNum <= 0 || !isValidAddr) return;
+    if (!amount || amountNum <= 0 || !isValidAddr || exceedsBalance) return;
     setLoading(true);
     try {
       const res = await lendingApi.withdraw(token, asset, amount, destination);
@@ -135,11 +139,17 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
                   className="font-mono"
                   step="any"
                 />
-                <Button variant="outline" size="sm" onClick={() => setAmount(currentBalance)}>
+                <Button variant="outline" size="sm" onClick={() => setAmount(maxAmount)}>
                   MAX
                 </Button>
               </div>
-              {exceedsLiquidity && (
+              {exceedsBalance && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Only {maxAmount} {asset} available
+                </p>
+              )}
+              {!exceedsBalance && exceedsLiquidity && (
                 <p className="text-xs text-amber-400 mt-1 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" />
                   Only {availableLiquidity} {asset} available in pool
@@ -162,7 +172,7 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
 
             <Button
               onClick={handleWithdraw}
-              disabled={loading || !amount || amountNum <= 0 || !isValidAddr || exceedsLiquidity}
+              disabled={loading || !amount || amountNum <= 0 || !isValidAddr || exceedsBalance || exceedsLiquidity}
               className="w-full"
             >
               {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Withdrawing...</> : `Withdraw ${asset}`}
