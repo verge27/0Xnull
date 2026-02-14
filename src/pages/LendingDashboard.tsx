@@ -312,7 +312,7 @@ const LendingDashboard = () => {
       <Footer />
 
       {/* Modals */}
-      <DepositFlow open={showDeposit} onClose={() => setShowDeposit(false)} token={token} />
+      <DepositFlow open={showDeposit} onClose={() => setShowDeposit(false)} token={token} onSuccess={fetchPortfolio} />
       <BorrowFlow
         open={showBorrow}
         onClose={() => setShowBorrow(false)}

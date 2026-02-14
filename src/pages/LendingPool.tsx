@@ -9,9 +9,10 @@ import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
 import { DepositFlow } from '@/components/lending/DepositFlow';
 import { BorrowFlow } from '@/components/lending/BorrowFlow';
+import { WithdrawModal } from '@/components/lending/WithdrawModal';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
-  lendingApi, type LendingPoolDetail,
+  lendingApi, type LendingPoolDetail, type Portfolio, type SupplyPosition,
   parseAmount, parsePercent, formatUsd, sourceLabel, RISK_PARAMS, ASSET_META,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
@@ -26,6 +27,8 @@ const LendingPool = () => {
   const [loading, setLoading] = useState(true);
   const [showDeposit, setShowDeposit] = useState(searchParams.get('action') === 'supply');
   const [showBorrow, setShowBorrow] = useState(searchParams.get('action') === 'borrow');
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [supplyPosition, setSupplyPosition] = useState<SupplyPosition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
 
@@ -46,6 +49,18 @@ const LendingPool = () => {
       setLoading(false);
     }
   }, [asset]);
+
+  // Fetch user's supply position for this asset
+  const fetchSupplyPosition = useCallback(async () => {
+    if (!token || !asset) { setSupplyPosition(null); return; }
+    try {
+      const portfolio = await lendingApi.getPortfolio(token);
+      const match = portfolio.supplies.find((s) => s.asset === asset);
+      setSupplyPosition(match || null);
+    } catch { setSupplyPosition(null); }
+  }, [token, asset]);
+
+  useEffect(() => { fetchSupplyPosition(); }, [fetchSupplyPosition]);
 
   useEffect(() => {
     fetchPool();
@@ -227,9 +242,19 @@ const LendingPool = () => {
             {!token ? (
               <LendingTokenPrompt compact onSubmit={setCustomToken} />
             ) : (
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button size="lg" onClick={() => handleAction('supply')} className="flex-1">
                   Supply {asset}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  onClick={() => setShowWithdraw(true)}
+                  className="flex-1"
+                  disabled={!supplyPosition}
+                  title={!supplyPosition ? `No ${asset} supplied` : undefined}
+                >
+                  Withdraw {asset}
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => handleAction('borrow')} className="flex-1">
                   Borrow against {asset}
@@ -243,7 +268,7 @@ const LendingPool = () => {
               <div className="text-sm text-muted-foreground space-y-1">
                 <p className="font-medium text-foreground">Privacy-Shielded</p>
                 {asset === 'XMR'
-                  ? <p>Send Monero to a unique subaddress. Your deposit is credited after 10 confirmations. No wallet connection needed.</p>
+                  ? <p>Send Monero to a unique subaddress. Your deposit is credited after 3 confirmations (~6 minutes). No wallet connection needed.</p>
                   : <p>Send tokens on Arbitrum. For maximum privacy, use Railgun's Railway Wallet to shield tokens first, then unshield to the deposit address.</p>
                 }
                 {hasAave && (
@@ -260,7 +285,7 @@ const LendingPool = () => {
 
       {token && (
         <>
-          <DepositFlow open={showDeposit} onClose={() => setShowDeposit(false)} asset={asset} token={token} />
+          <DepositFlow open={showDeposit} onClose={() => setShowDeposit(false)} asset={asset} token={token} onSuccess={() => { fetchPool(); fetchSupplyPosition(); }} />
           <BorrowFlow
             open={showBorrow}
             onClose={() => setShowBorrow(false)}
@@ -269,6 +294,18 @@ const LendingPool = () => {
             defaultCollateral={risk?.can_collateral ? asset : 'WETH'}
             defaultBorrow={risk?.can_collateral ? 'USDC' : asset}
           />
+          {supplyPosition && (
+            <WithdrawModal
+              open={showWithdraw}
+              onClose={() => setShowWithdraw(false)}
+              token={token}
+              asset={asset}
+              currentBalance={supplyPosition.current_balance}
+              interestEarned={supplyPosition.interest_earned}
+              availableLiquidity={pool?.available_liquidity}
+              onSuccess={() => { fetchPool(); fetchSupplyPosition(); }}
+            />
+          )}
         </>
       )}
     </div>
