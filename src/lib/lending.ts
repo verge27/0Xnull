@@ -352,6 +352,26 @@ export function formatUsd(n: number): string {
   return `$${formatAmount(n)}`;
 }
 
+const STABLECOINS = ['DAI', 'USDC', 'USDT', 'LUSD', 'GHO'];
+
+/** Format a balance with asset-appropriate decimal places */
+export function formatBalance(value: string | number, asset: string): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '0';
+  if (STABLECOINS.includes(asset) || asset === 'ARB') return num.toFixed(2);
+  if (asset === 'WBTC') return num.toFixed(6);
+  if (['WETH', 'wstETH'].includes(asset)) return num.toFixed(4);
+  return num.toFixed(4); // XMR and others
+}
+
+/** Format interest earned for display */
+export function formatInterest(value: string | number): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num) || Math.abs(num) < 0.0001) return '$0.00';
+  if (Math.abs(num) < 1) return `$${num.toFixed(4)}`;
+  return `$${num.toFixed(2)}`;
+}
+
 /** Calculate health factor */
 export function calcHealthFactor(
   collateralUsd: number,

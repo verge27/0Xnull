@@ -14,7 +14,7 @@ import { RepayModal } from '@/components/lending/RepayModal';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
   lendingApi, type Portfolio, type SupplyPosition, type BorrowPosition,
-  type LendingPool, parseAmount, formatUsd,
+  type LendingPool, parseAmount, formatUsd, formatBalance, formatInterest,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
@@ -266,12 +266,12 @@ const LendingDashboard = () => {
                           return (
                           <tr key={s.id} className="border-b border-border/50">
                             <td className="py-3 px-2"><AssetIcon asset={s.asset} showName size="sm" /></td>
-                            <td className="py-3 px-2 text-right font-mono">{s.deposited}</td>
-                            <td className="py-3 px-2 text-right font-mono">{s.current_balance}</td>
+                            <td className="py-3 px-2 text-right font-mono">{formatBalance(s.deposited, s.asset)}</td>
+                            <td className="py-3 px-2 text-right font-mono">{formatBalance(s.current_balance, s.asset)}</td>
                             <td className="py-3 px-2 text-right font-mono text-green-400">
                               {apy ? `${parseFloat(apy).toFixed(2)}%` : '—'}
                             </td>
-                            <td className="py-3 px-2 text-right font-mono text-green-400">+{s.interest_earned}</td>
+                            <td className="py-3 px-2 text-right font-mono text-green-400">+{formatInterest(s.interest_earned)}</td>
                             <td className="py-3 px-2 text-right">
                               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setWithdrawTarget(s)}>
                                 Withdraw
@@ -315,8 +315,8 @@ const LendingDashboard = () => {
                         {portfolio.borrows.map((b) => (
                           <tr key={b.id} className="border-b border-border/50">
                             <td className="py-3 px-2 font-mono text-sm">{b.collateral}</td>
-                            <td className="py-3 px-2 text-right font-mono">{b.borrowed}</td>
-                            <td className="py-3 px-2 text-right font-mono font-bold">{b.current_debt}</td>
+                            <td className="py-3 px-2 text-right font-mono">{(() => { const parts = b.borrowed.split(' '); return parts.length === 2 ? `${formatBalance(parts[0], parts[1])} ${parts[1]}` : b.borrowed; })()}</td>
+                            <td className="py-3 px-2 text-right font-mono font-bold">{(() => { const parts = b.current_debt.split(' '); return parts.length === 2 ? `${formatBalance(parts[0], parts[1])} ${parts[1]}` : b.current_debt; })()}</td>
                             <td className="py-3 px-2 text-right">
                               <HealthFactorBadge value={parseAmount(b.health_factor)} size="sm" />
                             </td>
