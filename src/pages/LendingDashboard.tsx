@@ -64,6 +64,12 @@ const LendingDashboard = () => {
       }
       
       const priceData = await pricesPromise;
+      // Flatten nested price objects: {XMR: {price_usd: "352.5"}} → {XMR: "352.5"}
+      const flatPrices: Record<string, string> = {};
+      const rawPrices = (priceData as any)?.prices || priceData;
+      for (const [key, val] of Object.entries(rawPrices)) {
+        flatPrices[key] = typeof val === 'object' && val !== null ? (val as any).price_usd || '0' : String(val);
+      }
       
       if (portfolioData) {
         setPortfolio(portfolioData);
@@ -80,7 +86,7 @@ const LendingDashboard = () => {
           setIsStale(false);
         }
       }
-      setPrices(priceData as Record<string, string>);
+      setPrices(flatPrices);
       setError(null);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load portfolio';
