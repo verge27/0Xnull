@@ -13,7 +13,7 @@ import { WithdrawModal } from '@/components/lending/WithdrawModal';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
   lendingApi, type LendingPoolDetail, type Portfolio, type SupplyPosition,
-  parseAmount, parsePercent, formatUsd, sourceLabel, RISK_PARAMS, ASSET_META,
+  parseAmount, parsePercent, formatUsd, formatBalance, sourceLabel, RISK_PARAMS, ASSET_META,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, Shield, Lock, Percent, CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -175,19 +175,19 @@ const LendingPool = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Total Deposited</p>
-                    <p className="font-mono font-bold">{parseAmount(pool.total_deposits).toFixed(4)}</p>
+                    <p className="font-mono font-bold">{formatBalance(pool.total_deposits, asset)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total Borrowed</p>
-                    <p className="font-mono font-bold">{parseAmount(pool.total_borrows).toFixed(4)}</p>
+                    <p className="font-mono font-bold">{formatBalance(pool.total_borrows, asset)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Available Liquidity</p>
-                    <p className="font-mono font-bold">{parseAmount(pool.available_liquidity).toFixed(4)}</p>
+                    <p className="font-mono font-bold">{formatBalance(pool.available_liquidity, asset)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Reserves</p>
-                    <p className="font-mono font-bold">{parseAmount(pool.total_reserves).toFixed(4)}</p>
+                    <p className="font-mono font-bold">{formatBalance(pool.total_reserves, asset)}</p>
                   </div>
                 </div>
                 <div>
