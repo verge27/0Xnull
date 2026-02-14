@@ -55,20 +55,29 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token, onSucce
     }
   };
 
+  const prevSeenRef = useRef(false);
+
   const pollStatus = useCallback(async () => {
     if (!deposit) return;
     try {
       const res = await lendingApi.getPendingDeposits(token);
-      const match = res.deposits?.find((d: PendingDeposit) => d.deposit_id === deposit.deposit_id);
+      const list = res.deposits || (res as any).pending || [];
+      const match = list.find((d: PendingDeposit) => d.deposit_id === deposit.deposit_id);
       if (match) {
+        prevSeenRef.current = true;
         setPendingStatus(match);
         if (match.status === 'confirmed') {
           if (pollRef.current) clearInterval(pollRef.current);
           toast.success('Deposit confirmed!');
           onSuccess?.();
-          // Auto-close after delay
           setTimeout(() => handleClose(), 3000);
         }
+      } else if (prevSeenRef.current) {
+        // Deposit disappeared from pending — treat as confirmed
+        if (pollRef.current) clearInterval(pollRef.current);
+        toast.success('Deposit confirmed!');
+        onSuccess?.();
+        setTimeout(() => handleClose(), 3000);
       }
     } catch { /* silently retry */ }
   }, [deposit, token, onSuccess]);
@@ -99,6 +108,7 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token, onSucce
     setAmount('');
     setDeposit(null);
     setPendingStatus(null);
+    prevSeenRef.current = false;
     onClose();
   };
 

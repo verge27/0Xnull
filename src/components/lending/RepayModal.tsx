@@ -75,6 +75,8 @@ export const RepayModal = ({ open, onClose, token, positionId, collateral, borro
     }
   };
 
+  const prevSeenRef = useRef(false);
+
   // Polling for confirmation
   const pollStatus = useCallback(async () => {
     if (!repayRequest) return;
@@ -82,6 +84,7 @@ export const RepayModal = ({ open, onClose, token, positionId, collateral, borro
       const res = await lendingApi.getPendingRepays(token);
       const match = res.pending?.find((p: PendingRepay) => p.repay_id === repayRequest.repay_id);
       if (match) {
+        prevSeenRef.current = true;
         setPendingStatus(match);
         if (match.status === 'confirmed') {
           setStep('done');
@@ -91,6 +94,12 @@ export const RepayModal = ({ open, onClose, token, positionId, collateral, borro
         } else if (match.status === 'seen' || match.status === 'confirming') {
           if (step !== 'polling') setStep('polling');
         }
+      } else if (prevSeenRef.current) {
+        // Repay disappeared from pending — treat as confirmed
+        setStep('done');
+        toast.success('Repayment complete!');
+        onSuccess?.();
+        if (pollRef.current) clearInterval(pollRef.current);
       }
     } catch { /* silently retry */ }
   }, [repayRequest, token, step, onSuccess]);
@@ -113,6 +122,7 @@ export const RepayModal = ({ open, onClose, token, positionId, collateral, borro
     setAmount('');
     setRepayRequest(null);
     setPendingStatus(null);
+    prevSeenRef.current = false;
     onClose();
   };
 
