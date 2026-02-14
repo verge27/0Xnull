@@ -58,7 +58,19 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
       toast.success(`Withdrew ${(res as WithdrawResult).amount} ${asset}`);
       onSuccess?.();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Withdrawal failed');
+      const msg = e instanceof Error ? e.message : 'Withdrawal failed';
+      // Parse "Only X available" errors to show a clearer message
+      const availMatch = msg.match(/Only\s+([\d.E\-+]+)\s+(\w+)\s+available/i);
+      if (availMatch) {
+        const availNum = parseFloat(availMatch[1]);
+        if (availNum < 0.0001) {
+          toast.error(`No ${asset} available to withdraw. The balance may still be settling — please try again in a few minutes.`);
+        } else {
+          toast.error(`Only ${availNum} ${asset} available to withdraw.`);
+        }
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
