@@ -42,13 +42,19 @@ const Dashboard = () => {
         portfolio = await lendingApi.getPortfolio(token).catch(() => null);
       }
 
-      const prices = await pricesPromise;
+      const priceData = await pricesPromise;
+      // Flatten nested price objects: {XMR: {price_usd: "352.5"}} → {XMR: "352.5"}
+      const flatPrices: Record<string, string> = {};
+      const rawPrices = (priceData as any)?.prices || priceData;
+      for (const [key, val] of Object.entries(rawPrices)) {
+        flatPrices[key] = typeof val === 'object' && val !== null ? (val as any).price_usd || '0' : String(val);
+      }
 
       if (portfolio) {
         setLendingPortfolio(portfolio);
         setLendingError(false);
       }
-      setLendingPrices(prices as Record<string, string>);
+      setLendingPrices(flatPrices);
     } catch {
       setLendingError(true);
     }
