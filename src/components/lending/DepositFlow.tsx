@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AssetIcon } from './AssetIcon';
+import { DepositStatusTracker } from './DepositStatusTracker';
 import { lendingApi, ASSET_META, type DepositRequest } from '@/lib/lending';
-import { Copy, Check, Loader2, Clock, QrCode } from 'lucide-react';
+import { Copy, Check, Loader2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -14,15 +14,29 @@ interface DepositFlowProps {
   onClose: () => void;
   asset?: string;
   token: string;
+  onSuccess?: () => void;
 }
 
-export const DepositFlow = ({ open, onClose, asset: defaultAsset, token }: DepositFlowProps) => {
+interface PendingDeposit {
+  deposit_id: string;
+  asset: string;
+  amount: string;
+  status: string;
+  confirmations?: number;
+  confirmations_required?: number;
+  txid?: string;
+  seen_at?: string;
+}
+
+export const DepositFlow = ({ open, onClose, asset: defaultAsset, token, onSuccess }: DepositFlowProps) => {
   const [step, setStep] = useState<'input' | 'awaiting'>('input');
   const [asset, setAsset] = useState(defaultAsset || 'USDC');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [deposit, setDeposit] = useState<DepositRequest | null>(null);
   const [copied, setCopied] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<PendingDeposit | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const meta = ASSET_META[asset];
   const isXmr = asset === 'XMR';
@@ -41,6 +55,35 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token }: Depos
     }
   };
 
+  const pollStatus = useCallback(async () => {
+    if (!deposit) return;
+    try {
+      const res = await lendingApi.getPendingDeposits(token);
+      const match = res.deposits?.find((d: PendingDeposit) => d.deposit_id === deposit.deposit_id);
+      if (match) {
+        setPendingStatus(match);
+        if (match.status === 'confirmed') {
+          if (pollRef.current) clearInterval(pollRef.current);
+          toast.success('Deposit confirmed!');
+          onSuccess?.();
+          // Auto-close after delay
+          setTimeout(() => handleClose(), 3000);
+        }
+      }
+    } catch { /* silently retry */ }
+  }, [deposit, token, onSuccess]);
+
+  useEffect(() => {
+    if (step === 'awaiting' && deposit) {
+      pollRef.current = setInterval(pollStatus, 15000);
+      const t = setTimeout(pollStatus, 5000);
+      return () => {
+        if (pollRef.current) clearInterval(pollRef.current);
+        clearTimeout(t);
+      };
+    }
+  }, [step, deposit, pollStatus]);
+
   const copyAddress = () => {
     if (deposit?.deposit_address) {
       navigator.clipboard.writeText(deposit.deposit_address);
@@ -51,9 +94,11 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token }: Depos
   };
 
   const handleClose = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
     setStep('input');
     setAmount('');
     setDeposit(null);
+    setPendingStatus(null);
     onClose();
   };
 
@@ -146,15 +191,20 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token }: Depos
 
             <div className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
               {isXmr
-                ? `Send exactly ${deposit.amount} XMR to the address above. Your position will be credited after 10 confirmations (~20 minutes).`
+                ? `Send exactly ${deposit.amount} XMR to the address above. Your position will be credited after 3 confirmations (~6 minutes).`
                 : `Send ${deposit.amount} ${deposit.asset} on Arbitrum One to the address above. For maximum privacy, shield your tokens via Railgun first.`
               }
             </div>
 
-            <div className="flex items-center gap-2 justify-center">
-              <Loader2 className="w-4 h-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Awaiting deposit...</span>
-            </div>
+            {/* Granular status tracking */}
+            <DepositStatusTracker
+              deposit={pendingStatus || {
+                deposit_id: deposit.deposit_id,
+                asset: deposit.asset,
+                amount: deposit.amount,
+                status: 'awaiting_deposit',
+              }}
+            />
           </div>
         )}
       </DialogContent>

@@ -305,10 +305,10 @@ export const lendingApi = {
   getPendingDeposits: (token: string) =>
     lendingRequest<{ deposits: PendingDeposit[] }>('/deposit/pending', {}, token),
 
-  withdraw: (token: string, asset: string, amount: string) =>
+  withdraw: (token: string, asset: string, amount: string, destination_address?: string) =>
     lendingRequest<WithdrawResponse>('/withdraw', {
       method: 'POST',
-      body: JSON.stringify({ asset, amount }),
+      body: JSON.stringify({ asset, amount, ...(destination_address ? { destination_address } : {}) }),
     }, token),
 
   borrow: (token: string, collateral_asset: string, collateral_amount: string, borrow_asset: string, borrow_amount: string) =>
@@ -322,6 +322,15 @@ export const lendingApi = {
       method: 'POST',
       body: JSON.stringify({ position_id, amount }),
     }, token),
+
+  requestRepay: (token: string, position_id: string, amount: string) =>
+    lendingRequest<any>('/repay/request', {
+      method: 'POST',
+      body: JSON.stringify({ position_id, amount }),
+    }, token),
+
+  getPendingRepays: (token: string) =>
+    lendingRequest<{ pending: any[] }>('/repay/pending', {}, token),
 };
 
 // ─── Helpers ────────────────────────────────────────────
