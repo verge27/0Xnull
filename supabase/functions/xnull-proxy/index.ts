@@ -284,8 +284,9 @@ serve(async (req) => {
     if (isHtmlError) {
       // Convert HTML error pages to clean JSON
       console.error(`Upstream returned HTML error for ${targetPath}: ${response.status}`);
+      const serviceName = targetPath.startsWith('/api/lending') ? 'lending' : 'prediction';
       responseData = JSON.stringify({
-        error: 'The prediction service is temporarily unavailable. Please try again in a moment.',
+        error: `The ${serviceName} service is temporarily unavailable. Please try again in a moment.`,
         status: response.status,
         upstream: true,
         retry: true,
