@@ -14,7 +14,7 @@ import { RepayModal } from '@/components/lending/RepayModal';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import {
   lendingApi, type Portfolio, type SupplyPosition, type BorrowPosition,
-  parseAmount, formatUsd,
+  type LendingPool, parseAmount, formatUsd,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
@@ -42,6 +42,7 @@ const LendingDashboard = () => {
   const { token, balance, setCustomToken } = useToken();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [prices, setPrices] = useState<Record<string, string>>({});
+  const [pools, setPools] = useState<LendingPool[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
@@ -57,13 +58,13 @@ const LendingDashboard = () => {
     setLoading(true);
     try {
       const pricesPromise = lendingApi.getPrices().catch(() => ({}));
-      
+      const poolsPromise = lendingApi.getPools().catch(() => []);
       let portfolioData: Portfolio | null = null;
       if (balance > 0) {
         portfolioData = await lendingApi.getPortfolio(token).catch(() => null);
       }
       
-      const priceData = await pricesPromise;
+      const [priceData, poolsData] = await Promise.all([pricesPromise, poolsPromise]);
       // Flatten nested price objects: {XMR: {price_usd: "352.5"}} → {XMR: "352.5"}
       const flatPrices: Record<string, string> = {};
       const rawPrices = (priceData as any)?.prices || priceData;
@@ -87,6 +88,7 @@ const LendingDashboard = () => {
         }
       }
       setPrices(flatPrices);
+      setPools(Array.isArray(poolsData) ? poolsData : (poolsData as any)?.pools || []);
       setError(null);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load portfolio';
@@ -122,6 +124,21 @@ const LendingDashboard = () => {
 
   const handleTokenSubmit = async (newToken: string) => {
     await setCustomToken(newToken);
+  };
+
+  // Get the display rate for an asset: Aave rate for non-XMR, 0xNull rate for XMR
+  const getSupplyApy = (asset: string): string | null => {
+    const pool = pools.find((p) => p.asset === asset);
+    if (!pool) return null;
+    if (asset === 'XMR') return pool.supply_apy;
+    return pool.aave_supply_apy || pool.supply_apy;
+  };
+
+  const getBorrowApy = (asset: string): string | null => {
+    const pool = pools.find((p) => p.asset === asset);
+    if (!pool) return null;
+    if (asset === 'XMR') return pool.borrow_apy;
+    return pool.aave_borrow_apy || pool.borrow_apy;
   };
 
   // Compute totals
@@ -234,20 +251,26 @@ const LendingDashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+                         <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
                           <th className="text-left py-2 px-2">Asset</th>
                           <th className="text-right py-2 px-2">Deposited</th>
                           <th className="text-right py-2 px-2">Current Balance</th>
+                          <th className="text-right py-2 px-2">APY</th>
                           <th className="text-right py-2 px-2">Interest Earned</th>
                           <th className="text-right py-2 px-2">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {portfolio.supplies.map((s) => (
+                        {portfolio.supplies.map((s) => {
+                          const apy = getSupplyApy(s.asset);
+                          return (
                           <tr key={s.id} className="border-b border-border/50">
                             <td className="py-3 px-2"><AssetIcon asset={s.asset} showName size="sm" /></td>
                             <td className="py-3 px-2 text-right font-mono">{s.deposited}</td>
                             <td className="py-3 px-2 text-right font-mono">{s.current_balance}</td>
+                            <td className="py-3 px-2 text-right font-mono text-green-400">
+                              {apy ? `${parseFloat(apy).toFixed(2)}%` : '—'}
+                            </td>
                             <td className="py-3 px-2 text-right font-mono text-green-400">+{s.interest_earned}</td>
                             <td className="py-3 px-2 text-right">
                               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setWithdrawTarget(s)}>
@@ -255,7 +278,8 @@ const LendingDashboard = () => {
                               </Button>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
