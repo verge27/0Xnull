@@ -15,7 +15,7 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
 
 const Lending = () => {
   const [pools, setPools] = useState<LendingPool[]>([]);
@@ -117,7 +117,8 @@ const Lending = () => {
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Shield className="w-3 h-3 text-primary" />
-            All deposits shielded via Railgun ZK-SNARKs on Arbitrum
+            Privacy-enhanced lending via Railgun ZK on Arbitrum — shielding optional on deposits and withdrawals
+            <Link to="/lending/privacy" className="text-primary hover:underline ml-1">How it works →</Link>
           </div>
         </div>
 
@@ -142,6 +143,7 @@ const Lending = () => {
             <div className="flex gap-2">
               <Button asChild><Link to="/lending/portfolio">Dashboard</Link></Button>
               <Button variant="outline" asChild><Link to="/lending/liquidations">Liquidations</Link></Button>
+              <Button variant="ghost" size="sm" asChild className="text-xs"><Link to="/lending/privacy">Privacy</Link></Button>
             </div>
           </CardContent>
         </Card>
@@ -213,7 +215,17 @@ const Lending = () => {
                         onClick={() => navigate(`/lending/pool/${pool.asset}`)}
                       >
                         <td className="py-3 px-3">
-                          <AssetIcon asset={pool.asset} showName />
+                          <div className="flex items-center gap-1.5">
+                            <AssetIcon asset={pool.asset} showName />
+                            {pool.asset !== 'XMR' && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <ShieldCheck className="w-3 h-3 text-emerald-400/60" />
+                                </TooltipTrigger>
+                                <TooltipContent><p className="text-xs">Railgun ZK shielding available for deposits and withdrawals</p></TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
                           ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
@@ -248,8 +260,12 @@ const Lending = () => {
                         <td className="py-3 px-3 text-right">
                           <div>
                             <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
-                            <span className="text-muted-foreground mx-1">/</span>
-                            <span className="font-mono text-amber-400">{borrowApy.toFixed(2)}%</span>
+                            {hasAave && (
+                              <span className="text-muted-foreground text-[10px] ml-1">(Aave: {parsePercent(pool.aave_supply_apy!).toFixed(2)}%)</span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            Platform fee: 0.05%
                           </div>
                         </td>
                         <td className="py-3 px-3 text-right hidden sm:table-cell">
