@@ -260,9 +260,6 @@ const Lending = () => {
                         <td className="py-3 px-3 text-right">
                           <div>
                             <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
-                            {hasAave && (
-                              <span className="text-muted-foreground text-[10px] ml-1">(Aave: {parsePercent(pool.aave_supply_apy!).toFixed(2)}%)</span>
-                            )}
                           </div>
                           <div className="text-[10px] text-muted-foreground">
                             Platform fee: 0.05%
