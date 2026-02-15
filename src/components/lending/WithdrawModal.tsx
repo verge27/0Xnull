@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { lendingApi, parseAmount } from '@/lib/lending';
 import { isValidDestinationAddress, addressPlaceholder, addressError } from '@/lib/addressValidation';
+import { WithdrawModeSelector, type WithdrawMode } from './WithdrawModeSelector';
 import { Loader2, CheckCircle, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,6 +38,7 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<WithdrawResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [withdrawMode, setWithdrawMode] = useState<WithdrawMode>('direct');
 
   const balanceNum = parseAmount(currentBalance);
   const amountNum = parseFloat(amount || '0');
@@ -45,12 +47,12 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
   const isValidAddr = destination.length > 0 && !addrErr;
   const exceedsBalance = amountNum > balanceNum;
   const exceedsLiquidity = amountNum > liquidityNum && liquidityNum < Infinity;
+  const isShieldedDisabled = withdrawMode === 'shielded'; // Coming soon
 
-  // Format balance for MAX button — trim trailing zeros but keep meaningful precision
   const maxAmount = balanceNum > 0 ? balanceNum.toString() : '0';
 
   const handleWithdraw = async () => {
-    if (!amount || amountNum <= 0 || !isValidAddr || exceedsBalance) return;
+    if (!amount || amountNum <= 0 || !isValidAddr || exceedsBalance || isShieldedDisabled) return;
     setLoading(true);
     try {
       const res = await lendingApi.withdraw(token, asset, amount, destination);
@@ -59,7 +61,6 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
       onSuccess?.();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Withdrawal failed';
-      // Parse "Only X available" errors to show a clearer message
       const availMatch = msg.match(/Only\s+([\d.E\-+]+)\s+(\w+)\s+available/i);
       if (availMatch) {
         const availNum = parseFloat(availMatch[1]);
@@ -80,6 +81,7 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
     setAmount('');
     setDestination('');
     setResult(null);
+    setWithdrawMode('direct');
     onClose();
   };
 
@@ -94,7 +96,7 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Withdraw {asset}</DialogTitle>
         </DialogHeader>
@@ -169,6 +171,16 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
               )}
             </div>
 
+            {/* Withdrawal Mode Selector */}
+            {asset !== 'XMR' && (
+              <WithdrawModeSelector
+                mode={withdrawMode}
+                onModeChange={setWithdrawMode}
+                amount={amount}
+                asset={asset}
+              />
+            )}
+
             <div>
               <Label className="text-xs text-muted-foreground">Destination Address</Label>
               <Input
@@ -184,10 +196,16 @@ export const WithdrawModal = ({ open, onClose, token, asset, currentBalance, int
 
             <Button
               onClick={handleWithdraw}
-              disabled={loading || !amount || amountNum <= 0 || !isValidAddr || exceedsBalance || exceedsLiquidity}
+              disabled={loading || !amount || amountNum <= 0 || !isValidAddr || exceedsBalance || exceedsLiquidity || isShieldedDisabled}
               className="w-full"
             >
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Withdrawing...</> : `Withdraw ${asset}`}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Withdrawing...</>
+              ) : isShieldedDisabled ? (
+                'Shielded withdrawals coming soon'
+              ) : (
+                `Withdraw ${asset}`
+              )}
             </Button>
           </div>
         )}

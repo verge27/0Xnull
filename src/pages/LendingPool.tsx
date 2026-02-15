@@ -266,14 +266,20 @@ const LendingPool = () => {
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 flex items-start gap-3">
               <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
               <div className="text-sm text-muted-foreground space-y-1">
-                <p className="font-medium text-foreground">Privacy-Shielded</p>
+                <p className="font-medium text-foreground">Privacy-Enhanced</p>
                 {asset === 'XMR'
                   ? <p>Send Monero to a unique subaddress. Your deposit is credited after 3 confirmations (~6 minutes). No wallet connection needed.</p>
                   : <p>Send tokens on Arbitrum. For maximum privacy, use Railgun's Railway Wallet to shield tokens first, then unshield to the deposit address.</p>
                 }
                 {hasAave && (
-                  <p className="text-xs mt-2">We display live Aave V3 rates alongside our own rates so you can see exactly what the underlying protocol pays. Our rates are derived from Aave's on-chain rates with a small spread that funds protocol operations.</p>
+                  <div className="text-xs mt-2 space-y-1">
+                    <p>We display live Aave V3 rates alongside our own. Our rates are Aave's on-chain rates minus a 0.05% platform fee that funds protocol operations.</p>
+                    <p>Shielded withdrawals incur an additional 0.25% Railgun network fee.</p>
+                  </div>
                 )}
+                <Link to="/lending/privacy" className="text-primary hover:underline text-xs inline-flex items-center gap-1 mt-2">
+                  How privacy works →
+                </Link>
               </div>
             </div>
           </div>

@@ -79,6 +79,7 @@ const Lending = lazy(() => import("./pages/Lending"));
 const LendingPool = lazy(() => import("./pages/LendingPool"));
 const LendingDashboard = lazy(() => import("./pages/LendingDashboard"));
 const LendingLiquidations = lazy(() => import("./pages/LendingLiquidations"));
+const LendingPrivacyPage = lazy(() => import("./pages/LendingPrivacy"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -173,6 +174,7 @@ const App = () => (
                   <Route path="/lending/dashboard" element={<LendingDashboard />} />
                   <Route path="/lending/portfolio" element={<LendingDashboard />} />
                   <Route path="/lending/liquidations" element={<LendingLiquidations />} />
+                  <Route path="/lending/privacy" element={<LendingPrivacyPage />} />
                   
                   {/* Dashboard */}
                   <Route path="/dashboard" element={<Dashboard />} />
