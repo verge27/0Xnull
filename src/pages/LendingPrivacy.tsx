@@ -110,11 +110,11 @@ const LendingPrivacy = () => {
                 Every blockchain transaction creates a link between two addresses — a sender and a receiver. Over time, these links build into a <strong className="text-foreground">transaction graph</strong>: a map of who sent what to whom.
               </p>
               <p>
-                Blockchain analytics companies like Chainalysis and Elliptic use these graphs to trace funds, identify wallet owners, and build profiles. Even if you never attached your name to a wallet, patterns in your transaction graph — the timing, the amounts, the addresses you interact with — can be enough to de-anonymise you.
+                Blockchain analytics companies like Chainalysis and Elliptic use these graphs to trace funds, identify wallet owners and build profiles. Even if you never attached your name to a wallet, patterns in your transaction graph — the timing, the amounts and the addresses you interact with — can be enough to de-anonymise you.
               </p>
               <Card className="bg-amber-500/5 border-amber-500/20">
                 <CardContent className="py-3 text-xs text-amber-300">
-                  <strong>Example:</strong> You buy ETH on a KYC exchange, send it to Wallet A, swap on Uniswap, bridge to Arbitrum, and deposit into a lending protocol. An observer can follow every step. Your KYC identity is now linked to your DeFi activity.
+                  <strong>Example:</strong> You buy ETH on a KYC exchange, send it to Wallet A, swap on Uniswap, bridge to Arbitrum and deposit into a lending protocol. An observer can follow every step. Your KYC identity is now linked to your DeFi activity.
                 </CardContent>
               </Card>
             </div>
