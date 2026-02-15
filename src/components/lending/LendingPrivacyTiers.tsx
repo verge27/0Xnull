@@ -46,7 +46,7 @@ const tiers = [
     badgeClass: 'bg-emerald-600/20 text-emerald-400 border-emerald-600/40',
     icon: Shield,
     iconClass: 'text-emerald-400',
-    note: 'Monero hides sender, receiver & amount',
+    note: 'Monero hides sender, receiver and amount',
     flow: [
       { label: 'Your Wallet' },
       { label: 'Send XMR', highlight: true },
