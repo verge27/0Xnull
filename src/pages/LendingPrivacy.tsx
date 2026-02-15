@@ -292,6 +292,143 @@ const LendingPrivacy = () => {
             </div>
           </section>
 
+          {/* Smart Contract Migration */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-bold">Why isn't this a smart contract?</h2>
+            <div className="text-sm text-muted-foreground space-y-3 leading-relaxed">
+              <p>
+                This is the question we get from DeFi natives who expect everything to live on-chain. It deserves a direct answer.
+              </p>
+              <p>
+                We could move the lending logic to a smart contract. Deposits, withdrawals, Aave V3 integration, interest accrual, fee deduction — all of this is composable and would work on-chain. The engineering is straightforward.
+              </p>
+              <p>
+                But it would make the product <strong className="text-foreground">less private</strong>, not more.
+              </p>
+              <p>Here's why.</p>
+              <p>
+                A smart contract is a glass box. Every deposit and withdrawal emits an event with the caller's wallet address. The transaction graph that our current architecture breaks by design would be <strong className="text-foreground">reconstructed in the contract's event logs</strong>. Any observer could query the contract, see who deposited, who withdrew, match amounts and timing and rebuild exactly the links our commingling model is designed to sever.
+              </p>
+              <p>
+                The centralised backend wallet acts as a <strong className="text-foreground">cut-out</strong> — a single point where all funds commingle without on-chain attribution. There are no events tying your address to your position. The chain sees transfers in and transfers out of one wallet. The link between depositor and withdrawer exists only in our database, not on a public ledger.
+              </p>
+              <p>
+                To replicate this privacy on-chain, every interaction would need to happen inside a zero-knowledge shielded environment — deposit shielded, earn yield shielded, withdraw shielded. ZK proofs would be mandatory, not optional. This is technically possible using Railgun's shielded pool as a composable base layer, but it introduces significant constraints:
+              </p>
+            </div>
+
+            {/* What a shielded smart contract would require */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                What a shielded smart contract would require
+              </h3>
+              <ul className="space-y-2">
+                {[
+                  'Mandatory ZK proofs on every transaction (30–60 second proving times)',
+                  'Railgun\'s contract architecture would need to support composable yield strategies (deposit → Aave supply → withdraw from Aave → unshield) — this doesn\'t exist yet',
+                  'Higher gas costs on every interaction, with no option to skip for users who don\'t need it',
+                  'No XMR integration — Monero can\'t be touched from an EVM smart contract',
+                  'No token-based authentication — every user needs a wallet, every position has an on-chain address',
+                  'Immutable code — every edge case we handle operationally (RPC failovers, state reconciliation, manual corrections) becomes a potential protocol-breaking bug',
+                ].map((item) => (
+                  <li key={item} className="flex gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+                    <p className="text-sm text-muted-foreground">{item}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* What we'd gain */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                What we'd gain
+              </h3>
+              <ul className="space-y-2">
+                {[
+                  { title: 'Trustlessness', desc: 'Users don\'t need to trust 0xNull with custody' },
+                  { title: 'Composability', desc: 'Other protocols could build on top' },
+                  { title: 'Immutability', desc: 'Rules can\'t change' },
+                ].map((item) => (
+                  <li key={item.title} className="flex gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="text-sm text-muted-foreground leading-relaxed">
+              <p><strong className="text-foreground">The tradeoff is real.</strong> Trustlessness vs privacy. Composability vs flexibility. Immutability vs the ability to fix things.</p>
+            </div>
+
+            {/* Migration Path Timeline */}
+            <div>
+              <h3 className="text-lg font-bold text-foreground mb-4">The migration path</h3>
+              <div className="space-y-0">
+                {[
+                  {
+                    stage: 'Now',
+                    color: 'primary',
+                    title: 'Custodial architecture with structural privacy',
+                    desc: 'The backend wallet commingles funds, deploys to Aave, handles payouts. ZK shielding optional for users who want cryptographic guarantees. This is the fastest path to a working product with strong privacy properties.',
+                  },
+                  {
+                    stage: 'Next',
+                    color: 'emerald',
+                    title: 'Shielded smart contract integration',
+                    desc: 'As Railgun\'s composable shielding matures and supports vault-style yield strategies, we can begin moving the Aave integration into a shielded smart contract where deposits and withdrawals happen entirely within the ZK-shielded environment. This eliminates custody risk while preserving privacy.',
+                  },
+                  {
+                    stage: 'Eventually',
+                    color: 'violet',
+                    title: 'Fully on-chain shielded vault',
+                    desc: 'A fully on-chain, shielded vault contract where all positions are managed inside Railgun\'s privacy set. No custodian, no backend database, no trust assumptions beyond the smart contract code and the ZK proof system. XMR integration would require a cross-chain bridge with its own trust model.',
+                  },
+                ].map((item, i) => (
+                  <div key={item.stage} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        item.color === 'primary' ? 'bg-primary/20 text-primary border border-primary/30' :
+                        item.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                        'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                      }`}>
+                        {i + 1}
+                      </div>
+                      {i < 2 && <div className="w-px h-full bg-border/50 min-h-[2rem]" />}
+                    </div>
+                    <div className="pb-6">
+                      <Badge variant="outline" className={`mb-1.5 text-[10px] ${
+                        item.color === 'primary' ? 'text-primary border-primary/30' :
+                        item.color === 'emerald' ? 'text-emerald-400 border-emerald-500/30' :
+                        'text-violet-400 border-violet-500/30'
+                      }`}>{item.stage}</Badge>
+                      <p className="font-medium text-foreground text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-sm text-muted-foreground leading-relaxed">
+              <p>We're not building the final form first. We're building what works now, what's private now and what gives us a clean upgrade path when the infrastructure catches up.</p>
+            </div>
+
+            {/* Key insight callout */}
+            <div className="p-5 rounded-xl bg-primary/10 border border-primary/20 text-center">
+              <p className="text-lg font-bold text-foreground leading-snug">
+                A centralised architecture is currently more private than a decentralised one.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">We'd rather ship real privacy today than theoretical trustlessness that leaks your data on-chain.</p>
+            </div>
+          </section>
+
           {/* Closing */}
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 text-sm text-muted-foreground">
             <p className="font-medium text-foreground mb-1">Choose based on your threat model, not fear.</p>
