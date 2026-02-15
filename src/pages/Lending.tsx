@@ -263,9 +263,6 @@ const Lending = () => {
                             <span className="text-muted-foreground mx-1">/</span>
                             <span className="font-mono text-amber-400 text-xs">{borrowApy.toFixed(2)}%</span>
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
-                            Platform fee: 0.05%
-                          </div>
                         </td>
                         <td className="py-3 px-3 text-right hidden sm:table-cell">
                           <Badge variant="outline" className="text-xs">
