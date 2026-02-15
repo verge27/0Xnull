@@ -220,6 +220,78 @@ const LendingPrivacy = () => {
             </Card>
           </section>
 
+          {/* Tornado Cash Distinction */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-bold">How is this different from Tornado Cash?</h2>
+            <div className="text-sm text-muted-foreground space-y-3 leading-relaxed">
+              <p>
+                It's a fair question. Both involve pooling funds and both can break transaction graph links. But the architecture, purpose and legal standing are fundamentally different.
+              </p>
+              <p>
+                <strong className="text-foreground">Tornado Cash</strong> is a mixing service. Its sole function is anonymisation. You deposit a fixed denomination (0.1, 1, 10 or 100 ETH), it sits idle in a smart contract and you withdraw later with a ZK proof that hides the link. There is no yield, no lending, no productive use of capital. The protocol is an immutable smart contract with no operator — nobody can respond to legal process, freeze illicit funds or comply with anything. OFAC sanctioned it because obfuscation isn't a side effect — it's the entire product.
+              </p>
+              <p>
+                <strong className="text-foreground">0xNull Lending</strong> is a yield protocol. The primary function is earning interest on deposits by deploying capital to Aave V3. Privacy is a structural byproduct of how lending pools work — your tokens get commingled with every other user's deposits, deployed into Aave's liquidity pools alongside billions in TVL and withdrawals come from the shared pool. This is the same commingling that happens in every bank, every money market fund, every lending protocol. It's not a mixer — it's how pooled finance works.
+              </p>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+                        <th className="text-left py-3 px-3"></th>
+                        <th className="text-left py-3 px-3">Tornado Cash</th>
+                        <th className="text-left py-3 px-3">0xNull Lending</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { label: 'Primary purpose', tc: 'Anonymisation', ox: 'Yield generation' },
+                        { label: 'Funds are...', tc: 'Idle in a mixing contract', ox: 'Earning yield on Aave V3' },
+                        { label: 'Denominations', tc: 'Fixed (0.1, 1, 10, 100 ETH) — designed for mixing', ox: 'Variable — deposit any amount' },
+                        { label: 'Operator', tc: 'None (immutable contract)', ox: 'Operated by Margin Syndicate Ltd (UK)' },
+                        { label: 'Compliance', tc: 'Impossible — no one controls the contract', ox: 'Accountable operator can respond to legal process' },
+                        { label: 'ZK involvement', tc: 'Required — the product IS the ZK circuit', ox: 'Optional — base product works without ZK' },
+                        { label: 'User intent', tc: 'Come for anonymity', ox: 'Come for APY' },
+                      ].map((row) => (
+                        <tr key={row.label} className="border-b border-border/50">
+                          <td className="py-3 px-3 font-medium text-foreground">{row.label}</td>
+                          <td className="py-3 px-3 text-muted-foreground">{row.tc}</td>
+                          <td className="py-3 px-3 text-muted-foreground">{row.ox}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
+              <div className="flex items-center justify-center gap-8 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">Tornado Cash</p>
+                  <p className="font-semibold text-foreground">🧺 Laundromat</p>
+                </div>
+                <div className="text-muted-foreground text-lg">vs</div>
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">0xNull Lending</p>
+                  <p className="font-semibold text-foreground">🏦 Bank savings account</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-sm text-muted-foreground space-y-3 leading-relaxed">
+              <p>
+                Your bank commingles deposits. Your money market fund pools capital. Aave itself commingles every supplier's tokens. Nobody calls these mixers. The commingling is a consequence of pooled finance, not a privacy tool.
+              </p>
+              <p>
+                0xNull sits in the same category: a lending protocol where privacy is a property of the architecture, not the product.
+              </p>
+            </div>
+          </section>
+
           {/* Closing */}
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 text-sm text-muted-foreground">
             <p className="font-medium text-foreground mb-1">Choose based on your threat model, not fear.</p>
