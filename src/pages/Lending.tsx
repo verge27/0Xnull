@@ -259,15 +259,12 @@ const Lending = () => {
                         {/* 0xNull Rate Column */}
                         <td className="py-3 px-3 text-right">
                           <div>
-                            <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
-                            <span className="text-[10px] text-muted-foreground ml-1">supply</span>
+                            <span className="font-mono text-green-400 text-xs">{supplyApy.toFixed(2)}%</span>
+                            <span className="text-muted-foreground mx-1">/</span>
+                            <span className="font-mono text-amber-400 text-xs">{borrowApy.toFixed(2)}%</span>
                           </div>
                           <div className="text-[10px] text-muted-foreground">
                             Platform fee: 0.05%
-                          </div>
-                          <div className="mt-0.5">
-                            <span className="font-mono text-amber-400">{borrowApy.toFixed(2)}%</span>
-                            <span className="text-[10px] text-muted-foreground ml-1">borrow</span>
                           </div>
                         </td>
                         <td className="py-3 px-3 text-right hidden sm:table-cell">
