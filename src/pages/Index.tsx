@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Zap, BarChart3, Lock, ArrowRight, TrendingUp, ExternalLink, Rocket, Gamepad2, Trophy, Swords } from 'lucide-react';
+import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,34 @@ const Index = () => {
   // Capture voucher/ref from URL params (e.g., ?ref=AWF0XDOTA)
   useVoucherFromUrl();
   
-  const features = [
+  const offerings = [
+    {
+      icon: BarChart3,
+      title: 'Prediction Markets',
+      description: 'Sports, esports, combat, crypto. Bet yes or no. XMR in, XMR out. No account.',
+      href: '/predictions',
+    },
+    {
+      icon: ShoppingBag,
+      title: 'Marketplace',
+      description: 'Buy and sell products and services anonymously. Pay with crypto, ship anywhere.',
+      href: '/browse',
+    },
+    {
+      icon: RefreshCw,
+      title: 'Swaps',
+      description: 'Swap 300+ coins privately. No registration. No history. Just rates.',
+      href: '/swaps',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Lending',
+      description: 'Deposit, earn yield via Aave, withdraw. No KYC. No identity. Optional ZK shielding.',
+      href: '/lending',
+    },
+  ];
+
+  const pillars = [
     {
       icon: Target,
       title: 'No Account Needed',
@@ -84,9 +111,9 @@ const Index = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-background/60 backdrop-blur-sm border border-primary/20 hover:bg-background/80 transition-colors group"
             >
-              <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 7/10
-              </Badge>
+              </span>
               <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                 Verified on KYCNOT.ME
               </span>
@@ -94,110 +121,96 @@ const Index = () => {
             </a>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              Scan. Send. Bet.
+              Join the Quiet Riot.
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              Anonymous prediction markets for sports and esports. XMR only. 0.4% rake on winnings only. Unopposed money returned.
+              No name. No account. No compromise. Just your token.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/get-started">
-                <Button size="lg" className="gap-2 text-lg px-8 neon-glow-primary transition-transform hover:scale-105">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md bg-primary text-primary-foreground font-medium neon-glow-primary transition-transform hover:scale-105 hover:bg-primary/90">
                   <Rocket className="w-5 h-5" aria-hidden="true" />
                   Get Started
-                </Button>
+                </button>
               </Link>
-              <Link to="/esports-predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-magenta-static transition-transform hover:scale-105">
-                  <Gamepad2 className="w-5 h-5" aria-hidden="true" />
-                  eSports
-                </Button>
+              <Link to="/predictions">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-cyan-static transition-transform hover:scale-105 hover:bg-accent">
+                  <BarChart3 className="w-5 h-5" aria-hidden="true" />
+                  Predictions
+                </button>
               </Link>
-              <Link to="/sports-predictions">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-cyan-static transition-transform hover:scale-105">
-                  <Trophy className="w-5 h-5" aria-hidden="true" />
-                  Sports
-                </Button>
+              <Link to="/browse">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
+                  <ShoppingBag className="w-5 h-5" aria-hidden="true" />
+                  Marketplace
+                </button>
               </Link>
-              <Link to="/predictions/sports/combat">
-                <Button size="lg" variant="outline" className="gap-2 text-lg px-8 bg-background/50 backdrop-blur-sm neon-glow-magenta-static transition-transform hover:scale-105">
-                  <Swords className="w-5 h-5" aria-hidden="true" />
-                  Combat
-                </Button>
+              <Link to="/swaps">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-cyan-static transition-transform hover:scale-105 hover:bg-accent">
+                  <RefreshCw className="w-5 h-5" aria-hidden="true" />
+                  Swaps
+                </button>
+              </Link>
+              <Link to="/lending">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
+                  <TrendingUp className="w-5 h-5" aria-hidden="true" />
+                  Lending
+                </button>
               </Link>
             </div>
           </div>
         </div>
       </BackgroundImage>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-20" aria-labelledby="features-heading">
-        <h2 id="features-heading" className="sr-only">Key Features</h2>
+      {/* Offerings Section */}
+      <section className="container mx-auto px-4 py-20" aria-labelledby="offerings-heading">
+        <h2 id="offerings-heading" className="text-3xl md:text-4xl font-bold text-center mb-4">
+          One token. Everything.
+        </h2>
+        <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+          Prediction markets, private swaps, anonymous lending, and a censorship-resistant marketplace — all under one roof, all XMR-native.
+        </p>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
+          {offerings.map((offering) => {
+            const Icon = offering.icon;
             return (
-              <Card key={index} className="border-border/50 bg-card/50 backdrop-blur">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
+              <Link key={offering.title} to={offering.href} className="group">
+                <div className="h-full border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6 transition-all hover:border-primary/40 hover:bg-card/80">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors" aria-hidden="true">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
-                </CardContent>
-              </Card>
+                  <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">{offering.title}</h3>
+                  <p className="text-muted-foreground text-sm">{offering.description}</p>
+                </div>
+              </Link>
             );
           })}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            How It Works
-          </h2>
-          <div className="space-y-8">
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
-                1
+      {/* Features / Pillars Section */}
+      <section className="container mx-auto px-4 py-20 border-t border-border/30" aria-labelledby="features-heading">
+        <h2 id="features-heading" className="sr-only">Key Features</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {pillars.map((pillar, index) => {
+            const Icon = pillar.icon;
+            return (
+              <div key={index} className="border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
+                  <Icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{pillar.title}</h3>
+                <p className="text-muted-foreground text-sm">{pillar.description}</p>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Pick a Market</h3>
-                <p className="text-muted-foreground">
-                  Browse sports, esports, combat and crypto price predictions. Choose YES or NO on the outcome you believe in.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
-                2
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Scan & Send XMR</h3>
-                <p className="text-muted-foreground">
-                  Get a unique deposit address. Scan the QR with your Monero wallet. One confirmation and you're in.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
-                3
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Get Paid Automatically</h3>
-                <p className="text-muted-foreground">
-                  Winners split the pool when the market resolves. Payouts sent instantly to your wallet — no withdrawal requests.
-                </p>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
-        <Card className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/20">
-          <CardContent className="p-12 text-center">
+        <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 rounded-lg">
+          <div className="p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Get Started?
             </h2>
@@ -205,13 +218,13 @@ const Index = () => {
               Access the permissionless economy today.
             </p>
             <Link to="/get-started">
-              <Button size="lg" className="gap-2">
+              <button className="inline-flex items-center gap-2 text-base px-6 h-11 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
                 Get Started
                 <ArrowRight className="w-5 h-5" />
-              </Button>
+              </button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEO Rich Text Section */}
