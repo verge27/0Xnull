@@ -128,7 +128,7 @@ const Index = () => {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/lending">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md bg-primary text-primary-foreground font-medium neon-glow-primary transition-transform hover:scale-105 hover:bg-primary/90">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
                   <TrendingUp className="w-5 h-5" aria-hidden="true" />
                   Lending
                 </button>
@@ -152,7 +152,7 @@ const Index = () => {
                 </button>
               </Link>
               <Link to="/get-started">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md bg-primary text-primary-foreground font-medium neon-glow-primary transition-transform hover:scale-105 hover:bg-primary/90">
                   <Rocket className="w-5 h-5" aria-hidden="true" />
                   Get Started
                 </button>
