@@ -225,4 +225,34 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Lending -->
+  <url>
+    <loc>https://0xnull.io/lending</loc>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/lending/privacy</loc>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Governance -->
+  <url>
+    <loc>https://0xnull.io/governance-predictions</loc>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Creators -->
+  <url>
+    <loc>https://0xnull.io/creators</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
