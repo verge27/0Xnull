@@ -10,14 +10,17 @@ import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import { LendingPrivacyTiers } from '@/components/lending/LendingPrivacyTiers';
+import { SEORichText } from '@/components/SEORichText';
 import {
   lendingApi, type LendingPool, type LendingStatus,
   parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
+import { useSEO } from '@/hooks/useSEO';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
 
 const Lending = () => {
+  useSEO();
   const [pools, setPools] = useState<LendingPool[]>([]);
   const [status, setStatus] = useState<LendingStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -300,6 +303,28 @@ const Lending = () => {
         <div className="mt-10 mb-4">
           <LendingPrivacyTiers />
         </div>
+
+        <SEORichText
+          title="Anonymous Crypto Lending Protocol"
+          content={`
+<p>Decentralized finance continues to evolve beyond simple token swaps and staking mechanisms. Today, users are increasingly looking for anonymous crypto lending protocols that allow them to access liquidity without identity verification, custodial risk, or invasive onboarding processes. Traditional lending platforms often require account creation, compliance checks, and extensive personal data collection — creating unnecessary friction for users who simply want to lend or borrow digital assets.</p>
+
+<p>The 0xNull Lending Protocol represents a shift toward privacy-first DeFi infrastructure, where smart contracts replace intermediaries and crypto-native payments eliminate reliance on banks or third-party processors. By removing KYC requirements, users can participate in decentralized lending markets without exposing sensitive identity information. This aligns with the foundational principles of cryptocurrency: permissionless access, self-custody, and censorship resistance.</p>
+
+<h3>Why No-KYC Lending Is Gaining Momentum</h3>
+
+<p>As regulatory environments tighten and centralized platforms increase verification requirements, demand for no KYC crypto lending continues to rise. Users want:</p>
+
+<ul>
+<li>Greater control over personal data</li>
+<li>Reduced counterparty risk</li>
+<li>Transparent on-chain activity</li>
+<li>Global accessibility without banking restrictions</li>
+</ul>
+
+<p>Anonymous lending protocols meet these needs by allowing borrowers to lock collateral directly into smart contracts while lenders supply liquidity in exchange for algorithmically determined yield.</p>
+          `}
+        />
       </main>
       <Footer />
     </div>
