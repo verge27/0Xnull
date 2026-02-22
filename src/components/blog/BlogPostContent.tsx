@@ -105,6 +105,39 @@ const components: Components = {
       {children}
     </a>
   ),
+  // Tables
+  table: ({ children, ...props }) => (
+    <div className="my-8 overflow-x-auto rounded-lg border border-border">
+      <table className="w-full text-sm" {...props}>
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children, ...props }) => (
+    <thead className="bg-muted/50 border-b border-border" {...props}>
+      {children}
+    </thead>
+  ),
+  tbody: ({ children, ...props }) => (
+    <tbody className="divide-y divide-border" {...props}>
+      {children}
+    </tbody>
+  ),
+  tr: ({ children, ...props }) => (
+    <tr className="hover:bg-muted/30 transition-colors" {...props}>
+      {children}
+    </tr>
+  ),
+  th: ({ children, ...props }) => (
+    <th className="px-4 py-3 text-left font-semibold text-foreground" {...props}>
+      {children}
+    </th>
+  ),
+  td: ({ children, ...props }) => (
+    <td className="px-4 py-3 text-muted-foreground" {...props}>
+      {children}
+    </td>
+  ),
 };
 
 export function BlogPostContent({ content }: { content: string }) {
