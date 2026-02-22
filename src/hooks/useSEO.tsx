@@ -64,6 +64,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Anonymous Phone Numbers No KYC | Buy Private eSIMs with Crypto – 0xNull',
     description: 'Buy anonymous phone numbers and eSIMs with no KYC on 0xNull. Instant activation, global coverage, and crypto payments including Monero and Lightning.',
   },
+  '/lending': {
+    title: '0xNull Lending Protocol | Anonymous No-KYC Crypto Lending',
+    description: 'Access the 0xNull decentralized lending protocol with no KYC. Lend and borrow crypto anonymously with privacy-first smart contracts and transparent rates.',
+  },
   '/cashout': {
     title: 'Cash Out Crypto - 0xNull',
     description: 'Cash out your cryptocurrency anonymously. Convert XMR to fiat with privacy.',
