@@ -42,6 +42,11 @@ const staticPages = [
   { path: '/api-docs', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-15' },
   { path: '/influencer', priority: '0.5', changefreq: 'monthly', lastmod: '2024-12-15' },
   { path: '/blog', priority: '0.8', changefreq: 'daily', lastmod: '2026-01-21' },
+  { path: '/lending', priority: '0.8', changefreq: 'weekly', lastmod: '2026-02-22' },
+  { path: '/lending/privacy', priority: '0.5', changefreq: 'monthly', lastmod: '2026-02-22' },
+  { path: '/governance-predictions', priority: '0.7', changefreq: 'daily', lastmod: '2026-02-22' },
+  { path: '/creators', priority: '0.7', changefreq: 'weekly', lastmod: '2026-01-14' },
+  { path: '/flash', priority: '0.8', changefreq: 'daily', lastmod: '2026-01-14' },
 ];
 
 Deno.serve(async (req) => {
