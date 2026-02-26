@@ -34,7 +34,7 @@ export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps)
         <Shield className="w-4 h-4 text-emerald-400" />
         <h3 className="text-base font-semibold text-foreground">Aave V3 Rates — Arbitrum</h3>
       </div>
-      <p className="text-xs text-zinc-400 mb-4">Earn yield on shielded assets via Railgun</p>
+      <p className="text-xs text-zinc-400 mb-4">Deposit assets to earn yield on Arbitrum</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {loading

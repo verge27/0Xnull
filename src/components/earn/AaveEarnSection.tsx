@@ -32,8 +32,8 @@ export function AaveEarnSection({ token, shieldedBalances, enabled, onToggle }: 
       {/* Toggle bar */}
       <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Private Yield — Aave V3</h3>
-          <p className="text-sm text-zinc-400">Earn on shielded assets via Railgun × Aave on Arbitrum</p>
+          <h3 className="text-lg font-semibold text-foreground">Earn Yield — Aave V3</h3>
+          <p className="text-sm text-zinc-400">Earn yield on Aave V3 via Arbitrum</p>
         </div>
         <button
           onClick={onToggle}

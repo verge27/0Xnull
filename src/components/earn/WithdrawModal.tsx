@@ -108,8 +108,8 @@ export function WithdrawModal({ asset, position, txPending, onWithdraw, onClose 
         {step === 'confirming' && (
           <div className="flex flex-col items-center py-10 gap-4">
             <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-            <p className="text-lg text-foreground">Generating Railgun proof...</p>
-            <p className="text-sm text-zinc-400">This may take 30–60 seconds</p>
+            <p className="text-lg text-foreground">Processing withdrawal...</p>
+            <p className="text-sm text-zinc-400">This may take a moment</p>
           </div>
         )}
 
