@@ -3,12 +3,19 @@ import type { AaveRate, EarnPosition, EarnTxResponse } from '@/types/earn';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
+function buildUrl(path: string): string {
+  const url = new URL(PROXY_URL);
+  url.searchParams.set('path', `/api/lending/earn${path}`);
+  return url.toString();
+}
+
 export async function fetchAaveRates(): Promise<AaveRate[]> {
-  const res = await fetch(`${API_BASE}/earn/rates`);
+  const res = await fetch(buildUrl('/rates'), {
+    headers: { 'Content-Type': 'application/json' },
+  });
   if (!res.ok) throw new Error("Failed to fetch rates");
   const data = await res.json();
 
-  // Backend returns { rates: { USDC: {...}, DAI: {...} } } — transform to array
   const ratesDict: Record<string, any> = data.rates || data;
   return Object.entries(ratesDict).map(([symbol, r]: [string, any]) => ({
     asset: symbol,
@@ -24,9 +31,9 @@ export async function fetchAaveRates(): Promise<AaveRate[]> {
 }
 
 export async function fetchEarnPositions(token: string): Promise<EarnPosition[]> {
-  const res = await fetch(`${API_BASE}/earn/positions`, {
+  const res = await fetch(buildUrl('/positions'), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ railgun_wallet: token }),
   });
   if (!res.ok) throw new Error("Failed to fetch positions");
@@ -35,9 +42,9 @@ export async function fetchEarnPositions(token: string): Promise<EarnPosition[]>
 }
 
 export async function submitEarnDeposit(asset: string, amount: string, token: string): Promise<EarnTxResponse> {
-  const res = await fetch(`${API_BASE}/earn/deposit`, {
+  const res = await fetch(buildUrl('/deposit'), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: asset, amount, railgun_wallet: token }),
   });
   return res.json();
@@ -50,9 +57,9 @@ export async function submitEarnWithdraw(
   destination: "reshield" | "wallet",
   walletAddress?: string,
 ): Promise<EarnTxResponse> {
-  const res = await fetch(`${API_BASE}/earn/withdraw`, {
+  const res = await fetch(buildUrl('/withdraw'), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       token: asset,
       amount,
