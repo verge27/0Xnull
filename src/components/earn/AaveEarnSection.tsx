@@ -20,11 +20,6 @@ export function AaveEarnSection({ token, shieldedBalances, enabled, onToggle }: 
   const depositRate = depositAsset ? rates.find((r) => r.asset === depositAsset)?.supply_apy : undefined;
   const withdrawPosition = withdrawAsset ? positions.find((p) => p.asset === withdrawAsset) : undefined;
 
-  const handleDeposit = async (asset: string, amount: string) => {
-    const res = await deposit(asset, amount);
-    if (!res.error) refresh();
-    return res;
-  };
 
   const handleWithdraw = async (asset: string, amount: string, destination: "reshield" | "wallet", walletAddress?: string) => {
     const res = await withdraw(asset, amount, destination, walletAddress);
@@ -76,11 +71,9 @@ export function AaveEarnSection({ token, shieldedBalances, enabled, onToggle }: 
             <DepositModal
               asset={depositAsset}
               rate={depositRate}
-              shieldedBalance={shieldedBalances[depositAsset] || '0'}
-              txPending={txPending}
               token={token}
-              onDeposit={handleDeposit}
               onClose={() => setDepositAsset(null)}
+              onSuccess={refresh}
             />
           )}
 
