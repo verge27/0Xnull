@@ -7,7 +7,7 @@ import { WithdrawModal as EarnWithdrawModal } from '@/components/earn/WithdrawMo
 
 interface AaveEarnSectionProps {
   token: string | null;
-  shieldedBalances: Record<string, string>;
+  shieldedBalances?: Record<string, string>;
   enabled: boolean;
   onToggle: () => void;
 }
