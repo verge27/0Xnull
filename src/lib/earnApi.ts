@@ -31,6 +31,11 @@ export async function fetchAaveRates(): Promise<AaveRate[]> {
 }
 
 export async function fetchEarnPositions(token: string): Promise<EarnPosition[]> {
+  // The positions endpoint requires a valid Railgun wallet address (starts with 0zk).
+  // If the user only has a 0xNull token (0xn_...), skip the call — they have no earn positions.
+  if (!token.startsWith('0zk')) {
+    return [];
+  }
   const res = await fetch(buildUrl('/positions'), {
     method: "POST",
     headers: { 'Content-Type': 'application/json' },
