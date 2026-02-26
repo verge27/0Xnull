@@ -338,6 +338,19 @@ const LendingDashboard = () => {
                 )}
               </CardContent>
             </Card>
+            {/* Aave Earn Section */}
+            <AaveEarnSection
+              token={token}
+              shieldedBalances={{}}
+              enabled={earnEnabled}
+              onToggle={() => {
+                setEarnEnabled((prev) => {
+                  const next = !prev;
+                  localStorage.setItem('earn_enabled', String(next));
+                  return next;
+                });
+              }}
+            />
           </div>
         )}
       </main>
