@@ -30,6 +30,7 @@ const Lending = () => {
   const [showDegraded, setShowDegraded] = useState(false);
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
+  const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
 
   const [isStale, setIsStale] = useState(false);
 
