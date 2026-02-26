@@ -18,6 +18,15 @@ function formatApy(apy: number): string {
   return `${(apy * 100).toFixed(2)}%`;
 }
 
+function formatCompactUsd(value: string | number): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (!num || isNaN(num)) return '$0';
+  if (num >= 1e9) return `$${(num / 1e9).toFixed(1)}B`;
+  if (num >= 1e6) return `$${(num / 1e6).toFixed(1)}M`;
+  if (num >= 1e3) return `$${(num / 1e3).toFixed(1)}K`;
+  return `$${Math.round(num)}`;
+}
+
 export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps) {
   return (
     <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5">
