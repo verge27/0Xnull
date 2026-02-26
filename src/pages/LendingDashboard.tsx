@@ -18,6 +18,7 @@ import {
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
+import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
 
 const PORTFOLIO_CACHE_KEY = 'lending_portfolio_cache';
 const PORTFOLIO_CACHE_TTL = 5 * 60 * 1000;
@@ -46,6 +47,7 @@ const LendingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
+  const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
 
   // Modal states
   const [showDeposit, setShowDeposit] = useState(false);
@@ -336,6 +338,19 @@ const LendingDashboard = () => {
                 )}
               </CardContent>
             </Card>
+            {/* Aave Earn Section */}
+            <AaveEarnSection
+              token={token}
+              shieldedBalances={{}}
+              enabled={earnEnabled}
+              onToggle={() => {
+                setEarnEnabled((prev) => {
+                  const next = !prev;
+                  localStorage.setItem('earn_enabled', String(next));
+                  return next;
+                });
+              }}
+            />
           </div>
         )}
       </main>
