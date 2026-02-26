@@ -1,6 +1,7 @@
 import type { AaveRate, EarnPosition, EarnTxResponse } from '@/types/earn';
 
-const API_BASE = "https://api.0xnull.io/api/lending";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
 export async function fetchAaveRates(): Promise<AaveRate[]> {
   const res = await fetch(`${API_BASE}/earn/rates`);
