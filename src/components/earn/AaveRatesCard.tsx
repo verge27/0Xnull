@@ -18,6 +18,15 @@ function formatApy(apy: number): string {
   return `${(apy * 100).toFixed(2)}%`;
 }
 
+function formatCompactUsd(value: string | number): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (!num || isNaN(num)) return '$0';
+  if (num >= 1e9) return `$${(num / 1e9).toFixed(1)}B`;
+  if (num >= 1e6) return `$${(num / 1e6).toFixed(1)}M`;
+  if (num >= 1e3) return `$${(num / 1e3).toFixed(1)}K`;
+  return `$${Math.round(num)}`;
+}
+
 export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps) {
   return (
     <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5">
@@ -43,7 +52,7 @@ export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps)
                     <span className="text-sm font-medium text-foreground">{rate.asset}</span>
                   </div>
                   <p className="text-2xl font-bold text-emerald-400 font-mono">{formatApy(rate.supply_apy)}</p>
-                  <p className="text-xs text-zinc-400">Liquidity: {rate.liquidity_formatted}</p>
+                  <p className="text-xs text-zinc-400">Liquidity: {formatCompactUsd(rate.liquidity_formatted)}</p>
                   <button
                     onClick={() => onDeposit(rate.asset)}
                     className="mt-auto w-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg transition-colors"
