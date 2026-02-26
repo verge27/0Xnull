@@ -329,6 +329,11 @@ export function DepositModal({ asset, rate, shieldedBalance, txPending, token, o
           <>
             {railgunStep === 'input' && (
               <div className="space-y-4">
+                {!railgunEnabled && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 text-sm text-amber-300">
+                    You need to shield tokens via Railgun before using private deposits. Use the Shield tab on the main dashboard first.
+                  </div>
+                )}
                 {amountInput(shieldedBalance)}
                 {apyPanel}
                 <p className="text-[11px] text-zinc-500 leading-relaxed">
