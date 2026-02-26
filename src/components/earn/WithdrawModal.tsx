@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { X, Check, Shield, Wallet } from 'lucide-react';
+import { X, Check, Wallet } from 'lucide-react';
 
 interface WithdrawModalProps {
   asset: string;
