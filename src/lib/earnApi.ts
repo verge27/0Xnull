@@ -75,3 +75,45 @@ export async function submitEarnWithdraw(
   });
   return res.json();
 }
+
+export interface DirectDepositResponse {
+  deposit_address: string;
+  token_contract: string;
+  chain: string;
+  note: string;
+}
+
+export async function requestDirectDeposit(asset: string, amount: string, token: string): Promise<DirectDepositResponse> {
+  const res = await fetch(buildUrl('/deposit/direct'), {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      'X-0xNull-Token': token,
+    },
+    body: JSON.stringify({ asset, amount }),
+  });
+  if (!res.ok) throw new Error("Failed to request deposit address");
+  return res.json();
+}
+
+export interface DirectDepositPending {
+  deposit_id: string;
+  asset: string;
+  amount: string;
+  status: string;
+  confirmations?: number;
+  confirmations_required?: number;
+  txid?: string;
+}
+
+export async function fetchDirectDepositPending(token: string): Promise<DirectDepositPending[]> {
+  const res = await fetch(buildUrl('/deposit/direct/pending'), {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-0xNull-Token': token,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch pending deposits");
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.deposits || [];
+}
