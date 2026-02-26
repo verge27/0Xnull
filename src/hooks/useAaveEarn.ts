@@ -74,7 +74,7 @@ export function useAaveEarn(token: string | null): UseAaveEarnReturn {
     if (!token) return { error: "No token provided" };
     setTxPending(true);
     try {
-      const res = await submitEarnDeposit({ token, asset, amount });
+      const res = await submitEarnDeposit(asset, amount, token);
       if (res.status === "ok") {
         loadPositions();
         return { tx_hash: res.tx_hash };
@@ -91,7 +91,7 @@ export function useAaveEarn(token: string | null): UseAaveEarnReturn {
     if (!token) return { error: "No token provided" };
     setTxPending(true);
     try {
-      const res = await submitEarnWithdraw({ token, asset, amount, destination, wallet_address: walletAddress });
+      const res = await submitEarnWithdraw(asset, amount, token, destination, walletAddress);
       if (res.status === "ok") {
         loadPositions();
         return { tx_hash: res.tx_hash };
