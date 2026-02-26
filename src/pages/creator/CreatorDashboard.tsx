@@ -469,6 +469,7 @@ const CreatorDashboard = () => {
               );
             })}
           </div>
+        )}
           </TabsContent>
 
           <TabsContent value="ai-clone"><DashboardAICloneTab /></TabsContent>
