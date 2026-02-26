@@ -306,6 +306,22 @@ const Lending = () => {
           <LendingPrivacyTiers />
         </div>
 
+        {/* Aave Earn Section */}
+        <div className="mb-6">
+          <AaveEarnSection
+            token={token}
+            shieldedBalances={{}}
+            enabled={earnEnabled}
+            onToggle={() => {
+              setEarnEnabled((prev) => {
+                const next = !prev;
+                localStorage.setItem('earn_enabled', String(next));
+                return next;
+              });
+            }}
+          />
+        </div>
+
         <SEORichText
           title="Anonymous Crypto Lending Protocol"
           content={`
