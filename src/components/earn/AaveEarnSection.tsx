@@ -78,6 +78,7 @@ export function AaveEarnSection({ token, shieldedBalances, enabled, onToggle }: 
               rate={depositRate}
               shieldedBalance={shieldedBalances[depositAsset] || '0'}
               txPending={txPending}
+              token={token}
               onDeposit={handleDeposit}
               onClose={() => setDepositAsset(null)}
             />
