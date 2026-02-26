@@ -29,7 +29,7 @@ const EVM_ADDR = /^0x[0-9a-fA-F]{40}$/;
 export function WithdrawModal({ asset, position, txPending, onWithdraw, onClose }: WithdrawModalProps) {
   const [step, setStep] = useState<Step>('input');
   const [amount, setAmount] = useState('');
-  const [destination, setDestination] = useState<Destination>('reshield');
+  const [destination, setDestination] = useState<Destination>('wallet');
   const [walletAddress, setWalletAddress] = useState('');
   const [txHash, setTxHash] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
