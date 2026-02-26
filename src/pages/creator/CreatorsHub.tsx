@@ -52,10 +52,13 @@ const CreatorsHub = () => {
 
   const hasMore = creators.length < total;
 
+  const HIDDEN_CREATORS = ['kk_cunt'];
+  
   const filteredCreators = creators.filter(
     (creator) =>
-      (creator.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (creator.pubkey || '').toLowerCase().includes(searchQuery.toLowerCase())
+      !HIDDEN_CREATORS.includes((creator.display_name || '').toLowerCase()) &&
+      ((creator.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+       (creator.pubkey || '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const { isVerified, showModal, verify, decline } = useCreatorAgeGate();
