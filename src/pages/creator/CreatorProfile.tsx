@@ -10,7 +10,9 @@ import {
   Share2,
   Check,
   Users,
-  ArrowLeft
+  ArrowLeft,
+  Bot,
+  Mic
 } from 'lucide-react';
 
 // Safe date formatting helper
@@ -40,6 +42,8 @@ import { MediaGrid } from '@/components/creator/MediaGrid';
 import { SubscriptionCard } from '@/components/creator/SubscriptionCard';
 import { TipModal } from '@/components/creator/TipModal';
 import { CreatorDMPanel } from '@/components/creator/CreatorDMPanel';
+import { CreatorChatTab } from '@/components/creator/CreatorChatTab';
+import { CreatorVoiceTab } from '@/components/creator/CreatorVoiceTab';
 import { BundlesSection } from '@/components/creator/BundlesSection';
 import { CampaignsSection } from '@/components/creator/CampaignsSection';
 import { useCreatorAuth } from '@/hooks/useCreatorAuth';
@@ -382,6 +386,14 @@ const CreatorProfile = () => {
                       <Lock className="w-3 h-3 mr-1" />
                       Paid
                     </TabsTrigger>
+                    <TabsTrigger value="chat">
+                      <Bot className="w-3 h-3 mr-1" />
+                      Chat
+                    </TabsTrigger>
+                    <TabsTrigger value="voice">
+                      <Mic className="w-3 h-3 mr-1" />
+                      Voice
+                    </TabsTrigger>
                   </TabsList>
                   
                   {/* View toggle */}
@@ -451,7 +463,7 @@ const CreatorProfile = () => {
                           key={item.id} 
                           content={item} 
                           creator={profile}
-                          isSubscribed={true} // Free content is always accessible
+                          isSubscribed={true}
                           isOwner={isOwner}
                           onDelete={handleDeleteContent}
                         />
@@ -487,6 +499,16 @@ const CreatorProfile = () => {
                   ) : (
                     <MediaGrid content={paidContent} isSubscribed={isSubscribed} creatorId={profile.id} />
                   )}
+                </TabsContent>
+
+                {/* AI Chat Tab */}
+                <TabsContent value="chat" className="mt-0">
+                  <CreatorChatTab creator={profile} />
+                </TabsContent>
+
+                {/* Voice Tab */}
+                <TabsContent value="voice" className="mt-0">
+                  <CreatorVoiceTab creator={profile} />
                 </TabsContent>
               </Tabs>
             </div>

@@ -4,12 +4,13 @@ import {
   Plus, Eye, Unlock, Coins, Settings, LogOut, 
   MoreVertical, Pencil, Trash2, Loader2, Image as ImageIcon,
   Upload, ExternalLink, Share2, Check, Copy, Play, Film,
-  FileText, Pin, PinOff
+  FileText, Pin, PinOff, Bot, Mic, Crown, TrendingUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,9 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import CreatorUploadModal from '@/components/creator/CreatorUploadModal';
 import { CreatorNotificationBell } from '@/components/creator/CreatorNotificationBell';
+import { DashboardAICloneTab } from '@/components/creator/DashboardAICloneTab';
+import { DashboardVoiceTab } from '@/components/creator/DashboardVoiceTab';
+import { DashboardSubscriptionTab, DashboardEarningsTab } from '@/components/creator/DashboardEarningsTab';
 
 const CreatorDashboard = () => {
   const navigate = useNavigate();
@@ -233,7 +237,16 @@ const CreatorDashboard = () => {
         })()}
 
 
-        {/* Content Grid */}
+        <Tabs defaultValue="content" className="w-full">
+          <TabsList className="mb-4 flex-wrap h-auto gap-1">
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="ai-clone"><Bot className="w-3 h-3 mr-1" />AI Clone</TabsTrigger>
+            <TabsTrigger value="voice"><Mic className="w-3 h-3 mr-1" />Voice</TabsTrigger>
+            <TabsTrigger value="subscriptions"><Crown className="w-3 h-3 mr-1" />Subs</TabsTrigger>
+            <TabsTrigger value="earnings"><TrendingUp className="w-3 h-3 mr-1" />Earnings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="content">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Your Content</h2>
         </div>
@@ -456,7 +469,13 @@ const CreatorDashboard = () => {
               );
             })}
           </div>
-        )}
+          </TabsContent>
+
+          <TabsContent value="ai-clone"><DashboardAICloneTab /></TabsContent>
+          <TabsContent value="voice"><DashboardVoiceTab /></TabsContent>
+          <TabsContent value="subscriptions"><DashboardSubscriptionTab /></TabsContent>
+          <TabsContent value="earnings"><DashboardEarningsTab /></TabsContent>
+        </Tabs>
       </main>
       <Footer />
 

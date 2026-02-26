@@ -530,6 +530,144 @@ class CreatorApiClient {
 
     return response.json();
   }
+
+  // ============ AI Clone Chat Endpoints ============
+
+  async getChatInfo(creatorId: string): Promise<{ has_clone: boolean; fee_per_message_usd?: number; persona_name?: string }> {
+    return this.request(`/chat/${creatorId}/chat/info`);
+  }
+
+  async getChatHistory(creatorId: string, userToken: string): Promise<{ messages: ChatMessageItem[] }> {
+    const response = await fetch(getProxyUrl(`/chat/${creatorId}/chat/history`), {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-token': userToken,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to load chat history');
+    }
+    return response.json();
+  }
+
+  async sendChatMessage(creatorId: string, message: string, userToken: string): Promise<{ reply: string; cost_usd: number; new_balance_usd: number }> {
+    const response = await fetch(getProxyUrl(`/chat/${creatorId}/chat`), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-token': userToken,
+      },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to send message');
+    }
+    return response.json();
+  }
+
+  // ============ Voice Endpoints ============
+
+  async getVoiceInfo(creatorId: string): Promise<{ available: boolean; cost_per_message_usd?: number }> {
+    return this.request(`/voice/${creatorId}/voice-info`);
+  }
+
+  async generateVoiceMessage(creatorId: string, text: string, userToken: string): Promise<{ audio: string; format: string; cost_usd: number; new_balance_usd: number }> {
+    const response = await fetch(getProxyUrl(`/voice/${creatorId}/voice-message`), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-token': userToken,
+      },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Voice generation failed');
+    }
+    return response.json();
+  }
+
+  // ============ Subscription Endpoints ============
+
+  async subscribe(creatorId: string, userToken: string): Promise<{ payment_address: string; amount_xmr: number; expires_at: string }> {
+    const response = await fetch(getProxyUrl(`/subscriptions/${creatorId}/subscribe`), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-token': userToken,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Subscription failed');
+    }
+    return response.json();
+  }
+
+  async getMySubscriptions(userToken: string): Promise<{ subscriptions: SubscriptionItem[] }> {
+    const response = await fetch(getProxyUrl('/subscriptions/my/subscriptions'), {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-token': userToken,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to load subscriptions');
+    }
+    return response.json();
+  }
+
+  // ============ Creator Dashboard Endpoints ============
+
+  async getPaymentEarnings(): Promise<{ total_tips_xmr: number; total_content_xmr: number; total_subscriptions_xmr: number; pending_xmr: number; disbursed_xmr: number }> {
+    return this.request('/payments/earnings');
+  }
+
+  async getChatPersona(): Promise<{ persona: string; fee_per_message_usd: number; total_earned: number; unique_fans: number; messages_today: number }> {
+    return this.request('/chat/persona');
+  }
+
+  async saveChatPersona(persona: string, fee: number): Promise<void> {
+    await this.request('/chat/persona', {
+      method: 'POST',
+      body: JSON.stringify({ persona, fee_per_message_usd: fee }),
+    });
+  }
+
+  async getMyVoice(): Promise<{ voice_id?: string; status: string; total_earned: number; total_messages: number }> {
+    return this.request('/voice/my-voice');
+  }
+
+  async setSubscriptionTier(price_xmr: number): Promise<void> {
+    await this.request('/subscriptions/tier', {
+      method: 'POST',
+      body: JSON.stringify({ price_xmr }),
+    });
+  }
+
+  async getSubscriptionStats(): Promise<{ active_subscribers: number; total_revenue_xmr: number; price_xmr: number }> {
+    return this.request('/subscriptions/tier');
+  }
+}
+
+// Additional types
+export interface ChatMessageItem {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+  cost_usd?: number;
+}
+
+export interface SubscriptionItem {
+  creator_id: string;
+  creator_name: string;
+  expires_at: string;
+  price_xmr: number;
+  status: 'active' | 'expired';
 }
 
 export const creatorApi = new CreatorApiClient();

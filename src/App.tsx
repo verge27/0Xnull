@@ -73,6 +73,7 @@ const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
+const FanDashboard = lazy(() => import("./pages/FanDashboard"));
 
 // Lending
 const Lending = lazy(() => import("./pages/Lending"));
@@ -234,6 +235,9 @@ const App = () => (
                   <Route path="/creator/:creatorId/content/:contentId" element={<ContentView />} />
                   <Route path="/content/:id" element={<ContentView />} />
                   <Route path="/content/search" element={<ContentSearch />} />
+                  
+                  {/* Fan Dashboard */}
+                  <Route path="/fan/dashboard" element={<FanDashboard />} />
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

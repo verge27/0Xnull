@@ -214,28 +214,31 @@ export const Navbar = () => {
                     <span>Insights & Analysis</span>
                   </Link>
 
-                  {/* AI */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI</div>
-                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Bot className="w-5 h-5 text-primary" />
-                    <span>AI Hub</span>
-                  </Link>
-                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Voice</span>
-                  </Link>
-                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Kokoro</span>
-                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
-                  </Link>
-                  
-                  {/* Creators */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Creators</div>
+                  {/* Companions */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Companions</div>
                   <Link to="/creators" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Sparkles className="w-5 h-5 text-primary" />
                     <span>Browse Creators</span>
                   </Link>
                   <Link to="/creator/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Become a Creator</span>
+                  </Link>
+                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Kokoro</span>
+                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
+                  </Link>
+                  <Link to="/fan/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Fan Dashboard</span>
+                  </Link>
+
+                  {/* Infra */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infra</div>
+                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Bot className="w-5 h-5 text-primary" />
+                    <span>AI Hub</span>
+                  </Link>
+                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Voice</span>
                   </Link>
 
                   {/* Infrastructure */}
@@ -349,31 +352,16 @@ export const Navbar = () => {
               </Link>
             </Button>
 
-            {/* AI and Infra Dropdown */}
+            {/* Companions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <Bot className="w-4 h-4" />
-                  <span className="hidden md:inline">AI & Infra</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden md:inline">Companions</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">AI</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/ai" className="cursor-pointer">AI Hub</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
-                    Kokoro Companion
-                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded ml-2">Soon</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Creators</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link to="/creators" className="cursor-pointer flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-primary" />
@@ -384,7 +372,36 @@ export const Navbar = () => {
                   <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Infrastructure</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
+                    Kokoro Companion
+                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded ml-2">Soon</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/fan/dashboard" className="cursor-pointer">Fan Dashboard</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Infra Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <Server className="w-4 h-4" />
+                  <span className="hidden md:inline">Infra</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover">
+                <DropdownMenuItem asChild>
+                  <Link to="/ai" className="cursor-pointer">AI Hub</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/infra" className="cursor-pointer">Infrastructure Hub</Link>
                 </DropdownMenuItem>
