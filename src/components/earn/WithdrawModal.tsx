@@ -83,46 +83,17 @@ export function WithdrawModal({ asset, position, txPending, onWithdraw, onClose 
               Earning: {position.balance_formatted} {asset} (~${position.value_usd.toFixed(2)})
             </p>
 
-            {/* Destination toggle */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setDestination('reshield')}
-                className={`rounded-lg p-3 text-left transition-all border ${destination === 'reshield' ? 'border-emerald-500 bg-emerald-500/5' : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-medium text-foreground">Re-shield</span>
-                </div>
-                <p className="text-[11px] text-zinc-400">Withdraw to shielded balance</p>
-                <p className="text-[11px] text-emerald-400 mt-1">Stays private</p>
-              </button>
-              <button
-                onClick={() => setDestination('wallet')}
-                className={`rounded-lg p-3 text-left transition-all border ${destination === 'wallet' ? 'border-emerald-500 bg-emerald-500/5' : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Wallet className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm font-medium text-foreground">To Wallet</span>
-                </div>
-                <p className="text-[11px] text-zinc-400">Withdraw to external wallet</p>
-                <p className="text-[11px] text-amber-400 mt-1">Public transaction</p>
-              </button>
+            {/* Withdrawal address */}
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400">Withdrawal Address (Arbitrum)</label>
+              <input
+                type="text"
+                value={walletAddress}
+                onChange={(e) => setWalletAddress(e.target.value)}
+                placeholder="0x..."
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:border-emerald-500/50"
+              />
             </div>
-
-            {destination === 'wallet' && (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder="0x..."
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:border-emerald-500/50"
-                />
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-                  <p className="text-xs text-amber-400">⚠ Withdrawing to a public wallet reveals this amount on-chain</p>
-                </div>
-              </div>
-            )}
 
             <button
               disabled={!canSubmit}
