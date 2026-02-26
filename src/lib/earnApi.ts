@@ -1,52 +1,64 @@
-import type { AaveRate, EarnPosition, EarnDepositRequest, EarnWithdrawRequest, EarnTxResponse } from '@/types/earn';
+import type { AaveRate, EarnPosition, EarnTxResponse } from '@/types/earn';
 
 const API_BASE = "https://api.0xnull.io/api/lending";
 
 export async function fetchAaveRates(): Promise<AaveRate[]> {
   const res = await fetch(`${API_BASE}/earn/rates`);
   if (!res.ok) throw new Error("Failed to fetch rates");
-  return res.json();
-}
+  const data = await res.json();
 
-export async function fetchAaveRatesDetailed(): Promise<AaveRate[]> {
-  const res = await fetch(`${API_BASE}/earn/rates/detailed`);
-  if (!res.ok) throw new Error("Failed to fetch detailed rates");
-  return res.json();
+  // Backend returns { rates: { USDC: {...}, DAI: {...} } } — transform to array
+  const ratesDict: Record<string, any> = data.rates || data;
+  return Object.entries(ratesDict).map(([symbol, r]: [string, any]) => ({
+    asset: symbol,
+    symbol,
+    supply_apy: (r.supply_apy ?? r.supplyApy ?? 0) / 100,
+    variable_borrow_apy: (r.borrow_apy ?? r.variable_borrow_apy ?? 0) / 100,
+    liquidity: r.total_supplied ?? r.liquidity ?? '0',
+    liquidity_formatted: r.available_liquidity ?? r.liquidity_formatted ?? '0',
+    atoken_address: r.aToken ?? r.atoken_address ?? '',
+    underlying_address: r.underlying ?? r.underlying_address ?? '',
+    decimals: r.decimals ?? 18,
+  }));
 }
 
 export async function fetchEarnPositions(token: string): Promise<EarnPosition[]> {
   const res = await fetch(`${API_BASE}/earn/positions`, {
-    headers: { "Authorization": `Bearer ${token}` }
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ railgun_wallet: token }),
   });
   if (!res.ok) throw new Error("Failed to fetch positions");
-  return res.json();
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.positions || [];
 }
 
-export async function submitEarnDeposit(req: EarnDepositRequest): Promise<EarnTxResponse> {
+export async function submitEarnDeposit(asset: string, amount: string, token: string): Promise<EarnTxResponse> {
   const res = await fetch(`${API_BASE}/earn/deposit`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${req.token}`
-    },
-    body: JSON.stringify({ asset: req.asset, amount: req.amount })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: asset, amount, railgun_wallet: token }),
   });
   return res.json();
 }
 
-export async function submitEarnWithdraw(req: EarnWithdrawRequest): Promise<EarnTxResponse> {
+export async function submitEarnWithdraw(
+  asset: string,
+  amount: string,
+  token: string,
+  destination: "reshield" | "wallet",
+  walletAddress?: string,
+): Promise<EarnTxResponse> {
   const res = await fetch(`${API_BASE}/earn/withdraw`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${req.token}`
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      asset: req.asset,
-      amount: req.amount,
-      destination: req.destination,
-      wallet_address: req.wallet_address
-    })
+      token: asset,
+      amount,
+      railgun_wallet: token,
+      destination: destination === "wallet" ? "external" : "reshield",
+      ...(destination === "wallet" && walletAddress ? { external_address: walletAddress } : {}),
+    }),
   });
   return res.json();
 }
