@@ -52,6 +52,9 @@ export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps)
                     <span className="text-sm font-medium text-foreground">{rate.asset}</span>
                   </div>
                   <p className="text-2xl font-bold text-emerald-400 font-mono">{formatApy(rate.supply_apy)}</p>
+                  {rate.asset === 'wstETH' && (
+                    <p className="text-[11px] text-zinc-500 -mt-1">Yield via staking rewards (~3-4% APY)</p>
+                  )}
                   <p className="text-xs text-zinc-400">Liquidity: {formatCompactUsd(rate.liquidity_formatted)}</p>
                   <button
                     onClick={() => onDeposit(rate.asset)}
