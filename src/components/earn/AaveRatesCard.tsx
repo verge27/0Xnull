@@ -52,7 +52,7 @@ export function AaveRatesCard({ rates, loading, onDeposit }: AaveRatesCardProps)
                     <span className="text-sm font-medium text-foreground">{rate.asset}</span>
                   </div>
                   <p className="text-2xl font-bold text-emerald-400 font-mono">{formatApy(rate.supply_apy)}</p>
-                  <p className="text-xs text-zinc-400">Liquidity: {rate.liquidity_formatted}</p>
+                  <p className="text-xs text-zinc-400">Liquidity: {formatCompactUsd(rate.liquidity_formatted)}</p>
                   <button
                     onClick={() => onDeposit(rate.asset)}
                     className="mt-auto w-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg transition-colors"
