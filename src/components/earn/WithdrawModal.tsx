@@ -36,7 +36,7 @@ export function WithdrawModal({ asset, position, txPending, onWithdraw, onClose 
 
   const bal = parseFloat(position.balance_formatted) || 0;
   const amt = parseFloat(amount) || 0;
-  const addrValid = destination === 'reshield' || EVM_ADDR.test(walletAddress);
+  const addrValid = EVM_ADDR.test(walletAddress);
   const canSubmit = amt > 0 && amt <= bal && addrValid && !txPending;
 
   const handleSubmit = useCallback(async () => {
