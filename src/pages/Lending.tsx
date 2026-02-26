@@ -18,6 +18,7 @@ import {
 import { useToken } from '@/hooks/useToken';
 import { useSEO } from '@/hooks/useSEO';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
+import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
 
 const Lending = () => {
   useSEO();
@@ -29,6 +30,7 @@ const Lending = () => {
   const [showDegraded, setShowDegraded] = useState(false);
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
+  const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
 
   const [isStale, setIsStale] = useState(false);
 
@@ -302,6 +304,22 @@ const Lending = () => {
         {/* Privacy Tiers */}
         <div className="mt-10 mb-4">
           <LendingPrivacyTiers />
+        </div>
+
+        {/* Aave Earn Section */}
+        <div className="mb-6">
+          <AaveEarnSection
+            token={token}
+            shieldedBalances={{}}
+            enabled={earnEnabled}
+            onToggle={() => {
+              setEarnEnabled((prev) => {
+                const next = !prev;
+                localStorage.setItem('earn_enabled', String(next));
+                return next;
+              });
+            }}
+          />
         </div>
 
         <SEORichText
