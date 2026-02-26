@@ -18,6 +18,7 @@ import {
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
+import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
 
 const PORTFOLIO_CACHE_KEY = 'lending_portfolio_cache';
 const PORTFOLIO_CACHE_TTL = 5 * 60 * 1000;
