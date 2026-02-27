@@ -113,14 +113,12 @@ const Lending = () => {
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
   const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
 
-  // Build set of assets the user has deposits in (Aave positions + Pendle positions)
+  // Build set of assets the user has deposits in (Aave positions)
   const myDepositAssets = useMemo(() => {
     const s = new Set<string>();
     for (const p of aaveEarn.positions) s.add(p.asset || '');
-    for (const p of pendle.positions) s.add(p.deposit_token || '');
-    // Also check portfolio supplies if user has lending positions in pools
     return s;
-  }, [aaveEarn.positions, pendle.positions]);
+  }, [aaveEarn.positions]);
 
   // Compact number formatter
   const fmtCompact = (n: number) => {
