@@ -332,9 +332,7 @@ const Lending = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredRows.map((row) => {
-                        if (row.kind === 'pool') {
-                          const pool = row.pool;
+                      {filteredRows.map((pool) => {
                           const price = parseAmount(pool.price_usd);
                           const deposited = parseAmount(pool.total_deposits);
                           const util = parsePercent(pool.utilization);
@@ -389,52 +387,6 @@ const Lending = () => {
                               </td>
                             </tr>
                           );
-                        }
-
-                        // Pendle market row
-                        const m = row.market;
-                        const days = daysUntil(m.expiry);
-                        const daysColor = days < 7 ? 'text-red-400' : days < 30 ? 'text-amber-400' : 'text-zinc-500';
-                        const apyClr = m.fixed_apy_pct >= 8 ? 'text-emerald-400 font-bold' : m.fixed_apy_pct >= 4 ? 'text-emerald-400' : m.fixed_apy_pct >= 2 ? 'text-amber-400' : 'text-zinc-400';
-
-                        return (
-                          <tr
-                            key={`pendle-${m.market_address}`}
-                            className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
-                          >
-                            <td className="py-3 px-3">
-                              <AssetIcon asset={m.deposit_token} showName />
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="text-foreground mr-1.5">{m.name}</span>
-                              <VenueBadge label="Pendle" source="pendle" />
-                            </td>
-                            <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
-                              <div>{fmtCompact(m.tvl_usd)}</div>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <span className={`font-mono ${apyClr}`}>{m.fixed_apy_pct.toFixed(2)}%</span>
-                              <Lock className="w-3 h-3 text-emerald-400 inline ml-1" />
-                            </td>
-                            <td className="py-3 px-3 text-right hidden lg:table-cell">
-                              <span className="text-muted-foreground">—</span>
-                            </td>
-                            <td className="py-3 px-3 hidden md:table-cell">
-                              <span className="text-xs font-mono text-amber-400">
-                                {fmtExpiry(m.expiry)} ({days}d)
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <Button
-                                size="sm"
-                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500"
-                                onClick={() => setActiveTab('earn')}
-                              >
-                                Lock Fixed
-                              </Button>
-                            </td>
-                          </tr>
-                        );
                       })}
                     </tbody>
                   </table>
