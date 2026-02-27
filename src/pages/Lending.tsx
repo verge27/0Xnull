@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
@@ -16,8 +17,10 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
+import { usePendleEarn } from '@/hooks/usePendleEarn';
+import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter } from 'lucide-react';
 import { EarnTab } from '@/components/earn/EarnTab';
 
 const Lending = () => {
@@ -31,8 +34,14 @@ const Lending = () => {
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'earn'>('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [myDepositsOnly, setMyDepositsOnly] = useState(false);
 
   const [isStale, setIsStale] = useState(false);
+
+  // Pendle & Aave earn data for dashboard integration
+  const pendle = usePendleEarn(token);
+  const aaveEarn = useAaveEarn(token);
 
   const fetchData = useCallback(async () => {
     try {
@@ -81,6 +90,67 @@ const Lending = () => {
 
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
   const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
+
+  // Build set of assets the user has deposits in (Aave positions + Pendle positions)
+  const myDepositAssets = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of aaveEarn.positions) s.add(p.asset || '');
+    for (const p of pendle.positions) s.add(p.deposit_token || '');
+    // Also check portfolio supplies if user has lending positions in pools
+    return s;
+  }, [aaveEarn.positions, pendle.positions]);
+
+  // Compact number formatter
+  const fmtCompact = (n: number) => {
+    if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+    if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+    if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+    return `$${n.toFixed(0)}`;
+  };
+
+  const fmtExpiry = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+  const daysUntil = (iso: string) =>
+    Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
+
+  // Unified rows: pool rows + pendle market rows
+  type DashboardRow = 
+    | { kind: 'pool'; pool: LendingPool }
+    | { kind: 'pendle'; market: typeof pendle.markets[0]; comparison?: typeof pendle.comparisons[0] };
+
+  const allRows = useMemo(() => {
+    const rows: DashboardRow[] = [];
+    for (const pool of pools) rows.push({ kind: 'pool', pool });
+    for (const m of pendle.markets) {
+      const comp = pendle.comparisons.find(c => c.market_address === m.market_address);
+      rows.push({ kind: 'pendle', market: m, comparison: comp });
+    }
+    return rows;
+  }, [pools, pendle.markets, pendle.comparisons]);
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return allRows.filter(row => {
+      const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
+      const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
+      // Search filter
+      if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
+          !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
+          !(row.kind === 'pendle' && 'pendle'.includes(q))) {
+        return false;
+      }
+      // My deposits filter
+      if (myDepositsOnly) {
+        if (row.kind === 'pool') {
+          return myDepositAssets.has(row.pool.asset);
+        } else {
+          return pendle.positions.some(p => p.market_address === row.market.market_address);
+        }
+      }
+      return true;
+    });
+  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,114 +257,149 @@ const Lending = () => {
         {/* Tab content */}
         {activeTab === 'dashboard' && (
           <>
-            {/* Pools Table */}
-            {!loading && pools.length > 0 && (
+            {/* Search & Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search assets, venues (e.g. DAI, Pendle, sUSDai)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-zinc-900 border-zinc-800"
+                />
+              </div>
+              {token && (
+                <Button
+                  variant={myDepositsOnly ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setMyDepositsOnly(!myDepositsOnly)}
+                  className="gap-1.5 whitespace-nowrap"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  My Deposits
+                </Button>
+              )}
+            </div>
+
+            {/* Unified Table */}
+            {!loading && filteredRows.length > 0 && (
               <TooltipProvider>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
                         <th className="text-left py-3 px-3">Asset</th>
-                        <th className="text-right py-3 px-3 hidden md:table-cell">Price</th>
-                        <th className="text-right py-3 px-3">Total Deposited</th>
-                        <th className="text-right py-3 px-3 hidden lg:table-cell">Total Borrowed</th>
-                        <th className="text-right py-3 px-3 hidden lg:table-cell">Available</th>
-                        <th className="py-3 px-3 w-32 hidden md:table-cell">Utilization</th>
-                        <th className="text-right py-3 px-3 hidden xl:table-cell">
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">Aave Rate</TooltipTrigger>
-                            <TooltipContent><p className="text-xs max-w-48">Live rate from Aave V3 on Arbitrum, updated every 60 seconds</p></TooltipContent>
-                          </Tooltip>
-                        </th>
-                        <th className="text-right py-3 px-3">
-                          <Tooltip>
-                            <TooltipTrigger className="cursor-help">0xNull Rate</TooltipTrigger>
-                            <TooltipContent><p className="text-xs max-w-48">Rate you earn/pay through 0xNull's privacy-preserving lending</p></TooltipContent>
-                          </Tooltip>
-                        </th>
-                        <th className="text-right py-3 px-3 hidden sm:table-cell">Source</th>
+                        <th className="text-left py-3 px-3">Venue</th>
+                        <th className="text-right py-3 px-3 hidden md:table-cell">Price / TVL</th>
+                        <th className="text-right py-3 px-3">Supply APY</th>
+                        <th className="text-right py-3 px-3 hidden lg:table-cell">Borrow APY</th>
+                        <th className="py-3 px-3 w-32 hidden md:table-cell">Util / Expiry</th>
                         <th className="text-right py-3 px-3">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {pools.map((pool) => {
-                        const price = parseAmount(pool.price_usd);
-                        const deposited = parseAmount(pool.total_deposits);
-                        const borrowed = parseAmount(pool.total_borrows);
-                        const available = parseAmount(pool.available_liquidity);
-                        const util = parsePercent(pool.utilization);
-                        const supplyApy = parsePercent(pool.supply_apy);
-                        const borrowApy = parsePercent(pool.borrow_apy);
-                        const hasAave = !!pool.aave_supply_apy;
+                      {filteredRows.map((row) => {
+                        if (row.kind === 'pool') {
+                          const pool = row.pool;
+                          const price = parseAmount(pool.price_usd);
+                          const deposited = parseAmount(pool.total_deposits);
+                          const util = parsePercent(pool.utilization);
+                          const supplyApy = parsePercent(pool.supply_apy);
+                          const borrowApy = parsePercent(pool.borrow_apy);
+
+                          return (
+                            <tr
+                              key={`pool-${pool.asset}`}
+                              className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
+                              onClick={() => navigate(`/lending/pool/${pool.asset}`)}
+                            >
+                              <td className="py-3 px-3">
+                                <div className="flex items-center gap-1.5">
+                                  <AssetIcon asset={pool.asset} showName />
+                                  {pool.asset !== 'XMR' && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <ShieldCheck className="w-3 h-3 text-emerald-400/60" />
+                                      </TooltipTrigger>
+                                      <TooltipContent><p className="text-xs">Railgun ZK shielding available</p></TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {sourceLabel(pool.source)}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
+                                <div>${price < 10 ? price.toFixed(4) : price.toFixed(2)}</div>
+                                <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)} dep.</div>
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
+                                <span className="text-muted-foreground text-xs ml-1">~</span>
+                              </td>
+                              <td className="py-3 px-3 text-right hidden lg:table-cell">
+                                <span className="font-mono text-amber-400">{borrowApy.toFixed(2)}%</span>
+                              </td>
+                              <td className="py-3 px-3 hidden md:table-cell">
+                                <UtilizationBar percent={util} />
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
+                                  <Button size="sm" variant="default" asChild className="h-7 text-xs">
+                                    <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
+                                  </Button>
+                                  <Button size="sm" variant="outline" asChild className="h-7 text-xs">
+                                    <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // Pendle market row
+                        const m = row.market;
+                        const days = daysUntil(m.expiry);
+                        const daysColor = days < 7 ? 'text-red-400' : days < 30 ? 'text-amber-400' : 'text-zinc-500';
+                        const apyClr = m.fixed_apy_pct >= 8 ? 'text-emerald-400 font-bold' : m.fixed_apy_pct >= 4 ? 'text-emerald-400' : m.fixed_apy_pct >= 2 ? 'text-amber-400' : 'text-zinc-400';
 
                         return (
                           <tr
-                            key={pool.asset}
-                            className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/lending/pool/${pool.asset}`)}
+                            key={`pendle-${m.market_address}`}
+                            className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
                           >
                             <td className="py-3 px-3">
-                              <div className="flex items-center gap-1.5">
-                                <AssetIcon asset={pool.asset} showName />
-                                {pool.asset !== 'XMR' && (
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <ShieldCheck className="w-3 h-3 text-emerald-400/60" />
-                                    </TooltipTrigger>
-                                    <TooltipContent><p className="text-xs">Railgun ZK shielding available for deposits and withdrawals</p></TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </div>
+                              <AssetIcon asset={m.deposit_token} showName />
                             </td>
-                            <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
-                              ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
+                            <td className="py-3 px-3">
+                              <span className="text-foreground">{m.name}</span>
+                              <span className="ml-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] bg-teal-500/20 text-teal-400">Pendle</span>
+                            </td>
+                            <td className="py-3 px-3 text-right text-xs text-muted-foreground hidden md:table-cell">
+                              {fmtCompact(m.tvl_usd)}
                             </td>
                             <td className="py-3 px-3 text-right">
-                              <div className="font-mono">{deposited.toFixed(2)}</div>
-                              <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)}</div>
+                              <span className={`font-mono ${apyClr}`}>{m.fixed_apy_pct.toFixed(2)}%</span>
+                              <Lock className="w-3 h-3 text-emerald-400 inline ml-1" />
                             </td>
                             <td className="py-3 px-3 text-right hidden lg:table-cell">
-                              <div className="font-mono">{borrowed.toFixed(2)}</div>
-                              <div className="text-xs text-muted-foreground">{formatUsd(borrowed * price)}</div>
-                            </td>
-                            <td className="py-3 px-3 text-right hidden lg:table-cell font-mono">
-                              {available.toFixed(2)}
+                              <span className="text-muted-foreground">—</span>
                             </td>
                             <td className="py-3 px-3 hidden md:table-cell">
-                              <UtilizationBar percent={util} />
-                            </td>
-                            <td className="py-3 px-3 text-right hidden xl:table-cell">
-                              {hasAave ? (
-                                <div>
-                                  <span className="font-mono text-green-400/70 text-xs">{parsePercent(pool.aave_supply_apy!).toFixed(2)}%</span>
-                                  <span className="text-muted-foreground mx-1">/</span>
-                                  <span className="font-mono text-amber-400/70 text-xs">{parsePercent(pool.aave_borrow_apy!).toFixed(2)}%</span>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
+                              <span className={`text-xs ${daysColor}`}>
+                                {fmtExpiry(m.expiry)} ({days}d)
+                              </span>
                             </td>
                             <td className="py-3 px-3 text-right">
-                              <div>
-                                <span className="font-mono text-green-400 text-xs">{supplyApy.toFixed(2)}%</span>
-                                <span className="text-muted-foreground mx-1">/</span>
-                                <span className="font-mono text-amber-400 text-xs">{borrowApy.toFixed(2)}%</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-right hidden sm:table-cell">
-                              <Badge variant="outline" className="text-xs">
-                                {sourceLabel(pool.source)}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
-                                <Button size="sm" variant="default" asChild className="h-7 text-xs">
-                                  <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
-                                </Button>
-                                <Button size="sm" variant="outline" asChild className="h-7 text-xs">
-                                  <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
-                                </Button>
-                              </div>
+                              <Button
+                                size="sm"
+                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500"
+                                onClick={() => setActiveTab('earn')}
+                              >
+                                Lock Fixed
+                              </Button>
                             </td>
                           </tr>
                         );
@@ -306,10 +411,15 @@ const Lending = () => {
             )}
 
             {/* Empty state */}
-            {!loading && !error && pools.length === 0 && (
+            {!loading && !error && filteredRows.length === 0 && (
               <div className="text-center py-16 text-muted-foreground">
                 <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No lending pools available</p>
+                <p>{searchQuery || myDepositsOnly ? 'No matching assets found' : 'No lending pools available'}</p>
+                {myDepositsOnly && (
+                  <Button variant="ghost" size="sm" className="mt-2" onClick={() => setMyDepositsOnly(false)}>
+                    Show all assets
+                  </Button>
+                )}
               </div>
             )}
 
