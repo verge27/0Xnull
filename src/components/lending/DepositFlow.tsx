@@ -172,9 +172,9 @@ export const DepositFlow = ({ open, onClose, asset: defaultAsset, token, onSucce
               </div>
             </div>
 
-            {isXmr && deposit.deposit_address && (
+            {deposit.deposit_address && (
               <div className="flex justify-center p-4 bg-white rounded-lg">
-                <QRCodeSVG value={`monero:${deposit.deposit_address}?tx_amount=${deposit.amount}`} size={180} />
+                <QRCodeSVG value={isXmr ? `monero:${deposit.deposit_address}?tx_amount=${deposit.amount}` : deposit.deposit_address} size={180} />
               </div>
             )}
 
