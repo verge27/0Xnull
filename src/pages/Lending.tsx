@@ -20,8 +20,11 @@ import { useToken } from '@/hooks/useToken';
 import { usePendleEarn } from '@/hooks/usePendleEarn';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { EarnTab } from '@/components/earn/EarnTab';
+
+type SortKey = 'asset' | 'venue' | 'price' | 'supplyApy' | 'borrowApy' | 'util';
+type SortDir = 'asc' | 'desc';
 
 const Lending = () => {
   useSEO();
@@ -38,6 +41,8 @@ const Lending = () => {
   const [myDepositsOnly, setMyDepositsOnly] = useState(false);
 
   const [isStale, setIsStale] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('supplyApy');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   // Pendle & Aave earn data for dashboard integration
   const pendle = usePendleEarn(token);
@@ -129,18 +134,49 @@ const Lending = () => {
     return rows;
   }, [pools, pendle.markets, pendle.comparisons]);
 
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const getSortValue = (row: DashboardRow, key: SortKey): number | string => {
+    if (row.kind === 'pool') {
+      const p = row.pool;
+      switch (key) {
+        case 'asset': return p.asset.toLowerCase();
+        case 'venue': return sourceLabel(p.source).toLowerCase();
+        case 'price': return parseAmount(p.price_usd) * parseAmount(p.total_deposits);
+        case 'supplyApy': return parsePercent(p.supply_apy);
+        case 'borrowApy': return parsePercent(p.borrow_apy);
+        case 'util': return parsePercent(p.utilization);
+      }
+    } else {
+      const m = row.market;
+      switch (key) {
+        case 'asset': return m.deposit_token.toLowerCase();
+        case 'venue': return m.name.toLowerCase();
+        case 'price': return m.tvl_usd;
+        case 'supplyApy': return m.fixed_apy_pct;
+        case 'borrowApy': return 0;
+        case 'util': return new Date(m.expiry).getTime();
+      }
+    }
+  };
+
   const filteredRows = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return allRows.filter(row => {
+    const filtered = allRows.filter(row => {
       const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
       const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
-      // Search filter
       if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
           !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
           !(row.kind === 'pendle' && 'pendle'.includes(q))) {
         return false;
       }
-      // My deposits filter
       if (myDepositsOnly) {
         if (row.kind === 'pool') {
           return myDepositAssets.has(row.pool.asset);
@@ -150,7 +186,14 @@ const Lending = () => {
       }
       return true;
     });
-  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions]);
+
+    return filtered.sort((a, b) => {
+      const va = getSortValue(a, sortKey);
+      const vb = getSortValue(b, sortKey);
+      const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions, sortKey, sortDir]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -288,12 +331,29 @@ const Lending = () => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                        <th className="text-left py-3 px-3">Asset</th>
-                        <th className="text-left py-3 px-3">Venue</th>
-                        <th className="text-right py-3 px-3 hidden md:table-cell">Price / TVL</th>
-                        <th className="text-right py-3 px-3">Supply APY</th>
-                        <th className="text-right py-3 px-3 hidden lg:table-cell">Borrow APY</th>
-                        <th className="py-3 px-3 w-32 hidden md:table-cell">Util / Expiry</th>
+                        {([
+                          { key: 'asset' as SortKey, label: 'Asset', align: 'text-left', hide: '' },
+                          { key: 'venue' as SortKey, label: 'Venue', align: 'text-left', hide: '' },
+                          { key: 'price' as SortKey, label: 'Price / TVL', align: 'text-right', hide: 'hidden md:table-cell' },
+                          { key: 'supplyApy' as SortKey, label: 'Supply APY', align: 'text-right', hide: '' },
+                          { key: 'borrowApy' as SortKey, label: 'Borrow APY', align: 'text-right', hide: 'hidden lg:table-cell' },
+                          { key: 'util' as SortKey, label: 'Util / Expiry', align: 'text-left', hide: 'hidden md:table-cell' },
+                        ]).map(col => (
+                          <th
+                            key={col.key}
+                            className={`${col.align} py-3 px-3 ${col.hide} cursor-pointer select-none hover:text-foreground transition-colors`}
+                            onClick={() => toggleSort(col.key)}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {col.label}
+                              {sortKey === col.key ? (
+                                sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                              ) : (
+                                <ArrowUpDown className="w-3 h-3 opacity-30" />
+                              )}
+                            </span>
+                          </th>
+                        ))}
                         <th className="text-right py-3 px-3">Actions</th>
                       </tr>
                     </thead>
