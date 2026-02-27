@@ -10,6 +10,14 @@ import type {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
+/** Map exotic ticker symbols back to what the backend expects */
+const ASSET_NORMALIZE: Record<string, string> = {
+  'USD₮0': 'USDT',
+};
+function normalizeAsset(asset: string): string {
+  return ASSET_NORMALIZE[asset] || asset;
+}
+
 function buildUrl(path: string): string {
   const url = new URL(PROXY_URL);
   url.searchParams.set('path', `/api/lending/morpho${path}`);
@@ -43,7 +51,7 @@ export async function submitMorphoDeposit(req: MorphoDepositRequest): Promise<Mo
       'Content-Type': 'application/json',
       'X-0xNull-Token': token,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, asset: normalizeAsset(body.asset) }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Deposit failed' }));
