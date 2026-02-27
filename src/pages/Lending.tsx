@@ -17,7 +17,6 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { usePendleEarn } from '@/hooks/usePendleEarn';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
