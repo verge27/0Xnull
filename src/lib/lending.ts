@@ -40,8 +40,9 @@ export interface LendingPoolDetail {
 
 export interface LendingStatus {
   healthy: boolean;
+  oracle?: { degraded: boolean; sources: Record<string, boolean>; active_count: number };
   oracle_degraded?: boolean;
-  circuit_breaker?: boolean;
+  circuit_breaker?: { borrows_halted: boolean; liquidations_halted: boolean };
   message?: string;
 }
 
