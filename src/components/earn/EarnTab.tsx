@@ -282,9 +282,16 @@ export function EarnTab({ token }: EarnTabProps) {
                             <>
                               <span className="inline-block rounded px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-400">Morpho</span>
                               {venue.curator && (
-                                <span className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] capitalize ${CURATOR_COLORS[venue.curator.toLowerCase()] || 'bg-zinc-700 text-zinc-300'}`}>
-                                  {venue.curator}
-                                </span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] capitalize cursor-help ${CURATOR_COLORS[venue.curator.toLowerCase()] || 'bg-zinc-700 text-zinc-300'}`}>
+                                      {venue.curator}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs">
+                                    {CURATOR_TOOLTIPS[venue.curator.toLowerCase()] || venue.curator}
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </>
                           )}
