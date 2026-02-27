@@ -200,7 +200,7 @@ const Lending = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Circuit Breaker Banner — only shown after 60s of degradation */}
-        {showDegraded && status?.circuit_breaker?.borrows_halted && (
+        {showDegraded && (typeof status?.circuit_breaker === 'object' ? status.circuit_breaker.borrows_halted : status?.circuit_breaker) && (
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 mb-6">
             <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
             <div>
