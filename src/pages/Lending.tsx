@@ -19,7 +19,7 @@ import {
 import { useToken } from '@/hooks/useToken';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { EarnTab } from '@/components/earn/EarnTab';
 
 type SortKey = 'asset' | 'venue' | 'price' | 'supplyApy' | 'borrowApy' | 'util';
