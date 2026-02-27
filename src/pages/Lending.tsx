@@ -146,7 +146,18 @@ const Lending = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button asChild><Link to="/lending/portfolio">Dashboard</Link></Button>
+              <Button
+                variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('dashboard')}
+              >
+                Dashboard
+              </Button>
+              <Button
+                variant={activeTab === 'earn' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('earn')}
+              >
+                Earn
+              </Button>
               <Button variant="outline" asChild><Link to="/lending/liquidations">Liquidations</Link></Button>
               <Button variant="ghost" size="sm" asChild className="text-xs"><Link to="/lending/privacy">Privacy</Link></Button>
             </div>
