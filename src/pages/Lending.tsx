@@ -26,6 +26,25 @@ import { EarnTab } from '@/components/earn/EarnTab';
 type SortKey = 'asset' | 'venue' | 'price' | 'supplyApy' | 'borrowApy' | 'util';
 type SortDir = 'asc' | 'desc';
 
+// Venue badge color map — keyed by lowercase venue/source name
+const VENUE_COLORS: Record<string, string> = {
+  'xmr pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
+  'aave v3':         'bg-sky-500/15 text-sky-400 border-sky-500/30',
+  'aave_arbitrum':   'bg-sky-500/15 text-sky-400 border-sky-500/30',
+  'pendle':          'bg-teal-500/15 text-teal-400 border-teal-500/30',
+  'xmr_pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
+};
+
+const VenueBadge = ({ label, source }: { label: string; source?: string }) => {
+  const key = (source || label).toLowerCase();
+  const colors = VENUE_COLORS[key] || 'bg-muted/50 text-muted-foreground border-border';
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium border ${colors}`}>
+      {label}
+    </span>
+  );
+};
+
 const Lending = () => {
   useSEO();
   const [pools, setPools] = useState<LendingPool[]>([]);
@@ -387,9 +406,7 @@ const Lending = () => {
                                 </div>
                               </td>
                               <td className="py-3 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {sourceLabel(pool.source)}
-                                </Badge>
+                                <VenueBadge label={sourceLabel(pool.source)} source={pool.source} />
                               </td>
                               <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
                                 <div>${price < 10 ? price.toFixed(4) : price.toFixed(2)}</div>
@@ -434,8 +451,8 @@ const Lending = () => {
                               <AssetIcon asset={m.deposit_token} showName />
                             </td>
                             <td className="py-3 px-3">
-                              <span className="text-foreground">{m.name}</span>
-                              <span className="ml-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] bg-teal-500/20 text-teal-400">Pendle</span>
+                              <span className="text-foreground mr-1.5">{m.name}</span>
+                              <VenueBadge label="Pendle" source="pendle" />
                             </td>
                             <td className="py-3 px-3 text-right text-xs text-muted-foreground hidden md:table-cell">
                               {fmtCompact(m.tvl_usd)}
