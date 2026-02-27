@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Lock, TrendingUp, AlertTriangle, Vault } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { usePendleEarn } from '@/hooks/usePendleEarn';
