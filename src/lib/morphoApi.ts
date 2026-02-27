@@ -51,7 +51,7 @@ export async function submitMorphoDeposit(req: MorphoDepositRequest): Promise<Mo
       'Content-Type': 'application/json',
       'X-0xNull-Token': token,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, asset: normalizeAsset(body.asset) }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Deposit failed' }));
