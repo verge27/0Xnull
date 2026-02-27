@@ -20,8 +20,11 @@ import { useToken } from '@/hooks/useToken';
 import { usePendleEarn } from '@/hooks/usePendleEarn';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { EarnTab } from '@/components/earn/EarnTab';
+
+type SortKey = 'asset' | 'venue' | 'price' | 'supplyApy' | 'borrowApy' | 'util';
+type SortDir = 'asc' | 'desc';
 
 const Lending = () => {
   useSEO();
