@@ -303,7 +303,7 @@ const Lending = () => {
                           { key: 'price' as SortKey, label: 'Price / TVL', align: 'text-right', hide: 'hidden md:table-cell' },
                           { key: 'supplyApy' as SortKey, label: 'Supply APY', align: 'text-right', hide: '' },
                           { key: 'borrowApy' as SortKey, label: 'Borrow APY', align: 'text-right', hide: 'hidden lg:table-cell' },
-                          { key: 'util' as SortKey, label: 'Util / Expiry', align: 'text-left', hide: 'hidden md:table-cell' },
+                          { key: 'util' as SortKey, label: 'Utilization', align: 'text-left', hide: 'hidden md:table-cell' },
                         ]).map(col => (
                           <th
                             key={col.key}
