@@ -62,8 +62,7 @@ const Lending = () => {
   const [sortKey, setSortKey] = useState<SortKey>('supplyApy');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  // Pendle & Aave earn data for dashboard integration
-  const pendle = usePendleEarn(token);
+  // Aave earn data for dashboard integration
   const aaveEarn = useAaveEarn(token);
 
   const fetchData = useCallback(async () => {
