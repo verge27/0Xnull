@@ -78,6 +78,12 @@ const CURATOR_COLORS: Record<string, string> = {
   hyperithm: 'bg-violet-500/20 text-violet-400',
 };
 
+const CURATOR_TOOLTIPS: Record<string, string> = {
+  steakhouse: 'Steakhouse Financial — institutional risk manager. Conservative allocation across high-quality collateral markets.',
+  gauntlet: 'Gauntlet — quantitative risk modelling. Algorithmic allocation optimized for risk-adjusted yield.',
+  hyperithm: 'Hyperithm — Asia-focused digital asset manager. Higher yield tolerance with active market selection.',
+};
+
 // ── Component ───────────────────────────────────────────
 
 export function EarnTab({ token }: EarnTabProps) {
