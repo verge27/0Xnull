@@ -19,6 +19,7 @@ import { useToken } from '@/hooks/useToken';
 import { useSEO } from '@/hooks/useSEO';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
 import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
+import { PendleEarnSection } from '@/components/pendle/PendleEarnSection';
 
 const Lending = () => {
   useSEO();
