@@ -91,6 +91,67 @@ const Lending = () => {
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
   const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
 
+  // Build set of assets the user has deposits in (Aave positions + Pendle positions)
+  const myDepositAssets = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of aaveEarn.positions) s.add(p.asset || '');
+    for (const p of pendle.positions) s.add(p.deposit_token || '');
+    // Also check portfolio supplies if user has lending positions in pools
+    return s;
+  }, [aaveEarn.positions, pendle.positions]);
+
+  // Compact number formatter
+  const fmtCompact = (n: number) => {
+    if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+    if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+    if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+    return `$${n.toFixed(0)}`;
+  };
+
+  const fmtExpiry = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+  const daysUntil = (iso: string) =>
+    Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
+
+  // Unified rows: pool rows + pendle market rows
+  type DashboardRow = 
+    | { kind: 'pool'; pool: LendingPool }
+    | { kind: 'pendle'; market: typeof pendle.markets[0]; comparison?: typeof pendle.comparisons[0] };
+
+  const allRows = useMemo(() => {
+    const rows: DashboardRow[] = [];
+    for (const pool of pools) rows.push({ kind: 'pool', pool });
+    for (const m of pendle.markets) {
+      const comp = pendle.comparisons.find(c => c.market_address === m.market_address);
+      rows.push({ kind: 'pendle', market: m, comparison: comp });
+    }
+    return rows;
+  }, [pools, pendle.markets, pendle.comparisons]);
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return allRows.filter(row => {
+      const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
+      const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
+      // Search filter
+      if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
+          !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
+          !(row.kind === 'pendle' && 'pendle'.includes(q))) {
+        return false;
+      }
+      // My deposits filter
+      if (myDepositsOnly) {
+        if (row.kind === 'pool') {
+          return myDepositAssets.has(row.pool.asset);
+        } else {
+          return pendle.positions.some(p => p.market_address === row.market.market_address);
+        }
+      }
+      return true;
+    });
+  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
