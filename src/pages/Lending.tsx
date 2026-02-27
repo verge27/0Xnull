@@ -224,9 +224,9 @@ const Lending = () => {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">Lending Protocol</h1>
             {status && (
-              <Badge variant="outline" className={`gap-1 ${!showDegraded || status.healthy ? 'border-green-500/50 text-green-400' : status.oracle_degraded ? 'border-amber-500/50 text-amber-400' : 'border-red-500/50 text-red-400'}`}>
+              <Badge variant="outline" className={`gap-1 ${!showDegraded || status.healthy ? 'border-green-500/50 text-green-400' : (status.oracle?.degraded || status.oracle_degraded) ? 'border-amber-500/50 text-amber-400' : 'border-red-500/50 text-red-400'}`}>
                 <Activity className="w-3 h-3" />
-                {!showDegraded || status.healthy ? 'Operational' : status.oracle_degraded ? 'Oracle Degraded' : 'Circuit Breaker'}
+                {!showDegraded || status.healthy ? 'Operational' : (status.oracle?.degraded || status.oracle_degraded) ? 'Oracle Degraded' : 'Circuit Breaker'}
               </Badge>
             )}
           </div>
