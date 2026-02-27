@@ -324,6 +324,21 @@ const Lending = () => {
           />
         </div>
 
+        {/* Pendle Earn Section */}
+        <div className="mb-6">
+          <PendleEarnSection
+            token={token}
+            enabled={pendleEnabled}
+            onToggle={() => {
+              setPendleEnabled((prev) => {
+                const next = !prev;
+                localStorage.setItem('0xnull_pendle_enabled', String(next));
+                return next;
+              });
+            }}
+          />
+        </div>
+
         <SEORichText
           title="Anonymous Crypto Lending Protocol"
           content={`

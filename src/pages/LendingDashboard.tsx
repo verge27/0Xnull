@@ -353,6 +353,18 @@ const LendingDashboard = () => {
                 });
               }}
             />
+            {/* Pendle Earn Section */}
+            <PendleEarnSection
+              token={token}
+              enabled={pendleEnabled}
+              onToggle={() => {
+                setPendleEnabled((prev) => {
+                  const next = !prev;
+                  localStorage.setItem('0xnull_pendle_enabled', String(next));
+                  return next;
+                });
+              }}
+            />
           </div>
         )}
       </main>
