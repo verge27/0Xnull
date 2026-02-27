@@ -134,18 +134,49 @@ const Lending = () => {
     return rows;
   }, [pools, pendle.markets, pendle.comparisons]);
 
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const getSortValue = (row: DashboardRow, key: SortKey): number | string => {
+    if (row.kind === 'pool') {
+      const p = row.pool;
+      switch (key) {
+        case 'asset': return p.asset.toLowerCase();
+        case 'venue': return sourceLabel(p.source).toLowerCase();
+        case 'price': return parseAmount(p.price_usd) * parseAmount(p.total_deposits);
+        case 'supplyApy': return parsePercent(p.supply_apy);
+        case 'borrowApy': return parsePercent(p.borrow_apy);
+        case 'util': return parsePercent(p.utilization);
+      }
+    } else {
+      const m = row.market;
+      switch (key) {
+        case 'asset': return m.deposit_token.toLowerCase();
+        case 'venue': return m.name.toLowerCase();
+        case 'price': return m.tvl_usd;
+        case 'supplyApy': return m.fixed_apy_pct;
+        case 'borrowApy': return 0;
+        case 'util': return new Date(m.expiry).getTime();
+      }
+    }
+  };
+
   const filteredRows = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return allRows.filter(row => {
+    const filtered = allRows.filter(row => {
       const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
       const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
-      // Search filter
       if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
           !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
           !(row.kind === 'pendle' && 'pendle'.includes(q))) {
         return false;
       }
-      // My deposits filter
       if (myDepositsOnly) {
         if (row.kind === 'pool') {
           return myDepositAssets.has(row.pool.asset);
@@ -155,7 +186,14 @@ const Lending = () => {
       }
       return true;
     });
-  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions]);
+
+    return filtered.sort((a, b) => {
+      const va = getSortValue(a, sortKey);
+      const vb = getSortValue(b, sortKey);
+      const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions, sortKey, sortDir]);
 
   return (
     <div className="min-h-screen bg-background">
