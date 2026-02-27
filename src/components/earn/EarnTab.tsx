@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Lock, TrendingUp, AlertTriangle, Vault } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { usePendleEarn } from '@/hooks/usePendleEarn';
@@ -75,6 +76,12 @@ const CURATOR_COLORS: Record<string, string> = {
   steakhouse: 'bg-amber-500/20 text-amber-400',
   gauntlet: 'bg-blue-500/20 text-blue-400',
   hyperithm: 'bg-violet-500/20 text-violet-400',
+};
+
+const CURATOR_TOOLTIPS: Record<string, string> = {
+  steakhouse: 'Steakhouse Financial — institutional risk manager. Conservative allocation across high-quality collateral markets.',
+  gauntlet: 'Gauntlet — quantitative risk modelling. Algorithmic allocation optimized for risk-adjusted yield.',
+  hyperithm: 'Hyperithm — Asia-focused digital asset manager. Higher yield tolerance with active market selection.',
 };
 
 // ── Component ───────────────────────────────────────────
@@ -275,9 +282,16 @@ export function EarnTab({ token }: EarnTabProps) {
                             <>
                               <span className="inline-block rounded px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-400">Morpho</span>
                               {venue.curator && (
-                                <span className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] capitalize ${CURATOR_COLORS[venue.curator.toLowerCase()] || 'bg-zinc-700 text-zinc-300'}`}>
-                                  {venue.curator}
-                                </span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] capitalize cursor-help ${CURATOR_COLORS[venue.curator.toLowerCase()] || 'bg-zinc-700 text-zinc-300'}`}>
+                                      {venue.curator}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs">
+                                    {CURATOR_TOOLTIPS[venue.curator.toLowerCase()] || venue.curator}
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </>
                           )}
