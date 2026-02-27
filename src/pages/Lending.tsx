@@ -30,8 +30,7 @@ const Lending = () => {
   const [showDegraded, setShowDegraded] = useState(false);
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
-  const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
-  const [pendleEnabled, setPendleEnabled] = useState(() => localStorage.getItem('0xnull_pendle_enabled') === 'true');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'earn'>('dashboard');
 
   const [isStale, setIsStale] = useState(false);
 
