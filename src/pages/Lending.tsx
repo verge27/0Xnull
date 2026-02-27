@@ -184,169 +184,145 @@ const Lending = () => {
           </div>
         )}
 
-        {/* Pools Table */}
-        {!loading && pools.length > 0 && (
-          <TooltipProvider>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                    <th className="text-left py-3 px-3">Asset</th>
-                    <th className="text-right py-3 px-3 hidden md:table-cell">Price</th>
-                    <th className="text-right py-3 px-3">Total Deposited</th>
-                    <th className="text-right py-3 px-3 hidden lg:table-cell">Total Borrowed</th>
-                    <th className="text-right py-3 px-3 hidden lg:table-cell">Available</th>
-                    <th className="py-3 px-3 w-32 hidden md:table-cell">Utilization</th>
-                    <th className="text-right py-3 px-3 hidden xl:table-cell">
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-help">Aave Rate</TooltipTrigger>
-                        <TooltipContent><p className="text-xs max-w-48">Live rate from Aave V3 on Arbitrum, updated every 60 seconds</p></TooltipContent>
-                      </Tooltip>
-                    </th>
-                    <th className="text-right py-3 px-3">
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-help">0xNull Rate</TooltipTrigger>
-                        <TooltipContent><p className="text-xs max-w-48">Rate you earn/pay through 0xNull's privacy-preserving lending</p></TooltipContent>
-                      </Tooltip>
-                    </th>
-                    <th className="text-right py-3 px-3 hidden sm:table-cell">Source</th>
-                    <th className="text-right py-3 px-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pools.map((pool) => {
-                    const price = parseAmount(pool.price_usd);
-                    const deposited = parseAmount(pool.total_deposits);
-                    const borrowed = parseAmount(pool.total_borrows);
-                    const available = parseAmount(pool.available_liquidity);
-                    const util = parsePercent(pool.utilization);
-                    const supplyApy = parsePercent(pool.supply_apy);
-                    const borrowApy = parsePercent(pool.borrow_apy);
-                    const hasAave = !!pool.aave_supply_apy;
-
-                    return (
-                      <tr
-                        key={pool.asset}
-                        className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
-                        onClick={() => navigate(`/lending/pool/${pool.asset}`)}
-                      >
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-1.5">
-                            <AssetIcon asset={pool.asset} showName />
-                            {pool.asset !== 'XMR' && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <ShieldCheck className="w-3 h-3 text-emerald-400/60" />
-                                </TooltipTrigger>
-                                <TooltipContent><p className="text-xs">Railgun ZK shielding available for deposits and withdrawals</p></TooltipContent>
-                              </Tooltip>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
-                          ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <div className="font-mono">{deposited.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)}</div>
-                        </td>
-                        <td className="py-3 px-3 text-right hidden lg:table-cell">
-                          <div className="font-mono">{borrowed.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">{formatUsd(borrowed * price)}</div>
-                        </td>
-                        <td className="py-3 px-3 text-right hidden lg:table-cell font-mono">
-                          {available.toFixed(2)}
-                        </td>
-                        <td className="py-3 px-3 hidden md:table-cell">
-                          <UtilizationBar percent={util} />
-                        </td>
-                        {/* Aave Rate Column */}
-                        <td className="py-3 px-3 text-right hidden xl:table-cell">
-                          {hasAave ? (
-                            <div>
-                              <span className="font-mono text-green-400/70 text-xs">{parsePercent(pool.aave_supply_apy!).toFixed(2)}%</span>
-                              <span className="text-muted-foreground mx-1">/</span>
-                              <span className="font-mono text-amber-400/70 text-xs">{parsePercent(pool.aave_borrow_apy!).toFixed(2)}%</span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </td>
-                        {/* 0xNull Rate Column */}
-                        <td className="py-3 px-3 text-right">
-                          <div>
-                            <span className="font-mono text-green-400 text-xs">{supplyApy.toFixed(2)}%</span>
-                            <span className="text-muted-foreground mx-1">/</span>
-                            <span className="font-mono text-amber-400 text-xs">{borrowApy.toFixed(2)}%</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-right hidden sm:table-cell">
-                          <Badge variant="outline" className="text-xs">
-                            {sourceLabel(pool.source)}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
-                            <Button size="sm" variant="default" asChild className="h-7 text-xs">
-                              <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
-                            </Button>
-                            <Button size="sm" variant="outline" asChild className="h-7 text-xs">
-                              <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
-                            </Button>
-                          </div>
-                        </td>
+        {/* Tab content */}
+        {activeTab === 'dashboard' && (
+          <>
+            {/* Pools Table */}
+            {!loading && pools.length > 0 && (
+              <TooltipProvider>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+                        <th className="text-left py-3 px-3">Asset</th>
+                        <th className="text-right py-3 px-3 hidden md:table-cell">Price</th>
+                        <th className="text-right py-3 px-3">Total Deposited</th>
+                        <th className="text-right py-3 px-3 hidden lg:table-cell">Total Borrowed</th>
+                        <th className="text-right py-3 px-3 hidden lg:table-cell">Available</th>
+                        <th className="py-3 px-3 w-32 hidden md:table-cell">Utilization</th>
+                        <th className="text-right py-3 px-3 hidden xl:table-cell">
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">Aave Rate</TooltipTrigger>
+                            <TooltipContent><p className="text-xs max-w-48">Live rate from Aave V3 on Arbitrum, updated every 60 seconds</p></TooltipContent>
+                          </Tooltip>
+                        </th>
+                        <th className="text-right py-3 px-3">
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help">0xNull Rate</TooltipTrigger>
+                            <TooltipContent><p className="text-xs max-w-48">Rate you earn/pay through 0xNull's privacy-preserving lending</p></TooltipContent>
+                          </Tooltip>
+                        </th>
+                        <th className="text-right py-3 px-3 hidden sm:table-cell">Source</th>
+                        <th className="text-right py-3 px-3">Actions</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {pools.map((pool) => {
+                        const price = parseAmount(pool.price_usd);
+                        const deposited = parseAmount(pool.total_deposits);
+                        const borrowed = parseAmount(pool.total_borrows);
+                        const available = parseAmount(pool.available_liquidity);
+                        const util = parsePercent(pool.utilization);
+                        const supplyApy = parsePercent(pool.supply_apy);
+                        const borrowApy = parsePercent(pool.borrow_apy);
+                        const hasAave = !!pool.aave_supply_apy;
+
+                        return (
+                          <tr
+                            key={pool.asset}
+                            className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
+                            onClick={() => navigate(`/lending/pool/${pool.asset}`)}
+                          >
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-1.5">
+                                <AssetIcon asset={pool.asset} showName />
+                                {pool.asset !== 'XMR' && (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <ShieldCheck className="w-3 h-3 text-emerald-400/60" />
+                                    </TooltipTrigger>
+                                    <TooltipContent><p className="text-xs">Railgun ZK shielding available for deposits and withdrawals</p></TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
+                              ${price < 10 ? price.toFixed(4) : price.toFixed(2)}
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <div className="font-mono">{deposited.toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)}</div>
+                            </td>
+                            <td className="py-3 px-3 text-right hidden lg:table-cell">
+                              <div className="font-mono">{borrowed.toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground">{formatUsd(borrowed * price)}</div>
+                            </td>
+                            <td className="py-3 px-3 text-right hidden lg:table-cell font-mono">
+                              {available.toFixed(2)}
+                            </td>
+                            <td className="py-3 px-3 hidden md:table-cell">
+                              <UtilizationBar percent={util} />
+                            </td>
+                            <td className="py-3 px-3 text-right hidden xl:table-cell">
+                              {hasAave ? (
+                                <div>
+                                  <span className="font-mono text-green-400/70 text-xs">{parsePercent(pool.aave_supply_apy!).toFixed(2)}%</span>
+                                  <span className="text-muted-foreground mx-1">/</span>
+                                  <span className="font-mono text-amber-400/70 text-xs">{parsePercent(pool.aave_borrow_apy!).toFixed(2)}%</span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <div>
+                                <span className="font-mono text-green-400 text-xs">{supplyApy.toFixed(2)}%</span>
+                                <span className="text-muted-foreground mx-1">/</span>
+                                <span className="font-mono text-amber-400 text-xs">{borrowApy.toFixed(2)}%</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-right hidden sm:table-cell">
+                              <Badge variant="outline" className="text-xs">
+                                {sourceLabel(pool.source)}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <div className="flex gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
+                                <Button size="sm" variant="default" asChild className="h-7 text-xs">
+                                  <Link to={`/lending/pool/${pool.asset}?action=supply`}>Supply</Link>
+                                </Button>
+                                <Button size="sm" variant="outline" asChild className="h-7 text-xs">
+                                  <Link to={`/lending/pool/${pool.asset}?action=borrow`}>Borrow</Link>
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </TooltipProvider>
+            )}
+
+            {/* Empty state */}
+            {!loading && !error && pools.length === 0 && (
+              <div className="text-center py-16 text-muted-foreground">
+                <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No lending pools available</p>
+              </div>
+            )}
+
+            {/* Privacy Tiers */}
+            <div className="mt-10 mb-4">
+              <LendingPrivacyTiers />
             </div>
-          </TooltipProvider>
+          </>
         )}
 
-        {/* Empty state */}
-        {!loading && !error && pools.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No lending pools available</p>
-          </div>
+        {activeTab === 'earn' && (
+          <EarnTab token={token} />
         )}
-
-        {/* Privacy Tiers */}
-        <div className="mt-10 mb-4">
-          <LendingPrivacyTiers />
-        </div>
-
-        {/* Aave Earn Section */}
-        <div className="mb-6">
-          <AaveEarnSection
-            token={token}
-            shieldedBalances={{}}
-            enabled={earnEnabled}
-            onToggle={() => {
-              setEarnEnabled((prev) => {
-                const next = !prev;
-                localStorage.setItem('earn_enabled', String(next));
-                return next;
-              });
-            }}
-          />
-        </div>
-
-        {/* Pendle Earn Section */}
-        <div className="mb-6">
-          <PendleEarnSection
-            token={token}
-            enabled={pendleEnabled}
-            onToggle={() => {
-              setPendleEnabled((prev) => {
-                const next = !prev;
-                localStorage.setItem('0xnull_pendle_enabled', String(next));
-                return next;
-              });
-            }}
-          />
-        </div>
 
         <SEORichText
           title="Anonymous Crypto Lending Protocol"
