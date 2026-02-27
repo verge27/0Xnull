@@ -17,10 +17,9 @@ import {
   parseAmount, parsePercent, formatUsd, sourceLabel,
 } from '@/lib/lending';
 import { useToken } from '@/hooks/useToken';
-import { usePendleEarn } from '@/hooks/usePendleEarn';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { useSEO } from '@/hooks/useSEO';
-import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Lock, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck, Search, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { EarnTab } from '@/components/earn/EarnTab';
 
 type SortKey = 'asset' | 'venue' | 'price' | 'supplyApy' | 'borrowApy' | 'util';
@@ -31,7 +30,7 @@ const VENUE_COLORS: Record<string, string> = {
   'xmr pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
   'aave v3':         'bg-sky-500/15 text-sky-400 border-sky-500/30',
   'aave_arbitrum':   'bg-sky-500/15 text-sky-400 border-sky-500/30',
-  'pendle':          'bg-teal-500/15 text-teal-400 border-teal-500/30',
+  
   'xmr_pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
 };
 
@@ -63,8 +62,7 @@ const Lending = () => {
   const [sortKey, setSortKey] = useState<SortKey>('supplyApy');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  // Pendle & Aave earn data for dashboard integration
-  const pendle = usePendleEarn(token);
+  // Aave earn data for dashboard integration
   const aaveEarn = useAaveEarn(token);
 
   const fetchData = useCallback(async () => {
@@ -115,43 +113,12 @@ const Lending = () => {
   const totalTvl = pools.reduce((sum, p) => sum + parseAmount(p.total_deposits) * parseAmount(p.price_usd), 0);
   const totalBorrowed = pools.reduce((sum, p) => sum + parseAmount(p.total_borrows) * parseAmount(p.price_usd), 0);
 
-  // Build set of assets the user has deposits in (Aave positions + Pendle positions)
+  // Build set of assets the user has deposits in (Aave positions)
   const myDepositAssets = useMemo(() => {
     const s = new Set<string>();
     for (const p of aaveEarn.positions) s.add(p.asset || '');
-    for (const p of pendle.positions) s.add(p.deposit_token || '');
-    // Also check portfolio supplies if user has lending positions in pools
     return s;
-  }, [aaveEarn.positions, pendle.positions]);
-
-  // Compact number formatter
-  const fmtCompact = (n: number) => {
-    if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-    if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
-    if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
-    return `$${n.toFixed(0)}`;
-  };
-
-  const fmtExpiry = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-
-  const daysUntil = (iso: string) =>
-    Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
-
-  // Unified rows: pool rows + pendle market rows
-  type DashboardRow = 
-    | { kind: 'pool'; pool: LendingPool }
-    | { kind: 'pendle'; market: typeof pendle.markets[0]; comparison?: typeof pendle.comparisons[0] };
-
-  const allRows = useMemo(() => {
-    const rows: DashboardRow[] = [];
-    for (const pool of pools) rows.push({ kind: 'pool', pool });
-    for (const m of pendle.markets) {
-      const comp = pendle.comparisons.find(c => c.market_address === m.market_address);
-      rows.push({ kind: 'pendle', market: m, comparison: comp });
-    }
-    return rows;
-  }, [pools, pendle.markets, pendle.comparisons]);
+  }, [aaveEarn.positions]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -162,46 +129,26 @@ const Lending = () => {
     }
   };
 
-  const getSortValue = (row: DashboardRow, key: SortKey): number | string => {
-    if (row.kind === 'pool') {
-      const p = row.pool;
-      switch (key) {
-        case 'asset': return p.asset.toLowerCase();
-        case 'venue': return sourceLabel(p.source).toLowerCase();
-        case 'price': return parseAmount(p.price_usd) * parseAmount(p.total_deposits);
-        case 'supplyApy': return parsePercent(p.supply_apy);
-        case 'borrowApy': return parsePercent(p.borrow_apy);
-        case 'util': return parsePercent(p.utilization);
-      }
-    } else {
-      const m = row.market;
-      switch (key) {
-        case 'asset': return m.deposit_token.toLowerCase();
-        case 'venue': return m.name.toLowerCase();
-        case 'price': return m.tvl_usd;
-        case 'supplyApy': return m.fixed_apy_pct;
-        case 'borrowApy': return 0;
-        case 'util': return new Date(m.expiry).getTime();
-      }
+  const getSortValue = (pool: LendingPool, key: SortKey): number | string => {
+    switch (key) {
+      case 'asset': return pool.asset.toLowerCase();
+      case 'venue': return sourceLabel(pool.source).toLowerCase();
+      case 'price': return parseAmount(pool.price_usd) * parseAmount(pool.total_deposits);
+      case 'supplyApy': return parsePercent(pool.supply_apy);
+      case 'borrowApy': return parsePercent(pool.borrow_apy);
+      case 'util': return parsePercent(pool.utilization);
     }
   };
 
   const filteredRows = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    const filtered = allRows.filter(row => {
-      const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
-      const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
-      if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
-          !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
-          !(row.kind === 'pendle' && 'pendle'.includes(q))) {
+    const filtered = pools.filter(pool => {
+      if (q && !pool.asset.toLowerCase().includes(q) &&
+          !sourceLabel(pool.source).toLowerCase().includes(q)) {
         return false;
       }
       if (myDepositsOnly) {
-        if (row.kind === 'pool') {
-          return myDepositAssets.has(row.pool.asset);
-        } else {
-          return pendle.positions.some(p => p.market_address === row.market.market_address);
-        }
+        return myDepositAssets.has(pool.asset);
       }
       return true;
     });
@@ -212,7 +159,7 @@ const Lending = () => {
       const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions, sortKey, sortDir]);
+  }, [pools, searchQuery, myDepositsOnly, myDepositAssets, sortKey, sortDir]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -324,7 +271,7 @@ const Lending = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search assets, venues (e.g. DAI, Pendle, sUSDai)..."
+                  placeholder="Search assets, venues (e.g. DAI, Aave, WETH)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 bg-zinc-900 border-zinc-800"
@@ -356,7 +303,7 @@ const Lending = () => {
                           { key: 'price' as SortKey, label: 'Price / TVL', align: 'text-right', hide: 'hidden md:table-cell' },
                           { key: 'supplyApy' as SortKey, label: 'Supply APY', align: 'text-right', hide: '' },
                           { key: 'borrowApy' as SortKey, label: 'Borrow APY', align: 'text-right', hide: 'hidden lg:table-cell' },
-                          { key: 'util' as SortKey, label: 'Util / Expiry', align: 'text-left', hide: 'hidden md:table-cell' },
+                          { key: 'util' as SortKey, label: 'Utilization', align: 'text-left', hide: 'hidden md:table-cell' },
                         ]).map(col => (
                           <th
                             key={col.key}
@@ -377,9 +324,7 @@ const Lending = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredRows.map((row) => {
-                        if (row.kind === 'pool') {
-                          const pool = row.pool;
+                      {filteredRows.map((pool) => {
                           const price = parseAmount(pool.price_usd);
                           const deposited = parseAmount(pool.total_deposits);
                           const util = parsePercent(pool.utilization);
@@ -434,52 +379,6 @@ const Lending = () => {
                               </td>
                             </tr>
                           );
-                        }
-
-                        // Pendle market row
-                        const m = row.market;
-                        const days = daysUntil(m.expiry);
-                        const daysColor = days < 7 ? 'text-red-400' : days < 30 ? 'text-amber-400' : 'text-zinc-500';
-                        const apyClr = m.fixed_apy_pct >= 8 ? 'text-emerald-400 font-bold' : m.fixed_apy_pct >= 4 ? 'text-emerald-400' : m.fixed_apy_pct >= 2 ? 'text-amber-400' : 'text-zinc-400';
-
-                        return (
-                          <tr
-                            key={`pendle-${m.market_address}`}
-                            className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
-                          >
-                            <td className="py-3 px-3">
-                              <AssetIcon asset={m.deposit_token} showName />
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="text-foreground mr-1.5">{m.name}</span>
-                              <VenueBadge label="Pendle" source="pendle" />
-                            </td>
-                            <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
-                              <div>{fmtCompact(m.tvl_usd)}</div>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <span className={`font-mono ${apyClr}`}>{m.fixed_apy_pct.toFixed(2)}%</span>
-                              <Lock className="w-3 h-3 text-emerald-400 inline ml-1" />
-                            </td>
-                            <td className="py-3 px-3 text-right hidden lg:table-cell">
-                              <span className="text-muted-foreground">—</span>
-                            </td>
-                            <td className="py-3 px-3 hidden md:table-cell">
-                              <span className="text-xs font-mono text-amber-400">
-                                {fmtExpiry(m.expiry)} ({days}d)
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <Button
-                                size="sm"
-                                className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500"
-                                onClick={() => setActiveTab('earn')}
-                              >
-                                Lock Fixed
-                              </Button>
-                            </td>
-                          </tr>
-                        );
                       })}
                     </tbody>
                   </table>
