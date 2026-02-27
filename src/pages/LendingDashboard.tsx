@@ -338,31 +338,8 @@ const LendingDashboard = () => {
                 )}
               </CardContent>
             </Card>
-            {/* Aave Earn Section */}
-            <AaveEarnSection
-              token={token}
-              shieldedBalances={{}}
-              enabled={earnEnabled}
-              onToggle={() => {
-                setEarnEnabled((prev) => {
-                  const next = !prev;
-                  localStorage.setItem('earn_enabled', String(next));
-                  return next;
-                });
-              }}
-            />
-            {/* Pendle Earn Section */}
-            <PendleEarnSection
-              token={token}
-              enabled={pendleEnabled}
-              onToggle={() => {
-                setPendleEnabled((prev) => {
-                  const next = !prev;
-                  localStorage.setItem('0xnull_pendle_enabled', String(next));
-                  return next;
-                });
-              }}
-            />
+            {/* Earn Section */}
+            <EarnTab token={token} />
           </div>
         )}
       </main>
