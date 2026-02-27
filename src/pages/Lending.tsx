@@ -451,8 +451,8 @@ const Lending = () => {
                               <AssetIcon asset={m.deposit_token} showName />
                             </td>
                             <td className="py-3 px-3">
-                              <span className="text-foreground">{m.name}</span>
-                              <span className="ml-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] bg-teal-500/20 text-teal-400">Pendle</span>
+                              <span className="text-foreground mr-1.5">{m.name}</span>
+                              <VenueBadge label="Pendle" source="pendle" />
                             </td>
                             <td className="py-3 px-3 text-right text-xs text-muted-foreground hidden md:table-cell">
                               {fmtCompact(m.tvl_usd)}
