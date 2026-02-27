@@ -406,9 +406,7 @@ const Lending = () => {
                                 </div>
                               </td>
                               <td className="py-3 px-3">
-                                <Badge variant="outline" className="text-xs">
-                                  {sourceLabel(pool.source)}
-                                </Badge>
+                                <VenueBadge label={sourceLabel(pool.source)} source={pool.source} />
                               </td>
                               <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
                                 <div>${price < 10 ? price.toFixed(4) : price.toFixed(2)}</div>
