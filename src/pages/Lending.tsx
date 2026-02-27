@@ -128,27 +128,6 @@ const Lending = () => {
     return `$${n.toFixed(0)}`;
   };
 
-  const fmtExpiry = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-
-  const daysUntil = (iso: string) =>
-    Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
-
-  // Unified rows: pool rows + pendle market rows
-  type DashboardRow = 
-    | { kind: 'pool'; pool: LendingPool }
-    | { kind: 'pendle'; market: typeof pendle.markets[0]; comparison?: typeof pendle.comparisons[0] };
-
-  const allRows = useMemo(() => {
-    const rows: DashboardRow[] = [];
-    for (const pool of pools) rows.push({ kind: 'pool', pool });
-    for (const m of pendle.markets) {
-      const comp = pendle.comparisons.find(c => c.market_address === m.market_address);
-      rows.push({ kind: 'pendle', market: m, comparison: comp });
-    }
-    return rows;
-  }, [pools, pendle.markets, pendle.comparisons]);
-
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
       setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -158,46 +137,26 @@ const Lending = () => {
     }
   };
 
-  const getSortValue = (row: DashboardRow, key: SortKey): number | string => {
-    if (row.kind === 'pool') {
-      const p = row.pool;
-      switch (key) {
-        case 'asset': return p.asset.toLowerCase();
-        case 'venue': return sourceLabel(p.source).toLowerCase();
-        case 'price': return parseAmount(p.price_usd) * parseAmount(p.total_deposits);
-        case 'supplyApy': return parsePercent(p.supply_apy);
-        case 'borrowApy': return parsePercent(p.borrow_apy);
-        case 'util': return parsePercent(p.utilization);
-      }
-    } else {
-      const m = row.market;
-      switch (key) {
-        case 'asset': return m.deposit_token.toLowerCase();
-        case 'venue': return m.name.toLowerCase();
-        case 'price': return m.tvl_usd;
-        case 'supplyApy': return m.fixed_apy_pct;
-        case 'borrowApy': return 0;
-        case 'util': return new Date(m.expiry).getTime();
-      }
+  const getSortValue = (pool: LendingPool, key: SortKey): number | string => {
+    switch (key) {
+      case 'asset': return pool.asset.toLowerCase();
+      case 'venue': return sourceLabel(pool.source).toLowerCase();
+      case 'price': return parseAmount(pool.price_usd) * parseAmount(pool.total_deposits);
+      case 'supplyApy': return parsePercent(pool.supply_apy);
+      case 'borrowApy': return parsePercent(pool.borrow_apy);
+      case 'util': return parsePercent(pool.utilization);
     }
   };
 
   const filteredRows = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    const filtered = allRows.filter(row => {
-      const asset = row.kind === 'pool' ? row.pool.asset : row.market.deposit_token;
-      const name = row.kind === 'pool' ? row.pool.asset : row.market.name;
-      if (q && !asset.toLowerCase().includes(q) && !name.toLowerCase().includes(q) &&
-          !(row.kind === 'pool' && sourceLabel(row.pool.source).toLowerCase().includes(q)) &&
-          !(row.kind === 'pendle' && 'pendle'.includes(q))) {
+    const filtered = pools.filter(pool => {
+      if (q && !pool.asset.toLowerCase().includes(q) &&
+          !sourceLabel(pool.source).toLowerCase().includes(q)) {
         return false;
       }
       if (myDepositsOnly) {
-        if (row.kind === 'pool') {
-          return myDepositAssets.has(row.pool.asset);
-        } else {
-          return pendle.positions.some(p => p.market_address === row.market.market_address);
-        }
+        return myDepositAssets.has(pool.asset);
       }
       return true;
     });
@@ -208,7 +167,7 @@ const Lending = () => {
       const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [allRows, searchQuery, myDepositsOnly, myDepositAssets, pendle.positions, sortKey, sortDir]);
+  }, [pools, searchQuery, myDepositsOnly, myDepositAssets, sortKey, sortDir]);
 
   return (
     <div className="min-h-screen bg-background">
