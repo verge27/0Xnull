@@ -10,6 +10,14 @@ import type {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
 
+/** Map exotic ticker symbols back to what the backend expects */
+const ASSET_NORMALIZE: Record<string, string> = {
+  'USD₮0': 'USDT',
+};
+function normalizeAsset(asset: string): string {
+  return ASSET_NORMALIZE[asset] || asset;
+}
+
 function buildUrl(path: string): string {
   const url = new URL(PROXY_URL);
   url.searchParams.set('path', `/api/lending/morpho${path}`);
