@@ -19,6 +19,7 @@ import {
 import { useToken } from '@/hooks/useToken';
 import { ArrowLeft, TrendingUp, Loader2, RefreshCw, Plus, AlertTriangle } from 'lucide-react';
 import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
+import { PendleEarnSection } from '@/components/pendle/PendleEarnSection';
 
 const PORTFOLIO_CACHE_KEY = 'lending_portfolio_cache';
 const PORTFOLIO_CACHE_TTL = 5 * 60 * 1000;
@@ -48,6 +49,7 @@ const LendingDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
   const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
+  const [pendleEnabled, setPendleEnabled] = useState(() => localStorage.getItem('0xnull_pendle_enabled') === 'true');
 
   // Modal states
   const [showDeposit, setShowDeposit] = useState(false);
@@ -347,6 +349,18 @@ const LendingDashboard = () => {
                 setEarnEnabled((prev) => {
                   const next = !prev;
                   localStorage.setItem('earn_enabled', String(next));
+                  return next;
+                });
+              }}
+            />
+            {/* Pendle Earn Section */}
+            <PendleEarnSection
+              token={token}
+              enabled={pendleEnabled}
+              onToggle={() => {
+                setPendleEnabled((prev) => {
+                  const next = !prev;
+                  localStorage.setItem('0xnull_pendle_enabled', String(next));
                   return next;
                 });
               }}

@@ -19,6 +19,7 @@ import { useToken } from '@/hooks/useToken';
 import { useSEO } from '@/hooks/useSEO';
 import { Shield, Activity, TrendingUp, AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react';
 import { AaveEarnSection } from '@/components/earn/AaveEarnSection';
+import { PendleEarnSection } from '@/components/pendle/PendleEarnSection';
 
 const Lending = () => {
   useSEO();
@@ -31,6 +32,7 @@ const Lending = () => {
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
   const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
+  const [pendleEnabled, setPendleEnabled] = useState(() => localStorage.getItem('0xnull_pendle_enabled') === 'true');
 
   const [isStale, setIsStale] = useState(false);
 
@@ -316,6 +318,21 @@ const Lending = () => {
               setEarnEnabled((prev) => {
                 const next = !prev;
                 localStorage.setItem('earn_enabled', String(next));
+                return next;
+              });
+            }}
+          />
+        </div>
+
+        {/* Pendle Earn Section */}
+        <div className="mb-6">
+          <PendleEarnSection
+            token={token}
+            enabled={pendleEnabled}
+            onToggle={() => {
+              setPendleEnabled((prev) => {
+                const next = !prev;
+                localStorage.setItem('0xnull_pendle_enabled', String(next));
                 return next;
               });
             }}
