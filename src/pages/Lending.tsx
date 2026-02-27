@@ -465,7 +465,7 @@ const Lending = () => {
                               <span className="text-muted-foreground">—</span>
                             </td>
                             <td className="py-3 px-3 hidden md:table-cell">
-                              <span className={`text-xs ${daysColor}`}>
+                              <span className="text-xs font-mono text-amber-400">
                                 {fmtExpiry(m.expiry)} ({days}d)
                               </span>
                             </td>
