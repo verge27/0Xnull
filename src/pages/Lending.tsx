@@ -60,7 +60,7 @@ const Lending = () => {
       setError(null);
 
       // Track when oracle degradation started
-      const isDegraded = statusRes?.oracle?.degraded || statusRes?.circuit_breaker?.borrows_halted;
+      const isDegraded = statusRes?.oracle?.degraded || statusRes?.oracle_degraded || (typeof statusRes?.circuit_breaker === 'object' ? statusRes.circuit_breaker.borrows_halted : statusRes?.circuit_breaker);
       if (isDegraded) {
         setDegradedSince(prev => prev ?? Date.now());
       } else {
