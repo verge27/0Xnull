@@ -34,8 +34,14 @@ const Lending = () => {
   const { token, setCustomToken } = useToken();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'earn'>('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [myDepositsOnly, setMyDepositsOnly] = useState(false);
 
   const [isStale, setIsStale] = useState(false);
+
+  // Pendle & Aave earn data for dashboard integration
+  const pendle = usePendleEarn(token);
+  const aaveEarn = useAaveEarn(token);
 
   const fetchData = useCallback(async () => {
     try {
