@@ -47,8 +47,7 @@ const LendingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
-  const [earnEnabled, setEarnEnabled] = useState(() => localStorage.getItem('earn_enabled') === 'true');
-  const [pendleEnabled, setPendleEnabled] = useState(() => localStorage.getItem('0xnull_pendle_enabled') === 'true');
+  const [earnEnabled] = useState(true);
 
   // Modal states
   const [showDeposit, setShowDeposit] = useState(false);
