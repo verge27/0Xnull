@@ -454,8 +454,8 @@ const Lending = () => {
                               <span className="text-foreground mr-1.5">{m.name}</span>
                               <VenueBadge label="Pendle" source="pendle" />
                             </td>
-                            <td className="py-3 px-3 text-right text-xs text-muted-foreground hidden md:table-cell">
-                              {fmtCompact(m.tvl_usd)}
+                            <td className="py-3 px-3 text-right font-mono hidden md:table-cell">
+                              <div>{fmtCompact(m.tvl_usd)}</div>
                             </td>
                             <td className="py-3 px-3 text-right">
                               <span className={`font-mono ${apyClr}`}>{m.fixed_apy_pct.toFixed(2)}%</span>
