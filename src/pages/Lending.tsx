@@ -30,7 +30,7 @@ const VENUE_COLORS: Record<string, string> = {
   'xmr pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
   'aave v3':         'bg-sky-500/15 text-sky-400 border-sky-500/30',
   'aave_arbitrum':   'bg-sky-500/15 text-sky-400 border-sky-500/30',
-  'pendle':          'bg-teal-500/15 text-teal-400 border-teal-500/30',
+  
   'xmr_pool':        'bg-orange-500/15 text-orange-400 border-orange-500/30',
 };
 
