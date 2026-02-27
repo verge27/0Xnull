@@ -413,7 +413,7 @@ const Lending = () => {
                                 <div className="text-xs text-muted-foreground">{formatUsd(deposited * price)} dep.</div>
                               </td>
                               <td className="py-3 px-3 text-right">
-                                <span className="font-mono text-green-400">{supplyApy.toFixed(2)}%</span>
+                                <span className={`font-mono ${supplyApy >= 8 ? 'text-emerald-400 font-bold' : supplyApy >= 4 ? 'text-emerald-400' : supplyApy >= 2 ? 'text-amber-400' : 'text-zinc-400'}`}>{supplyApy.toFixed(2)}%</span>
                                 <span className="text-muted-foreground text-xs ml-1">~</span>
                               </td>
                               <td className="py-3 px-3 text-right hidden lg:table-cell">
