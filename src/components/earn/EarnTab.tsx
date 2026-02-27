@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react';
-import { Lock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Lock, TrendingUp, AlertTriangle, Vault } from 'lucide-react';
 import { AssetIcon } from '@/components/lending/AssetIcon';
 import { useAaveEarn } from '@/hooks/useAaveEarn';
 import { usePendleEarn } from '@/hooks/usePendleEarn';
+import { useMorphoEarn } from '@/hooks/useMorphoEarn';
 import { DepositModal } from '@/components/earn/DepositModal';
 import { PendleDepositModal } from '@/components/pendle/PendleDepositModal';
+import { MorphoDepositModal } from '@/components/morpho/MorphoDepositModal';
 import type { AaveRate } from '@/types/earn';
 import type { PendleMarket } from '@/types/pendle';
+import type { MorphoVault } from '@/types/morpho';
 
 interface EarnTabProps {
   token: string | null;
@@ -15,7 +18,7 @@ interface EarnTabProps {
 // ── Unified venue type ──────────────────────────────────
 
 interface Venue {
-  type: 'aave' | 'pendle';
+  type: 'aave' | 'pendle' | 'morpho';
   label: string;
   apy: number;
   isVariable: boolean;
@@ -23,9 +26,11 @@ interface Venue {
   liquidity?: string;
   expiry?: string;
   market_address?: string;
+  curator?: string;
   // references for modals
   aaveRate?: AaveRate;
   pendleMarket?: PendleMarket;
+  morphoVault?: MorphoVault;
 }
 
 interface AssetGroup {
@@ -66,17 +71,26 @@ const ASSET_BORDER: Record<string, string> = {
   USDT: 'border-l-green-500',
 };
 
+const CURATOR_COLORS: Record<string, string> = {
+  steakhouse: 'bg-amber-500/20 text-amber-400',
+  gauntlet: 'bg-blue-500/20 text-blue-400',
+  hyperithm: 'bg-violet-500/20 text-violet-400',
+};
+
 // ── Component ───────────────────────────────────────────
 
 export function EarnTab({ token }: EarnTabProps) {
   const aave = useAaveEarn(token);
   const pendle = usePendleEarn(token);
+  const morpho = useMorphoEarn(token);
 
   const [depositAaveAsset, setDepositAaveAsset] = useState<string | null>(null);
   const [depositPendleMarket, setDepositPendleMarket] = useState<PendleMarket | null>(null);
+  const [depositMorphoVault, setDepositMorphoVault] = useState<MorphoVault | null>(null);
 
-  const loading = aave.loading && pendle.loading;
-  const partialError = (aave.error && !pendle.error) || (!aave.error && pendle.error);
+  const loading = aave.loading && pendle.loading && morpho.loading;
+  const anyError = [aave.error, pendle.error, morpho.error].filter(Boolean);
+  const partialError = anyError.length > 0 && anyError.length < 3;
 
   // Build unified asset map
   const groups: AssetGroup[] = useMemo(() => {
@@ -89,7 +103,7 @@ export function EarnTab({ token }: EarnTabProps) {
       map.get(key)!.push({
         type: 'aave',
         label: 'Aave V3',
-        apy: r.supply_apy * 100, // decimal → pct
+        apy: r.supply_apy * 100,
         isVariable: true,
         liquidity: r.liquidity_formatted,
         aaveRate: r,
@@ -112,17 +126,31 @@ export function EarnTab({ token }: EarnTabProps) {
       });
     }
 
-    // Sort venues within each group by APY desc
+    // Morpho vaults
+    for (const v of morpho.flatVaults) {
+      const key = v.asset;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push({
+        type: 'morpho',
+        label: v.name,
+        apy: 0, // Morpho API doesn't return APY in /vaults — show TVL-based ranking
+        isVariable: true,
+        tvl: v.tvl_human,
+        curator: v.curator,
+        morphoVault: v,
+      });
+    }
+
+    // Sort venues within each group by APY desc, then TVL desc for 0-APY items
     const result: AssetGroup[] = [];
     for (const [asset, venues] of map) {
-      venues.sort((a, b) => b.apy - a.apy);
+      venues.sort((a, b) => b.apy - a.apy || (b.tvl || 0) - (a.tvl || 0));
       result.push({ asset, venues, bestApy: venues[0]?.apy ?? 0 });
     }
 
-    // Sort groups by best APY desc
     result.sort((a, b) => b.bestApy - a.bestApy);
     return result;
-  }, [aave.rates, pendle.markets]);
+  }, [aave.rates, pendle.markets, morpho.flatVaults]);
 
   // Find overall best
   const bestOverall = useMemo(() => {
@@ -135,7 +163,7 @@ export function EarnTab({ token }: EarnTabProps) {
     return best;
   }, [groups]);
 
-  // Find Aave rate for a given asset (for spread calculation)
+  // Aave APY map for spread calculation
   const aaveApyMap = useMemo(() => {
     const m = new Map<string, number>();
     for (const r of aave.rates) m.set(r.asset, r.supply_apy * 100);
@@ -147,9 +175,9 @@ export function EarnTab({ token }: EarnTabProps) {
   const depositPendleComparison = depositPendleMarket
     ? pendle.comparisons.find((c) => c.market_address === depositPendleMarket.market_address)
     : undefined;
+  const morphoVaultsForAsset = depositMorphoVault ? (morpho.vaults[depositMorphoVault.asset] || [depositMorphoVault]) : [];
 
-  // Position count for badge
-  const positionCount = aave.positions.length + pendle.positions.length;
+  const positionCount = aave.positions.length + pendle.positions.length + morpho.positions.length;
 
   return (
     <div className="space-y-6">
@@ -157,12 +185,12 @@ export function EarnTab({ token }: EarnTabProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-white">Earn</h2>
-          <p className="text-sm text-zinc-400">Deposit into Aave (variable) or Pendle (fixed) on Arbitrum</p>
+          <p className="text-sm text-zinc-400">Deposit into Aave (variable), Pendle (fixed), or Morpho (curated vaults) on Arbitrum</p>
         </div>
-        {bestOverall && (
+        {bestOverall && bestOverall.apy > 0 && (
           <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1 text-emerald-400 text-sm whitespace-nowrap">
             <TrendingUp className="w-3.5 h-3.5" />
-            {bestOverall.asset} → {bestOverall.label} at {bestOverall.apy.toFixed(2)}% {bestOverall.label !== 'Aave V3' ? 'fixed' : 'variable'}
+            {bestOverall.asset} → {bestOverall.label} at {bestOverall.apy.toFixed(2)}%
           </span>
         )}
       </div>
@@ -215,7 +243,7 @@ export function EarnTab({ token }: EarnTabProps) {
 
                 return group.venues.map((venue, idx) => {
                   const isFirst = idx === 0;
-                  const spread = venue.type === 'pendle' && aaveApy !== undefined ? venue.apy - aaveApy : null;
+                  const spread = venue.type !== 'aave' && aaveApy !== undefined && venue.apy > 0 ? venue.apy - aaveApy : null;
                   const days = venue.expiry ? daysUntil(venue.expiry) : 0;
                   const daysColor = days < 7 ? 'text-red-400' : days < 30 ? 'text-amber-400' : 'text-zinc-500';
 
@@ -235,31 +263,47 @@ export function EarnTab({ token }: EarnTabProps) {
 
                       {/* Venue */}
                       <td className="py-3 px-3">
-                        <span className="text-white">{venue.label}</span>
-                        {venue.type === 'aave' && (
-                          <span className="ml-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] bg-blue-500/20 text-blue-400">Aave</span>
-                        )}
-                        {venue.type === 'pendle' && (
-                          <span className="ml-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] bg-teal-500/20 text-teal-400">Pendle</span>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-white text-xs">{venue.label}</span>
+                          {venue.type === 'aave' && (
+                            <span className="inline-block rounded px-1.5 py-0.5 text-[10px] bg-blue-500/20 text-blue-400">Aave</span>
+                          )}
+                          {venue.type === 'pendle' && (
+                            <span className="inline-block rounded px-1.5 py-0.5 text-[10px] bg-teal-500/20 text-teal-400">Pendle</span>
+                          )}
+                          {venue.type === 'morpho' && (
+                            <>
+                              <span className="inline-block rounded px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-400">Morpho</span>
+                              {venue.curator && (
+                                <span className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] capitalize ${CURATOR_COLORS[venue.curator.toLowerCase()] || 'bg-zinc-700 text-zinc-300'}`}>
+                                  {venue.curator}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </td>
 
                       {/* Type */}
                       <td className="py-3 px-3">
-                        {venue.isVariable ? (
-                          <span className="text-zinc-400 text-xs flex items-center gap-1">
-                            <span className="text-base leading-none">~</span> Variable
-                          </span>
-                        ) : (
+                        {venue.type === 'pendle' ? (
                           <span className="text-emerald-400 text-xs flex items-center gap-1">
                             <Lock className="w-3 h-3" /> Fixed
+                          </span>
+                        ) : venue.type === 'morpho' ? (
+                          <span className="text-purple-400 text-xs flex items-center gap-1">
+                            <Vault className="w-3 h-3" /> Vault
+                          </span>
+                        ) : (
+                          <span className="text-zinc-400 text-xs flex items-center gap-1">
+                            <span className="text-base leading-none">~</span> Variable
                           </span>
                         )}
                       </td>
 
                       {/* APY */}
-                      <td className={`py-3 px-3 text-right font-mono ${apyColor(venue.apy)}`}>
-                        {venue.apy.toFixed(2)}%
+                      <td className={`py-3 px-3 text-right font-mono ${venue.apy > 0 ? apyColor(venue.apy) : 'text-zinc-500'}`}>
+                        {venue.apy > 0 ? `${venue.apy.toFixed(2)}%` : '—'}
                       </td>
 
                       {/* TVL */}
@@ -300,12 +344,19 @@ export function EarnTab({ token }: EarnTabProps) {
                           >
                             Supply
                           </button>
-                        ) : (
+                        ) : venue.type === 'pendle' ? (
                           <button
                             onClick={() => venue.pendleMarket && setDepositPendleMarket(venue.pendleMarket)}
                             className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-4 py-1.5 text-sm font-medium transition"
                           >
                             Lock Fixed
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => venue.morphoVault && setDepositMorphoVault(venue.morphoVault)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-4 py-1.5 text-sm font-medium transition"
+                          >
+                            Deposit
                           </button>
                         )}
                       </td>
@@ -343,6 +394,23 @@ export function EarnTab({ token }: EarnTabProps) {
             return res;
           }}
           onClose={() => setDepositPendleMarket(null)}
+        />
+      )}
+
+      {depositMorphoVault && (
+        <MorphoDepositModal
+          vault={depositMorphoVault}
+          allVaultsForAsset={morphoVaultsForAsset}
+          txPending={morpho.txPending}
+          onDeposit={async (asset, amt, vaultAddr) => {
+            const res = await morpho.deposit(asset, amt, vaultAddr);
+            if (!res.error) {
+              morpho.refresh();
+              setDepositMorphoVault(null);
+            }
+            return res;
+          }}
+          onClose={() => setDepositMorphoVault(null)}
         />
       )}
     </div>
