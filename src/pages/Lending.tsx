@@ -41,6 +41,8 @@ const Lending = () => {
   const [myDepositsOnly, setMyDepositsOnly] = useState(false);
 
   const [isStale, setIsStale] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('supplyApy');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   // Pendle & Aave earn data for dashboard integration
   const pendle = usePendleEarn(token);
