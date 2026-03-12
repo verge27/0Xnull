@@ -352,6 +352,14 @@ export const Navbar = () => {
               </Link>
             </Button>
 
+            {/* Free Software Link */}
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/free-software">
+                <Terminal className="w-4 h-4" />
+                <span className="hidden md:inline">Free Software</span>
+              </Link>
+            </Button>
+
             {/* Companions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

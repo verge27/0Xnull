@@ -204,6 +204,7 @@ const App = () => (
                   <Route path="/tor-guide" element={<TorGuide />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
+                  <Route path="/free-software" element={<FreeSoftware />} />
                   
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
