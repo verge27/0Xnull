@@ -72,6 +72,7 @@ const Influencer = lazy(() => import("./pages/Influencer"));
 const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
+const FreeSoftware = lazy(() => import("./pages/FreeSoftware"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 const FanDashboard = lazy(() => import("./pages/FanDashboard"));
 
@@ -203,6 +204,7 @@ const App = () => (
                   <Route path="/tor-guide" element={<TorGuide />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
+                  <Route path="/free-software" element={<FreeSoftware />} />
                   
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
