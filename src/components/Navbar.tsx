@@ -214,7 +214,14 @@ export const Navbar = () => {
                     <span>Insights & Analysis</span>
                   </Link>
 
-                  {/* Companions */}
+                  {/* Free Software */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Free Software</div>
+                  <Link to="/free-software" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <Terminal className="w-5 h-5 text-primary" />
+                    <span>Open-Source Tools</span>
+                  </Link>
+
+
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Companions</div>
                   <Link to="/creators" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Sparkles className="w-5 h-5 text-primary" />
