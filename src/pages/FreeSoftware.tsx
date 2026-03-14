@@ -110,14 +110,6 @@ const FreeSoftware = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-3 mt-auto pt-2">
-                  {project.internalLink && (
-                    <Button size="sm" className="gap-1.5" asChild>
-                      <Link to={project.internalLink}>
-                        <Shield className="w-3.5 h-3.5" />
-                        Try It
-                      </Link>
-                    </Button>
-                  )}
                   <Button variant="outline" size="sm" className="gap-1.5" asChild>
                     <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3.5 h-3.5" />
