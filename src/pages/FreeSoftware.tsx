@@ -14,6 +14,7 @@ interface FreeSoftwareProject {
   githubUrl: string;
   downloadUrl: string;
   license: string;
+  internalLink?: string;
 }
 
 const projects: FreeSoftwareProject[] = [
