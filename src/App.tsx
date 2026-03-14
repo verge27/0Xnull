@@ -206,6 +206,7 @@ const App = () => (
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />
+                  <Route path="/3ds-scanner" element={<ThreeDSScanner />} />
                   
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
