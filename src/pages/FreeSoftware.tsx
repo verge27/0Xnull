@@ -1,4 +1,4 @@
-import { ExternalLink, Download, Terminal, Scale } from 'lucide-react';
+import { ExternalLink, Download, Terminal, Scale, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
