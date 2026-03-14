@@ -62,6 +62,12 @@ const Index = () => {
       description: 'Deposit, earn yield via Aave, withdraw. No KYC. No identity. Optional ZK shielding.',
       href: '/lending',
     },
+    {
+      icon: Shield,
+      title: '3DS Scanner',
+      description: 'Check if any checkout enforces 3D Secure. Free.',
+      href: '/3ds-scanner',
+    },
   ];
 
   const pillars = [
