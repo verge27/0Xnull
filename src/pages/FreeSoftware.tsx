@@ -38,6 +38,17 @@ const projects: FreeSoftwareProject[] = [
     downloadUrl: "https://github.com/verge27/GoogleCamera/archive/refs/heads/main.zip",
     license: "MIT",
   },
+  {
+    name: "3DS Risk Scanner",
+    tagline: "Check if a merchant enforces 3D Secure",
+    description:
+      "Automated checkout risk intelligence platform. Navigates e-commerce checkout flows end-to-end using a headless browser — product discovery, cart, guest checkout, payment page — and determines whether 3DS authentication is enforced. Returns confidence-rated verdicts, PSP detection, screenshots, and full state transition logs.",
+    techTags: ["Python", "FastAPI", "Playwright", "3D Secure", "PCI"],
+    githubUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform",
+    downloadUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform/archive/refs/heads/main.zip",
+    license: "MIT",
+    internalLink: "/3ds-scanner",
+  },
 ];
 
 const FreeSoftware = () => {
