@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
