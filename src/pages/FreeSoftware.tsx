@@ -1,4 +1,4 @@
-import { ExternalLink, Download, Terminal, Scale } from 'lucide-react';
+import { ExternalLink, Download, Terminal, Scale, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ interface FreeSoftwareProject {
   githubUrl: string;
   downloadUrl: string;
   license: string;
+  internalLink?: string;
 }
 
 const projects: FreeSoftwareProject[] = [
@@ -36,6 +37,17 @@ const projects: FreeSoftwareProject[] = [
     githubUrl: "https://github.com/verge27/GoogleCamera",
     downloadUrl: "https://github.com/verge27/GoogleCamera/archive/refs/heads/main.zip",
     license: "MIT",
+  },
+  {
+    name: "3DS Risk Scanner",
+    tagline: "Check if a merchant enforces 3D Secure",
+    description:
+      "Automated checkout risk intelligence platform. Navigates e-commerce checkout flows end-to-end using a headless browser — product discovery, cart, guest checkout, payment page — and determines whether 3DS authentication is enforced. Returns confidence-rated verdicts, PSP detection, screenshots, and full state transition logs.",
+    techTags: ["Python", "FastAPI", "Playwright", "3D Secure", "PCI"],
+    githubUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform",
+    downloadUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform/archive/refs/heads/main.zip",
+    license: "MIT",
+    internalLink: "/3ds-scanner",
   },
 ];
 
@@ -97,14 +109,22 @@ const FreeSoftware = () => {
                   ))}
                 </div>
 
-                <div className="flex gap-3 mt-auto pt-2">
+                <div className="flex flex-wrap gap-3 mt-auto pt-2">
+                  {project.internalLink && (
+                    <Button size="sm" className="gap-1.5" asChild>
+                      <Link to={project.internalLink}>
+                        <Shield className="w-3.5 h-3.5" />
+                        Try It
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" className="gap-1.5" asChild>
                     <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3.5 h-3.5" />
                       GitHub
                     </a>
                   </Button>
-                  <Button size="sm" className="gap-1.5" asChild>
+                  <Button variant={project.internalLink ? "outline" : "default"} size="sm" className="gap-1.5" asChild>
                     <a href={project.downloadUrl} target="_blank" rel="noopener noreferrer">
                       <Download className="w-3.5 h-3.5" />
                       Download ZIP

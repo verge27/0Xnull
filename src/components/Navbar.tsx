@@ -220,6 +220,9 @@ export const Navbar = () => {
                     <Terminal className="w-5 h-5 text-primary" />
                     <span>Open-Source Tools</span>
                   </Link>
+                  <Link to="/3ds-scanner" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">3DS Scanner</span>
+                  </Link>
 
 
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Companions</div>

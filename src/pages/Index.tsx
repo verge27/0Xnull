@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +61,12 @@ const Index = () => {
       title: 'Lending',
       description: 'Deposit, earn yield via Aave, withdraw. No KYC. No identity. Optional ZK shielding.',
       href: '/lending',
+    },
+    {
+      icon: Shield,
+      title: '3DS Scanner',
+      description: 'Check if any checkout enforces 3D Secure. Free.',
+      href: '/3ds-scanner',
     },
   ];
 
