@@ -73,6 +73,7 @@ const InfluencerDashboard = lazy(() => import("./pages/InfluencerDashboard"));
 const PartnerEarnings = lazy(() => import("./pages/PartnerEarnings"));
 const FlashMarkets = lazy(() => import("./pages/FlashMarkets"));
 const FreeSoftware = lazy(() => import("./pages/FreeSoftware"));
+const ThreeDSScanner = lazy(() => import("./pages/ThreeDSScanner"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 const FanDashboard = lazy(() => import("./pages/FanDashboard"));
 
