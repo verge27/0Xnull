@@ -52,9 +52,13 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp}"],
         globIgnores: ["**/listing-images/**"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3MB
-        // Precache the app shell for instant loading
+        // Precache the app shell for instant loading, but never for real files.
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
+        navigateFallbackDenylist: [
+          /^\/api/,
+          /^\/supabase/,
+          /^\/.*\.[a-z0-9]+$/i,
+        ],
         // Skip waiting to activate new service worker immediately
         skipWaiting: true,
         clientsClaim: true,
