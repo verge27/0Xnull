@@ -2,28 +2,28 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Render app immediately
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root");
 
-// Defer service worker registration until after initial render
-if ('serviceWorker' in navigator) {
-  // Use requestIdleCallback to register SW when browser is idle
+const renderApp = () => {
+  if (!rootElement) return;
+  createRoot(rootElement).render(<App />);
+};
+
+const registerAppServiceWorker = () => {
+  if (!('serviceWorker' in navigator)) return;
+
   const registerSW = () => {
     import('virtual:pwa-register').then(({ registerSW }) => {
       const updateSW = registerSW({
-        // Ensures new builds reliably replace old cached app shells.
-        // This fixes cases where routes/nav "disappear" due to an outdated service worker.
         immediate: true,
-        onRegisteredSW(swUrl, r) {
-          // Check for updates periodically
-          if (r) {
+        onRegisteredSW(_swUrl, registration) {
+          if (registration) {
             setInterval(() => {
-              r.update();
-            }, 60 * 60 * 1000); // Check hourly
+              registration.update();
+            }, 60 * 60 * 1000);
           }
         },
         onNeedRefresh() {
-          // Auto-apply the update so users aren't stuck on an old cached version.
           updateSW(true);
         },
         onOfflineReady() {
@@ -40,4 +40,39 @@ if ('serviceWorker' in navigator) {
   } else {
     setTimeout(registerSW, 2000);
   }
-}
+};
+
+const bypassStaleServiceWorkerForStaticRoutes = async () => {
+  const pathname = window.location.pathname;
+  const isStaticFileRoute = /^\/.*\.[a-z0-9]+$/i.test(pathname);
+
+  if (!isStaticFileRoute || !('serviceWorker' in navigator)) {
+    return false;
+  }
+
+  const bypassKey = `sw-bypass:${pathname}`;
+  const hasRetried = sessionStorage.getItem(bypassKey) === '1';
+
+  if (hasRetried) {
+    sessionStorage.removeItem(bypassKey);
+    return false;
+  }
+
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  if (registrations.length === 0) {
+    return false;
+  }
+
+  sessionStorage.setItem(bypassKey, '1');
+  await Promise.all(registrations.map((registration) => registration.unregister()));
+  window.location.replace(window.location.href);
+  return true;
+};
+
+void (async () => {
+  const isRecoveringStaticRoute = await bypassStaleServiceWorkerForStaticRoutes();
+  if (isRecoveringStaticRoute) return;
+
+  renderApp();
+  registerAppServiceWorker();
+})();
