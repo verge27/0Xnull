@@ -65,7 +65,7 @@ Hash: SHA512
 
 0xNull Warrant Canary
 =====================
-Date: January 9, 2026
+Date: May 27, 2026
 
 As of the date above, 0xNull Admin states:
 
