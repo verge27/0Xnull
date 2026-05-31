@@ -369,7 +369,7 @@ export const CreatorComments = ({ contentId, creatorId }: CreatorCommentsProps) 
                       {canDelete(comment) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label="Comment options">
                               <MoreVertical className="w-3 h-3" />
                             </Button>
                           </DropdownMenuTrigger>
