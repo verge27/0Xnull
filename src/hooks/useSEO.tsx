@@ -17,7 +17,7 @@ interface StructuredData {
 
 const defaultMeta = {
   title: '0xNull - Anonymous Crypto Predictions & Marketplace',
-  description: 'Privacy-first prediction markets for sports, esports, and crypto. Anonymous marketplace for goods and services. Pay with Monero and other cryptocurrencies.',
+  description: 'Anonymous prediction markets for sports, esports, and crypto. Privacy-first marketplace paid in Monero. No KYC, no accounts.',
   image: 'https://0xnull.io/og-image.png',
   type: 'website',
 };

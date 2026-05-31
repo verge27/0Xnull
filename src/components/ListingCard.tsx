@@ -65,6 +65,8 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
           
           <button
             onClick={handleWishlistClick}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            aria-pressed={isWishlisted}
             className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm p-2 rounded-full hover:bg-background transition-colors z-10"
           >
             <Heart 

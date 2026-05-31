@@ -271,7 +271,11 @@ const Browse = () => {
           <Collapsible open={isOpen} onOpenChange={() => toggleCategory(category.id)}>
             <div className="flex items-center gap-1">
               <CollapsibleTrigger asChild>
-                <button className="p-1 hover:bg-muted rounded">
+                <button
+                  className="p-1 hover:bg-muted rounded"
+                  aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${category.name} category`}
+                  aria-expanded={isOpen}
+                >
                   {isOpen ? (
                     <ChevronDown className="h-4 w-4" />
                   ) : (
@@ -354,7 +358,7 @@ const Browse = () => {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <h1 className="text-3xl font-bold">Results for "{urlSearchQuery}"</h1>
-                <Button variant="ghost" size="sm" onClick={clearSearch}>
+                <Button variant="ghost" size="sm" onClick={clearSearch} aria-label="Clear search">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -563,6 +567,7 @@ const Browse = () => {
               </>
             )}
 
+            <h2 className="sr-only">Available Products</h2>
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sortedListings.map(listing => (
                 listing.isPartner ? (
