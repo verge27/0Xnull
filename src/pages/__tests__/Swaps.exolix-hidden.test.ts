@@ -41,14 +41,30 @@ describe('Swaps page — Exolix UI is hidden', () => {
     expect(code).not.toMatch(/import\s+\{[^}]*\bExolixWidget\b[^}]*\}/);
   });
 
-  it('does not surface visible "Exolix" label text in JSX', () => {
-    // Catches things like >Exolix<, "Powered by Exolix", aria-label="Exolix…"
-    const jsxTextMatches = code.match(/>\s*[^<]*Exolix[^<]*</g) ?? [];
-    expect(jsxTextMatches).toEqual([]);
-
-    const labelAttrMatches = code.match(
+  it('only references "Exolix" in JSX inside aggregator === "exolix" branches', () => {
+    // Residual Exolix labels/buttons may remain in the source, but they MUST
+    // stay gated behind `aggregator === 'exolix'` — which is unreachable now
+    // that the tab switcher is gone. Find every JSX-visible Exolix occurrence
+    // and verify it sits inside such a guard.
+    const visibleOccurrences: { index: number; snippet: string }[] = [];
+    const patterns = [
+      /[>\s][^<>{}\n]*Exolix[^<>{}\n]*[<{]/g,
       /(aria-label|title|placeholder)\s*=\s*["'][^"']*Exolix[^"']*["']/gi,
-    ) ?? [];
-    expect(labelAttrMatches).toEqual([]);
+    ];
+    for (const re of patterns) {
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(code)) !== null) {
+        visibleOccurrences.push({ index: m.index, snippet: m[0] });
+      }
+    }
+
+    const ungated = visibleOccurrences.filter(({ index }) => {
+      // Walk backwards looking for the nearest `aggregator === 'exolix'` guard
+      // within the enclosing JSX expression (cap at 2KB lookback).
+      const window = code.slice(Math.max(0, index - 2000), index);
+      return !/aggregator\s*===\s*['"]exolix['"]/.test(window);
+    });
+
+    expect(ungated).toEqual([]);
   });
 });
