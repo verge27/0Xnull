@@ -38,6 +38,34 @@ const PRIORITY_CHANNELS = ['awfdota'];
 const cache: Map<string, { data: any; timestamp: number }> = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+// Cached app access token (client credentials flow)
+let tokenCache: { token: string; expiresAt: number } | null = null;
+
+async function getAppAccessToken(clientId: string, clientSecret: string): Promise<string> {
+  if (tokenCache && Date.now() < tokenCache.expiresAt - 60_000) {
+    return tokenCache.token;
+  }
+  const res = await fetch('https://id.twitch.tv/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'client_credentials',
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Twitch app token: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  tokenCache = {
+    token: data.access_token,
+    expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000,
+  };
+  return tokenCache.token;
+}
+
+
 // Helper to check if a specific channel is live
 async function checkChannelLive(
   channel: string, 
@@ -95,11 +123,22 @@ serve(async (req) => {
     }
 
     const clientId = Deno.env.get('TWITCH_CLIENT_ID');
-    const oauthToken = Deno.env.get('TWITCH_OAUTH_TOKEN');
+    const clientSecret = Deno.env.get('TWITCH_CLIENT_SECRET');
 
-    if (!clientId || !oauthToken) {
+    if (!clientId || !clientSecret) {
       console.error('Missing Twitch credentials');
       return new Response(JSON.stringify({ error: 'Twitch credentials not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let oauthToken: string;
+    try {
+      oauthToken = await getAppAccessToken(clientId, clientSecret);
+    } catch (e) {
+      console.error('Twitch token fetch failed:', e);
+      return new Response(JSON.stringify({ error: 'Twitch auth failed', details: String(e) }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
