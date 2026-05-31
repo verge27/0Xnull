@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.creator-og]
 verify_jwt = false
+
+[functions.pk-create-market]
+verify_jwt = false
