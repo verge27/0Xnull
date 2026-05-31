@@ -62,8 +62,8 @@ describe('Swaps page — Exolix UI is hidden', () => {
 
     const ungated = visibleOccurrences.filter(({ index }) => {
       // Walk backwards looking for the nearest `aggregator === 'exolix'` guard
-      // within the enclosing JSX expression (cap at 2KB lookback).
-      const window = code.slice(Math.max(0, index - 2000), index);
+      // 8KB lookback to comfortably span large JSX expression bodies.
+      const window = code.slice(Math.max(0, index - 8000), index);
       return !/aggregator\s*===\s*['"]exolix['"]/.test(window);
     });
 
