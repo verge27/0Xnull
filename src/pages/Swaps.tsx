@@ -849,13 +849,8 @@ const Swaps = () => {
             <p className="text-muted-foreground">Exchange cryptocurrencies privately</p>
           </div>
 
-          {/* Aggregator Selection */}
-          <Tabs value={aggregator} onValueChange={handleAggregatorChange} className="mb-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-xs mx-auto">
-              <TabsTrigger value="trocador">Trocador</TabsTrigger>
-              <TabsTrigger value="exolix">Exolix</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Aggregator selection removed — Trocador only */}
+
 
           {/* Fiat Gateway Banner */}
           <Link to="/cashout" className="block mb-6">
