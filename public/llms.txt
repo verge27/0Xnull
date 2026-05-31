@@ -2,7 +2,7 @@
 
 > Privacy-first, no-KYC platform for anonymous prediction markets, crypto lending, swaps and a censorship-resistant marketplace. Authentication via 0xNull tokens; payments in Monero and other cryptocurrencies.
 
-0xNull lets users bet, lend, swap, and trade goods and services without accounts, email or identity verification. Tokens (`0xn_…`) act as anonymous identities, payouts are automatic and a 0.4% fee applies only to winnings.
+0xNull lets users bet, lend, swap and trade goods and services without accounts, email or identity verification. Tokens (`0xn_…`) act as anonymous identities, payouts are automatic and a 0.4% fee applies only to winnings.
 
 ## Pages
 

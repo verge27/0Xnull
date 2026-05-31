@@ -26,7 +26,7 @@ const pageMeta: Record<string, SEOProps> = {
   '/': defaultMeta,
   '/predict': {
     title: 'Anonymous Crypto Prediction Markets – 0xNull',
-    description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and private predictions across sports, esports and crypto.',
+    description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and private predictions across sports, esports and crypto.',
   },
   '/sports-predictions': {
     title: 'Anonymous Sports Predictions | No-KYC Crypto Betting – 0xNull',
