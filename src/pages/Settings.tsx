@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 
 const Settings = () => {
+  useSEO();
   const { user } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
   const { isUnlocked, checkHasKeys, restoreSession, unlockKeys, lockKeys } = usePGP();
