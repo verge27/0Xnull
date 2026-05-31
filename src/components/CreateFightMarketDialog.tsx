@@ -73,6 +73,7 @@ export function CreateFightMarketDialog({
       const resolution_criteria = `Official result from ${promotionName || 'the promotion'}. ${resolution === 'auto' ? 'Auto-resolved via Tapology within 24-48 hours.' : 'Manually verified within 1-7 days.'}`;
 
       if (privateKeyUser) {
+        if (!token) throw new Error('Missing 0xNull token. Please reload and try again.');
         // Token-authenticated path: route through edge function with service role
         const { data, error } = await supabase.functions.invoke('pk-create-market', {
           body: {
@@ -82,7 +83,7 @@ export function CreateFightMarketDialog({
             resolution_date: resolutionDate.toISOString(),
           },
           headers: {
-            'X-0xNull-Token': privateKeyUser.payment_token || '',
+            'X-0xNull-Token': token,
           },
         });
         if (error) throw error;
