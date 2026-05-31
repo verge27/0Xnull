@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "lint:oxford": "node scripts/check-oxford-commas.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
