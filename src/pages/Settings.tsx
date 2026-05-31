@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { usePGP } from '@/hooks/usePGP';
+import { useSEO } from '@/hooks/useSEO';
 import { usePasskey } from '@/hooks/usePasskey';
 import { settingsSchema } from '@/lib/validation';
 import { Shield, Download, Key, Copy, Check, AlertTriangle, Upload, FileKey, QrCode, Fingerprint, Trash2, Lock } from 'lucide-react';
