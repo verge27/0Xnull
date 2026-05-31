@@ -48,7 +48,9 @@ describe('Swaps page — Exolix UI is hidden', () => {
     // and verify it sits inside such a guard.
     const visibleOccurrences: { index: number; snippet: string }[] = [];
     const patterns = [
-      /[>\s][^<>{}\n]*Exolix[^<>{}\n]*[<{]/g,
+      // Only match Exolix appearing as JSX text (preceded by `>`), not in
+      // TS type/identifier positions like `interface ExolixRate` or `useState`.
+      />[^<>{}\n]*Exolix[^<>{}\n]*[<{]/g,
       /(aria-label|title|placeholder)\s*=\s*["'][^"']*Exolix[^"']*["']/gi,
     ];
     for (const re of patterns) {
