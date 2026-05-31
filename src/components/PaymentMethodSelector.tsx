@@ -63,7 +63,7 @@ export function PaymentMethodSelector({
                   <Badge variant="secondary" className="text-xs">Multi-coin</Badge>
                 </Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Pay with BTC, ETH, or 200+ other cryptocurrencies. Automatically swapped to XMR.
+                  Pay with BTC, ETH or 200+ other cryptocurrencies. Automatically swapped to XMR.
                 </p>
               </div>
             </div>

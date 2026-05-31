@@ -137,7 +137,7 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
                 <TokenBadge />
               </div>
               <p className="text-xs text-muted-foreground">
-                Voice cloning, text-to-speech, and AI chat — powered by your token balance.
+                Voice cloning, text-to-speech and AI chat — powered by your token balance.
               </p>
               <Button size="sm" variant="outline" asChild className="w-full gap-1">
                 <Link to="/ai">View AI Hub <ArrowRight className="w-3 h-3" /></Link>

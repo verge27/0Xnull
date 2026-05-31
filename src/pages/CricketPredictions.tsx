@@ -82,7 +82,7 @@ export default function CricketPredictions() {
         eventType: 'sports' as const,
       })),
       pageTitle: 'Cricket Predictions - 0xNull',
-      pageDescription: 'Anonymous cricket betting with Monero. Predict IPL, international, and T20 match outcomes.',
+      pageDescription: 'Anonymous cricket betting with Monero. Predict IPL, international and T20 match outcomes.',
       pageUrl: 'https://0xnull.io/cricket',
     };
   }, [markets]);
@@ -873,7 +873,7 @@ export default function CricketPredictions() {
 
             {/* Refund info */}
             <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
-              <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-result, abandoned, or cancelled match. 0.4% fee on winnings only.</p>
+              <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-result, abandoned or cancelled match. 0.4% fee on winnings only.</p>
             </div>
             
             {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (
@@ -1050,13 +1050,13 @@ export default function CricketPredictions() {
       <SEORichText
         title="Anonymous Cricket Prediction Markets on 0xNull"
         content={`
-          <p>0xNull offers anonymous cricket prediction markets with no KYC, no accounts, and no identity verification. Users can predict outcomes of major cricket matches and tournaments while maintaining full privacy and financial anonymity.</p>
+          <p>0xNull offers anonymous cricket prediction markets with no KYC, no accounts and no identity verification. Users can predict outcomes of major cricket matches and tournaments while maintaining full privacy and financial anonymity.</p>
           
-          <p>Unlike traditional cricket betting platforms, 0xNull cricket predictions are built around privacy-first prediction markets. There is no registration process, no personal data collection, and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant transactions.</p>
+          <p>Unlike traditional cricket betting platforms, 0xNull cricket predictions are built around privacy-first prediction markets. There is no registration process, no personal data collection and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant transactions.</p>
           
-          <p>Cricket prediction markets on 0xNull cover a wide range of events, including international matches, domestic leagues, and major tournaments. Users can predict match winners, series outcomes, and key cricket events without exposing their identity or relying on centralized operators.</p>
+          <p>Cricket prediction markets on 0xNull cover a wide range of events, including international matches, domestic leagues and major tournaments. Users can predict match winners, series outcomes and key cricket events without exposing their identity or relying on centralized operators.</p>
           
-          <p>By combining no-KYC access, crypto-native payments, and transparent market mechanics, 0xNull creates a secure environment for anonymous cricket predictions. The platform is designed for users who want to participate in cricket markets without surveillance, restrictions, or personal data risks.</p>
+          <p>By combining no-KYC access, crypto-native payments and transparent market mechanics, 0xNull creates a secure environment for anonymous cricket predictions. The platform is designed for users who want to participate in cricket markets without surveillance, restrictions or personal data risks.</p>
           
           <p>Explore anonymous cricket prediction markets on 0xNull and predict cricket outcomes with full privacy—no KYC, no accounts, just crypto-powered markets.</p>
         `}

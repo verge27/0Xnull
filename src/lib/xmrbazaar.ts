@@ -128,7 +128,7 @@ export const xmrbazaarListings: XMRBazaarListing[] = [
   {
     id: "xmr-9i9T",
     title: "Design & Art Services",
-    description: "Professional design services accepting XMR. Logos, branding, illustrations, and custom artwork. Contact via Matrix or Telegram for quotes.",
+    description: "Professional design services accepting XMR. Logos, branding, illustrations and custom artwork. Contact via Matrix or Telegram for quotes.",
     priceUsd: 50,
     priceXmr: 0.30,
     category: "services",
@@ -231,7 +231,7 @@ export const xmrbazaarListings: XMRBazaarListing[] = [
   {
     id: "xmr-rYrH",
     title: "Monero XMR Embroidered Patch - Velcro",
-    description: "High-quality embroidered Monero patch with velcro backing. 8cm diameter. Perfect for bags, jackets, or gear.",
+    description: "High-quality embroidered Monero patch with velcro backing. 8cm diameter. Perfect for bags, jackets or gear.",
     priceUsd: 12,
     priceXmr: 0.07,
     category: "accessories",
@@ -276,7 +276,7 @@ export const xmrbazaarListings: XMRBazaarListing[] = [
   {
     id: "xmr-3YYU",
     title: "VPS Combo: Email, Docs & Chat Server",
-    description: "Privacy-focused VPS setup with email (no spam flags), chat server (XMPP or SimpleX), and Cryptpad (encrypted Google Docs alternative). Setup with your domain, then root access handed to you.",
+    description: "Privacy-focused VPS setup with email (no spam flags), chat server (XMPP or SimpleX) and Cryptpad (encrypted Google Docs alternative). Setup with your domain, then root access handed to you.",
     priceUsd: 150,
     priceXmr: 0.91,
     category: "services",

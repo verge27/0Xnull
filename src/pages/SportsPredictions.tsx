@@ -109,7 +109,7 @@ export default function SportsPredictions() {
         eventType: 'sports' as const,
       })),
       pageTitle: 'Sports Predictions - 0xNull',
-      pageDescription: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA, and more.',
+      pageDescription: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA and more.',
       pageUrl: 'https://0xnull.io/sports-predictions',
     };
   }, [markets]);
@@ -503,7 +503,7 @@ export default function SportsPredictions() {
     return sorted;
   }, [upcomingMatches, selectedCategory, soccerLeagueFilter]);
   
-  // Separate live, closing soon, and regular markets
+  // Separate live, closing soon and regular markets
   // Live markets = betting closed but not yet resolved (match in progress)
   // Only show live markets that have actual bets (pool > 0)
   const liveMarkets = markets.filter(m => {
@@ -1611,7 +1611,7 @@ export default function SportsPredictions() {
         {/* SEO Rich Text Section */}
         <SEORichText 
           title="Anonymous Sports Prediction Markets on 0xNull"
-          content="<p>0xNull Sports Predictions offers a privacy-first way to participate in anonymous, no-KYC sports prediction markets. Users can place predictions on major sporting events without creating accounts, submitting personal information, or completing identity verification.</p><p>Unlike traditional sportsbooks and prediction platforms, 0xNull is built for anonymity. All sports predictions are made using cryptocurrencies, including privacy-focused options like Monero, ensuring transactions remain confidential and censorship-resistant.</p><p>The platform covers a wide range of sports markets, allowing users to predict outcomes securely while maintaining full control over their privacy. With no centralized custody of user data and no KYC requirements, 0xNull removes common barriers that limit access to global prediction markets.</p><p>Whether you're predicting match outcomes, tournament results, or seasonal performances, 0xNull enables sports predictions without surveillance, tracking, or identity exposure. Every market is designed around fairness, transparency, and user sovereignty.</p><p>Explore anonymous sports prediction markets on 0xNull and participate freely—without KYC, accounts, or compromised privacy.</p>"
+          content="<p>0xNull Sports Predictions offers a privacy-first way to participate in anonymous, no-KYC sports prediction markets. Users can place predictions on major sporting events without creating accounts, submitting personal information or completing identity verification.</p><p>Unlike traditional sportsbooks and prediction platforms, 0xNull is built for anonymity. All sports predictions are made using cryptocurrencies, including privacy-focused options like Monero, ensuring transactions remain confidential and censorship-resistant.</p><p>The platform covers a wide range of sports markets, allowing users to predict outcomes securely while maintaining full control over their privacy. With no centralized custody of user data and no KYC requirements, 0xNull removes common barriers that limit access to global prediction markets.</p><p>Whether you're predicting match outcomes, tournament results, or seasonal performances, 0xNull enables sports predictions without surveillance, tracking or identity exposure. Every market is designed around fairness, transparency and user sovereignty.</p><p>Explore anonymous sports prediction markets on 0xNull and participate freely—without KYC, accounts or compromised privacy.</p>"
         />
         
         <Footer />
@@ -1724,7 +1724,7 @@ export default function SportsPredictions() {
 
               {/* Refund info */}
               <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
-                <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw, or cancelled event. 0.4% fee on winnings only.</p>
+                <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw or cancelled event. 0.4% fee on winnings only.</p>
               </div>
               
               {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (

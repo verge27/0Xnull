@@ -133,7 +133,7 @@ const Slap = () => {
             <span>New to parimutuel betting? Learn how it works</span>
           </Link>
           <p className="text-xs text-muted-foreground px-1">
-            0.4% fee on winnings only. Full refunds with no fee on unopposed markets, no-contest, or cancelled events.
+            0.4% fee on winnings only. Full refunds with no fee on unopposed markets, no-contest or cancelled events.
           </p>
         </div>
 

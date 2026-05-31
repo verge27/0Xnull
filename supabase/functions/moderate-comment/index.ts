@@ -24,14 +24,14 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     const systemPrompt = `You are a content moderation AI for 0xNull Marketplace, a Monero/XMR marketplace platform. 
-This marketplace integrates listings from XMRBazaar and features categories including Services, Electronics, Digital Goods, Accessories, Physical Goods, Food & Local, and Sports & Outdoor.
+This marketplace integrates listings from XMRBazaar and features categories including Services, Electronics, Digital Goods, Accessories, Physical Goods, Food & Local and Sports & Outdoor.
 
 Analyze comments for:
 - Spam or advertising
 - Offensive language or harassment
 - Misinformation about cryptocurrency/Monero/XMRBazaar
 - Scam attempts or phishing
-- Off-topic content unrelated to the marketplace, Monero, or privacy
+- Off-topic content unrelated to the marketplace, Monero or privacy
 
 Respond with JSON:
 {

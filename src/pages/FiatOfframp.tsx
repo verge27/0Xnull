@@ -29,7 +29,7 @@ const FIAT_CURRENCIES = [
   { ticker: 'gbp', label: 'GBP', network: 'gbp' },
 ];
 
-// SimpleSwap supports ETH, USDT, and USDC on Ethereum mainnet for fiat off-ramps
+// SimpleSwap supports ETH, USDT and USDC on Ethereum mainnet for fiat off-ramps
 const SUPPORTED_CRYPTO = [
   { ticker: 'eth', network: 'eth', label: 'ETH (Ethereum)' },
   { ticker: 'usdt', network: 'eth', label: 'USDT (ERC20)' },
@@ -319,7 +319,7 @@ const FiatOfframp = () => {
                   Crypto to Fiat
                 </CardTitle>
                 <CardDescription>
-                  Receive USD, EUR, or GBP via bank transfer or card
+                  Receive USD, EUR or GBP via bank transfer or card
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

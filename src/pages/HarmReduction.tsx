@@ -33,7 +33,7 @@ const HarmReduction = () => {
             What is <span className="text-gradient">0xNull Marketplace</span>?
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A privacy-focused marketplace for grey market goods, embarrassing purchases, and items you'd rather keep private — <strong>not</strong> for illegal activity.
+            A privacy-focused marketplace for grey market goods, embarrassing purchases and items you'd rather keep private — <strong>not</strong> for illegal activity.
           </p>
         </div>
 

@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid file type. Use JPG, PNG, WebP, or GIF' }),
+        JSON.stringify({ error: 'Invalid file type. Use JPG, PNG, WebP or GIF' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

@@ -381,7 +381,7 @@ const CreatorUploadModal = ({ open, onOpenChange, onSuccess }: CreatorUploadModa
                   id="text-content"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Share an update, announcement, or message with your subscribers..."
+                  placeholder="Share an update, announcement or message with your subscribers..."
                   rows={6}
                   maxLength={2000}
                   className="resize-none"

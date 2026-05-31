@@ -85,7 +85,7 @@ export default function PredictionsHub() {
             </div>
             <h1 className="text-4xl font-bold mb-3">Predictions</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Bet on esports, sports, and crypto with XMR. No accounts, no KYC.
+              Bet on esports, sports and crypto with XMR. No accounts, no KYC.
             </p>
           </div>
 

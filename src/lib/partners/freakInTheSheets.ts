@@ -118,7 +118,7 @@ export const freakInTheSheetsListings: Partial<Listing>[] = [
   {
     id: 'fits-lube-001',
     title: 'ID Free Hypoallergenic Water-Based Lubricant 130ml',
-    description: 'Long-lasting hypoallergenic lubricant. Free from glycerin, parabens, and alcohol. Ultra-gentle fragrance-free formula. Toy and latex friendly. High-performance slip.',
+    description: 'Long-lasting hypoallergenic lubricant. Free from glycerin, parabens and alcohol. Ultra-gentle fragrance-free formula. Toy and latex friendly. High-performance slip.',
     priceUsd: gbpToUsd(13.99),
     priceXmr: usdToXmr(gbpToUsd(13.99)),
     category: 'adult-intimacy',

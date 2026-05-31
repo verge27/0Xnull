@@ -17,7 +17,7 @@ interface StructuredData {
 
 const defaultMeta = {
   title: '0xNull - Anonymous Crypto Predictions & Marketplace',
-  description: 'Anonymous prediction markets for sports, esports, and crypto. Privacy-first marketplace paid in Monero. No KYC, no accounts.',
+  description: 'Anonymous prediction markets for sports, esports and crypto. Privacy-first marketplace paid in Monero. No KYC, no accounts.',
   image: 'https://0xnull.io/og-image.png',
   type: 'website',
 };
@@ -26,19 +26,19 @@ const pageMeta: Record<string, SEOProps> = {
   '/': defaultMeta,
   '/predict': {
     title: 'Anonymous Crypto Prediction Markets – 0xNull',
-    description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and private predictions across sports, esports, and crypto.',
+    description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and private predictions across sports, esports and crypto.',
   },
   '/sports-predictions': {
     title: 'Anonymous Sports Predictions | No-KYC Crypto Betting – 0xNull',
-    description: 'Place anonymous sports predictions on 0xNull. No KYC, no accounts, private Monero betting on football, basketball, tennis, and more.',
+    description: 'Place anonymous sports predictions on 0xNull. No KYC, no accounts, private Monero betting on football, basketball, tennis and more.',
   },
   '/esports-predictions': {
     title: 'Anonymous Esports Predictions | No-KYC Crypto Betting – 0xNull',
-    description: 'Bet on esports anonymously with 0xNull. No KYC, no accounts, private Monero predictions on CS2, Dota 2, LoL, and more.',
+    description: 'Bet on esports anonymously with 0xNull. No KYC, no accounts, private Monero predictions on CS2, Dota 2, LoL and more.',
   },
   '/predictions': {
     title: 'Anonymous Crypto Price Predictions | No-KYC Bitcoin Betting – 0xNull',
-    description: 'Make anonymous crypto price predictions on 0xNull. No KYC, no accounts, private Monero betting on Bitcoin, Ethereum, and more.',
+    description: 'Make anonymous crypto price predictions on 0xNull. No KYC, no accounts, private Monero betting on Bitcoin, Ethereum and more.',
   },
   '/swaps': {
     title: 'Anonymous Crypto Swaps No KYC | Private Crypto Exchange – 0xNull',
@@ -46,23 +46,23 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/browse': {
     title: 'Anonymous Crypto Marketplace | No-KYC Prediction Markets – 0xNull',
-    description: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services, and Monero payments—built for privacy-first users.',
+    description: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services and Monero payments—built for privacy-first users.',
   },
   '/ai': {
     title: 'AI Services - 0xNull',
-    description: 'Privacy-first AI services. Voice cloning, text-to-speech, and more with cryptocurrency payments.',
+    description: 'Privacy-first AI services. Voice cloning, text-to-speech and more with cryptocurrency payments.',
   },
   '/infra': {
     title: 'Infrastructure - 0xNull',
-    description: 'Privacy infrastructure services. VPS, eSIM, swaps, and more with anonymous crypto payments.',
+    description: 'Privacy infrastructure services. VPS, eSIM, swaps and more with anonymous crypto payments.',
   },
   '/vps': {
     title: 'Anonymous VPS Hosting with Cryptocurrency | No-KYC VPS – 0xNull',
-    description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments, and privacy-first virtual servers.',
+    description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments and privacy-first virtual servers.',
   },
   '/phone': {
     title: 'Anonymous Phone Numbers No KYC | Buy Private eSIMs with Crypto – 0xNull',
-    description: 'Buy anonymous phone numbers and eSIMs with no KYC on 0xNull. Instant activation, global coverage, and crypto payments including Monero and Lightning.',
+    description: 'Buy anonymous phone numbers and eSIMs with no KYC on 0xNull. Instant activation, global coverage and crypto payments including Monero and Lightning.',
   },
   '/lending': {
     title: '0xNull Lending Protocol | Anonymous No-KYC Crypto Lending',
@@ -86,7 +86,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/how-betting-works': {
     title: 'How Parimutuel Betting Works - 0xNull',
-    description: 'Learn how parimutuel betting works on 0xNull. Understand pool-based odds, payouts, and the 0.4% fee structure.',
+    description: 'Learn how parimutuel betting works on 0xNull. Understand pool-based odds, payouts and the 0.4% fee structure.',
   },
   '/support': {
     title: 'Support - 0xNull',
@@ -102,7 +102,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/combat': {
     title: 'MMA & Boxing Predictions - 0xNull',
-    description: 'Anonymous MMA and boxing betting. Predict UFC, boxing, and combat sports outcomes with Monero.',
+    description: 'Anonymous MMA and boxing betting. Predict UFC, boxing and combat sports outcomes with Monero.',
   },
   '/cricket': {
     title: 'Anonymous Cricket Prediction Markets | No-KYC Cricket Predictions – 0xNull',
@@ -114,7 +114,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/starcraft': {
     title: 'StarCraft Predictions - 0xNull',
-    description: 'Anonymous StarCraft 2 betting. Predict GSL, ESL, and pro SC2 match outcomes with crypto.',
+    description: 'Anonymous StarCraft 2 betting. Predict GSL, ESL and pro SC2 match outcomes with crypto.',
   },
   '/slap': {
     title: 'Slap Fighting Predictions - 0xNull',
@@ -122,7 +122,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/get-started': {
     title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
-    description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and full privacy from the start.',
+    description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and full privacy from the start.',
   },
   '/tor': {
     title: 'Tor Access Guide - 0xNull',
@@ -138,11 +138,11 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/philosophy': {
     title: 'Philosophy - 0xNull',
-    description: 'Our philosophy on privacy, freedom, and decentralization. Why we built 0xNull.',
+    description: 'Our philosophy on privacy, freedom and decentralization. Why we built 0xNull.',
   },
   '/fiat-onramp': {
     title: 'Buy Crypto with Fiat - 0xNull',
-    description: 'Buy cryptocurrency with credit card or bank transfer. Get BTC, ETH, and more without KYC.',
+    description: 'Buy cryptocurrency with credit card or bank transfer. Get BTC, ETH and more without KYC.',
   },
   '/fiat-offramp': {
     title: 'Sell Crypto to Fiat - 0xNull',
@@ -150,7 +150,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/verify': {
     title: 'Verify & Security - 0xNull',
-    description: 'Verify 0xNull authenticity. PGP keys, Tor address, and warrant canary for security.',
+    description: 'Verify 0xNull authenticity. PGP keys, Tor address and warrant canary for security.',
   },
   '/vpn-resources': {
     title: 'Privacy VPN Resources - 0xNull',
@@ -174,7 +174,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/settings': {
     title: 'Settings - 0xNull',
-    description: 'Manage your 0xNull account settings, profile, and preferences.',
+    description: 'Manage your 0xNull account settings, profile and preferences.',
   },
   '/my-slips': {
     title: 'My Bet Slips - 0xNull',
@@ -190,7 +190,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/creators': {
     title: '0xNull Creators | Anonymous Adult Content Platform (No KYC, Monero)',
-    description: '0xNull Creators is a privacy-first adult content platform with no KYC, no accounts, and Monero-only payments. Create and support content anonymously.',
+    description: '0xNull Creators is a privacy-first adult content platform with no KYC, no accounts and Monero-only payments. Create and support content anonymously.',
   },
   '/creator/register': {
     title: 'Become a Creator - 0xNull Creators',
@@ -202,7 +202,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/creator/dashboard': {
     title: 'Creator Dashboard - 0xNull Creators',
-    description: 'Manage your content, view earnings, and connect with subscribers.',
+    description: 'Manage your content, view earnings and connect with subscribers.',
   },
 };
 
@@ -397,7 +397,7 @@ const faqSchemas: Record<string, StructuredData> = {
         name: 'What is the fee structure on 0xNull?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: '0xNull charges a flat 0.4% fee on winnings only. There is no fee on losses, refunds, or no-contest outcomes. This is significantly lower than traditional bookmakers.',
+          text: '0xNull charges a flat 0.4% fee on winnings only. There is no fee on losses, refunds or no-contest outcomes. This is significantly lower than traditional bookmakers.',
         },
       },
       {
@@ -413,7 +413,7 @@ const faqSchemas: Record<string, StructuredData> = {
         name: 'What happens if an event is cancelled or ends in a draw?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'For cancelled events, no-contest outcomes, or draws where applicable, all bettors on both sides receive a full refund with zero fees. Your entire stake is returned.',
+          text: 'For cancelled events, no-contest outcomes or draws where applicable, all bettors on both sides receive a full refund with zero fees. Your entire stake is returned.',
         },
       },
       {
@@ -465,7 +465,7 @@ const faqSchemas: Record<string, StructuredData> = {
         name: 'How do anonymous crypto swaps work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Our crypto swap service allows you to exchange cryptocurrencies without KYC or registration. Simply select your coins, enter the amount, and provide a receiving address. The swap is processed through decentralized partners.',
+          text: 'Our crypto swap service allows you to exchange cryptocurrencies without KYC or registration. Simply select your coins, enter the amount and provide a receiving address. The swap is processed through decentralized partners.',
         },
       },
       {
@@ -473,7 +473,7 @@ const faqSchemas: Record<string, StructuredData> = {
         name: 'What cryptocurrencies can I swap?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'We support a wide range of cryptocurrencies including BTC, ETH, XMR, LTC, DOGE, and many more. Check the swap interface for the full list of available pairs.',
+          text: 'We support a wide range of cryptocurrencies including BTC, ETH, XMR, LTC, DOGE and many more. Check the swap interface for the full list of available pairs.',
         },
       },
       {
@@ -516,7 +516,7 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'Sports Predictions',
-    description: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA, and more.',
+    description: 'Anonymous sports betting with Monero. Predict outcomes for football, basketball, MMA and more.',
     url: 'https://0xnull.io/sports-predictions',
     isPartOf: {
       '@type': 'WebSite',
@@ -533,7 +533,7 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'Esports Predictions',
-    description: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends, and more.',
+    description: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends and more.',
     url: 'https://0xnull.io/esports-predictions',
     isPartOf: {
       '@type': 'WebSite',
@@ -788,7 +788,7 @@ const articleSchemas: Record<string, StructuredData> = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'How Parimutuel Betting Works on 0xNull',
-    description: 'A comprehensive guide to understanding parimutuel betting mechanics, pool-based odds, and the 0.4% fee structure.',
+    description: 'A comprehensive guide to understanding parimutuel betting mechanics, pool-based odds and the 0.4% fee structure.',
     url: 'https://0xnull.io/how-betting-works',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
@@ -814,7 +814,7 @@ const articleSchemas: Record<string, StructuredData> = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'The Philosophy Behind 0xNull',
-    description: 'Our philosophy on privacy, freedom, and decentralization. Why we built 0xNull.',
+    description: 'Our philosophy on privacy, freedom and decentralization. Why we built 0xNull.',
     url: 'https://0xnull.io/philosophy',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',

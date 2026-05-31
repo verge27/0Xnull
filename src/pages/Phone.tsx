@@ -321,15 +321,15 @@ const Phone = () => {
       <SEORichText
         title="Anonymous Phone Numbers & eSIMs with No KYC on 0xNull"
         content={`
-          <p>0xNull offers anonymous phone numbers and eSIMs with no KYC, no accounts, and no identity verification. Users can activate phone services instantly using cryptocurrency—without providing an email address, personal details, or documents.</p>
+          <p>0xNull offers anonymous phone numbers and eSIMs with no KYC, no accounts and no identity verification. Users can activate phone services instantly using cryptocurrency—without providing an email address, personal details or documents.</p>
           
-          <p>Unlike traditional telecom providers, 0xNull phone services are built for privacy-first usage. There is no registration process and no data tied to your identity. Simply choose a phone number or eSIM, pay with crypto, and start using the service immediately.</p>
+          <p>Unlike traditional telecom providers, 0xNull phone services are built for privacy-first usage. There is no registration process and no data tied to your identity. Simply choose a phone number or eSIM, pay with crypto and start using the service immediately.</p>
           
-          <p>Phone numbers and eSIMs are available for dozens of countries worldwide, making them ideal for verification, privacy-focused communication, travel, or online services that require a phone number. Activation occurs instantly after payment confirmation, with no manual approval or delays.</p>
+          <p>Phone numbers and eSIMs are available for dozens of countries worldwide, making them ideal for verification, privacy-focused communication, travel or online services that require a phone number. Activation occurs instantly after payment confirmation, with no manual approval or delays.</p>
           
-          <p>All phone services on 0xNull are crypto-only, supporting Bitcoin (Lightning), Monero, USDT, and USDC. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
+          <p>All phone services on 0xNull are crypto-only, supporting Bitcoin (Lightning), Monero, USDT and USDC. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
           
-          <p>Whether you need a temporary number, a private phone line, or an anonymous eSIM for global use, 0xNull provides fast, no-KYC phone services designed for anonymity and convenience.</p>
+          <p>Whether you need a temporary number, a private phone line or an anonymous eSIM for global use, 0xNull provides fast, no-KYC phone services designed for anonymity and convenience.</p>
           
           <p>Get an anonymous phone number or eSIM on 0xNull today—no KYC, no email, no account. Just pay and use.</p>
         `}

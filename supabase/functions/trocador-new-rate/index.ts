@@ -151,7 +151,7 @@ serve(async (req) => {
     }
 
     if (!isValidKycRating(min_kycrating)) {
-      return new Response(JSON.stringify({ error: 'Invalid min_kycrating: must be A, B, C, or D' }), {
+      return new Response(JSON.stringify({ error: 'Invalid min_kycrating: must be A, B, C or D' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

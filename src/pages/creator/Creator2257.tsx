@@ -33,13 +33,13 @@ const Creator2257 = () => {
                 Under 18 U.S.C. § 2257(h)(2)(B), the record-keeping requirements do not apply to:
               </p>
               <blockquote className="border-l-4 border-[#FF6600] pl-4 italic text-muted-foreground bg-muted/30 py-2 rounded-r">
-                "Any person who does not produce, manufacture, publish, duplicate, reproduce, or reissue the matter"
+                "Any person who does not produce, manufacture, publish, duplicate, reproduce or reissue the matter"
               </blockquote>
               <p className="text-muted-foreground mt-4 mb-2">0xNull Creators is a hosting platform that:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                 <li>Does NOT produce or create content</li>
                 <li>Does NOT employ or contract performers</li>
-                <li>Does NOT direct, film, or manufacture content</li>
+                <li>Does NOT direct, film or manufacture content</li>
                 <li>Merely provides hosting infrastructure for third-party creators</li>
               </ul>
             </section>

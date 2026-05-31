@@ -14,7 +14,7 @@ type Step = "landing" | "get-crypto" | "get-wallet" | "get-xmr" | "ready";
 const GetStarted = () => {
   useSEO({
     title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
-    description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and full privacy from the start.',
+    description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and full privacy from the start.',
   });
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("landing");
@@ -115,7 +115,7 @@ const GetStarted = () => {
           Buy crypto without KYC
         </h1>
         <p className="text-lg text-muted-foreground">
-          Get Bitcoin, USDT, or other crypto with no identity verification.
+          Get Bitcoin, USDT or other crypto with no identity verification.
         </p>
       </div>
 
@@ -177,7 +177,7 @@ const GetStarted = () => {
         </h1>
         <p className="text-lg text-muted-foreground">
           Cake Wallet is the easiest way to hold and send Monero (XMR).
-          <br />Available on iOS, Android, and desktop.
+          <br />Available on iOS, Android and desktop.
         </p>
       </div>
 
@@ -398,7 +398,7 @@ const GetStarted = () => {
       {/* SEO Rich Text Section */}
       <SEORichText 
         title="How to Use Anonymous Crypto Prediction Markets on 0xNull"
-        content="<p>Getting started with 0xNull is simple, private, and requires no KYC. The platform is designed so users can access anonymous prediction markets, crypto services, and digital utilities without creating accounts or submitting personal information.</p><p>To begin using 0xNull's anonymous crypto prediction markets, users only need a supported cryptocurrency wallet. There is no registration process, no identity verification, and no data tracking. All interactions are crypto-native, with support for privacy-focused assets like Monero to ensure confidential transactions.</p><p>Once connected, users can explore sports predictions, crypto predictions, esports markets, anonymous services, and crypto swaps—all from a single privacy-first ecosystem. Every action on 0xNull is designed to minimize data exposure while maintaining transparent market mechanics.</p><p>Whether you want to place a prediction, swap cryptocurrencies, or access anonymous services, 0xNull removes traditional barriers and prioritizes user sovereignty. There are no accounts to manage, no centralized custody, and no surveillance-based restrictions.</p><p>Get started with 0xNull today and experience anonymous, no-KYC prediction markets and crypto services—built for privacy by default.</p>"
+        content="<p>Getting started with 0xNull is simple, private and requires no KYC. The platform is designed so users can access anonymous prediction markets, crypto services and digital utilities without creating accounts or submitting personal information.</p><p>To begin using 0xNull's anonymous crypto prediction markets, users only need a supported cryptocurrency wallet. There is no registration process, no identity verification and no data tracking. All interactions are crypto-native, with support for privacy-focused assets like Monero to ensure confidential transactions.</p><p>Once connected, users can explore sports predictions, crypto predictions, esports markets, anonymous services and crypto swaps—all from a single privacy-first ecosystem. Every action on 0xNull is designed to minimize data exposure while maintaining transparent market mechanics.</p><p>Whether you want to place a prediction, swap cryptocurrencies or access anonymous services, 0xNull removes traditional barriers and prioritizes user sovereignty. There are no accounts to manage, no centralized custody and no surveillance-based restrictions.</p><p>Get started with 0xNull today and experience anonymous, no-KYC prediction markets and crypto services—built for privacy by default.</p>"
       />
       
       <Footer />

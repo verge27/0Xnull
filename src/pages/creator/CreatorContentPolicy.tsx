@@ -19,7 +19,7 @@ const CreatorContentPolicy = () => {
         <Card className="border-border/50 mb-6">
           <CardContent className="p-4">
             <p className="text-muted-foreground text-sm">
-              This Content Policy outlines what content is and is not permitted on 0xNull Creators. Violation of this policy may result in content removal, account termination, and reporting to law enforcement where applicable.
+              This Content Policy outlines what content is and is not permitted on 0xNull Creators. Violation of this policy may result in content removal, account termination and reporting to law enforcement where applicable.
             </p>
           </CardContent>
         </Card>
@@ -90,7 +90,7 @@ const CreatorContentPolicy = () => {
                   <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4 mb-3">
                     <li>Real photographs or videos of minors</li>
                     <li>AI-generated imagery depicting minors</li>
-                    <li>Drawn, animated, or CGI depictions of minors</li>
+                    <li>Drawn, animated or CGI depictions of minors</li>
                     <li>Written content sexualizing minors</li>
                     <li>Content that sexualizes characters explicitly stated to be under 18</li>
                     <li>"Aged up" depictions of minor characters</li>
@@ -130,18 +130,18 @@ const CreatorContentPolicy = () => {
                   <h3 className="text-lg font-medium text-destructive mb-2">3. Illegal Content</h3>
                   <p className="text-muted-foreground mb-2">Prohibited:</p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4 mb-3">
-                    <li>Content depicting actual violence, murder, or torture</li>
+                    <li>Content depicting actual violence, murder or torture</li>
                     <li>Terrorist content or violent extremism</li>
                     <li>Human trafficking or exploitation</li>
                     <li>Drug trafficking or sales</li>
                     <li>Weapons sales (where illegal)</li>
-                    <li>Fraud, scams, or phishing</li>
+                    <li>Fraud, scams or phishing</li>
                     <li>Malware or harmful code</li>
                     <li>Any content illegal under applicable law</li>
                   </ul>
                   <div className="bg-destructive/20 rounded p-3">
                     <p className="text-sm text-destructive">
-                      Consequence: Removal, ban, and law enforcement referral where applicable.
+                      Consequence: Removal, ban and law enforcement referral where applicable.
                     </p>
                   </div>
                 </div>
@@ -188,7 +188,7 @@ const CreatorContentPolicy = () => {
                   <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                     <li>Sexual deepfakes of real persons without consent</li>
                     <li>Any deepfake involving minors</li>
-                    <li>Deepfakes intended to deceive, defraud, or defame</li>
+                    <li>Deepfakes intended to deceive, defraud or defame</li>
                   </ul>
                 </div>
 

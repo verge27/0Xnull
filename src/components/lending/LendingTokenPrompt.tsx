@@ -37,7 +37,7 @@ export const LendingTokenPrompt = ({ onSubmit, loading, compact }: LendingTokenP
           <div className="flex-1 space-y-2">
             <p className="text-sm">
               <span className="font-medium text-foreground">You need a 0xNull token</span>{' '}
-              <span className="text-muted-foreground">to deposit, borrow, and manage positions. Tokens are your anonymous private key to 0xNull — no email, no account, no KYC required.</span>
+              <span className="text-muted-foreground">to deposit, borrow and manage positions. Tokens are your anonymous private key to 0xNull — no email, no account, no KYC required.</span>
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" asChild className="gap-1 h-7 text-xs">
@@ -115,7 +115,7 @@ export const LendingTokenPrompt = ({ onSubmit, loading, compact }: LendingTokenP
         </div>
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1 pt-2">
           <Shield className="w-3 h-3" />
-          Tokens work across all 0xNull services — predictions, lending, AI tools, and marketplace.
+          Tokens work across all 0xNull services — predictions, lending, AI tools and marketplace.
         </p>
       </div>
     </div>

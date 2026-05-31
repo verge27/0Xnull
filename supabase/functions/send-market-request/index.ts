@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate required fields
     if (!title || !description || !oracle) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: title, description, and oracle are required" }),
+        JSON.stringify({ error: "Missing required fields: title, description and oracle are required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }

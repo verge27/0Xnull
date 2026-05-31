@@ -1,34 +1,34 @@
 # 0xNull
 
-> Privacy-first, no-KYC platform for anonymous prediction markets, crypto lending, swaps, and a censorship-resistant marketplace. Authentication via 0xNull tokens; payments in Monero and other cryptocurrencies.
+> Privacy-first, no-KYC platform for anonymous prediction markets, crypto lending, swaps and a censorship-resistant marketplace. Authentication via 0xNull tokens; payments in Monero and other cryptocurrencies.
 
-0xNull lets users bet, lend, swap, and trade goods and services without accounts, email, or identity verification. Tokens (`0xn_…`) act as anonymous identities, payouts are automatic, and a 0.4% fee applies only to winnings.
+0xNull lets users bet, lend, swap, and trade goods and services without accounts, email or identity verification. Tokens (`0xn_…`) act as anonymous identities, payouts are automatic and a 0.4% fee applies only to winnings.
 
 ## Pages
 
-- [Home](/): Overview of 0xNull's prediction markets, marketplace, swaps, lending, and 3DS scanner.
-- [Prediction Markets Hub](/predict): Anonymous parimutuel markets across sports, esports, crypto, and governance.
+- [Home](/): Overview of 0xNull's prediction markets, marketplace, swaps, lending and 3DS scanner.
+- [Prediction Markets Hub](/predict): Anonymous parimutuel markets across sports, esports, crypto and governance.
 - [Sports Predictions](/sports-predictions): No-KYC sports betting paid in Monero.
-- [Esports Predictions](/esports-predictions): Anonymous esports betting on CS2, Dota 2, LoL, and more.
+- [Esports Predictions](/esports-predictions): Anonymous esports betting on CS2, Dota 2, LoL and more.
 - [Crypto Predictions](/predictions): Anonymous Bitcoin and crypto price prediction markets.
 - [Cricket Predictions](/cricket-predictions): No-KYC cricket prediction markets.
 - [Combat Sports](/predictions/sports/combat): MMA and boxing prediction markets.
 - [Governance Predictions](/governance-predictions): Long-horizon admin-resolved markets.
 - [Flash Markets](/flash): 5-minute Bull vs Bear crypto prediction markets.
-- [How Parimutuel Betting Works](/how-betting-works): Pool-based odds, payouts, and 0.4% fee structure explained.
+- [How Parimutuel Betting Works](/how-betting-works): Pool-based odds, payouts and 0.4% fee structure explained.
 - [Marketplace](/browse): Anonymous marketplace for digital goods and services.
 - [Swaps](/swaps): No-KYC crypto swaps across 300+ coins.
-- [Lending](/lending): Anonymous lending with Aave, Pendle, and Morpho integrations.
-- [Lending Privacy Tiers](/lending/privacy): Moderate, Max ZK, and Max Native privacy explained.
+- [Lending](/lending): Anonymous lending with Aave, Pendle and Morpho integrations.
+- [Lending Privacy Tiers](/lending/privacy): Moderate, Max ZK and Max Native privacy explained.
 - [AI Hub](/ai): Privacy-first AI services paid with crypto.
 - [Voice Cloning](/voice): AI voice cloning powered by Kokoro.
 - [Kokoro AI Companion](/kokoro): Conversational AI with no logs.
-- [Infrastructure](/infra): Anonymous VPS, eSIM, and privacy tooling.
+- [Infrastructure](/infra): Anonymous VPS, eSIM and privacy tooling.
 - [VPS Hosting](/vps): No-KYC virtual servers paid in crypto.
 - [Phone Numbers / eSIM](/phone): Anonymous eSIMs and phone numbers.
 - [Cash Out](/cashout): Convert crypto to fiat privately.
 - [Get Started](/get-started): Three-step onboarding to obtain XMR and a 0xNull token.
-- [Blog](/blog): Privacy, crypto, and platform updates.
+- [Blog](/blog): Privacy, crypto and platform updates.
 - [API Docs](/api-docs): Public 0xNull API reference.
 - [Verify / Warrant Canary](/verify): Live warrant canary and transparency.
 

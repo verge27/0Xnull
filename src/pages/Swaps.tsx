@@ -860,7 +860,7 @@ const Swaps = () => {
                   <Banknote className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">Fiat Gateway</p>
-                    <p className="text-sm text-muted-foreground">Buy crypto or cash out via bank, Visa, or Google Pay</p>
+                    <p className="text-sm text-muted-foreground">Buy crypto or cash out via bank, Visa or Google Pay</p>
                   </div>
                 </div>
                 <ArrowRightLeft className="h-5 w-5 text-muted-foreground" />
@@ -1460,7 +1460,7 @@ const Swaps = () => {
       {/* SEO Rich Text Section */}
       <SEORichText 
         title="Anonymous Crypto Swaps with No KYC on 0xNull"
-        content="<p>0xNull provides anonymous crypto swaps with no KYC, no accounts, and no identity verification. Users can swap cryptocurrencies directly while maintaining full financial privacy and control.</p><p>Unlike centralized exchanges, 0xNull crypto swaps are privacy-first and non-custodial. There is no user registration, no personal data collection, and no tracking. Swaps are completed using crypto-native infrastructure and support privacy-focused assets such as Monero, ensuring confidential transactions.</p><p>These no-KYC crypto swaps allow users to exchange assets without exposing identity, submitting documents, or relying on custodial platforms. By removing traditional exchange barriers, 0xNull enables global access to crypto swaps regardless of jurisdiction or restrictions.</p><p>Designed for users who prioritize anonymity and sovereignty, 0xNull crypto swaps offer a secure and censorship-resistant way to exchange digital assets without compromising privacy.</p><p>Swap cryptocurrencies anonymously on 0xNull—no KYC, no accounts, just private crypto-to-crypto swaps.</p>"
+        content="<p>0xNull provides anonymous crypto swaps with no KYC, no accounts and no identity verification. Users can swap cryptocurrencies directly while maintaining full financial privacy and control.</p><p>Unlike centralized exchanges, 0xNull crypto swaps are privacy-first and non-custodial. There is no user registration, no personal data collection and no tracking. Swaps are completed using crypto-native infrastructure and support privacy-focused assets such as Monero, ensuring confidential transactions.</p><p>These no-KYC crypto swaps allow users to exchange assets without exposing identity, submitting documents or relying on custodial platforms. By removing traditional exchange barriers, 0xNull enables global access to crypto swaps regardless of jurisdiction or restrictions.</p><p>Designed for users who prioritize anonymity and sovereignty, 0xNull crypto swaps offer a secure and censorship-resistant way to exchange digital assets without compromising privacy.</p><p>Swap cryptocurrencies anonymously on 0xNull—no KYC, no accounts, just private crypto-to-crypto swaps.</p>"
       />
 
       <Footer />
