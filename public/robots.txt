@@ -1,3 +1,34 @@
 User-agent: *
 Allow: /
+
+# Private / per-user routes
+Disallow: /auth
+Disallow: /checkout/
+Disallow: /order/
+Disallow: /orders
+Disallow: /wishlist
+Disallow: /messages
+Disallow: /settings
+Disallow: /sell
+Disallow: /my-slips
+Disallow: /payouts
+Disallow: /dashboard
+Disallow: /tokens
+Disallow: /lending/dashboard
+Disallow: /lending/portfolio
+Disallow: /fan/dashboard
+Disallow: /creator/dashboard
+Disallow: /creator/upload
+Disallow: /creator/settings
+Disallow: /creator/register
+Disallow: /creator/login
+
+# Admin / internal
+Disallow: /admin/
+Disallow: /blog/admin
+Disallow: /influencer/
+Disallow: /partners/
+Disallow: /api-analytics
+Disallow: /verify
+
 Sitemap: https://0xnull.io/sitemap.xml
