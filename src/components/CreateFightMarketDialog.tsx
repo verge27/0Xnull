@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { usePrivateKeyAuth } from "@/hooks/usePrivateKeyAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useToken } from "@/hooks/useToken";
 import { ResolutionInfo } from "@/components/ResolutionBadge";
 import { fixName } from "@/lib/nameFixes";
 
