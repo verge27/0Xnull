@@ -127,7 +127,8 @@ const Index = () => {
             </a>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              Join the Quiet Riot.
+              <span className="sr-only">0xNull — Anonymous Prediction Markets &amp; Crypto Marketplace. </span>
+              <span aria-hidden="true">Join the Quiet Riot.</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
               No name. No account. No compromise. Just your token.

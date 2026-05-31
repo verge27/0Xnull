@@ -25,7 +25,7 @@ const defaultMeta = {
 const pageMeta: Record<string, SEOProps> = {
   '/': defaultMeta,
   '/predict': {
-    title: 'Anonymous Crypto Prediction Markets | No-KYC Betting Hub – 0xNull',
+    title: 'Anonymous Crypto Prediction Markets – 0xNull',
     description: 'Explore anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments, and private predictions across sports, esports, and crypto.',
   },
   '/sports-predictions': {
@@ -109,7 +109,7 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Access anonymous cricket prediction markets on 0xNull. Make no-KYC cricket predictions using Monero and other cryptocurrencies on a privacy-first platform.',
   },
   '/flash': {
-    title: 'Flash Markets | 5-Minute Crypto Prediction Markets (No KYC) – 0xNull',
+    title: 'Flash Markets | 5-Min Crypto Predictions – 0xNull',
     description: 'Join Flash Markets on 0xNull—5-minute crypto prediction markets with Bull vs Bear outcomes. No KYC, no accounts, Monero-only, winners split the pool.',
   },
   '/starcraft': {
