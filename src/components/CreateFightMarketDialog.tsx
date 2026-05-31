@@ -46,6 +46,7 @@ export function CreateFightMarketDialog({
   });
   
   const { privateKeyUser } = usePrivateKeyAuth();
+  const { token } = useToken();
   const { user } = useAuth();
 
   const generateQuestion = () => {
