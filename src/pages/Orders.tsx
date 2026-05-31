@@ -40,6 +40,7 @@ const statusConfig: Record<OrderStatus, { label: string; icon: React.ReactNode; 
 };
 
 const Orders = () => {
+  useSEO();
   const { orders, loading, isAuthenticated, updateOrderStatus, isBuyer, isSeller } = useOrders();
   const { isUnlocked, decryptMessage, isPGPEncrypted, restoreSession } = usePGP();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
