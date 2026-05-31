@@ -31,7 +31,7 @@ const heroResponsiveSources = [
 const Index = () => {
   useSEO({
     title: '0xNull | Anonymous Prediction Markets & Crypto Marketplace',
-    description: 'Discover 0xNull Marketplace, a privacy-first anonymous prediction markets and cryptocurrency marketplace. Access digital goods, services, and prediction markets with Monero and other crypto | no KYC, no tracking.',
+    description: 'Privacy-first anonymous prediction markets and crypto marketplace. Trade goods, predict outcomes, pay with Monero. No KYC, no tracking, no accounts.',
   });
   
   // Capture voucher/ref from URL params (e.g., ?ref=AWF0XDOTA)

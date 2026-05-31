@@ -79,6 +79,7 @@ export default function AIHub() {
           </div>
 
           {/* Features */}
+          <h2 className="sr-only">Features</h2>
           <div className="grid sm:grid-cols-3 gap-4 mb-12">
             {features.map((feature) => {
               const Icon = feature.icon;
@@ -97,6 +98,7 @@ export default function AIHub() {
           </div>
 
           {/* Services Grid */}
+          <h2 className="sr-only">Available Services</h2>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {services.map((service) => {
               const Icon = service.icon;

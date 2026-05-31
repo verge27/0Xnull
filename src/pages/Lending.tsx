@@ -212,6 +212,7 @@ const Lending = () => {
         )}
 
         {/* TVL Banner */}
+        <h2 className="sr-only">Market Overview</h2>
         <Card className="mb-6 bg-gradient-to-r from-primary/10 to-transparent border-primary/20">
           <CardContent className="py-4 flex items-center justify-between flex-wrap gap-4">
             <div className="flex gap-8">
@@ -266,6 +267,7 @@ const Lending = () => {
         {/* Tab content */}
         {activeTab === 'dashboard' && (
           <>
+            <h2 className="sr-only">Asset Rates</h2>
             {/* Search & Filter Bar */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
