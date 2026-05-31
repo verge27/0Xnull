@@ -253,7 +253,11 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Twitch API error: ${response.status} - ${errorText}`);
+      console.error(`[twitch-helix] streams call FAILED status=${response.status} url=${twitchUrl} body=${errorText.slice(0, 500)}`);
+      if (response.status === 401) {
+        console.error('[twitch-helix] 401 from Helix — invalidating cached app token so next call refreshes');
+        tokenCache = null;
+      }
       return new Response(JSON.stringify({ error: 'Twitch API error', details: errorText }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
