@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { usePrivateKeyAuth } from "@/hooks/usePrivateKeyAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useToken } from "@/hooks/useToken";
 import { ResolutionInfo } from "@/components/ResolutionBadge";
 import { fixName } from "@/lib/nameFixes";
 
@@ -45,6 +46,7 @@ export function CreateFightMarketDialog({
   });
   
   const { privateKeyUser } = usePrivateKeyAuth();
+  const { token } = useToken();
   const { user } = useAuth();
 
   const generateQuestion = () => {
@@ -68,22 +70,40 @@ export function CreateFightMarketDialog({
     try {
       const question = generateQuestion();
       const description = `Market resolves YES if ${fixName(fighter1)} wins the fight against ${fixName(fighter2)} at ${fixName(eventName)}. Resolves NO if ${fixName(fighter2)} wins. Draw or No Contest will result in refunds.`;
+      const resolution_criteria = `Official result from ${promotionName || 'the promotion'}. ${resolution === 'auto' ? 'Auto-resolved via Tapology within 24-48 hours.' : 'Manually verified within 1-7 days.'}`;
 
-      const { data, error } = await supabase
-        .from('prediction_markets')
-        .insert({
-          question,
-          description,
-          resolution_criteria: `Official result from ${promotionName || 'the promotion'}. ${resolution === 'auto' ? 'Auto-resolved via Tapology within 24-48 hours.' : 'Manually verified within 1-7 days.'}`,
-          resolution_date: resolutionDate.toISOString(),
-          status: 'open',
-          creator_id: user?.id || null,
-          creator_pk_id: privateKeyUser?.id || null,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      if (privateKeyUser) {
+        if (!token) throw new Error('Missing 0xNull token. Please reload and try again.');
+        // Token-authenticated path: route through edge function with service role
+        const { data, error } = await supabase.functions.invoke('pk-create-market', {
+          body: {
+            question,
+            description,
+            resolution_criteria,
+            resolution_date: resolutionDate.toISOString(),
+          },
+          headers: {
+            'X-0xNull-Token': token,
+          },
+        });
+        if (error) throw error;
+        if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      } else {
+        const { error } = await supabase
+          .from('prediction_markets')
+          .insert({
+            question,
+            description,
+            resolution_criteria,
+            resolution_date: resolutionDate.toISOString(),
+            status: 'open',
+            creator_id: user!.id,
+            creator_pk_id: null,
+          })
+          .select()
+          .single();
+        if (error) throw error;
+      }
 
       toast.success("Market created successfully!");
       onOpenChange(false);
