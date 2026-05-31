@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useOrders, type Order, type OrderStatus } from '@/hooks/useOrders';
 import { usePGP } from '@/hooks/usePGP';
+import { useSEO } from '@/hooks/useSEO';
 import { PGPPassphraseDialog } from '@/components/PGPPassphraseDialog';
 
 const statusConfig: Record<OrderStatus, { label: string; icon: React.ReactNode; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
