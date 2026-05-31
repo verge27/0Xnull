@@ -122,7 +122,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function CryptoPredictions() {
   useSEO({
     title: 'Anonymous Crypto Prediction Markets | No-KYC Crypto Predictions – 0xNull',
-    description: 'Access anonymous crypto prediction markets on 0xNull. Predict crypto prices with no KYC, no accounts, and Monero payments on a privacy-first platform.',
+    description: 'Access anonymous crypto prediction markets on 0xNull. Predict crypto prices with no KYC, no accounts and Monero payments on a privacy-first platform.',
   });
   const { bets, storeBet, checkBetStatus, getBetsForMarket, submitPayoutAddress } = usePredictionBets();
   const { isAdmin } = useIsAdmin();
@@ -1051,7 +1051,7 @@ export default function CryptoPredictions() {
       {/* SEO Rich Text Section */}
       <SEORichText 
         title="Anonymous Crypto Prediction Markets on 0xNull"
-        content="<p>0xNull offers anonymous crypto prediction markets with no KYC, no accounts, and no identity verification. Users can predict cryptocurrency price movements and market outcomes while maintaining full financial privacy.</p><p>Unlike centralized prediction platforms and exchanges, 0xNull crypto prediction markets are built around anonymity and privacy-first design. There is no user tracking, no personal data collection, and no requirement to submit documents. All predictions are placed using cryptocurrencies, including Monero, to ensure confidential and censorship-resistant transactions.</p><p>These no-KYC crypto prediction markets allow participants to express market views without exposing their identity or relying on custodial services. Markets cover a wide range of crypto-related outcomes, including price levels, trend directions, and major market events.</p><p>By combining decentralized infrastructure, crypto-native payments, and strict privacy principles, 0xNull creates a secure environment for anonymous crypto predictions. The platform is designed for users who want market access without surveillance, restrictions, or centralized control.</p><p>Explore anonymous crypto prediction markets on 0xNull and participate freely—without KYC, accounts, or compromised privacy.</p>"
+        content="<p>0xNull offers anonymous crypto prediction markets with no KYC, no accounts and no identity verification. Users can predict cryptocurrency price movements and market outcomes while maintaining full financial privacy.</p><p>Unlike centralized prediction platforms and exchanges, 0xNull crypto prediction markets are built around anonymity and privacy-first design. There is no user tracking, no personal data collection and no requirement to submit documents. All predictions are placed using cryptocurrencies, including Monero, to ensure confidential and censorship-resistant transactions.</p><p>These no-KYC crypto prediction markets allow participants to express market views without exposing their identity or relying on custodial services. Markets cover a wide range of crypto-related outcomes, including price levels, trend directions and major market events.</p><p>By combining decentralized infrastructure, crypto-native payments and strict privacy principles, 0xNull creates a secure environment for anonymous crypto predictions. The platform is designed for users who want market access without surveillance, restrictions or centralized control.</p><p>Explore anonymous crypto prediction markets on 0xNull and participate freely—without KYC, accounts or compromised privacy.</p>"
       />
       
       <Footer />

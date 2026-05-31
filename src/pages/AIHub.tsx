@@ -149,8 +149,8 @@ export default function AIHub() {
                 </div>
 
                 <p className="text-muted-foreground">
-                  200+ AI models — including GPT-5.2, Claude, Gemini, and deep uncensored open-source catalogues.
-                  No KYC, no prompt logging, TEE-verified privacy. Pay with XMR, ETH, BTC, or fiat. From $8/month or pay-per-prompt.
+                  200+ AI models — including GPT-5.2, Claude, Gemini and deep uncensored open-source catalogues.
+                  No KYC, no prompt logging, TEE-verified privacy. Pay with XMR, ETH, BTC or fiat. From $8/month or pay-per-prompt.
                 </p>
 
                 <div className="grid sm:grid-cols-3 gap-3">

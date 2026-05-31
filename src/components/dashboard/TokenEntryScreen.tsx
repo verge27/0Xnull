@@ -146,7 +146,7 @@ export const TokenEntryScreen = ({ onTokenSet }: TokenEntryScreenProps) => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Your token is your identity. It grants access to lending, predictions, AI tools, and more.
+          Your token is your identity. It grants access to lending, predictions, AI tools and more.
         </p>
       </div>
     );

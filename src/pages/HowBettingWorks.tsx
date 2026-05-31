@@ -68,7 +68,7 @@ export default function HowBettingWorks() {
                 <li>All bets go into a shared pool</li>
                 <li>Odds are determined by the ratio of money on each side</li>
                 <li>Winners split the total pool proportionally to their stake</li>
-                <li>The house takes a flat <strong className="text-foreground">0.4% fee on winnings only</strong> — no fee on losses, refunds, or no-contest</li>
+                <li>The house takes a flat <strong className="text-foreground">0.4% fee on winnings only</strong> — no fee on losses, refunds or no-contest</li>
               </ul>
             </CardContent>
           </Card>
@@ -347,7 +347,7 @@ export default function HowBettingWorks() {
               <div className="p-4 rounded-lg bg-muted/50">
                 <p className="text-sm font-semibold text-foreground mb-2">2. No-Contest / Draw / Cancelled Event</p>
                 <p className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">Example:</strong> A fight ends in a No Contest, a match is postponed, or an event is cancelled.
+                  <strong className="text-foreground">Example:</strong> A fight ends in a No Contest, a match is postponed or an event is cancelled.
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
                   All bettors on both sides receive a <strong className="text-foreground">full refund with zero fees</strong>. Your stake is returned in full.
@@ -355,7 +355,7 @@ export default function HowBettingWorks() {
               </div>
 
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Bottom line:</strong> You only pay the 0.4% fee when you <em>win</em>. Losses, refunds, and no-contest scenarios are completely fee-free.
+                <strong className="text-foreground">Bottom line:</strong> You only pay the 0.4% fee when you <em>win</em>. Losses, refunds and no-contest scenarios are completely fee-free.
               </p>
             </CardContent>
           </Card>
@@ -596,7 +596,7 @@ export default function HowBettingWorks() {
                 </TableBody>
               </Table>
               <p className="text-muted-foreground mt-4 text-center">
-                The system is simple, transparent, and permissionless. <strong className="text-foreground">You're betting against other users, not the house.</strong>
+                The system is simple, transparent and permissionless. <strong className="text-foreground">You're betting against other users, not the house.</strong>
               </p>
             </CardContent>
           </Card>

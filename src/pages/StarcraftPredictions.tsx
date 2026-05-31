@@ -114,7 +114,7 @@ export default function StarcraftPredictions() {
         eventType: 'esports' as const,
       })),
       pageTitle: 'StarCraft 2 Predictions - 0xNull',
-      pageDescription: 'Anonymous StarCraft 2 betting. Predict GSL, ESL, and pro SC2 match outcomes with crypto.',
+      pageDescription: 'Anonymous StarCraft 2 betting. Predict GSL, ESL and pro SC2 match outcomes with crypto.',
       pageUrl: 'https://0xnull.io/starcraft',
     };
   }, [markets]);
@@ -990,7 +990,7 @@ export default function StarcraftPredictions() {
 
               {/* Refund info */}
               <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
-                <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw, or cancelled event. 0.4% fee on winnings only.</p>
+                <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw or cancelled event. 0.4% fee on winnings only.</p>
               </div>
               
               {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (

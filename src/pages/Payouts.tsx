@@ -1012,7 +1012,7 @@ export default function Payouts() {
                   <div className="flex items-center gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(page => {
-                        // Show first, last, and pages around current
+                        // Show first, last and pages around current
                         return page === 1 || 
                                page === totalPages || 
                                Math.abs(page - currentPage) <= 1;

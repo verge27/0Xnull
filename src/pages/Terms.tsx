@@ -50,7 +50,7 @@ const Terms = () => {
                   <li><strong>Child sexual abuse material (CSAM)</strong> or any exploitation of minors</li>
                   <li><strong>Human trafficking</strong> or any form of human exploitation</li>
                   <li><strong>Weapons of mass destruction</strong> (biological, chemical, nuclear, radiological agents)</li>
-                  <li><strong>Stolen property</strong>, data, credentials, or identity documents</li>
+                  <li><strong>Stolen property</strong>, data, credentials or identity documents</li>
                   <li><strong>Services intended to cause physical harm</strong>, including murder-for-hire or violence-for-hire</li>
                   <li>Fentanyl or fentanyl analogues</li>
                   <li><strong>Substances illegal in all jurisdictions worldwide</strong></li>
@@ -61,7 +61,7 @@ const Terms = () => {
                   verify the legal status of any item in any jurisdiction.
                 </p>
                 <p className="mt-4 font-medium">
-                  The platform does NOT verify, endorse, authenticate, or guarantee any listing. 
+                  The platform does NOT verify, endorse, authenticate or guarantee any listing. 
                   All items and services are provided by independent sellers without platform verification.
                 </p>
               </CardContent>
@@ -73,7 +73,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  Nothing in these Terms creates any agency, partnership, joint venture, or employment 
+                  Nothing in these Terms creates any agency, partnership, joint venture or employment 
                   relationship between you and 0xNull. Sellers are independent parties, not agents or 
                   employees of the platform.
                 </p>
@@ -86,13 +86,13 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  0xNull Marketplace does NOT collect, store, or have knowledge of the geographic 
+                  0xNull Marketplace does NOT collect, store or have knowledge of the geographic 
                   location of any buyer or seller. The platform operates without awareness of user 
-                  jurisdictions, IP addresses, or physical locations.
+                  jurisdictions, IP addresses or physical locations.
                 </p>
                 <p>
                   Users access this platform of their own accord and are solely responsible for 
-                  understanding and complying with all applicable local, state, national, and 
+                  understanding and complying with all applicable local, state, national and 
                   international laws in their respective jurisdictions.
                 </p>
               </CardContent>
@@ -106,9 +106,9 @@ const Terms = () => {
                 <p>Users are solely and exclusively responsible for:</p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Determining the legality of any item or service in their jurisdiction before purchasing or selling</li>
-                  <li>Compliance with all import/export regulations, customs requirements, and trade restrictions</li>
-                  <li>Calculating and paying any applicable taxes, duties, VAT, sales tax, import duties, or other government-imposed charges</li>
-                  <li>Obtaining any required licenses, permits, or authorizations for items or services</li>
+                  <li>Compliance with all import/export regulations, customs requirements and trade restrictions</li>
+                  <li>Calculating and paying any applicable taxes, duties, VAT, sales tax, import duties or other government-imposed charges</li>
+                  <li>Obtaining any required licenses, permits or authorizations for items or services</li>
                   <li>Accurate representation of items when selling</li>
                   <li>Maintaining their own operational security and privacy</li>
                   <li>Understanding and accepting all risks associated with transactions</li>
@@ -126,7 +126,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  The platform does not monitor, read, or have access to encrypted communications 
+                  The platform does not monitor, read or have access to encrypted communications 
                   between users. We cannot and do not review message content.
                 </p>
               </CardContent>
@@ -139,7 +139,7 @@ const Terms = () => {
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
                   All transactions are conducted in Monero (XMR) or via compatible cryptocurrency 
-                  payment methods. Cryptocurrency transactions are final, irreversible, and 
+                  payment methods. Cryptocurrency transactions are final, irreversible and 
                   non-refundable.
                 </p>
                 <p className="font-medium">
@@ -152,7 +152,7 @@ const Terms = () => {
                 </p>
                 <p>
                   Users are solely responsible for any tax obligations arising from cryptocurrency 
-                  transactions, including capital gains, income reporting, or other tax requirements 
+                  transactions, including capital gains, income reporting or other tax requirements 
                   in their jurisdiction.
                 </p>
               </CardContent>
@@ -174,10 +174,10 @@ const Terms = () => {
                 <ul className="list-disc list-inside space-y-1">
                   <li>Non-delivery or delayed delivery of items</li>
                   <li>Items not matching their description</li>
-                  <li>Quality, safety, or authenticity of items</li>
+                  <li>Quality, safety or authenticity of items</li>
                   <li>Seller or buyer conduct</li>
                   <li>Communication failures between parties</li>
-                  <li>Any loss, damage, or injury resulting from transactions</li>
+                  <li>Any loss, damage or injury resulting from transactions</li>
                 </ul>
                 <p className="mt-4">
                   Users transact entirely at their own risk. Review seller ratings and conduct due 
@@ -216,7 +216,7 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  Users retain full ownership of all content, images, and descriptions they upload 
+                  Users retain full ownership of all content, images and descriptions they upload 
                   to their listings. 0xNull does not claim any intellectual property rights over 
                   user-generated content. By posting content, you grant the platform a limited, 
                   non-exclusive license to display your listings for the purpose of operating the 
@@ -231,19 +231,19 @@ const Terms = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  You agree to indemnify, defend, and hold harmless 0xNull Marketplace, its operators, 
-                  developers, affiliates, and agents from and against any and all claims, damages, 
-                  obligations, losses, liabilities, costs, and expenses (including attorney's fees) 
+                  You agree to indemnify, defend and hold harmless 0xNull Marketplace, its operators, 
+                  developers, affiliates and agents from and against any and all claims, damages, 
+                  obligations, losses, liabilities, costs and expenses (including attorney's fees) 
                   arising from:
                 </p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Your use of the platform</li>
                   <li>Your violation of these Terms of Service</li>
-                  <li>Your violation of any law, regulation, or third-party right</li>
-                  <li>Your failure to pay applicable taxes, duties, or government charges</li>
+                  <li>Your violation of any law, regulation or third-party right</li>
+                  <li>Your failure to pay applicable taxes, duties or government charges</li>
                   <li>Your purchase or sale of any item or service</li>
                   <li>Any dispute with another user</li>
-                  <li>Any content you submit, post, or transmit through the platform</li>
+                  <li>Any content you submit, post or transmit through the platform</li>
                 </ul>
                 <p className="mt-4">
                   This indemnification obligation shall survive termination of these Terms and 

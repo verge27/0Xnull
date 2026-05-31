@@ -80,7 +80,7 @@ export default function CombatSports() {
         eventType: 'sports' as const,
       })),
       pageTitle: 'MMA & Boxing Predictions - 0xNull',
-      pageDescription: 'Anonymous MMA and boxing betting. Predict UFC, boxing, and combat sports outcomes with Monero.',
+      pageDescription: 'Anonymous MMA and boxing betting. Predict UFC, boxing and combat sports outcomes with Monero.',
       pageUrl: 'https://0xnull.io/combat',
     };
   }, [markets]);

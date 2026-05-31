@@ -250,7 +250,7 @@ const CreatorSettings = () => {
   };
 
   const slugError = pageSlug && !/^[a-z0-9-]+$/.test(pageSlug) 
-    ? 'Only lowercase letters, numbers, and hyphens allowed' 
+    ? 'Only lowercase letters, numbers and hyphens allowed' 
     : null;
 
   if (authLoading || !creator) {

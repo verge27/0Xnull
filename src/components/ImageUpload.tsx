@@ -38,7 +38,7 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     
     if (!fileExt || !allowedExts.includes(fileExt)) {
-      toast.error('Invalid file type. Use JPG, PNG, WebP, or GIF');
+      toast.error('Invalid file type. Use JPG, PNG, WebP or GIF');
       return null;
     }
 
@@ -103,7 +103,7 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5 }: ImageUplo
     
     if (!fileExt || !allowedExts.includes(fileExt)) {
       console.error('[ImageUpload] Invalid file type:', fileExt);
-      toast.error('Invalid file type. Use JPG, PNG, WebP, or GIF');
+      toast.error('Invalid file type. Use JPG, PNG, WebP or GIF');
       return null;
     }
 

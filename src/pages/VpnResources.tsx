@@ -50,7 +50,7 @@ const vpnServices = [
   {
     name: "IVPN",
     url: "https://ivpn.net",
-    description: "Open source, independently audited, and fully transparent. Anonymous signup with no personal data required. Slightly pricier but rock-solid reputation.",
+    description: "Open source, independently audited and fully transparent. Anonymous signup with no personal data required. Slightly pricier but rock-solid reputation.",
     kycLevel: 0,
     kycNote: "Explicit never",
     acceptsXmr: true,

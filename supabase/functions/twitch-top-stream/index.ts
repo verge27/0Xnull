@@ -86,7 +86,7 @@ async function getAppAccessToken(clientId: string, clientSecret: string): Promis
     );
     // Common hints
     if (res.status === 400) {
-      console.error('[twitch-auth] hint: 400 usually means invalid client_id, missing/invalid client_secret, or wrong grant_type');
+      console.error('[twitch-auth] hint: 400 usually means invalid client_id, missing/invalid client_secret or wrong grant_type');
     } else if (res.status === 401 || res.status === 403) {
       console.error('[twitch-auth] hint: 401/403 usually means the client_secret is wrong or the app was disabled in the Twitch dev console');
     }

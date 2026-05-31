@@ -415,9 +415,9 @@ const Lending = () => {
         <SEORichText
           title="Anonymous Crypto Lending Protocol"
           content={`
-<p>Decentralized finance continues to evolve beyond simple token swaps and staking mechanisms. Today, users are increasingly looking for anonymous crypto lending protocols that allow them to access liquidity without identity verification, custodial risk, or invasive onboarding processes. Traditional lending platforms often require account creation, compliance checks, and extensive personal data collection — creating unnecessary friction for users who simply want to lend or borrow digital assets.</p>
+<p>Decentralized finance continues to evolve beyond simple token swaps and staking mechanisms. Today, users are increasingly looking for anonymous crypto lending protocols that allow them to access liquidity without identity verification, custodial risk or invasive onboarding processes. Traditional lending platforms often require account creation, compliance checks and extensive personal data collection — creating unnecessary friction for users who simply want to lend or borrow digital assets.</p>
 
-<p>The 0xNull Lending Protocol represents a shift toward privacy-first DeFi infrastructure, where smart contracts replace intermediaries and crypto-native payments eliminate reliance on banks or third-party processors. By removing KYC requirements, users can participate in decentralized lending markets without exposing sensitive identity information. This aligns with the foundational principles of cryptocurrency: permissionless access, self-custody, and censorship resistance.</p>
+<p>The 0xNull Lending Protocol represents a shift toward privacy-first DeFi infrastructure, where smart contracts replace intermediaries and crypto-native payments eliminate reliance on banks or third-party processors. By removing KYC requirements, users can participate in decentralized lending markets without exposing sensitive identity information. This aligns with the foundational principles of cryptocurrency: permissionless access, self-custody and censorship resistance.</p>
 
 <h3>Why No-KYC Lending Is Gaining Momentum</h3>
 

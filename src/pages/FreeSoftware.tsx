@@ -22,7 +22,7 @@ const projects: FreeSoftwareProject[] = [
     name: "CameraKit",
     tagline: "GPS speed camera detector for Raspberry Pi",
     description:
-      "Standalone speed camera detection system using GPS positioning and OpenStreetMap data. Fetches 3,100+ UK camera locations via Overpass API, builds a KD-tree spatial index for real-time proximity alerts. Supports gpsd, serial NMEA, audio/TTS alerts, average speed zone tracking, and CSV trip logging. No subscriptions, no cloud, fully offline after initial database sync.",
+      "Standalone speed camera detection system using GPS positioning and OpenStreetMap data. Fetches 3,100+ UK camera locations via Overpass API, builds a KD-tree spatial index for real-time proximity alerts. Supports gpsd, serial NMEA, audio/TTS alerts, average speed zone tracking and CSV trip logging. No subscriptions, no cloud, fully offline after initial database sync.",
     techTags: ["Python", "Raspberry Pi", "OpenStreetMap", "scipy", "GPS"],
     githubUrl: "https://github.com/verge27/CameraKit",
     downloadUrl: "https://github.com/verge27/CameraKit/archive/refs/heads/main.zip",
@@ -42,7 +42,7 @@ const projects: FreeSoftwareProject[] = [
     name: "3DS Risk Scanner",
     tagline: "Check if a merchant enforces 3D Secure",
     description:
-      "Automated checkout risk intelligence platform. Navigates e-commerce checkout flows end-to-end using a headless browser — product discovery, cart, guest checkout, payment page — and determines whether 3DS authentication is enforced. Returns confidence-rated verdicts, PSP detection, screenshots, and full state transition logs.",
+      "Automated checkout risk intelligence platform. Navigates e-commerce checkout flows end-to-end using a headless browser — product discovery, cart, guest checkout, payment page — and determines whether 3DS authentication is enforced. Returns confidence-rated verdicts, PSP detection, screenshots and full state transition logs.",
     techTags: ["Python", "FastAPI", "Playwright", "3D Secure", "PCI"],
     githubUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform",
     downloadUrl: "https://github.com/verge27/3DS-Checkout-Risk-Intelligence-Platform/archive/refs/heads/main.zip",

@@ -90,7 +90,7 @@ export const DashboardAICloneTab = () => {
           <div>
             <Label>Personality Description</Label>
             <Textarea
-              placeholder="Describe your AI clone's personality, tone, interests, and how it should interact with fans..."
+              placeholder="Describe your AI clone's personality, tone, interests and how it should interact with fans..."
               value={persona}
               onChange={(e) => setPersona(e.target.value)}
               rows={6}

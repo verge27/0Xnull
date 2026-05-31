@@ -106,7 +106,7 @@ export const SiteAssistant = () => {
             <div className="text-center text-muted-foreground text-sm py-8">
               <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>Hello! I'm your site assistant.</p>
-              <p className="mt-1">Ask me about navigating the marketplace, categories, or how to buy/sell items!</p>
+              <p className="mt-1">Ask me about navigating the marketplace, categories or how to buy/sell items!</p>
             </div>
           )}
           {messages.map((msg, idx) => (

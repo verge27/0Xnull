@@ -248,7 +248,7 @@ const Philosophy = () => {
 
             <blockquote className="border-l-4 border-muted-foreground pl-6 py-4 mb-6 bg-secondary/30 rounded-r-lg">
               <p className="italic text-muted-foreground mb-2">
-                "Computer technology is on the verge of providing the ability for individuals and groups to communicate and interact with each other in a totally anonymous manner... These developments will alter completely the nature of government regulation, the ability to tax and control economic interactions, the ability to keep information secret, and will even alter the nature of trust and reputation."
+                "Computer technology is on the verge of providing the ability for individuals and groups to communicate and interact with each other in a totally anonymous manner... These developments will alter completely the nature of government regulation, the ability to tax and control economic interactions, the ability to keep information secret and will even alter the nature of trust and reputation."
               </p>
               <cite className="text-sm">— Tim May, The Crypto Anarchist Manifesto, 1988</cite>
             </blockquote>
@@ -353,7 +353,7 @@ const Philosophy = () => {
                 0xNull Marketplace builds privacy infrastructure. We operate in the cypherpunk tradition: working systems over theoretical arguments. Anonymous VPS hosting, cryptocurrency swaps and disposable phone numbers—tools that function regardless of jurisdiction.
               </p>
               <p>
-                We don't advocate for any particular political outcome. We observe that these tools exist, that demand for privacy exists, and that we can provide services at the intersection. What you do with privacy is your business. Literally.
+                We don't advocate for any particular political outcome. We observe that these tools exist, that demand for privacy exists and that we can provide services at the intersection. What you do with privacy is your business. Literally.
               </p>
               <p>
                 Our services comply with the acceptable use policies of our infrastructure partners. We're not a shield for illegal activity—we're a layer of privacy on top of legitimate infrastructure. The same privacy that protects dissidents protects you from marketing databases. The same anonymity that enables whistleblowers enables you to sign up for a service without surrendering your phone number.

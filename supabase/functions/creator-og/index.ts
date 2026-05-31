@@ -154,7 +154,7 @@ function generateContentOgHtml(content: ContentItem, creatorName: string, creato
     ? `https://0xnull.io/creator/${creatorId}/content/${content.id}`
     : `https://0xnull.io/content/${content.id}`;
   
-  // Use thumbnail, or media URL for images, or fallback to OG image
+  // Use thumbnail, or media URL for images or fallback to OG image
   let image = 'https://0xnull.io/og-image.png';
   if (content.thumbnail_url) {
     image = `https://xnull.io${content.thumbnail_url.startsWith('/') ? '' : '/'}${content.thumbnail_url}`;

@@ -226,7 +226,7 @@ const FiatOnramp = () => {
               <CardContent className="p-4 text-center">
                 <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
                 <h3 className="font-semibold mb-1">800+ Cryptos</h3>
-                <p className="text-xs text-muted-foreground">BTC, ETH, USDT, SOL, and more</p>
+                <p className="text-xs text-muted-foreground">BTC, ETH, USDT, SOL and more</p>
               </CardContent>
             </Card>
             <Card className="bg-secondary/30">

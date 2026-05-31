@@ -71,7 +71,7 @@ const Checkout = () => {
   const [copied, setCopied] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
 
-  // Fetch order, listing, and seller data
+  // Fetch order, listing and seller data
   useEffect(() => {
     const fetchOrderData = async () => {
       if (!orderId) return;
@@ -346,7 +346,7 @@ const Checkout = () => {
                           <span className="font-semibold">Pay with Any Crypto</span>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Use Trocador to pay with BTC, ETH, USDT, or 200+ other coins. Converts to XMR automatically.
+                          Use Trocador to pay with BTC, ETH, USDT or 200+ other coins. Converts to XMR automatically.
                         </p>
                       </Label>
                     </div>

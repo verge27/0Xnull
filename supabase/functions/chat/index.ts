@@ -37,7 +37,7 @@ serve(async (req) => {
 - General marketplace questions
 - Privacy and security best practices
 
-Keep answers clear, concise, and helpful. Be friendly but professional.` 
+Keep answers clear, concise and helpful. Be friendly but professional.` 
           },
           ...messages,
         ],

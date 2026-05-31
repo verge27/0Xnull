@@ -33,7 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 export default function GovernancePredictions() {
   useSEO({
     title: 'Governance Predictions | Crypto Policy & Protocol Markets – 0xNull',
-    description: 'Predict outcomes on crypto governance, protocol upgrades, and policy decisions. Anonymous betting with Monero on 0xNull.',
+    description: 'Predict outcomes on crypto governance, protocol upgrades and policy decisions. Anonymous betting with Monero on 0xNull.',
   });
   
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
@@ -81,7 +81,7 @@ export default function GovernancePredictions() {
         eventType: 'other' as const,
       })),
       pageTitle: 'Governance Predictions - 0xNull',
-      pageDescription: 'Predict crypto governance outcomes with Monero. Protocol upgrades, policy decisions, and more.',
+      pageDescription: 'Predict crypto governance outcomes with Monero. Protocol upgrades, policy decisions and more.',
       pageUrl: 'https://0xnull.io/governance-predictions',
     };
   }, [markets]);
@@ -367,7 +367,7 @@ export default function GovernancePredictions() {
               <div>
                 <h4 className="font-semibold mb-2">1. Long-Term Predictions</h4>
                 <p className="text-sm text-muted-foreground">
-                  Governance markets cover major crypto events like protocol upgrades, hard forks, and policy changes. Resolution dates can be months or years away.
+                  Governance markets cover major crypto events like protocol upgrades, hard forks and policy changes. Resolution dates can be months or years away.
                 </p>
               </div>
               <div>
@@ -508,7 +508,7 @@ export default function GovernancePredictions() {
               Request a Governance Market
             </DialogTitle>
             <DialogDescription>
-              Suggest a prediction market for crypto governance, protocol upgrades, or policy decisions.
+              Suggest a prediction market for crypto governance, protocol upgrades or policy decisions.
             </DialogDescription>
           </DialogHeader>
           
@@ -537,7 +537,7 @@ export default function GovernancePredictions() {
               <div className="flex items-start gap-2 opacity-60">
                 <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
                 <span className="text-muted-foreground">
-                  We don't accept subjective markets, price predictions, or markets without verifiable outcomes
+                  We don't accept subjective markets, price predictions or markets without verifiable outcomes
                 </span>
               </div>
             </div>

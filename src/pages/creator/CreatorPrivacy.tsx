@@ -20,7 +20,7 @@ const CreatorPrivacy = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">1. Introduction</h2>
               <p className="text-muted-foreground mb-4">
-                This Privacy Policy explains how we collect, use, and protect information when you use 0xNull Creators ("Platform," "Service").
+                This Privacy Policy explains how we collect, use and protect information when you use 0xNull Creators ("Platform," "Service").
               </p>
               <p className="text-muted-foreground">
                 Our core principle is <strong className="text-[#FF6600]">privacy by default</strong> - we collect the minimum information necessary to operate the Service.
@@ -111,7 +111,7 @@ const CreatorPrivacy = () => {
               
               <h3 className="text-lg font-medium mt-4 mb-2">4.1 We Do NOT Sell Data</h3>
               <p className="text-muted-foreground mb-4">
-                We do not sell, rent, or trade your information to third parties.
+                We do not sell, rent or trade your information to third parties.
               </p>
 
               <h3 className="text-lg font-medium mt-4 mb-2">4.2 Limited Sharing</h3>
@@ -232,7 +232,7 @@ const CreatorPrivacy = () => {
                 By using the Platform, you consent to the transfer and processing of data in jurisdictions where our servers and service providers operate.
               </p>
               <p className="text-muted-foreground">
-                For users in the EU/EEA, we process data under legitimate interests (operating the Platform) and contractual necessity. You have rights under GDPR including access, rectification, erasure, and complaint to your local data protection authority.
+                For users in the EU/EEA, we process data under legitimate interests (operating the Platform) and contractual necessity. You have rights under GDPR including access, rectification, erasure and complaint to your local data protection authority.
               </p>
             </section>
 

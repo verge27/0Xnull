@@ -237,7 +237,7 @@ export const ukPeptidesPartnerListings: Partial<Listing>[] = [
 export const ukPeptidesSeller = {
   id: 'uk-peptides',
   displayName: 'UK-Peptides',
-  bio: "Europe's largest peptide stockist since 2012. 99.8% purity guaranteed. Industrial-grade freezer storage. Next-day UK delivery. BLACK FRIDAY 20% OFF with code BLACKF20. Accepts Bitcoin, bank transfer, and card. All products for research purposes only.",
+  bio: "Europe's largest peptide stockist since 2012. 99.8% purity guaranteed. Industrial-grade freezer storage. Next-day UK delivery. BLACK FRIDAY 20% OFF with code BLACKF20. Accepts Bitcoin, bank transfer and card. All products for research purposes only.",
   location: 'United Kingdom',
   partnerUrl: UK_PEPTIDES_BASE_URL,
   acceptsCrypto: ['BTC'],

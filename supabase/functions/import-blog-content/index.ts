@@ -1,5 +1,5 @@
 // Blog content import edge function — Google Docs + DOCX conversion
-// Preserves headings, lists, bold/italic, hyperlinks, and images
+// Preserves headings, lists, bold/italic, hyperlinks and images
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import JSZip from "https://esm.sh/jszip@3.10.1";

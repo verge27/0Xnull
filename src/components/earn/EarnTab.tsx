@@ -192,7 +192,7 @@ export function EarnTab({ token }: EarnTabProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-white">Earn</h2>
-          <p className="text-sm text-zinc-400">Deposit into Aave (variable), Pendle (fixed), or Morpho (curated vaults) on Arbitrum</p>
+          <p className="text-sm text-zinc-400">Deposit into Aave (variable), Pendle (fixed) or Morpho (curated vaults) on Arbitrum</p>
         </div>
         {bestOverall && bestOverall.apy > 0 && (
           <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1 text-emerald-400 text-sm whitespace-nowrap">

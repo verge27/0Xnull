@@ -16,7 +16,7 @@ serve(async (req) => {
 
     if (!text || !voice_id || !tier) {
       return new Response(
-        JSON.stringify({ error: "text, voice_id, and tier are required" }),
+        JSON.stringify({ error: "text, voice_id and tier are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

@@ -24,15 +24,15 @@ import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
 
 const BLOG_SEO_CONTENT = `
-<p>The 0xNull Blog is a privacy-first crypto blog dedicated to anonymous prediction markets, no-KYC platforms, and financial privacy. Here you'll find in-depth articles, guides, and explainers designed to help users understand how privacy-focused crypto services work—without hype, tracking, or data collection.</p>
+<p>The 0xNull Blog is a privacy-first crypto blog dedicated to anonymous prediction markets, no-KYC platforms and financial privacy. Here you'll find in-depth articles, guides, and explainers designed to help users understand how privacy-focused crypto services work—without hype, tracking or data collection.</p>
 
-<p>As traditional financial platforms move toward increased surveillance and identity verification, privacy-first alternatives are becoming more important than ever. The 0xNull Blog explores topics such as anonymous crypto prediction markets, Monero-powered payments, no-KYC services, and the broader privacy-first ecosystem powering platforms like 0xNull.</p>
+<p>As traditional financial platforms move toward increased surveillance and identity verification, privacy-first alternatives are becoming more important than ever. The 0xNull Blog explores topics such as anonymous crypto prediction markets, Monero-powered payments, no-KYC services and the broader privacy-first ecosystem powering platforms like 0xNull.</p>
 
-<p>Our articles break down how prediction markets work, why no-KYC access matters, and how users can interact with crypto-native services without accounts or identity exposure. Whether you're learning about Flash Markets, anonymous sports predictions, crypto swaps, or privacy-preserving infrastructure, the blog is designed to educate—not persuade.</p>
+<p>Our articles break down how prediction markets work, why no-KYC access matters and how users can interact with crypto-native services without accounts or identity exposure. Whether you're learning about Flash Markets, anonymous sports predictions, crypto swaps or privacy-preserving infrastructure, the blog is designed to educate—not persuade.</p>
 
-<p>You'll also find practical guides explaining how to use 0xNull safely and privately, insights into crypto privacy tools, and updates on new features across the 0xNull ecosystem. All content is written with clarity, neutrality, and user sovereignty in mind.</p>
+<p>You'll also find practical guides explaining how to use 0xNull safely and privately, insights into crypto privacy tools and updates on new features across the 0xNull ecosystem. All content is written with clarity, neutrality and user sovereignty in mind.</p>
 
-<p>Browse the 0xNull Blog to learn more about anonymous crypto prediction markets, privacy-first tools, and how to use no-KYC platforms responsibly.</p>
+<p>Browse the 0xNull Blog to learn more about anonymous crypto prediction markets, privacy-first tools and how to use no-KYC platforms responsibly.</p>
 `;
 
 interface BlogPost {
@@ -65,7 +65,7 @@ export default function Blog() {
 
   useSEO({
     title: '0xNull Blog | Privacy-First Crypto & No-KYC Prediction Markets',
-    description: 'Read the 0xNull Blog for insights on privacy-first crypto, anonymous prediction markets, Monero payments, and no-KYC platforms—guides, explainers, and updates.',
+    description: 'Read the 0xNull Blog for insights on privacy-first crypto, anonymous prediction markets, Monero payments, and no-KYC platforms—guides, explainers and updates.',
   });
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export default function Blog() {
               0xNull Blog — Privacy-First Crypto & Prediction Market Insights
             </h1>
             <p className="text-lg text-muted-foreground">
-              Deep dives into prediction markets, crypto privacy, and the future of decentralized betting
+              Deep dives into prediction markets, crypto privacy and the future of decentralized betting
             </p>
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function Blog() {
               Ready to Start Predicting?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Put your knowledge to work. Make predictions on esports, sports, crypto, and more with complete privacy.
+              Put your knowledge to work. Make predictions on esports, sports, crypto and more with complete privacy.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Button asChild size="lg">

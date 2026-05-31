@@ -101,7 +101,7 @@ const CreatorTerms = () => {
                 <h4 className="font-medium text-destructive mb-2">A. Child Sexual Abuse Material (CSAM)</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                   <li>Any sexual or suggestive content involving minors (persons under 18)</li>
-                  <li>This includes real, AI-generated, drawn, animated, or any other depiction</li>
+                  <li>This includes real, AI-generated, drawn, animated or any other depiction</li>
                   <li>Zero tolerance. Immediate ban and report to NCMEC/law enforcement.</li>
                 </ul>
               </div>
@@ -118,7 +118,7 @@ const CreatorTerms = () => {
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-4">
                 <h4 className="font-medium text-destructive mb-2">C. Illegal Content</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
-                  <li>Content depicting actual violence, murder, or serious bodily harm</li>
+                  <li>Content depicting actual violence, murder or serious bodily harm</li>
                   <li>Content promoting terrorism or violent extremism</li>
                   <li>Content facilitating human trafficking</li>
                   <li>Content that violates applicable law</li>
@@ -191,7 +191,7 @@ const CreatorTerms = () => {
               
               <h3 className="text-lg font-medium mt-4 mb-2">7.1 Your Content</h3>
               <p className="text-muted-foreground mb-4">
-                You retain ownership of content you upload. By uploading, you grant us a non-exclusive, worldwide license to host, display, and distribute your content through the Platform.
+                You retain ownership of content you upload. By uploading, you grant us a non-exclusive, worldwide license to host, display and distribute your content through the Platform.
               </p>
 
               <h3 className="text-lg font-medium mt-4 mb-2">7.2 Copyright Infringement</h3>
@@ -255,7 +255,7 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">10. Limitation of Liability</h2>
               <p className="text-muted-foreground mb-4 uppercase text-sm">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE PLATFORM OPERATORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY.
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE PLATFORM OPERATORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY.
               </p>
               <p className="text-muted-foreground uppercase text-sm">
                 TOTAL LIABILITY FOR ANY CLAIMS ARISING FROM YOUR USE OF THE PLATFORM SHALL NOT EXCEED THE AMOUNT YOU PAID IN THE PAST 12 MONTHS, IF ANY.
@@ -265,7 +265,7 @@ const CreatorTerms = () => {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">11. Indemnification</h2>
               <p className="text-muted-foreground mb-2">
-                You agree to indemnify and hold harmless the Platform operators from any claims, damages, losses, or expenses (including legal fees) arising from:
+                You agree to indemnify and hold harmless the Platform operators from any claims, damages, losses or expenses (including legal fees) arising from:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                 <li>Your use of the Platform</li>
@@ -350,7 +350,7 @@ const CreatorTerms = () => {
 
             <div className="border-t border-border pt-6 mt-8">
               <p className="text-center text-muted-foreground font-medium">
-                By using 0xNull Creators, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                By using 0xNull Creators, you acknowledge that you have read, understood and agree to be bound by these Terms of Service.
               </p>
             </div>
           </CardContent>

@@ -51,7 +51,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 export default function EsportsPredictions() {
   useSEO({
     title: 'Anonymous Esports Prediction Markets | No-KYC Esports Predictions – 0xNull',
-    description: 'Access anonymous esports prediction markets on 0xNull. Predict esports outcomes with no KYC, no accounts, and Monero payments on a privacy-first platform.',
+    description: 'Access anonymous esports prediction markets on 0xNull. Predict esports outcomes with no KYC, no accounts and Monero payments on a privacy-first platform.',
   });
   const { bets, storeBet, getBetsForMarket, checkBetStatus, submitPayoutAddress } = usePredictionBets();
   const { 
@@ -99,7 +99,7 @@ export default function EsportsPredictions() {
         eventType: 'esports' as const,
       })),
       pageTitle: 'Esports Predictions - 0xNull',
-      pageDescription: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends, and more.',
+      pageDescription: 'Anonymous esports betting. Predict outcomes for CS2, Dota 2, League of Legends and more.',
       pageUrl: 'https://0xnull.io/esports-predictions',
     };
   }, [markets]);
@@ -1233,7 +1233,7 @@ export default function EsportsPredictions() {
         {/* SEO Rich Text Section */}
         <SEORichText 
           title="Anonymous Esports Prediction Markets on 0xNull"
-          content="<p>0xNull provides anonymous esports prediction markets with no KYC, no accounts, and no identity verification. Users can predict outcomes across major esports titles while maintaining full privacy and financial sovereignty.</p><p>Unlike traditional esports betting or prediction platforms, 0xNull esports prediction markets are built for anonymity. There is no user registration, no personal data collection, and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant participation.</p><p>These no-KYC esports prediction markets cover popular competitive games and tournaments, allowing users to predict match outcomes, series results, and major event conclusions without relying on centralized operators. By removing identity requirements, 0xNull enables global access to esports markets regardless of location or restrictions.</p><p>With a privacy-first architecture and crypto-native settlement, 0xNull creates a secure environment for anonymous esports predictions. The platform is designed for users who want to engage with competitive gaming markets without surveillance, accounts, or third-party oversight.</p><p>Explore anonymous esports prediction markets on 0xNull and participate freely—no KYC, no accounts, just privacy.</p>"
+          content="<p>0xNull provides anonymous esports prediction markets with no KYC, no accounts and no identity verification. Users can predict outcomes across major esports titles while maintaining full privacy and financial sovereignty.</p><p>Unlike traditional esports betting or prediction platforms, 0xNull esports prediction markets are built for anonymity. There is no user registration, no personal data collection and no tracking. All predictions are placed using cryptocurrencies, including Monero, ensuring confidential and censorship-resistant participation.</p><p>These no-KYC esports prediction markets cover popular competitive games and tournaments, allowing users to predict match outcomes, series results and major event conclusions without relying on centralized operators. By removing identity requirements, 0xNull enables global access to esports markets regardless of location or restrictions.</p><p>With a privacy-first architecture and crypto-native settlement, 0xNull creates a secure environment for anonymous esports predictions. The platform is designed for users who want to engage with competitive gaming markets without surveillance, accounts or third-party oversight.</p><p>Explore anonymous esports prediction markets on 0xNull and participate freely—no KYC, no accounts, just privacy.</p>"
         />
 
         <Footer />
@@ -1363,7 +1363,7 @@ export default function EsportsPredictions() {
 
             {/* Refund info */}
             <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 text-xs text-amber-200/80">
-              <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw, or cancelled event. 0.4% fee on winnings only.</p>
+              <p><strong>Refund Policy:</strong> Full refund (no fees) if: unopposed market, no-contest, draw or cancelled event. 0.4% fee on winnings only.</p>
             </div>
             
             {betAmountUsd && parseFloat(betAmountUsd) > 0 && selectedMarket && xmrUsdRate && (

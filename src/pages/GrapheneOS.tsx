@@ -20,7 +20,7 @@ const GrapheneOS = () => {
   const faqs = [
     {
       question: 'Will my apps work?',
-      answer: 'Yes. With sandboxed Google Play, the vast majority of apps work normally — including banking apps, ride-sharing, and anything requiring Google services.',
+      answer: 'Yes. With sandboxed Google Play, the vast majority of apps work normally — including banking apps, ride-sharing and anything requiring Google services.',
     },
     {
       question: 'Is it difficult to use?',
@@ -61,7 +61,7 @@ const GrapheneOS = () => {
                 Your phone is infrastructure. Treat it like it.
               </p>
               <p className="text-muted-foreground">
-                Most people obsess over passwords and 2FA, then run everything through a device that constantly phones home, grants apps permissions they shouldn't have, and trusts every network by default.
+                Most people obsess over passwords and 2FA, then run everything through a device that constantly phones home, grants apps permissions they shouldn't have and trusts every network by default.
               </p>
               <p className="text-lg font-semibold text-primary mt-4">GrapheneOS fixes this.</p>
             </div>
@@ -100,11 +100,11 @@ const GrapheneOS = () => {
                   <CardContent className="space-y-3 text-sm">
                     <div>
                       <p className="font-semibold">Constant telemetry</p>
-                      <p className="text-muted-foreground">Google services track location, app usage, and device data continuously</p>
+                      <p className="text-muted-foreground">Google services track location, app usage and device data continuously</p>
                     </div>
                     <div>
                       <p className="font-semibold">Bloated attack surface</p>
-                      <p className="text-muted-foreground">Carrier apps, OEM additions, and pre-installed software you can't remove</p>
+                      <p className="text-muted-foreground">Carrier apps, OEM additions and pre-installed software you can't remove</p>
                     </div>
                     <div>
                       <p className="font-semibold">Permissive by default</p>
@@ -139,7 +139,7 @@ const GrapheneOS = () => {
                     </div>
                     <div>
                       <p className="font-semibold">User profiles</p>
-                      <p className="text-muted-foreground">Isolate work, personal, and sensitive apps separately</p>
+                      <p className="text-muted-foreground">Isolate work, personal and sensitive apps separately</p>
                     </div>
                   </CardContent>
                 </Card>

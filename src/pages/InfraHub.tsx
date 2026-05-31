@@ -120,7 +120,7 @@ export default function InfraHub() {
 
           {/* Bottom CTA */}
           <div className="mt-12 text-center text-sm text-muted-foreground">
-            <p>All services accept XMR, BTC, and other cryptocurrencies</p>
+            <p>All services accept XMR, BTC and other cryptocurrencies</p>
           </div>
         </div>
       </main>
