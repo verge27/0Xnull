@@ -42,28 +42,83 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 let tokenCache: { token: string; expiresAt: number } | null = null;
 
 async function getAppAccessToken(clientId: string, clientSecret: string): Promise<string> {
-  if (tokenCache && Date.now() < tokenCache.expiresAt - 60_000) {
-    return tokenCache.token;
+  const now = Date.now();
+
+  if (tokenCache) {
+    const msLeft = tokenCache.expiresAt - now;
+    if (msLeft > 60_000) {
+      console.log(`[twitch-auth] reusing cached token (expires in ${Math.round(msLeft / 1000)}s)`);
+      return tokenCache.token;
+    }
+    console.log(`[twitch-auth] cached token expired/near-expiry (msLeft=${msLeft}); refreshing`);
+  } else {
+    console.log('[twitch-auth] no cached token; fetching new app access token');
   }
-  const res = await fetch('https://id.twitch.tv/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'client_credentials',
-    }),
-  });
+
+  const clientIdFp = `${clientId.slice(0, 4)}…${clientId.slice(-4)} (len=${clientId.length})`;
+  const secretFp = `len=${clientSecret.length}`;
+  console.log(`[twitch-auth] client_credentials request client_id=${clientIdFp} secret_${secretFp}`);
+
+  const started = Date.now();
+  let res: Response;
+  try {
+    res = await fetch('https://id.twitch.tv/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+      }),
+    });
+  } catch (networkErr) {
+    console.error(`[twitch-auth] network error contacting id.twitch.tv after ${Date.now() - started}ms:`, networkErr);
+    throw new Error(`Twitch token network error: ${networkErr instanceof Error ? networkErr.message : String(networkErr)}`);
+  }
+
+  const elapsed = Date.now() - started;
+  const bodyText = await res.text();
+
   if (!res.ok) {
-    throw new Error(`Failed to fetch Twitch app token: ${res.status} ${await res.text()}`);
+    console.error(
+      `[twitch-auth] token request FAILED status=${res.status} ${res.statusText} elapsed=${elapsed}ms ` +
+      `body=${bodyText.slice(0, 500)}`,
+    );
+    // Common hints
+    if (res.status === 400) {
+      console.error('[twitch-auth] hint: 400 usually means invalid client_id, missing/invalid client_secret, or wrong grant_type');
+    } else if (res.status === 401 || res.status === 403) {
+      console.error('[twitch-auth] hint: 401/403 usually means the client_secret is wrong or the app was disabled in the Twitch dev console');
+    }
+    // Invalidate cache so we don't keep serving a bad token
+    tokenCache = null;
+    throw new Error(`Failed to fetch Twitch app token: ${res.status} ${bodyText}`);
   }
-  const data = await res.json();
+
+  let data: { access_token?: string; expires_in?: number; token_type?: string };
+  try {
+    data = JSON.parse(bodyText);
+  } catch {
+    console.error(`[twitch-auth] token response was not JSON: ${bodyText.slice(0, 200)}`);
+    throw new Error('Twitch token response was not valid JSON');
+  }
+
+  if (!data.access_token) {
+    console.error(`[twitch-auth] token response missing access_token: ${JSON.stringify(data)}`);
+    throw new Error('Twitch token response missing access_token');
+  }
+
+  const expiresIn = data.expires_in ?? 3600;
   tokenCache = {
     token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000,
+    expiresAt: now + expiresIn * 1000,
   };
+  console.log(
+    `[twitch-auth] new token acquired type=${data.token_type ?? 'bearer'} expires_in=${expiresIn}s elapsed=${elapsed}ms`,
+  );
   return tokenCache.token;
 }
+
 
 
 // Helper to check if a specific channel is live
