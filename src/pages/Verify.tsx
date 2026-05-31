@@ -65,7 +65,7 @@ Hash: SHA512
 
 0xNull Warrant Canary
 =====================
-Date: May 27, 2026
+Date: May 31, 2026
 
 As of the date above, 0xNull Admin states:
 
@@ -191,7 +191,7 @@ const Verify = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                As of <span className="font-semibold text-foreground">January 9, 2026</span>:
+                As of <span className="font-semibold text-foreground">May 31, 2026</span>:
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
