@@ -731,14 +731,18 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
   },
   '/grapheneos': {
     '@context': 'https://schema.org',
-    '@type': 'Product',
+    '@type': 'Service',
     name: 'GrapheneOS Phones',
     description: 'Privacy-focused GrapheneOS phones with crypto payments.',
     url: 'https://0xnull.io/grapheneos',
-    brand: {
-      '@type': 'Brand',
-      name: 'GrapheneOS',
+    image: 'https://0xnull.io/og-image.png',
+    serviceType: 'Privacy Phone Sales',
+    provider: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
     },
+    areaServed: 'Worldwide',
   },
   '/fiat-onramp': {
     '@context': 'https://schema.org',
