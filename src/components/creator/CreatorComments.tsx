@@ -61,6 +61,7 @@ interface CreatorCommentsProps {
 export const CreatorComments = ({ contentId, creatorId }: CreatorCommentsProps) => {
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
+  const { token } = useToken();
   
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
