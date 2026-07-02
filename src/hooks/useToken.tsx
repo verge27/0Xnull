@@ -33,7 +33,7 @@ const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
 export function TokenProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { privateKeyUser } = usePrivateKeyAuth();
+  const { privateKeyUser, storedPrivateKey } = usePrivateKeyAuth();
   const [token, setToken] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
