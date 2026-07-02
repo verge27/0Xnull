@@ -36,6 +36,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
+import { useToken } from '@/hooks/useToken';
 import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
 import { toast } from 'sonner';
 
