@@ -215,45 +215,85 @@ serve(async (req) => {
       );
     }
 
-    // Auto-resolve a prediction market based on price
+    // Auto-resolve a prediction market based on price (cron-only)
     if (action === "resolve-market") {
-      const { marketId, targetPrice, comparison } = await req.json();
-
-      if (!marketId || !targetPrice || !comparison) {
-        throw new Error("Missing required fields: marketId, targetPrice, comparison");
+      const cronSecret = Deno.env.get("CRON_SECRET");
+      const authHeader = req.headers.get("Authorization") || "";
+      if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
-      const data = await fetchPrice(symbol);
-
-      if (!data) {
-        throw new Error("Could not fetch current price");
-      }
-
-      const currentPrice = data.price;
-
-      console.log(
-        `Current ${symbol} price: $${currentPrice}, Target: $${targetPrice}, Comparison: ${comparison}`,
-      );
-
-      let outcome: "yes" | "no";
-      if (comparison === "above") {
-        outcome = currentPrice > targetPrice ? "yes" : "no";
-      } else if (comparison === "below") {
-        outcome = currentPrice < targetPrice ? "yes" : "no";
-      } else if (comparison === "equals") {
-        outcome = Math.abs(currentPrice - targetPrice) < 100 ? "yes" : "no";
-      } else {
-        throw new Error("Invalid comparison type. Use: above, below, equals");
+      const { marketId } = await req.json();
+      if (!marketId) {
+        throw new Error("Missing required field: marketId");
       }
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+      // Look up market resolution criteria server-side — never trust client
+      const { data: market, error: marketError } = await supabase
+        .from("prediction_markets")
+        .select("id, question, resolution_criteria, status")
+        .eq("id", marketId)
+        .maybeSingle();
+
+      if (marketError || !market) {
+        throw new Error("Market not found");
+      }
+      if (market.status !== "open") {
+        return new Response(
+          JSON.stringify({ error: "Market not open", status: market.status }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      // Parse ticker + target(s) from the market question (same logic as check-and-resolve)
+      const question = market.question || "";
+      const tickerMatch = question.match(/\(([A-Z]+)\)/);
+      const ticker = tickerMatch ? tickerMatch[1] : symbol;
+      const priceMatches = question.match(/\$([0-9,]+)/g);
+      if (!priceMatches || priceMatches.length < 1) {
+        throw new Error("Could not parse target price from market question");
+      }
+      const prices = priceMatches.map((p: string) => parseFloat(p.replace(/[$,]/g, "")));
+      let comparison: "above" | "below" | "between";
+      let targetLow: number;
+      let targetHigh: number | undefined;
+      const q = question.toLowerCase();
+      if (q.includes("between") && prices.length >= 2) {
+        comparison = "between"; targetLow = Math.min(...prices); targetHigh = Math.max(...prices);
+      } else if (q.includes("above")) {
+        comparison = "above"; targetLow = prices[0];
+      } else if (q.includes("below")) {
+        comparison = "below"; targetLow = prices[0];
+      } else if (prices.length >= 2) {
+        comparison = "between"; targetLow = Math.min(...prices); targetHigh = Math.max(...prices);
+      } else {
+        comparison = "above"; targetLow = prices[0];
+      }
+
+      const data = await fetchPrice(ticker);
+      if (!data) throw new Error("Could not fetch current price");
+      const currentPrice = data.price;
+
+      let outcome: "yes" | "no";
+      if (comparison === "between" && targetHigh !== undefined) {
+        outcome = currentPrice >= targetLow && currentPrice <= targetHigh ? "yes" : "no";
+      } else if (comparison === "above") {
+        outcome = currentPrice > targetLow ? "yes" : "no";
+      } else {
+        outcome = currentPrice < targetLow ? "yes" : "no";
+      }
 
       const { error: updateError } = await supabase
         .from("prediction_markets")
         .update({
           status: `resolved_${outcome}`,
           resolved_at: new Date().toISOString(),
-          resolution_criteria: `Oracle resolved at $${currentPrice.toFixed(2)} (target: ${targetPrice}, ${comparison})`,
+          resolution_criteria: `Oracle resolved at $${currentPrice.toFixed(2)} (target: ${comparison} $${targetLow}${targetHigh ? `-$${targetHigh}` : ""})`,
         })
         .eq("id", marketId);
 
@@ -262,25 +302,24 @@ serve(async (req) => {
         throw new Error("Failed to resolve market");
       }
 
-      console.log(`Market ${marketId} resolved as ${outcome} at price $${currentPrice}`);
-
       return new Response(
-        JSON.stringify({
-          success: true,
-          marketId,
-          outcome,
-          currentPrice,
-          targetPrice,
-          comparison,
-          timestamp: Date.now(),
-          source: "api",
-        }),
+        JSON.stringify({ success: true, marketId, outcome, currentPrice, source: "api" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     // Auto-check and resolve all pending markets past their resolution_date
+    // Auto-check and resolve all pending markets past their resolution_date (cron-only)
     if (action === "check-and-resolve") {
+      const cronSecret = Deno.env.get("CRON_SECRET");
+      const authHeader = req.headers.get("Authorization") || "";
+      if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
       // Fetch all open markets past resolution date

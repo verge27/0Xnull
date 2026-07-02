@@ -753,21 +753,23 @@ const Swaps = () => {
 
         setTrade(tradeData);
 
-        // Save to history
-        await supabase.from('swap_history').insert({
-          trade_id: data.id,
-          from_coin: fromCoin,
-          from_network: fromNetwork,
-          to_coin: toCoin,
-          to_network: toNetwork,
-          amount: amount,
-          receive_address: receiveAddress,
-          provider: 'Exolix',
-          provider_address: data.depositAddress,
-          provider_memo: data.depositExtraId,
-          status: data.status,
-          user_id: user?.id || null,
-        });
+        // Save to history (only when signed-in; anonymous swaps stay in localStorage)
+        if (user?.id) {
+          await supabase.from('swap_history').insert({
+            trade_id: data.id,
+            from_coin: fromCoin,
+            from_network: fromNetwork,
+            to_coin: toCoin,
+            to_network: toNetwork,
+            amount: amount,
+            receive_address: receiveAddress,
+            provider: 'Exolix',
+            provider_address: data.depositAddress,
+            provider_memo: data.depositExtraId,
+            status: data.status,
+            user_id: user.id,
+          });
+        }
 
         saveTradeIdToLocal(data.id);
         fetchSwapHistory();
@@ -794,21 +796,23 @@ const Swaps = () => {
 
         setTrade(data);
 
-        // Save to history
-        await supabase.from('swap_history').insert({
-          trade_id: data.trade_id,
-          from_coin: fromCoin,
-          from_network: fromNetwork,
-          to_coin: toCoin,
-          to_network: toNetwork,
-          amount: amount,
-          receive_address: receiveAddress,
-          provider: selectedProvider!.provider,
-          provider_address: data.address,
-          provider_memo: data.address_memo,
-          status: data.status,
-          user_id: user?.id || null,
-        });
+        // Save to history (only when signed-in; anonymous swaps stay in localStorage)
+        if (user?.id) {
+          await supabase.from('swap_history').insert({
+            trade_id: data.trade_id,
+            from_coin: fromCoin,
+            from_network: fromNetwork,
+            to_coin: toCoin,
+            to_network: toNetwork,
+            amount: amount,
+            receive_address: receiveAddress,
+            provider: selectedProvider!.provider,
+            provider_address: data.address,
+            provider_memo: data.address_memo,
+            status: data.status,
+            user_id: user.id,
+          });
+        }
 
         // Save trade_id to localStorage for history
         saveTradeIdToLocal(data.trade_id);

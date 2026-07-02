@@ -385,9 +385,8 @@ serve(async (req) => {
   const cronSecret = Deno.env.get('CRON_SECRET');
   const authHeader = req.headers.get('authorization');
   const url = new URL(req.url);
-  const isManualTrigger = url.searchParams.get('manual') === 'true';
-  
-  if (!isManualTrigger && cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // Require CRON_SECRET unconditionally — no `?manual=true` bypass
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     console.log('Unauthorized: Invalid or missing cron secret');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
