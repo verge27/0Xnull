@@ -36,6 +36,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
+import { useToken } from '@/hooks/useToken';
 import { triggerCreatorNotification } from '@/hooks/useCreatorNotifications';
 import { toast } from 'sonner';
 
@@ -61,6 +62,7 @@ interface CreatorCommentsProps {
 export const CreatorComments = ({ contentId, creatorId }: CreatorCommentsProps) => {
   const { user } = useAuth();
   const { privateKeyUser } = usePrivateKeyAuth();
+  const { token } = useToken();
   
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,24 +166,32 @@ export const CreatorComments = ({ contentId, creatorId }: CreatorCommentsProps) 
 
     setIsSubmitting(true);
     try {
-      const commentData: any = {
-        content_id: contentId,
-        content: newComment.trim(),
-        is_content_request: isContentRequest,
-        parent_id: replyingTo || null,
-      };
-
-      if (user) {
-        commentData.user_id = user.id;
-      } else if (privateKeyUser) {
-        commentData.pk_user_id = privateKeyUser.id;
+      if (privateKeyUser) {
+        // Token-authenticated path: route through edge function with service role
+        if (!token) throw new Error('Missing 0xNull token. Please reload and try again.');
+        const { data, error } = await supabase.functions.invoke('pk-create-comment', {
+          body: {
+            content_id: contentId,
+            content: newComment.trim(),
+            is_content_request: isContentRequest,
+            parent_id: replyingTo || null,
+          },
+          headers: { 'X-0xNull-Token': token },
+        });
+        if (error) throw error;
+        if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      } else {
+        const { error } = await supabase
+          .from('creator_comments')
+          .insert({
+            content_id: contentId,
+            content: newComment.trim(),
+            is_content_request: isContentRequest,
+            parent_id: replyingTo || null,
+            user_id: user!.id,
+          });
+        if (error) throw error;
       }
-
-      const { error } = await supabase
-        .from('creator_comments')
-        .insert(commentData);
-
-      if (error) throw error;
 
       // Trigger notification for content requests
       if (isContentRequest && creatorId) {
