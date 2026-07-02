@@ -32,22 +32,33 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Sending market request email:", { title, description, oracle });
+    // HTML-escape user-supplied fields before interpolating into the email
+    const esc = (v: string) => String(v)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+    const safeTitle = esc(title);
+    const safeDescription = esc(description);
+    const safeOracle = esc(oracle);
+
+    console.log("Sending market request email (title only):", safeTitle.slice(0, 80));
 
     const emailResponse = await resend.emails.send({
       from: "0xNull Markets <onboarding@resend.dev>",
       to: ["admin@0xnull.io"],
-      subject: `[Market Request] ${title}`,
+      subject: `[Market Request] ${safeTitle.slice(0, 120)}`,
       html: `
         <h1>New Market Request</h1>
         <h2>Market Title</h2>
-        <p>${title}</p>
+        <p>${safeTitle}</p>
         
         <h2>Description</h2>
-        <p>${description}</p>
+        <p>${safeDescription}</p>
         
         <h2>Oracle / Resolution Criteria</h2>
-        <p>${oracle}</p>
+        <p>${safeOracle}</p>
         
         <hr />
         <p style="color: #666; font-size: 12px;">

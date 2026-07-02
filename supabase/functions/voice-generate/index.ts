@@ -12,6 +12,16 @@ serve(async (req) => {
   }
 
   try {
+    // Gate behind CRON_SECRET until a token-based billing flow is wired up (prevents ElevenLabs quota abuse)
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { text, voice_id, tier } = await req.json();
 
     if (!text || !voice_id || !tier) {
