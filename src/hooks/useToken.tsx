@@ -4,6 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { usePrivateKeyAuth } from './usePrivateKeyAuth';
 
+// Route private_key_users writes through the pk-update-profile edge function,
+// which validates ownership via private-key derivation and uses the service role.
+async function updatePkPaymentToken(privateKey: string, paymentToken: string) {
+  const { error } = await supabase.functions.invoke('pk-update-profile', {
+    body: {
+      privateKey,
+      timestamp: Date.now(),
+      updates: { payment_token: paymentToken },
+    },
+  });
+  if (error) throw error;
+}
+
 const STORAGE_KEY = 'oxnull_token';
 
 interface TokenContextType {
@@ -20,7 +33,7 @@ const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
 export function TokenProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { privateKeyUser } = usePrivateKeyAuth();
+  const { privateKeyUser, storedPrivateKey } = usePrivateKeyAuth();
   const [token, setToken] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -79,20 +92,14 @@ export function TokenProvider({ children }: { children: ReactNode }) {
             // Use the stored token
             storedToken = pkUser.payment_token;
             localStorage.setItem(STORAGE_KEY, storedToken);
-          } else if (storedToken) {
-            // Link the existing local token to the private key user
-            await (supabase as any)
-              .from('private_key_users')
-              .update({ payment_token: storedToken })
-              .eq('public_key', privateKeyUser.publicKey);
-          } else {
-            // Create a new token and link it
+          } else if (storedToken && storedPrivateKey) {
+            // Link the existing local token via edge function (RLS blocks direct writes)
+            await updatePkPaymentToken(storedPrivateKey, storedToken);
+          } else if (storedPrivateKey) {
+            // Create a new token and link it via edge function
             storedToken = await api.createToken();
             localStorage.setItem(STORAGE_KEY, storedToken);
-            await (supabase as any)
-              .from('private_key_users')
-              .update({ payment_token: storedToken })
-              .eq('public_key', privateKeyUser.publicKey);
+            await updatePkPaymentToken(storedPrivateKey, storedToken);
           }
         } catch (e) {
           console.error('Failed to sync token with private key user:', e);
@@ -125,7 +132,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
     }
     
     init();
-  }, [user, privateKeyUser]);
+  }, [user, privateKeyUser, storedPrivateKey]);
 
   const refreshBalance = useCallback(async () => {
     if (!token) return;
@@ -156,11 +163,8 @@ export function TokenProvider({ children }: { children: ReactNode }) {
           .eq('id', user.id);
       }
       
-      if (privateKeyUser) {
-        await (supabase as any)
-          .from('private_key_users')
-          .update({ payment_token: newToken })
-          .eq('public_key', privateKeyUser.publicKey);
+      if (privateKeyUser && storedPrivateKey) {
+        await updatePkPaymentToken(storedPrivateKey, newToken);
       }
       
       return true;
@@ -168,7 +172,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
       console.error('Invalid token:', e);
       return false;
     }
-  }, [user, privateKeyUser]);
+  }, [user, privateKeyUser, storedPrivateKey]);
 
   const clearToken = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
