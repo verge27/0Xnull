@@ -4,6 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { usePrivateKeyAuth } from './usePrivateKeyAuth';
 
+// Route private_key_users writes through the pk-update-profile edge function,
+// which validates ownership via private-key derivation and uses the service role.
+async function updatePkPaymentToken(privateKey: string, paymentToken: string) {
+  const { error } = await supabase.functions.invoke('pk-update-profile', {
+    body: {
+      privateKey,
+      timestamp: Date.now(),
+      updates: { payment_token: paymentToken },
+    },
+  });
+  if (error) throw error;
+}
+
 const STORAGE_KEY = 'oxnull_token';
 
 interface TokenContextType {
