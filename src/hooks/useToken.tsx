@@ -172,7 +172,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
       console.error('Invalid token:', e);
       return false;
     }
-  }, [user, privateKeyUser]);
+  }, [user, privateKeyUser, storedPrivateKey]);
 
   const clearToken = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
