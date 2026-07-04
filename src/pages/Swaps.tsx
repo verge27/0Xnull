@@ -494,7 +494,7 @@ const Swaps = () => {
       
       for (const tradeId of savedTradeIds) {
         const { data, error } = await supabase
-          .rpc('get_swap_by_trade_id', { p_trade_id: tradeId });
+          .rpc('get_swap_by_trade_id_limited', { p_trade_id: tradeId });
         
         if (!error && data && data.length > 0) {
           results.push(data[0]);
