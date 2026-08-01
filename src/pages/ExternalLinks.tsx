@@ -1,4 +1,5 @@
-import { Link as LinkIcon, ExternalLink, Globe } from "lucide-react";
+import { Link as LinkIcon, ExternalLink, Globe, Shield, Download } from "lucide-react";
+import { Link as RouterLink } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
