@@ -40,6 +40,8 @@ interface EarningsData {
 }
 
 const PartnerEarnings = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const [data, setData] = useState<EarningsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,14 +52,15 @@ const PartnerEarnings = () => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch("https://api.0xnull.io/api/marketing/partners/mostafa/earnings");
-      if (!response.ok) {
+      const { data: result, error: fnError } = await supabase.functions.invoke("partner-earnings", {
+        method: "GET",
+      });
+      if (fnError) {
         throw new Error("Failed to fetch earnings data");
       }
-      const result = await response.json();
-      setData(result);
+      setData(result as EarningsData);
       if (isRefresh) toast.success("Data refreshed");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load earnings data");
@@ -68,8 +71,15 @@ const PartnerEarnings = () => {
   };
 
   useEffect(() => {
+    if (authLoading || adminLoading) return;
+    if (!user || !isAdmin) {
+      setLoading(false);
+      return;
+    }
     fetchEarnings();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, adminLoading, user, isAdmin]);
+
 
   const copyAddress = () => {
     if (data?.payout_address) {
