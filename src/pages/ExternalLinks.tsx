@@ -31,7 +31,7 @@ const externalLinks = [
     description: "A Reddit-like dark web discussion forum for darknet market news and community talk.",
     category: "Forum",
     tags: ["Darknet", "Forum", "Community", "Privacy"],
-    isRecommended: true
+    isRecommended: false
   },
   {
     name: "Mental Outlaw",
