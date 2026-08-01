@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const partner = url.searchParams.get('partner');
+    const partner = url.searchParams.get('partner') ?? 'mostafa';
 
     if (!partner || !/^[a-zA-Z0-9_-]{1,64}$/.test(partner)) {
       return new Response(JSON.stringify({ error: 'Invalid or missing partner parameter' }), {
