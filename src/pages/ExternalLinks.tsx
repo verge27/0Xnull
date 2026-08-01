@@ -25,10 +25,10 @@ const externalLinks = [
     isRecommended: true
   },
   {
-    name: "Dredd the Darknet Chat",
-    url: "https://dread.re/",
+    name: "Dread",
+    url: "http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion/",
     onionAddress: "dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion",
-    description: "A community forum and chat for darknet market discussions and privacy news.",
+    description: "A Reddit-like dark web discussion forum for darknet market news and community talk.",
     category: "Forum",
     tags: ["Darknet", "Forum", "Community", "Privacy"],
     isRecommended: true
