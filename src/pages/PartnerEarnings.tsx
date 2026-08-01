@@ -6,6 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Copy, Check, DollarSign, TrendingUp, Percent, Clock, User, Briefcase, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+
 
 interface MonthlyData {
   month: string;
