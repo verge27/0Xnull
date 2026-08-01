@@ -3,7 +3,7 @@ import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Globe, Lock, Eye, ExternalLink, Download } from 'lucide-react';
+import { Shield, Globe, Lock, Eye, ExternalLink, Download, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TorGuide = () => {
