@@ -124,7 +124,7 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
     description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and full privacy from the start.',
   },
-  '/tor': {
+  '/tor-guide': {
     title: 'Tor Access Guide - 0xNull',
     description: 'Access 0xNull via Tor for maximum privacy. Step-by-step guide to anonymous browsing.',
   },
@@ -309,9 +309,9 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Get Started', url: 'https://0xnull.io/get-started' },
   ],
-  '/tor': [
+  '/tor-guide': [
     { name: 'Home', url: 'https://0xnull.io/' },
-    { name: 'Tor Guide', url: 'https://0xnull.io/tor' },
+    { name: 'Tor Guide', url: 'https://0xnull.io/tor-guide' },
   ],
   '/grapheneos': [
     { name: 'Home', url: 'https://0xnull.io/' },
