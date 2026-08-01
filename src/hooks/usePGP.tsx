@@ -9,27 +9,32 @@ interface PGPKeys {
   privateKey: string;
 }
 
-// Local storage key for caching decrypted private key
+// Session storage key for caching the decrypted private key.
+// sessionStorage is cleared when the tab closes and is never shared across tabs,
+// so the unlocked key is not persisted to disk for long periods.
 const SESSION_KEY_STORAGE = 'pgp_session_key';
 const SESSION_EXPIRY_STORAGE = 'pgp_session_expiry';
-const SESSION_DURATION_DAYS = 7;
+const SESSION_DURATION_MINUTES = 30;
 
 // Helper to check if session is expired
 const isSessionExpired = (): boolean => {
-  const expiry = localStorage.getItem(SESSION_EXPIRY_STORAGE);
+  const expiry = sessionStorage.getItem(SESSION_EXPIRY_STORAGE);
   if (!expiry) return true;
   return Date.now() > parseInt(expiry, 10);
 };
 
 // Helper to set session with expiry
 const setSessionWithExpiry = (key: string): void => {
-  localStorage.setItem(SESSION_KEY_STORAGE, key);
-  const expiryTime = Date.now() + (SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000);
-  localStorage.setItem(SESSION_EXPIRY_STORAGE, expiryTime.toString());
+  sessionStorage.setItem(SESSION_KEY_STORAGE, key);
+  const expiryTime = Date.now() + SESSION_DURATION_MINUTES * 60 * 1000;
+  sessionStorage.setItem(SESSION_EXPIRY_STORAGE, expiryTime.toString());
 };
 
 // Helper to clear session
 const clearSession = (): void => {
+  sessionStorage.removeItem(SESSION_KEY_STORAGE);
+  sessionStorage.removeItem(SESSION_EXPIRY_STORAGE);
+  // Remove any legacy long-lived copies kept in localStorage
   localStorage.removeItem(SESSION_KEY_STORAGE);
   localStorage.removeItem(SESSION_EXPIRY_STORAGE);
 };
@@ -237,7 +242,7 @@ export function usePGP() {
       return false;
     }
     
-    const cached = localStorage.getItem(SESSION_KEY_STORAGE);
+    const cached = sessionStorage.getItem(SESSION_KEY_STORAGE);
     if (cached) {
       setDecryptedPrivateKey(cached);
       setIsUnlocked(true);

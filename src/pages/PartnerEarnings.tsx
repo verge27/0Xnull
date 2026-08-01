@@ -6,6 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Copy, Check, DollarSign, TrendingUp, Percent, Clock, User, Briefcase, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+
 
 interface MonthlyData {
   month: string;
@@ -36,6 +40,8 @@ interface EarningsData {
 }
 
 const PartnerEarnings = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const [data, setData] = useState<EarningsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +52,15 @@ const PartnerEarnings = () => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch("https://api.0xnull.io/api/marketing/partners/mostafa/earnings");
-      if (!response.ok) {
+      const { data: result, error: fnError } = await supabase.functions.invoke("partner-earnings", {
+        method: "GET",
+      });
+      if (fnError) {
         throw new Error("Failed to fetch earnings data");
       }
-      const result = await response.json();
-      setData(result);
+      setData(result as EarningsData);
       if (isRefresh) toast.success("Data refreshed");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load earnings data");
@@ -64,8 +71,15 @@ const PartnerEarnings = () => {
   };
 
   useEffect(() => {
+    if (authLoading || adminLoading) return;
+    if (!user || !isAdmin) {
+      setLoading(false);
+      return;
+    }
     fetchEarnings();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, adminLoading, user, isAdmin]);
+
 
   const copyAddress = () => {
     if (data?.payout_address) {
@@ -85,7 +99,25 @@ const PartnerEarnings = () => {
     return value.toFixed(8);
   };
 
-  if (loading) {
+  if (!authLoading && !adminLoading && (!user || !isAdmin)) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <Card className="border-destructive/50">
+            <CardContent className="pt-6">
+              <p className="text-destructive">
+                This page is restricted. Sign in with an authorized account to view partner earnings.
+              </p>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading || authLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />

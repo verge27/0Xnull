@@ -7,6 +7,32 @@ const corsHeaders = {
 
 const CREATOR_API_BASE = 'https://api.0xnull.io/api/creator';
 
+// Only these upstream path prefixes (relative to CREATOR_API_BASE) may be proxied.
+const ALLOWED_PATH_PREFIXES = [
+  '/auth',
+  '/register',
+  '/whitelist',
+  '/profile',
+  '/creators',
+  '/content',
+  '/my',
+  '/chat',
+  '/voice',
+  '/subscriptions',
+  '/payments',
+  '/media',
+  '/stats',
+];
+
+const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+const isAllowedPath = (path: string): boolean => {
+  if (!path.startsWith('/')) return false;
+  if (path.includes('..')) return false;
+  const base = path.split('?')[0];
+  return ALLOWED_PATH_PREFIXES.some((prefix) => base === prefix || base.startsWith(`${prefix}/`));
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -23,6 +49,22 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    if (!ALLOWED_METHODS.includes(req.method)) {
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!isAllowedPath(path)) {
+      console.warn(`[creator-proxy] Blocked disallowed path: ${path}`);
+      return new Response(
+        JSON.stringify({ error: 'Path not allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
 
     const targetUrl = `${CREATOR_API_BASE}${path}`;
     console.log(`[creator-proxy] ${req.method} ${targetUrl}`);

@@ -325,6 +325,19 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require cron authentication before creating any markets
+  const cronSecret = Deno.env.get('CRON_SECRET');
+  const authHeader = req.headers.get('authorization') || '';
+  const requestSecret = req.headers.get('x-cron-secret') || authHeader.replace(/^Bearer\s+/i, '');
+
+  if (!cronSecret || !requestSecret || requestSecret !== cronSecret) {
+    console.error('Unauthorized: invalid or missing cron secret');
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     console.log('Auto-create sports markets job started');
     
