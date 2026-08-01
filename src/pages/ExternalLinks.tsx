@@ -1,4 +1,4 @@
-import { Link as LinkIcon, ExternalLink, Globe, Shield, Download } from "lucide-react";
+import { Link as LinkIcon, ExternalLink, Globe, Shield, Download, AlertTriangle, CheckCircle } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -165,6 +165,46 @@ const ExternalLinks = () => {
                       Read our Tor Guide
                     </RouterLink>
                   </Button>
+                </div>
+
+                {/* Safety disclaimer */}
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-foreground">Stay safe on Tor</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Darknet resources can contain scams, malware or illegal offers. 0xNull does not control these sites and is not responsible for their content. Use Tor for privacy research, but never share real personal information, exchange funds without verification or assume every onion service is trustworthy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Safety checklist */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-foreground">Quick safety checklist</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      <span>Keep Tor Browser updated to the latest release</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      <span>Avoid logging into personal accounts or using your real identity</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      <span>Do not download files or run scripts from unfamiliar onion sites</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      <span>Keep the browser window at default size to resist fingerprinting</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      <span>Use bridges or a VPN if your network blocks Tor connections</span>
+                    </li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
