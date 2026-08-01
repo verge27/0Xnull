@@ -156,6 +156,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Privacy VPN Resources - 0xNull',
     description: 'Curated list of privacy-focused VPNs that accept crypto and require no KYC.',
   },
+  '/external-links': {
+    title: 'External Links - 0xNull',
+    description: 'Curated privacy and darknet resources outside the 0xNull ecosystem.',
+  },
   '/wishlist': {
     title: 'My Wishlist - 0xNull',
     description: 'Your saved marketplace items. Track products you want to purchase later.',
@@ -336,6 +340,10 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
     { name: 'VPN Resources', url: 'https://0xnull.io/vpn-resources' },
+  ],
+  '/external-links': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'External Links', url: 'https://0xnull.io/external-links' },
   ],
   '/kokoro': [
     { name: 'Home', url: 'https://0xnull.io/' },

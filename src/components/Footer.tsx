@@ -117,6 +117,11 @@ export const Footer = () => {
                   VPN
                 </Link>
               </li>
+              <li>
+                <Link to="/external-links" className="text-muted-foreground hover:text-foreground transition-colors">
+                  External Links
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
