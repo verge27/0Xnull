@@ -5,6 +5,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SubmitLinkForm } from "@/components/SubmitLinkForm";
 
 const externalLinks = [
   {
@@ -120,6 +121,12 @@ const ExternalLinks = () => {
               ))}
             </div>
           </div>
+
+          {/* Submit a link */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Suggest a Resource</h2>
+            <SubmitLinkForm />
+          </section>
 
           {/* Disclaimer */}
           <Card className="bg-secondary/30">
