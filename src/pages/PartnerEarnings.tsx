@@ -99,7 +99,25 @@ const PartnerEarnings = () => {
     return value.toFixed(8);
   };
 
-  if (loading) {
+  if (!authLoading && !adminLoading && (!user || !isAdmin)) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <Card className="border-destructive/50">
+            <CardContent className="pt-6">
+              <p className="text-destructive">
+                This page is restricted. Sign in with an authorized account to view partner earnings.
+              </p>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading || authLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
