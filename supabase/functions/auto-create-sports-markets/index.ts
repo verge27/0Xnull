@@ -21,21 +21,46 @@ interface PredictionMarket {
   market_id: string;
 }
 
-async function fetchEvents(): Promise<SportsEvent[]> {
-  const res = await fetch(`${API_BASE}/sports/events`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch events: ${res.status}`);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Fetch JSON with timeout + retry/backoff. Body reads can throw mid-stream
+// ("error reading a body from connection") on large upstream payloads.
+async function fetchJsonWithRetry(
+  url: string,
+  attempts = 3,
+  timeoutMs = 30000,
+): Promise<any> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) {
+        await res.body?.cancel();
+        throw new Error(`Request failed: ${res.status}`);
+      }
+      // Read as text first so a mid-stream failure is caught here, then parse.
+      const text = await res.text();
+      return JSON.parse(text);
+    } catch (e) {
+      lastError = e;
+      console.error(`Fetch attempt ${attempt}/${attempts} failed for ${url}:`, e);
+      if (attempt < attempts) await sleep(1000 * Math.pow(2, attempt - 1));
+    } finally {
+      clearTimeout(timer);
+    }
   }
-  const data = await res.json();
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+async function fetchEvents(): Promise<SportsEvent[]> {
+  const data = await fetchJsonWithRetry(`${API_BASE}/sports/events`);
   return data.events || [];
 }
 
 async function fetchExistingMarkets(): Promise<string[]> {
-  const res = await fetch(`${API_BASE}/predictions/markets`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch markets: ${res.status}`);
-  }
-  const data = await res.json();
+  const data = await fetchJsonWithRetry(`${API_BASE}/predictions/markets`);
   return (data.markets || []).map((m: PredictionMarket) => m.market_id);
 }
 
