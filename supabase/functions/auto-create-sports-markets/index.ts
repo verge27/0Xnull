@@ -366,11 +366,22 @@ serve(async (req) => {
   try {
     console.log('Auto-create sports markets job started');
     
-    // Fetch events and existing markets in parallel
-    const [events, existingMarketIds] = await Promise.all([
+    // Fetch events and existing markets in parallel; a failed market list
+    // must not abort the run (createMarket already skips duplicates).
+    const [eventsResult, marketsResult] = await Promise.allSettled([
       fetchEvents(),
       fetchExistingMarkets(),
     ]);
+
+    if (eventsResult.status === 'rejected') {
+      throw eventsResult.reason;
+    }
+    const events = eventsResult.value;
+    const existingMarketIds =
+      marketsResult.status === 'fulfilled' ? marketsResult.value : [];
+    if (marketsResult.status === 'rejected') {
+      console.error('Existing markets fetch failed, continuing:', marketsResult.reason);
+    }
     
     console.log(`Found ${events.length} events, ${existingMarketIds.length} existing markets`);
     
