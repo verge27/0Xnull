@@ -124,7 +124,7 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
     description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and full privacy from the start.',
   },
-  '/tor': {
+  '/tor-guide': {
     title: 'Tor Access Guide - 0xNull',
     description: 'Access 0xNull via Tor for maximum privacy. Step-by-step guide to anonymous browsing.',
   },
@@ -309,9 +309,9 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Get Started', url: 'https://0xnull.io/get-started' },
   ],
-  '/tor': [
+  '/tor-guide': [
     { name: 'Home', url: 'https://0xnull.io/' },
-    { name: 'Tor Guide', url: 'https://0xnull.io/tor' },
+    { name: 'Tor Guide', url: 'https://0xnull.io/tor-guide' },
   ],
   '/grapheneos': [
     { name: 'Home', url: 'https://0xnull.io/' },
@@ -878,12 +878,12 @@ const articleSchemas: Record<string, StructuredData> = {
       },
     },
   },
-  '/tor': {
+  '/tor-guide': {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: 'How to Access 0xNull via Tor',
     description: 'Step-by-step guide to accessing 0xNull through the Tor network for maximum privacy.',
-    url: 'https://0xnull.io/tor',
+    url: 'https://0xnull.io/tor-guide',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
     author: {

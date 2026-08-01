@@ -153,6 +153,11 @@ export const Footer = () => {
             >
               {TOR_ADDRESS}
             </a>
+            <div className="mt-2">
+              <Link to="/tor-guide" className="text-primary hover:text-foreground transition-colors text-xs">
+                How to use Tor →
+              </Link>
+            </div>
           </div>
         </div>
 
