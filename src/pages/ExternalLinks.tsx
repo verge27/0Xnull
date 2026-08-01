@@ -14,6 +14,15 @@ const externalLinks = [
     category: "Directory",
     tags: ["Darknet", "Privacy", "Directory"],
     isRecommended: true
+  },
+  {
+    name: "Ahmia",
+    url: "https://ahmia.fi/",
+    onionAddress: "juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion",
+    description: "A search engine for indexing Tor onion services and hidden content.",
+    category: "Search Engine",
+    tags: ["Tor", "Onion", "Search Engine", "Privacy"],
+    isRecommended: true
   }
 ];
 
@@ -75,6 +84,20 @@ const ExternalLinks = () => {
                         </Badge>
                       ))}
                     </div>
+                    {link.onionAddress && (
+                      <div className="mt-4 pt-4 border-t border-border/50">
+                        <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
+                        <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
+                          {link.onionAddress}
+                        </code>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
+                            Visit via Tor
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
