@@ -878,12 +878,12 @@ const articleSchemas: Record<string, StructuredData> = {
       },
     },
   },
-  '/tor': {
+  '/tor-guide': {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: 'How to Access 0xNull via Tor',
     description: 'Step-by-step guide to accessing 0xNull through the Tor network for maximum privacy.',
-    url: 'https://0xnull.io/tor',
+    url: 'https://0xnull.io/tor-guide',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
     author: {
