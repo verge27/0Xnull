@@ -41,6 +41,14 @@ const externalLinks = [
     category: "YouTube Channel",
     tags: ["Privacy", "Security", "YouTube", "Education"],
     isRecommended: true
+  },
+  {
+    name: "vx-underground",
+    url: "https://vx-underground.org/",
+    description: "The largest collection of malware source code, samples and papers on the internet.",
+    category: "Research Archive",
+    tags: ["Malware", "Security", "Research", "Papers"],
+    isRecommended: false
   }
 ];
 
