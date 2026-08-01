@@ -142,7 +142,7 @@ export default function CombatSports() {
     setLoading(true);
     try {
       const { data: blockedData } = await supabase
-        .from('blocked_markets')
+        .from('blocked_market_ids')
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 
