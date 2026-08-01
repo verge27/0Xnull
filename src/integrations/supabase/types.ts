@@ -1389,6 +1389,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      message_identity_unchanged: {
+        Args: {
+          p_message_id: string
+          p_new_content: string
+          p_new_conversation_id: string
+          p_new_created_at: string
+          p_new_sender_private_key_user_id: string
+          p_new_sender_user_id: string
+        }
+        Returns: boolean
+      }
       order_identity_unchanged: {
         Args: {
           p_new_buyer_pk_user_id: string
