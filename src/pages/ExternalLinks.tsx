@@ -23,6 +23,15 @@ const externalLinks = [
     category: "Search Engine",
     tags: ["Tor", "Onion", "Search Engine", "Privacy"],
     isRecommended: true
+  },
+  {
+    name: "Dredd the Darknet Chat",
+    url: "https://dread.re/",
+    onionAddress: "dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion",
+    description: "A community forum and chat for darknet market discussions and privacy news.",
+    category: "Forum",
+    tags: ["Darknet", "Forum", "Community", "Privacy"],
+    isRecommended: true
   }
 ];
 
