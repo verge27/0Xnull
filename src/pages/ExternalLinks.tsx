@@ -14,6 +14,15 @@ const externalLinks = [
     category: "Directory",
     tags: ["Darknet", "Privacy", "Directory"],
     isRecommended: true
+  },
+  {
+    name: "Ahmia",
+    url: "https://ahmia.fi/",
+    onionAddress: "juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion",
+    description: "A search engine for indexing Tor onion services and hidden content.",
+    category: "Search Engine",
+    tags: ["Tor", "Onion", "Search Engine", "Privacy"],
+    isRecommended: true
   }
 ];
 
