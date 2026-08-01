@@ -47,6 +47,18 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_market_ids: {
+        Row: {
+          market_id: string
+        }
+        Insert: {
+          market_id: string
+        }
+        Update: {
+          market_id?: string
+        }
+        Relationships: []
+      }
       blocked_markets: {
         Row: {
           blocked_by: string | null
@@ -1367,9 +1379,50 @@ export type Database = {
         }
         Returns: boolean
       }
+      market_update_allowed: {
+        Args: {
+          p_market_id: string
+          p_new_resolved_at: string
+          p_new_status: string
+          p_new_total_no_pool: number
+          p_new_total_yes_pool: number
+        }
+        Returns: boolean
+      }
+      message_identity_unchanged: {
+        Args: {
+          p_message_id: string
+          p_new_content: string
+          p_new_conversation_id: string
+          p_new_created_at: string
+          p_new_sender_private_key_user_id: string
+          p_new_sender_user_id: string
+        }
+        Returns: boolean
+      }
+      order_identity_unchanged: {
+        Args: {
+          p_new_buyer_pk_user_id: string
+          p_new_buyer_user_id: string
+          p_new_seller_pk_user_id: string
+          p_new_seller_user_id: string
+          p_order_id: string
+        }
+        Returns: boolean
+      }
       record_listing_sale: {
         Args: { p_listing_id: string; p_quantity: number; p_revenue: number }
         Returns: undefined
+      }
+      review_identity_unchanged: {
+        Args: {
+          p_new_reviewer_pk_user_id: string
+          p_new_reviewer_user_id: string
+          p_new_seller_pk_user_id: string
+          p_new_seller_user_id: string
+          p_review_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

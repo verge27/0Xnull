@@ -266,9 +266,9 @@ export default function SportsPredictions() {
   const fetchMarkets = async () => {
     setLoading(true);
     try {
-      // Fetch blocked markets from database
+      // Fetch blocked market IDs from database
       const { data: blockedData } = await supabase
-        .from('blocked_markets')
+        .from('blocked_market_ids')
         .select('market_id');
       const blockedIds = new Set((blockedData || []).map(b => b.market_id));
 

@@ -48,20 +48,10 @@ interface AnalyticsEvent {
 // Standalone tracking function that doesn't depend on React state
 async function trackAnalyticsEvent(voucherCode: string, event: AnalyticsEvent): Promise<void> {
   try {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    
     console.log('[VoucherAnalytics] Tracking event:', event.event_type, 'voucher:', voucherCode);
-    
-    const response = await fetch(`${supabaseUrl}/rest/v1/voucher_analytics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({
+
+    const { error } = await supabase.functions.invoke('voucher-analytics', {
+      body: {
         voucher_code: voucherCode,
         event_type: event.event_type,
         user_token: getAnonymousToken(),
@@ -69,11 +59,11 @@ async function trackAnalyticsEvent(voucherCode: string, event: AnalyticsEvent): 
         market_id: event.market_id || null,
         bet_amount: event.bet_amount || null,
         metadata: event.metadata || {},
-      }),
+      },
     });
-    
-    if (!response.ok) {
-      console.error('[VoucherAnalytics] Failed to track:', response.status, await response.text());
+
+    if (error) {
+      console.error('[VoucherAnalytics] Failed to track:', error.message);
     } else {
       console.log('[VoucherAnalytics] Successfully tracked:', event.event_type);
     }
