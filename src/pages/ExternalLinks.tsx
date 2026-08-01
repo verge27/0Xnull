@@ -131,6 +131,45 @@ const ExternalLinks = () => {
             </div>
           </div>
 
+          {/* Tor Access Explainer */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">How to Access Tor Links</h2>
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Visiting .onion addresses safely
+                </CardTitle>
+                <CardDescription>
+                  Links ending in .onion only work inside the Tor network. A normal browser cannot open them. Use Tor Browser to reach these services without revealing your IP address or location.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Tor Browser routes your traffic through multiple encrypted relays and strips identifying information at the network edge. It is the standard way to access darknet resources and is free to download.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild>
+                    <a
+                      href="https://www.torproject.org/download/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Tor Browser
+                      <ExternalLink className="h-3 w-3 ml-2" />
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <RouterLink to="/tor-guide">
+                      Read our Tor Guide
+                    </RouterLink>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
           {/* Submit a link */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6">Suggest a Resource</h2>
