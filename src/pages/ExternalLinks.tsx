@@ -32,6 +32,14 @@ const externalLinks = [
     category: "Forum",
     tags: ["Darknet", "Forum", "Community", "Privacy"],
     isRecommended: true
+  },
+  {
+    name: "Mental Outlaw",
+    url: "https://youtube.com/@mentaloutlaw?si=DzuNJpvBi5P6VZTk",
+    description: "Privacy-focused tech commentary tutorials and security news.",
+    category: "YouTube Channel",
+    tags: ["Privacy", "Security", "YouTube", "Education"],
+    isRecommended: true
   }
 ];
 
