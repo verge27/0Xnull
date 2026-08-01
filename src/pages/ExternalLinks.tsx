@@ -84,6 +84,20 @@ const ExternalLinks = () => {
                         </Badge>
                       ))}
                     </div>
+                    {link.onionAddress && (
+                      <div className="mt-4 pt-4 border-t border-border/50">
+                        <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
+                        <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
+                          {link.onionAddress}
+                        </code>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
+                            Visit via Tor
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
