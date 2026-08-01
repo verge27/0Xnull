@@ -48,6 +48,7 @@ const Kokoro = lazy(() => import("./pages/Kokoro"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
+const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
 
 // Heavy prediction pages (largest bundles - definitely lazy load)
@@ -203,6 +204,7 @@ const App = () => (
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/tor-guide" element={<TorGuide />} />
+                  <Route path="/external-links" element={<ExternalLinks />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />
