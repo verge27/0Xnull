@@ -8,6 +8,36 @@ const corsHeaders = {
 
 const API_BASE = 'https://api.0xnull.io';
 
+// Only these upstream path prefixes may be reached through this proxy.
+const ALLOWED_PATH_PREFIXES = [
+  '/api/predictions',
+  '/api/multibets',
+  '/api/lending',
+  '/api/token',
+  '/api/sports',
+  '/api/esports',
+  '/api/cricket',
+  '/api/slap',
+  '/api/russian-mma',
+  '/api/tapology',
+  '/api/flash',
+  '/api/swap',
+  '/api/vouchers',
+  '/api/voice',
+  '/api/kokoro',
+  '/api/3ds',
+];
+
+const ALLOWED_METHODS = ['GET', 'POST', 'PUT'];
+
+const isAllowedPath = (path: string): boolean => {
+  if (!path.startsWith('/api/')) return false;
+  if (path.includes('..')) return false;
+  return ALLOWED_PATH_PREFIXES.some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`) || path.startsWith(`${prefix}?`)
+  );
+};
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -24,6 +54,22 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    if (!ALLOWED_METHODS.includes(req.method)) {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!isAllowedPath(targetPath)) {
+      console.warn(`Blocked disallowed proxy path: ${targetPath}`);
+      return new Response(JSON.stringify({ error: 'Path not allowed' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
 
     // Pool endpoints can run in "soft" mode (soft_pool=1) to avoid upstream 5xx/504s bubbling to the client.
     // When soft_pool=1, always returns HTTP 200 with { exists: boolean, pool?: object, status?: number }
