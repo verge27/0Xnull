@@ -3,7 +3,7 @@ import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Globe, Lock, Eye, ExternalLink, Download } from 'lucide-react';
+import { Shield, Globe, Lock, Eye, ExternalLink, Download, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TorGuide = () => {
@@ -174,6 +174,48 @@ const TorGuide = () => {
                 </span>
               </li>
             </ul>
+          </CardContent>
+        </Card>
+
+        {/* FAQ */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-primary" />
+              Frequently Asked Questions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">What do I do if an onion link will not open?</h4>
+              <p className="text-sm text-muted-foreground">
+                First make sure you are using Tor Browser and not a regular browser. Check that the address ends in .onion and is typed correctly. If the site still fails to load, try requesting a new circuit in Tor Browser (click the lock icon in the address bar and choose "New Circuit for this Site"). Some services are intermittent, so waiting a few minutes and retrying often helps. If you are on a censored network, configure a bridge under Settings → Connection → Bridges.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">How do I verify I am really in Tor Browser?</h4>
+              <p className="text-sm text-muted-foreground">
+                The window title should say "Tor Browser". The address bar shows a small Tor icon next to the lock and a separate .onion circuit indicator. You can also visit{' '}
+                <a
+                  href="https://check.torproject.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  check.torproject.org
+                  <ExternalLink className="w-3 h-3" />
+                </a>{' '}
+                which will confirm whether your traffic is routing through the Tor network. If you see a standard browser interface, you are not protected by Tor.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">Can I use a normal browser with a Tor proxy or VPN instead?</h4>
+              <p className="text-sm text-muted-foreground">
+                A normal browser cannot open .onion links even with a VPN. Tor Browser is required because it includes the built-in Tor client and anti-fingerprinting protections. A VPN hides your traffic from your ISP but does not provide the onion-routing or browser-level hardening that makes Tor links work safely.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
