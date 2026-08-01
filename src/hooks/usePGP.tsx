@@ -242,7 +242,7 @@ export function usePGP() {
       return false;
     }
     
-    const cached = localStorage.getItem(SESSION_KEY_STORAGE);
+    const cached = sessionStorage.getItem(SESSION_KEY_STORAGE);
     if (cached) {
       setDecryptedPrivateKey(cached);
       setIsUnlocked(true);
