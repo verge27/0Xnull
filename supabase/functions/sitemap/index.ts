@@ -29,6 +29,8 @@ const staticPages = [
   { path: '/voice', priority: '0.7', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/kokoro', priority: '0.6', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/browse', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
+  { path: '/marketplace', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
+
   { path: '/get-started', priority: '0.7', changefreq: 'monthly', lastmod: '2024-12-15' },
   { path: '/safety', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-01' },
   { path: '/vpn-resources', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-01' },
