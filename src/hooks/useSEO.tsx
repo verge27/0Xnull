@@ -1005,7 +1005,11 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
       ...customMeta,
     };
     
-    const url = `https://0xnull.io${location.pathname}`;
+    // Canonical/og:url always self-reference the route (query strings excluded)
+    // unless the page explicitly points at a preferred URL.
+    const canonicalPath = meta.canonical || location.pathname;
+    const url = `https://0xnull.io${canonicalPath}`;
+
     
     // Update document title
     document.title = meta.title || defaultMeta.title;
