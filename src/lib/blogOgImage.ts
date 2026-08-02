@@ -14,6 +14,12 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   flash: `${SITE_URL}/images/blog/og-fallback-flash.jpg`,
 };
 
+/** Every branded fallback thumbnail that must exist in /public. */
+export const OG_FALLBACK_IMAGES: Record<string, string> = {
+  ...CATEGORY_FALLBACKS,
+  default: DEFAULT_OG_IMAGE,
+};
+
 /** Turn a relative asset path into the absolute URL social crawlers require. */
 export function absoluteImageUrl(src: string): string {
   const trimmed = src.trim();
@@ -22,14 +28,24 @@ export function absoluteImageUrl(src: string): string {
   return `${SITE_URL}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
 }
 
+/** Every image referenced in markdown content, either ![alt](src) or <img src="">. */
+export function contentImages(content?: string | null): string[] {
+  if (!content) return [];
+  const found: string[] = [];
+  for (const m of content.matchAll(/!\[[^\]]*\]\(([^)\s]+)/g)) {
+    if (m[1]) found.push(m[1]);
+  }
+  for (const m of content.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+    if (m[1]) found.push(m[1]);
+  }
+  return [...new Set(found.map((src) => src.trim()).filter(Boolean))];
+}
+
 /** First image referenced in markdown content, either ![alt](src) or <img src="">. */
 function firstContentImage(content?: string | null): string | undefined {
-  if (!content) return undefined;
-  const markdown = content.match(/!\[[^\]]*\]\(([^)\s]+)/);
-  if (markdown?.[1]) return markdown[1];
-  const html = content.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return html?.[1];
+  return contentImages(content)[0];
 }
+
 
 export interface OgImageSource {
   featured_image?: string | null;
