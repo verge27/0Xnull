@@ -92,12 +92,10 @@ const Index = () => {
             </a>
             
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              One token. Every private service. No accounts, ever.
+              Join the Quiet Riot
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              0xNull issues one anonymous credential — a <span className="font-mono text-foreground">0xn_</span> token —
-              funded in Monero and metered in USD. It pays for AI, the marketplace, swaps, lending and
-              prediction markets. There is no signup step at any of them.
+              0xNull is one anonymous credential — a <span className="font-mono text-foreground">0xn_</span> token — funded in Monero and spent across every service. No accounts, no signup.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link to="/dashboard">
@@ -127,12 +125,10 @@ const Index = () => {
       <section className="container mx-auto px-4 py-20" aria-labelledby="token-heading">
         <div className="max-w-2xl mb-10">
           <h2 id="token-heading" className="text-3xl md:text-4xl font-bold mb-4">
-            The token is the product
+            Issued instantly, funded in XMR, spent everywhere
           </h2>
           <p className="text-muted-foreground">
-            Everything else on this site is something the token unlocks. It is a bearer credential:
-            whoever holds the string holds the balance, and nobody — including us — can connect it to a
-            person.
+            The token is the product. Everything else is something it unlocks. Whoever holds the string holds the balance, and nobody — including us — can connect it to a person.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
