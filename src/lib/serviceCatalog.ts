@@ -116,7 +116,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   // ---- Predictions ----
   {
     name: 'Prediction Markets',
-    what: 'Yes/no markets on sports, esports, combat, crypto and governance outcomes.',
+    what: 'Yes/no markets on sports, esports, combat, crypto and governance outcomes. One token, a fresh single-use address per market.',
     price: '0.4% rake',
     priceNote: 'on winnings only — nothing on losses or refunds',
     status: 'live',
