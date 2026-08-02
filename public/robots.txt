@@ -34,3 +34,5 @@ Disallow: /api-analytics
 Disallow: /verify
 
 Sitemap: https://0xnull.io/sitemap.xml
+
+Sitemap: https://0xnull.io/rss.xml
