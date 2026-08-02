@@ -102,18 +102,17 @@ Deno.serve(async (req) => {
       xml += '  </url>\n';
     }
 
-    // Add dynamic blog post pages
+    // Add dynamic blog post pages.
+    // lastmod comes only from a real per-post timestamp; when a post has
+    // neither, the element is omitted rather than filled with a placeholder.
     if (blogPosts && blogPosts.length > 0) {
       console.log(`Adding ${blogPosts.length} blog posts to sitemap`);
       for (const post of blogPosts) {
-        const lastmod = post.updated_at 
-          ? new Date(post.updated_at).toISOString().split('T')[0]
-          : post.published_at 
-            ? new Date(post.published_at).toISOString().split('T')[0]
-            : '2026-01-21';
+        const source = post.updated_at || post.published_at;
+        const lastmod = source ? new Date(source).toISOString().split('T')[0] : null;
         xml += '  <url>\n';
         xml += `    <loc>${SITE_URL}/blog/${post.slug}</loc>\n`;
-        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        if (lastmod) xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += `    <changefreq>weekly</changefreq>\n`;
         xml += `    <priority>0.7</priority>\n`;
         xml += '  </url>\n';
@@ -124,12 +123,12 @@ Deno.serve(async (req) => {
     if (listings && listings.length > 0) {
       console.log(`Adding ${listings.length} listings to sitemap`);
       for (const listing of listings) {
-        const lastmod = listing.updated_at 
+        const lastmod = listing.updated_at
           ? new Date(listing.updated_at).toISOString().split('T')[0]
-          : '2025-01-02';
+          : null;
         xml += '  <url>\n';
         xml += `    <loc>${SITE_URL}/listing/${listing.id}</loc>\n`;
-        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        if (lastmod) xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += `    <changefreq>weekly</changefreq>\n`;
         xml += `    <priority>0.6</priority>\n`;
         xml += '  </url>\n';
