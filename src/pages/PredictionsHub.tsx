@@ -209,7 +209,7 @@ export default function PredictionsHub() {
                 <CardContent className="text-sm text-muted-foreground">
                   Betting privately starts with the connection you bet from. Our guide to{' '}
                   <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="text-primary hover:underline">anonymous VPS hosting</Link>{' '}
-                  covers no-KYC providers, paying in XMR, and hardening a box you can run your own VPN on.
+                  covers no-KYC providers, paying in XMR and hardening a box you can run your own VPN on.
                 </CardContent>
               </Card>
             </div>
