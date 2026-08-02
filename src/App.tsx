@@ -50,6 +50,8 @@ const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
 const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
+const Docs = lazy(() => import("./pages/Docs"));
+const Canary = lazy(() => import("./pages/Canary"));
 
 // Heavy prediction pages (largest bundles - definitely lazy load)
 const CryptoPredictions = lazy(() => import("./pages/CryptoPredictions"));
