@@ -13,24 +13,14 @@ import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
 import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIdentity';
+import { TokenStatusWidget } from '@/components/TokenStatusWidget';
+
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 import { toast } from 'sonner';
 
-const TokenDashboardBadge = () => {
-  const { token, balance, hasToken } = useToken();
-  if (!hasToken || !token) return null;
-  const truncated = `${token.slice(0, 8)}…${token.slice(-4)}`;
-  return (
-    <Button variant="ghost" size="sm" asChild className="gap-1.5 hidden sm:inline-flex">
-      <Link to="/dashboard">
-        <Key className="w-3.5 h-3.5 text-primary" />
-        <code className="font-mono text-xs text-muted-foreground hidden lg:inline">{truncated}</code>
-        <span className="font-mono text-xs font-semibold">${balance.toFixed(2)}</span>
-      </Link>
-    </Button>
-  );
-};
+const TokenDashboardBadge = () => <TokenStatusWidget />;
+
 
 const MobileTokenBadge = ({ onNavigate }: { onNavigate: () => void }) => {
   const { token, balance, hasToken } = useToken();
