@@ -121,6 +121,21 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
     }
     
     setLoading(true);
+
+    // Re-validate the resolved og:image chain against the live site before saving.
+    try {
+      const freshReport = await checkPostImages({
+        featured_image: formData.featured_image,
+        content: formData.content,
+        category: formData.category,
+      });
+      setImageReport(freshReport);
+      warnAboutImages(freshReport);
+    } catch (imageErr) {
+      console.error('og:image preflight failed:', imageErr);
+    }
+    
+
     
     try {
       const status = publish ? 'published' : 'draft';
