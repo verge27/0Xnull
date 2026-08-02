@@ -71,11 +71,50 @@ export default function BlogPost() {
     image: post.featured_image || undefined,
   } : undefined);
 
+  // Inject FAQPage structured data when the post has an FAQ section
+  useEffect(() => {
+    const id = 'blog-faq-jsonld';
+    document.getElementById(id)?.remove();
+    if (!post?.content) return;
+
+    const faqSection = post.content.split(/^##\s+Frequently Asked Questions\s*$/m)[1];
+    if (!faqSection) return;
+
+    const body = faqSection.split(/^##\s+/m)[0];
+    const items = [...body.matchAll(/^###\s+(.+?)\s*$\n+([\s\S]*?)(?=\n###\s|\s*$)/gm)]
+      .map(([, q, a]) => ({
+        '@type': 'Question',
+        name: q.trim(),
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: a.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*_`]/g, '').trim(),
+        },
+      }))
+      .filter((i) => i.acceptedAnswer.text.length > 0);
+
+    if (items.length === 0) return;
+
+    const script = document.createElement('script');
+    script.id = id;
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: items,
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      document.getElementById(id)?.remove();
+    };
+  }, [post?.content]);
+
   useEffect(() => {
     if (slug) {
       fetchPost();
     }
   }, [slug]);
+
 
   const fetchPost = async () => {
     setLoading(true);
