@@ -146,7 +146,8 @@ const externalLinks: ExternalLink[] = [
   {
     name: "Riseup",
     url: "https://riseup.net",
-    description: "Publishes per-service onions on their Tor docs page. Verify via riseup.net.",
+    onionAddress: "vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion",
+    description: "Main site mirror for mail, lists and VPN. Per-service onions are published on riseup.net's Tor docs page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
     isRecommended: false
