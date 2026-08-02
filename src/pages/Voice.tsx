@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import ChatWidget from "@/components/ChatWidget";
 import { useToken } from "@/hooks/useToken";
 import { api, type Voice, TIER_CONFIG } from "@/services/api";
+import { Link } from "react-router-dom";
+import { ServicePriceBar } from "@/components/ServicePriceBar";
 const voiceBackground = '/images/backgrounds/voice-background.webp';
 
 const tiers = [
