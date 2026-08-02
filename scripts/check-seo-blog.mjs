@@ -79,7 +79,8 @@ function checkRobots() {
   if (/^\s*Disallow:\s*\/\s*$/im.test(wildcard)) {
     fail('robots.txt', 'blocks the whole site for all crawlers (Disallow: /)');
   }
-  if (/^\s*Disallow:\s*\/blog/im.test(txt)) {
+  // Blocking /blog or /blog/ hides every post; deeper rules (/blog/admin) are intentional.
+  if (/^\s*Disallow:\s*\/blog\/?\s*$/im.test(txt)) {
     fail('robots.txt', 'disallows /blog — posts cannot be crawled');
   }
 
