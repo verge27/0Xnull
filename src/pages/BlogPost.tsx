@@ -39,6 +39,7 @@ interface BlogPostData {
   subcategory: string | null;
   tags: string[];
   published_at: string | null;
+  updated_at?: string | null;
   views: number;
   market_id: string | null;
   meta_description: string | null;
