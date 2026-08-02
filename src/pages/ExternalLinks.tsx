@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { Link as LinkIcon, ExternalLink, Globe, Shield, Download, AlertTriangle, CheckCircle } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -6,6 +7,8 @@ import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { SubmitLinkForm } from "@/components/SubmitLinkForm";
 
 type ExternalLink = {
@@ -16,6 +19,7 @@ type ExternalLink = {
   category: string;
   tags: string[];
   isRecommended: boolean;
+  isVerified: boolean;
 };
 
 const externalLinks: ExternalLink[] = [
@@ -25,7 +29,8 @@ const externalLinks: ExternalLink[] = [
     description: "A directory of darknet resources and onion services for privacy research.",
     category: "Directory",
     tags: ["Directory", "Darknet", "Onion", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "The Pirate Bay",
@@ -34,7 +39,8 @@ const externalLinks: ExternalLink[] = [
     description: "Torrent index and search. The onion address is published on thepiratebay.org. Note: copyright-infringing content is illegal in most jurisdictions.",
     category: "Directory",
     tags: ["Tor", "Torrents", "Directory"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Monero",
@@ -43,7 +49,8 @@ const externalLinks: ExternalLink[] = [
     description: "Official getmonero.org onion. The address is published on the Monero project's site.",
     category: "Monero",
     tags: ["Tor", "Monero", "Privacy", "Cryptocurrency"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Wasabi Wallet",
@@ -52,7 +59,8 @@ const externalLinks: ExternalLink[] = [
     description: "Privacy-focused Bitcoin wallet. Published on wasabiwallet.io. The zkSNACKs coordinator backend was shut down in 2024; the wallet still works pointed at a custom coordinator.",
     category: "Monero",
     tags: ["Tor", "Bitcoin", "Privacy", "Wallet"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Ahmia",
@@ -61,7 +69,8 @@ const externalLinks: ExternalLink[] = [
     description: "A search engine for indexing Tor onion services and hidden content.",
     category: "Search Engine",
     tags: ["Tor", "Onion", "Search Engine", "Privacy"],
-    isRecommended: true
+    isRecommended: true,
+    isVerified: true
   },
   {
     name: "BBC News",
@@ -70,7 +79,8 @@ const externalLinks: ExternalLink[] = [
     description: "International edition mirror.",
     category: "News",
     tags: ["News", "Tor", "Mirror"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Brave Search",
@@ -79,7 +89,8 @@ const externalLinks: ExternalLink[] = [
     description: "Privacy-focused search engine with a Tor onion service. Onion address announced by Brave; verify on brave.com before use.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "CIA",
@@ -88,7 +99,8 @@ const externalLinks: ExternalLink[] = [
     description: "Official anonymous tip channel. Verify the onion address on cia.gov.",
     category: "Infrastructure",
     tags: ["Tor", "Official", "Whistleblowing"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Dread",
@@ -97,7 +109,8 @@ const externalLinks: ExternalLink[] = [
     description: "A Reddit-like dark web discussion forum for darknet market news and community talk.",
     category: "Forum",
     tags: ["Darknet", "Forum", "Community", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "DarkGPT",
@@ -105,7 +118,8 @@ const externalLinks: ExternalLink[] = [
     description: "Tor-native uncensored AI chat. The operator is anonymous so treat every prompt as logged and avoid anything adjacent to your real infrastructure.",
     category: "AI",
     tags: ["Tor", "AI", "Onion", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "DuckDuckGo",
@@ -114,7 +128,8 @@ const externalLinks: ExternalLink[] = [
     description: "Searches the clearnet via Tor. Address published on DDG's official help pages.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Facebook",
@@ -123,7 +138,8 @@ const externalLinks: ExternalLink[] = [
     description: "Official Meta mirror. Network-layer privacy only — Meta still logs you.",
     category: "Comms",
     tags: ["Tor", "Mirror", "Social"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "I2P Search",
@@ -131,7 +147,8 @@ const externalLinks: ExternalLink[] = [
     description: "Indexes I2P eepsites, not Tor hidden services. Requires an I2P router; Tor Browser will not resolve .i2p addresses.",
     category: "Search Engine",
     tags: ["I2P", "Search Engine", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "Just Another Library",
@@ -140,7 +157,8 @@ const externalLinks: ExternalLink[] = [
     description: "Stick to public-domain material.",
     category: "Knowledge",
     tags: ["Tor", "Library", "Knowledge"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "Mental Outlaw",
@@ -148,7 +166,8 @@ const externalLinks: ExternalLink[] = [
     description: "Privacy-focused tech commentary tutorials and security news.",
     category: "YouTube Channel",
     tags: ["Privacy", "Security", "YouTube", "Education"],
-    isRecommended: true
+    isRecommended: true,
+    isVerified: false
   },
   {
     name: "NYT",
@@ -157,7 +176,8 @@ const externalLinks: ExternalLink[] = [
     description: "Paywall still applies.",
     category: "News",
     tags: ["News", "Tor", "Mirror"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "ProPublica",
@@ -166,7 +186,8 @@ const externalLinks: ExternalLink[] = [
     description: "First major outlet on Tor. Verify the onion address on propublica.org.",
     category: "News",
     tags: ["News", "Tor", "Mirror"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Proton Mail",
@@ -175,7 +196,8 @@ const externalLinks: ExternalLink[] = [
     description: "Encrypted email provider. Onion address published on Proton's official Tor access page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Reddit",
@@ -184,7 +206,8 @@ const externalLinks: ExternalLink[] = [
     description: "Official mirror.",
     category: "Comms",
     tags: ["Tor", "Forum", "Social"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Riseup",
@@ -193,7 +216,8 @@ const externalLinks: ExternalLink[] = [
     description: "Main site mirror for mail, lists and VPN. Per-service onions are published on riseup.net's Tor docs page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "DanWin1210",
@@ -202,7 +226,8 @@ const externalLinks: ExternalLink[] = [
     description: "Daniel Winzen's hosting, mail and XMPP operation. Cross-check the onion address against danwin1210.me before use.",
     category: "Comms",
     tags: ["Tor", "Email", "XMPP", "Hosting"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "OnionShare",
@@ -211,7 +236,8 @@ const externalLinks: ExternalLink[] = [
     description: "Open-source tool for sending files, hosting websites and chatting securely over Tor. The onion address is published on onionshare.org.",
     category: "Infrastructure",
     tags: ["Tor", "File sharing", "Privacy", "Open source"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "The Tor Project",
@@ -220,7 +246,8 @@ const externalLinks: ExternalLink[] = [
     description: "Docs, downloads and Tor Metrics access without clearnet exit.",
     category: "Infrastructure",
     tags: ["Tor", "Browser", "Privacy"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Qubes OS",
@@ -229,7 +256,8 @@ const externalLinks: ExternalLink[] = [
     description: "Security-focused operating system built around isolation via virtual machines. Onion address published on qubes-os.org.",
     category: "Infrastructure",
     tags: ["OS", "Security", "Privacy", "Open source"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: true
   },
   {
     name: "Torgle",
@@ -237,7 +265,8 @@ const externalLinks: ExternalLink[] = [
     description: "Directory of Tor onion services. No independently verifiable v3 address currently available; treat as unverified.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Unverified"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "Torch",
@@ -246,7 +275,8 @@ const externalLinks: ExternalLink[] = [
     description: "Oldest index with ~1M+ sites. Unfiltered so expect more noise.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Darknet"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "VormWeb",
@@ -254,7 +284,8 @@ const externalLinks: ExternalLink[] = [
     description: "Search engine with a claimed hidden service mirror. No published v3 address could be verified from an authoritative source.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Unverified"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   },
   {
     name: "vx-underground",
@@ -262,25 +293,36 @@ const externalLinks: ExternalLink[] = [
     description: "The largest collection of malware source code, samples and papers on the internet.",
     category: "Research Archive",
     tags: ["Malware", "Security", "Research", "Papers"],
-    isRecommended: false
+    isRecommended: false,
+    isVerified: false
   }
 ];
 
-const groupedLinks = externalLinks.reduce<Record<string, ExternalLink[]>>((acc, link) => {
-  if (!acc[link.category]) acc[link.category] = [];
-  acc[link.category].push(link);
-  return acc;
-}, {});
-
 const priorityOrder = ["Directory", "Search Engine", "Monero", "Comms"];
-const allCategories = Object.keys(groupedLinks);
-const remainingCategories = allCategories
-  .filter((category) => !priorityOrder.includes(category))
-  .sort();
-const sortedCategories = [...priorityOrder.filter((c) => allCategories.includes(c)), ...remainingCategories];
 
 const ExternalLinks = () => {
   useSEO();
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  const filteredLinks = useMemo(
+    () => (verifiedOnly ? externalLinks.filter((link) => link.isVerified) : externalLinks),
+    [verifiedOnly]
+  );
+
+  const groupedLinks = useMemo(() => {
+    return filteredLinks.reduce<Record<string, ExternalLink[]>>((acc, link) => {
+      if (!acc[link.category]) acc[link.category] = [];
+      acc[link.category].push(link);
+      return acc;
+    }, {});
+  }, [filteredLinks]);
+
+  const allCategories = Object.keys(groupedLinks);
+  const remainingCategories = allCategories
+    .filter((category) => !priorityOrder.includes(category))
+    .sort();
+  const sortedCategories = [...priorityOrder.filter((c) => allCategories.includes(c)), ...remainingCategories];
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -296,78 +338,110 @@ const ExternalLinks = () => {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
               Curated privacy and darknet resources outside the 0xNull ecosystem
             </p>
-            <div className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground mb-6">
               <Badge variant="outline">Focus: External privacy tools and directories</Badge>
             </div>
+
+            <div className="flex items-center justify-center gap-3">
+              <Switch
+                id="verified-only"
+                checked={verifiedOnly}
+                onCheckedChange={setVerifiedOnly}
+              />
+              <Label htmlFor="verified-only" className="font-medium cursor-pointer">
+                Verified only
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {verifiedOnly
+                ? `Showing ${filteredLinks.length} verified onion resources`
+                : `Showing ${externalLinks.length} resources (${externalLinks.filter((l) => l.isVerified).length} verified)`}
+            </p>
           </div>
 
           {/* External Links */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-6">External Resources</h2>
             <div className="space-y-12">
-              {sortedCategories.map((category) => (
-                <section key={category}>
-                  <h3 className="text-xl font-semibold mb-4">{category}</h3>
-                  <div className="grid gap-6">
-                    {groupedLinks[category].map((link, index) => (
-                      <Card key={index} className={`hover:border-primary/50 transition-colors ${link.isRecommended ? 'border-primary/30 bg-primary/5' : ''}`}>
-                        <CardHeader>
-                          <div className="flex items-start justify-between flex-wrap gap-2">
-                            <div>
-                              <CardTitle className="flex items-center gap-2 flex-wrap">
-                                <LinkIcon className="h-5 w-5 text-primary" />
-                                {link.name}
-                                {link.isRecommended && <Badge className="bg-primary text-primary-foreground">Recommended</Badge>}
-                                {(link.tags.some((t) => ["Unverified", "Defunct", "Down"].includes(t))) && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    {link.tags.find((t) => ["Unverified", "Defunct", "Down"].includes(t))}
-                                  </Badge>
+              {sortedCategories.length > 0 ? (
+                sortedCategories.map((category) => (
+                  <section key={category}>
+                    <h3 className="text-xl font-semibold mb-4">{category}</h3>
+                    <div className="grid gap-6">
+                      {groupedLinks[category].map((link, index) => (
+                        <Card key={index} className={`hover:border-primary/50 transition-colors ${link.isRecommended ? 'border-primary/30 bg-primary/5' : ''}`}>
+                          <CardHeader>
+                            <div className="flex items-start justify-between flex-wrap gap-2">
+                              <div>
+                                <CardTitle className="flex items-center gap-2 flex-wrap">
+                                  <LinkIcon className="h-5 w-5 text-primary" />
+                                  {link.name}
+                                  {link.isVerified && (
+                                    <Badge variant="outline" className="text-xs border-green-500/50 text-green-500">
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Verified
+                                    </Badge>
+                                  )}
+                                  {link.isRecommended && <Badge className="bg-primary text-primary-foreground">Recommended</Badge>}
+                                  {(link.tags.some((t) => ["Unverified", "Defunct", "Down"].includes(t))) && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      {link.tags.find((t) => ["Unverified", "Defunct", "Down"].includes(t))}
+                                    </Badge>
+                                  )}
+                                </CardTitle>
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Badge variant="secondary">{link.category}</Badge>
+                                {link.url && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                      Visit {link.name}
+                                      <ExternalLink className="h-3 w-3 ml-1" />
+                                    </a>
+                                  </Button>
                                 )}
-                              </CardTitle>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="secondary">{link.category}</Badge>
-                              {link.url && (
+                            <CardDescription className="mt-2">{link.description}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <h4 className="text-sm font-semibold mb-3">Tags:</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {link.tags.map((tag, tagIndex) => (
+                                <Badge key={tagIndex} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            {link.onionAddress && (
+                              <div className="mt-4 pt-4 border-t border-border/50">
+                                <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
+                                <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
+                                  {link.onionAddress}
+                                </code>
                                 <Button variant="outline" size="sm" asChild>
-                                  <a href={link.url} target="_blank" rel="noopener noreferrer">
-                                    Visit {link.name}
+                                  <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
+                                    Visit via Tor
                                     <ExternalLink className="h-3 w-3 ml-1" />
                                   </a>
                                 </Button>
-                              )}
-                            </div>
-                          </div>
-                          <CardDescription className="mt-2">{link.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <h4 className="text-sm font-semibold mb-3">Tags:</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {link.tags.map((tag, tagIndex) => (
-                              <Badge key={tagIndex} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          {link.onionAddress && (
-                            <div className="mt-4 pt-4 border-t border-border/50">
-                              <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
-                              <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
-                                {link.onionAddress}
-                              </code>
-                              <Button variant="outline" size="sm" asChild>
-                                <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
-                                  Visit via Tor
-                                  <ExternalLink className="h-3 w-3 ml-1" />
-                                </a>
-                              </Button>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <Card className="border-border/50">
+                  <CardContent className="py-12 text-center">
+                    <p className="text-muted-foreground">
+                      No verified resources match this filter. Turn off "Verified only" to see the full list.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
 
