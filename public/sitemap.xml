@@ -241,6 +241,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/blog/cs2-skin-gambling-guide</loc>
+    <lastmod>2026-08-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/blog/best-privacy-coins-2026</loc>
     <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
@@ -249,12 +255,6 @@
   <url>
     <loc>https://0xnull.io/blog/anonymous-vps-hosting-crypto-guide</loc>
     <lastmod>2026-08-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/cs2-skin-gambling-guide</loc>
-    <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -368,7 +368,7 @@
   </url>
   <url>
     <loc>https://0xnull.io/blog/anonymous-vps-hosting-2026</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

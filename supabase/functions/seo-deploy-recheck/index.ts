@@ -92,7 +92,12 @@ async function inspectUrl(headers: Record<string, string>, property: string, url
     return { error: `[${res.status}] ${body.slice(0, 400)}` };
   }
   const data = await res.json();
-  return { result: data?.inspectionResult?.indexStatusResult ?? {} };
+  return {
+    result: data?.inspectionResult?.indexStatusResult ?? {},
+    // Same signal Google's Rich Results Test reports: detected rich-result
+    // types (Article, FAQ, Breadcrumbs) plus any validation issues.
+    richResults: data?.inspectionResult?.richResultsResult ?? null,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -191,8 +196,13 @@ Deno.serve(async (req) => {
     const rows = [];
     const summary: Record<string, string | null> = {};
     for (const url of TRACKED_URLS) {
-      const { result, error } = await inspectUrl(headers, property, url);
-      summary[url] = error ? `error: ${error}` : (result?.verdict ?? null);
+      const { result, richResults, error } = await inspectUrl(headers, property, url);
+      const richTypes = (richResults?.detectedItems ?? [])
+        .map((i: { richResultType?: string }) => i.richResultType)
+        .filter(Boolean);
+      summary[url] = error
+        ? `error: ${error}`
+        : `${result?.verdict ?? 'UNKNOWN'}${richTypes.length ? ` | rich: ${richTypes.join(', ')}` : ''}`;
       rows.push({
         url,
         verdict: result?.verdict ?? null,
