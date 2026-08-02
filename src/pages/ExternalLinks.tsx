@@ -28,6 +28,15 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "The Pirate Bay",
+    url: "https://thepiratebay.org",
+    onionAddress: "piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion",
+    description: "Torrent index and search. The onion address is published on thepiratebay.org. Note: copyright-infringing content is illegal in most jurisdictions.",
+    category: "Directory",
+    tags: ["Tor", "Torrents", "Directory"],
+    isRecommended: false
+  },
+  {
     name: "Monero",
     url: "https://www.getmonero.org/",
     onionAddress: "monerotoruzizulg5ttgat2emf4d6fbmiea25detrmmy7erypseyteyd.onion",
@@ -211,6 +220,15 @@ const externalLinks: ExternalLink[] = [
     description: "Docs, downloads and Tor Metrics access without clearnet exit.",
     category: "Infrastructure",
     tags: ["Tor", "Browser", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "Qubes OS",
+    url: "https://www.qubes-os.org",
+    onionAddress: "qubesosfasa4zl44o4tws22di6kepyzfeqv3tg4e3ztknltfxqrymdad.onion",
+    description: "Security-focused operating system built around isolation via virtual machines. Onion address published on qubes-os.org.",
+    category: "Infrastructure",
+    tags: ["OS", "Security", "Privacy", "Open source"],
     isRecommended: false
   },
   {
