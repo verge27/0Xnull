@@ -204,7 +204,18 @@ const Lending = () => {
             Privacy-enhanced lending via Railgun ZK on Arbitrum — shielding optional on deposits and withdrawals
             <Link to="/lending/privacy" className="text-primary hover:underline ml-1">How it works →</Link>
           </div>
+          <ServicePriceBar
+            price="0.05% spread on supply · borrow rate passed through raw"
+            trust={
+              <>
+                Rates come from the underlying markets rather than from us, health factors are shown before
+                you borrow and the fee is stated up front. See{' '}
+                <Link to="/docs#pricing" className="text-primary hover:underline">pricing and metering</Link>.
+              </>
+            }
+          />
         </div>
+
 
         {/* Token Onboarding Banner */}
         {!token && (
