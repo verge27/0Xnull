@@ -10,6 +10,8 @@ import { Sparkles, Send, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useToken } from '@/hooks/useToken';
 import { TokenRequired } from '@/components/TokenManager';
+import { Link } from 'react-router-dom';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
