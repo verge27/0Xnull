@@ -12,6 +12,7 @@ import { RefreshCw, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-rea
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { SitemapFreshnessCard } from '@/components/seo/SitemapFreshnessCard';
+import { DeployRecheckCard } from '@/components/seo/DeployRecheckCard';
 
 
 interface Snapshot {
