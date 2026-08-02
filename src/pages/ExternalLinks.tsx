@@ -113,14 +113,6 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
-    name: "Grams",
-    url: "https://en.wikipedia.org/wiki/Grams_(search)",
-    description: "Original Grams shut down in December 2017. Any service claiming the Grams name today is an unaffiliated clone — assume hostile and do not enter credentials.",
-    category: "Search Engine",
-    tags: ["Darknet", "Search Engine", "Defunct"],
-    isRecommended: false
-  },
-  {
     name: "I2P Search",
     url: "https://i2psearch.com/",
     description: "Indexes I2P eepsites, not Tor hidden services. Requires an I2P router; Tor Browser will not resolve .i2p addresses.",
