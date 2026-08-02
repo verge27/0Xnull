@@ -221,6 +221,8 @@ const App = () => (
                   
                   {/* Admin Analytics */}
                   <Route path="/admin/analytics" element={<VoucherAnalytics />} />
+                  <Route path="/admin/seo-coverage" element={<SeoCoverage />} />
+
                   
                   {/* Blog */}
                   <Route path="/blog" element={<Blog />} />
