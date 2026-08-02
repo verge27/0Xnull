@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { KeypairGenerator } from '@/components/KeypairGenerator';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 
 const services = [
   {
