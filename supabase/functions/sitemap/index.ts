@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     // Fetch active listings
     const { data: listings, error: listingsError } = await supabase
       .from('listings')
-      .select('id, updated_at')
+      .select('id, seller_id, updated_at')
       .eq('status', 'active')
       .order('updated_at', { ascending: false })
       .limit(1000);
