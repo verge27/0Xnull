@@ -350,7 +350,16 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
           />
         </div>
         
+        {imageReport && imageReport.problems.length > 0 ? (
+          <p className="text-sm text-destructive">
+            {imageReport.problems.length} social image
+            {imageReport.problems.length > 1 ? 's are' : ' is'} unreachable — publishing will produce a broken or
+            fallback preview.
+          </p>
+        ) : null}
+
         <div className="flex gap-2 pt-4">
+
           <Button
             variant="outline"
             onClick={() => handleSave(false)}
