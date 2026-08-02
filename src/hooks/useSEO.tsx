@@ -7,7 +7,14 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: string;
+  /**
+   * Absolute path to use as the canonical URL (e.g. '/blog').
+   * Defaults to the current pathname, which already drops query strings
+   * so filtered views never create duplicate canonicals.
+   */
+  canonical?: string;
 }
+
 
 interface StructuredData {
   '@context': string;
@@ -998,7 +1005,11 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
       ...customMeta,
     };
     
-    const url = `https://0xnull.io${location.pathname}`;
+    // Canonical/og:url always self-reference the route (query strings excluded)
+    // unless the page explicitly points at a preferred URL.
+    const canonicalPath = meta.canonical || location.pathname;
+    const url = `https://0xnull.io${canonicalPath}`;
+
     
     // Update document title
     document.title = meta.title || defaultMeta.title;
@@ -1019,14 +1030,19 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     updateMetaTag('twitter:image', meta.image || defaultMeta.image);
     updateMetaTag('twitter:url', url);
     
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    // Canonical URL — keep exactly one so crawlers never see conflicting signals
+    const canonicalLinks = document.querySelectorAll('link[rel="canonical"]');
+    canonicalLinks.forEach((link, index) => {
+      if (index > 0) link.remove();
+    });
+    let canonical = canonicalLinks[0] as HTMLLinkElement | undefined;
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.rel = 'canonical';
       document.head.appendChild(canonical);
     }
     canonical.href = url;
+
     
     // Collect all structured data
     const allStructuredData: StructuredData[] = [];

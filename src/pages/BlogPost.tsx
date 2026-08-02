@@ -23,6 +23,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
+import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
+
 
 interface BlogPostData {
   id: string;
@@ -69,7 +71,9 @@ export default function BlogPost() {
     title: post.title,
     description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
     image: post.featured_image || undefined,
+    canonical: `/blog/${post.slug}`,
   } : undefined);
+
 
   // Inject FAQPage structured data when the post has an FAQ section
   useEffect(() => {
@@ -214,11 +218,25 @@ export default function BlogPost() {
       <Navbar />
       
       <article className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Breadcrumbs */}
+        <SeoBreadcrumbs
+          className="mb-4"
+          items={[
+            { name: 'Home', href: '/' },
+            { name: 'Blog', href: '/blog' },
+            ...(post.category
+              ? [{ name: categoryInfo.label, href: `/blog?category=${post.category}` }]
+              : []),
+            { name: post.title, href: `/blog/${post.slug}` },
+          ]}
+        />
+
         {/* Back button */}
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate('/blog')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blog
         </Button>
+
 
         {/* Category & Tags */}
         <div className="flex flex-wrap items-center gap-2 mb-4">

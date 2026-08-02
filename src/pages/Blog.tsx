@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
+import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
+
 
 const BLOG_SEO_CONTENT = `
 <p>The 0xNull Blog is a privacy-first crypto blog dedicated to anonymous prediction markets, no-KYC platforms and financial privacy. Here you'll find in-depth articles, guides and explainers designed to help users understand how privacy-focused crypto services work—without hype, tracking or data collection.</p>
@@ -66,7 +68,10 @@ export default function Blog() {
   useSEO({
     title: '0xNull Blog | Privacy-First Crypto & No-KYC Prediction Markets',
     description: 'Read the 0xNull Blog for insights on privacy-first crypto, anonymous prediction markets, Monero payments and no-KYC platforms—guides, explainers and updates.',
+    // Category filters are query-string views of the same list: canonical stays /blog.
+    canonical: '/blog',
   });
+
 
   useEffect(() => {
     fetchPosts();
@@ -116,6 +121,22 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      <div className="container mx-auto px-4 pt-6">
+        <SeoBreadcrumbs
+          items={[
+            { name: 'Home', href: '/' },
+            ...(activeCategory !== 'all'
+              ? [
+                  { name: 'Blog', href: '/blog' },
+                  { name: getCategoryInfo(activeCategory).label, href: `/blog?category=${activeCategory}` },
+                ]
+              : [{ name: 'Blog', href: '/blog' }]),
+          ]}
+        />
+      </div>
+
+
       
       {/* Hero Section */}
       <section className="relative py-20 overflow-visible">
