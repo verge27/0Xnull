@@ -161,6 +161,15 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "DanWin1210",
+    url: "https://danwin1210.me",
+    onionAddress: "danielas3rtn54uwmofdo3x2bsdifr47huasnmbgqzfrec5ubupvtpid.onion",
+    description: "Daniel Winzen's hosting, mail and XMPP operation. Cross-check the onion address against danwin1210.me before use.",
+    category: "Comms",
+    tags: ["Tor", "Email", "XMPP", "Hosting"],
+    isRecommended: false
+  },
+  {
     name: "The Tor Project",
     url: "https://www.torproject.org",
     onionAddress: "2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion",
