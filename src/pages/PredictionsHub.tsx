@@ -91,6 +91,19 @@ export default function PredictionsHub() {
             </p>
           </div>
 
+          <ServicePriceBar
+            className="mb-8"
+            price="0.4% of winnings"
+            trust={
+              <>
+                Stakes sit in a per-market pool you can read at any time, resolution runs on a backend
+                oracle job and payouts publish their transaction IDs. Nothing on losses or refunds. See{' '}
+                <Link to="/docs#markets" className="text-primary hover:underline">market resolution</Link>.
+              </>
+            }
+          />
+
+
           {/* Category Tabs */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
             <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
