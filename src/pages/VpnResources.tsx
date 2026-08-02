@@ -24,6 +24,7 @@ const vpnServices = [
   {
     name: "Mullvad",
     url: "https://mullvad.net",
+    onionAddress: "o54hon2e2vj9c7m3aqxpindcbbffqdoxwvsollocxabuckjoaowyd.onion",
     description: "The gold standard in privacy VPNs. Police raid in Sweden found zero user data. 16 years operational with DAITA anti-fingerprinting and Tor collaboration.",
     kycLevel: 1,
     kycNote: null,
