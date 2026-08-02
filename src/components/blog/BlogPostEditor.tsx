@@ -113,25 +113,38 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
             const { data, error: refreshError } = await supabase.functions.invoke('sitemap-refresh');
 
             if (!refreshError) {
-              if (data?.static_stale) {
-                toast.warning(
-                  `Sitemap has ${data.dynamic_url_count} URLs but the live file still has ${data.live_url_count}. Click Publish to ship the updated sitemap.xml.`,
-                  { duration: 10000 },
-                );
-              } else if (data?.search_console === 'submitted') {
+              if (data?.search_console === 'submitted') {
                 toast.success('Sitemap resubmitted to Search Console.');
               }
-              return;
+              break;
             }
 
             console.error(`Sitemap refresh failed (attempt ${attempt}/${maxAttempts}):`, refreshError);
             if (attempt === maxAttempts) {
               toast.error('Sitemap refresh failed after several retries. Try again from the SEO dashboard.');
-              return;
+              break;
             }
             // Exponential backoff with jitter: ~1s, 2s, 4s.
             const delay = 1000 * 2 ** (attempt - 1);
             await new Promise((resolve) => setTimeout(resolve, delay / 2 + Math.random() * (delay / 2)));
+          }
+
+          // Always verify the served public/sitemap.xml matches the generated one.
+          const { data: freshness, error: freshnessError } = await supabase.functions.invoke('sitemap-freshness');
+
+          if (freshnessError) {
+            console.error('Sitemap freshness check failed:', freshnessError);
+            return;
+          }
+
+          if (freshness?.is_stale) {
+            const missing = freshness.missing_from_served?.length ?? 0;
+            toast.warning(
+              `Live sitemap.xml is out of date: ${freshness.served_count} URLs served vs ${freshness.generated_count} generated` +
+                (missing > 0 ? ` (${missing} missing, including ${freshness.missing_from_served[0]})` : '') +
+                '. Publish the site to ship the updated sitemap.xml.',
+              { duration: 15000 },
+            );
           }
         })();
       }
