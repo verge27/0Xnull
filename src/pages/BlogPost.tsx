@@ -81,6 +81,8 @@ export default function BlogPost() {
             title: post.title,
             description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
             image: postImage,
+            imageAlt: `${post.title} — 0xNull Blog`,
+            twitterCard: 'summary_large_image' as const,
             canonical: `/blog/${post.slug}`,
             type: 'article',
             article: {
