@@ -223,6 +223,15 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Qubes OS",
+    url: "https://www.qubes-os.org",
+    onionAddress: "qubesosfasa4zl44o4tws22di6kepyzfeqv3tg4e3ztknltfxqrymdad.onion",
+    description: "Security-focused operating system built around isolation via virtual machines. Onion address published on qubes-os.org.",
+    category: "Infrastructure",
+    tags: ["OS", "Security", "Privacy", "Open source"],
+    isRecommended: false
+  },
+  {
     name: "Torgle",
     url: "https://www.torgle.net/",
     description: "Directory of Tor onion services. No independently verifiable v3 address currently available; treat as unverified.",
