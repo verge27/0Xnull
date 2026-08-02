@@ -104,6 +104,19 @@ const Phone = () => {
             </p>
           </div>
 
+          <ServicePriceBar
+            className="mb-12"
+            price="Provider pricing, paid in crypto"
+            trust={
+              <>
+                Numbers and eSIMs are bought without identity documents. The rest of the platform's
+                mechanics are documented in the{' '}
+                <Link to="/docs" className="text-primary hover:underline">docs</Link>.
+              </>
+            }
+          />
+
+
           {/* Features Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {features.map((feature, idx) => (
