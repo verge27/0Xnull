@@ -109,10 +109,22 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
       if (publish) {
         supabase.functions
           .invoke('sitemap-refresh')
-          .then(({ error: refreshError }) => {
-            if (refreshError) console.error('Sitemap refresh failed:', refreshError);
+          .then(({ data, error: refreshError }) => {
+            if (refreshError) {
+              console.error('Sitemap refresh failed:', refreshError);
+              return;
+            }
+            if (data?.static_stale) {
+              toast.warning(
+                `Sitemap has ${data.dynamic_url_count} URLs but the live file still has ${data.live_url_count}. Click Publish to ship the updated sitemap.xml.`,
+                { duration: 10000 },
+              );
+            } else if (data?.search_console === 'submitted') {
+              toast.success('Sitemap resubmitted to Search Console.');
+            }
           });
       }
+
       
 
       

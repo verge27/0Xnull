@@ -28,19 +28,34 @@ Deno.serve(async (req) => {
   try {
     // 1. Regenerate the dynamic sitemap so its cached output reflects the newest posts.
     const projectUrl = Deno.env.get('SUPABASE_URL');
+    let dynamicCount = 0;
     if (projectUrl) {
       try {
         const res = await fetch(`${projectUrl}/functions/v1/sitemap`, {
           headers: { apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '' },
         });
         const xml = await res.text();
+        dynamicCount = (xml.match(/<url>/g) ?? []).length;
         result.dynamic_status = res.status;
-        result.dynamic_url_count = (xml.match(/<url>/g) ?? []).length;
+        result.dynamic_url_count = dynamicCount;
       } catch (e) {
         console.error('Dynamic sitemap regeneration failed:', e);
         result.dynamic_error = e instanceof Error ? e.message : String(e);
       }
     }
+
+    // 1b. Compare against the deployed static file so we can flag a stale deploy.
+    try {
+      const liveRes = await fetch(`${SITEMAP_URL}?cb=${now}`, { headers: { 'Cache-Control': 'no-cache' } });
+      const liveXml = await liveRes.text();
+      const liveCount = (liveXml.match(/<url>/g) ?? []).length;
+      result.live_url_count = liveCount;
+      result.static_stale = dynamicCount > 0 && liveCount !== dynamicCount;
+    } catch (e) {
+      console.error('Live sitemap check failed:', e);
+      result.live_error = e instanceof Error ? e.message : String(e);
+    }
+
 
     // 2. Tell Search Console to refetch the sitemap.
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
