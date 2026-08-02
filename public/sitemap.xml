@@ -115,6 +115,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/marketplace</loc>
+    <lastmod>2025-01-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/get-started</loc>
     <lastmod>2024-12-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -229,13 +235,19 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/blog/anonymous-vps-hosting-crypto-guide</loc>
+    <lastmod>2026-08-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/blog/cs2-skin-gambling-guide</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/anonymous-vps-hosting-crypto-guide</loc>
+    <loc>https://0xnull.io/blog/best-privacy-coins-2026</loc>
     <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -247,20 +259,26 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/best-privacy-coins-2026</loc>
-    <lastmod>2026-08-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/blog/burner-phone-number-app-2026</loc>
     <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/blog/no-kyc-crypto-exchange-2026</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/blog/cs2-betting-guide-crypto</loc>
     <lastmod>2026-08-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/crypto-lending-no-kyc-guide</loc>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -277,20 +295,20 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/no-kyc-crypto-exchange-2026</loc>
-    <lastmod>2026-07-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/crypto-lending-no-kyc-guide</loc>
-    <lastmod>2026-07-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/blog/esports-betting-crypto-guide</loc>
     <lastmod>2026-07-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/best-monero-wallets-2026</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/how-prediction-markets-work</loc>
+    <lastmod>2026-07-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -307,26 +325,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/how-prediction-markets-work</loc>
-    <lastmod>2026-07-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/best-monero-wallets-2026</loc>
-    <lastmod>2026-08-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/blog/tor-browser-crypto-guide</loc>
     <lastmod>2026-07-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/polymarket-alternatives-2026</loc>
-    <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -337,14 +337,20 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/how-to-buy-monero-2026</loc>
+    <loc>https://0xnull.io/blog/temporary-phone-number-anonymous</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/polymarket-alternatives-2026</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/temporary-phone-number-anonymous</loc>
-    <lastmod>2026-08-01</lastmod>
+    <loc>https://0xnull.io/blog/how-to-buy-monero-2026</loc>
+    <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -461,5 +467,11 @@
     <lastmod>2025-12-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/seller/ff4b2ba9-541d-4dea-862e-946baa630f2a</loc>
+    <lastmod>2025-12-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>
