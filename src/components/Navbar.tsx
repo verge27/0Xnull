@@ -505,6 +505,7 @@ export const Navbar = () => {
                 size="icon"
                 className="relative"
                 onClick={() => betSlip.setIsOpen(true)}
+                aria-label="Open bet slip"
               >
                 <Receipt className="w-4 h-4" />
                 <Badge 
@@ -529,7 +530,7 @@ export const Navbar = () => {
                   Marketplace
                 </Badge>
                 <Link to="/wishlist">
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative" aria-label="View wishlist">
                     <Heart className="w-4 h-4" />
                     {wishlistCount > 0 && (
                       <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -544,7 +545,7 @@ export const Navbar = () => {
             {isAuthenticated && (
               <>
                 <Link to="/messages">
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Open messages">
                     <MessageCircle className="w-4 h-4" />
                     {unreadCount > 0 && (
                       <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -554,7 +555,7 @@ export const Navbar = () => {
                   </Button>
                 </Link>
                 <Link to="/orders" className="hidden sm:block">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="View orders">
                     <Package className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -597,6 +598,7 @@ export const Navbar = () => {
                                 variant="outline"
                                 size="icon"
                                 onClick={copyKey}
+                                aria-label="Copy private key"
                                 disabled={keyInput.length !== 64}
                                 className={keyCopied ? 'text-green-500' : ''}
                               >
@@ -632,7 +634,7 @@ export const Navbar = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
-                    <Button variant="ghost" size="icon" onClick={() => pkSignOut()} className="hidden sm:inline-flex">
+                    <Button variant="ghost" size="icon" onClick={() => pkSignOut()} className="hidden sm:inline-flex" aria-label="Sign out">
                       <LogOut className="w-4 h-4" />
                     </Button>
                   </div>
@@ -641,11 +643,11 @@ export const Navbar = () => {
                 {user && (
                   <>
                     <Link to="/settings">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Account settings">
                         <User className="w-4 h-4" />
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="icon" onClick={() => signOut()} className="hidden sm:inline-flex">
+                    <Button variant="ghost" size="icon" onClick={() => signOut()} className="hidden sm:inline-flex" aria-label="Sign out">
                       <LogOut className="w-4 h-4" />
                     </Button>
                   </>

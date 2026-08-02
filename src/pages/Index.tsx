@@ -92,7 +92,8 @@ const Index = () => {
             </a>
             
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              Join the Quiet Riot
+              <span aria-hidden="true">Join the Quiet Riot</span>
+              <span className="sr-only">0xNull — one anonymous token for every private service</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
               0xNull is one anonymous credential — a <span className="font-mono text-foreground">0xn_</span> token — funded in Monero and spent across every service. No accounts, no signup.
