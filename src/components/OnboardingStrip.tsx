@@ -34,7 +34,7 @@ export const OnboardingStrip = () => (
           <div className="flex items-center gap-3 mb-3">
             <span className="font-mono text-sm text-primary">0{i + 1}</span>
             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
-              <Icon className="w-4.5 h-4.5 text-primary" />
+              <Icon className="w-4 h-4 text-primary" />
             </div>
             <h3 className="font-semibold">{step.label}</h3>
           </div>
