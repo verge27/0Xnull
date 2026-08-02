@@ -192,7 +192,12 @@ const groupedLinks = externalLinks.reduce<Record<string, ExternalLink[]>>((acc, 
   return acc;
 }, {});
 
-const sortedCategories = Object.keys(groupedLinks).sort();
+const priorityOrder = ["Directory", "Search Engine", "Comms"];
+const allCategories = Object.keys(groupedLinks);
+const remainingCategories = allCategories
+  .filter((category) => !priorityOrder.includes(category))
+  .sort();
+const sortedCategories = [...priorityOrder.filter((c) => allCategories.includes(c)), ...remainingCategories];
 
 const ExternalLinks = () => {
   useSEO();
