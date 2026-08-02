@@ -25,6 +25,8 @@ export interface CatalogService {
   price: string;
   /** Optional clarification of what the price is per */
   priceNote?: string;
+  /** Optional short explainer that appears under the service card */
+  explainer?: string;
   status: ServiceStatus;
   group: ServiceGroup;
   href: string;
@@ -116,9 +118,10 @@ export const SERVICE_CATALOG: CatalogService[] = [
   // ---- Predictions ----
   {
     name: 'Prediction Markets',
-    what: 'Yes/no markets on sports, esports, combat, crypto and governance outcomes. One token, a fresh single-use address per market.',
+    what: 'Yes/no markets on sports, esports, combat, crypto and governance outcomes.',
     price: '0.4% rake',
     priceNote: 'on winnings only — nothing on losses or refunds',
+    explainer: 'One 0xn_ token per user. Every market you enter gets a fresh single-use Monero address so your identity stays the same while each position stays separate.',
     status: 'live',
     group: 'predictions',
     href: '/predict',
