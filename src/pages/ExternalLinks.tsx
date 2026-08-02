@@ -196,6 +196,15 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "OnionShare",
+    url: "https://onionshare.org",
+    onionAddress: "lldan5gahapx5k7iafb3s4ikijc4ni7gx5jywdabk2rdslb3kk4mb3yd.onion",
+    description: "Open-source tool for sending files, hosting websites and chatting securely over Tor. The onion address is published on onionshare.org.",
+    category: "Infrastructure",
+    tags: ["Tor", "File sharing", "Privacy", "Open source"],
+    isRecommended: false
+  },
+  {
     name: "The Tor Project",
     url: "https://www.torproject.org",
     onionAddress: "2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion",

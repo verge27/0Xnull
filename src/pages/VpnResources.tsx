@@ -24,6 +24,7 @@ const vpnServices = [
   {
     name: "Mullvad",
     url: "https://mullvad.net",
+    onionAddress: "o54hon2e2vj9c7m3aqxpindcbbffqdoxwvsollocxabuckjoaowyd.onion",
     description: "The gold standard in privacy VPNs. Police raid in Sweden found zero user data. 16 years operational with DAITA anti-fingerprinting and Tor collaboration.",
     kycLevel: 1,
     kycNote: null,
@@ -205,7 +206,22 @@ const VpnResources = () => {
                       <div className="text-xs text-primary font-medium mb-1">Why it fits 0xNull:</div>
                       <p className="text-sm text-muted-foreground">{vpn.whyItFits}</p>
                     </div>
-                    
+
+                    {vpn.onionAddress && (
+                      <div className="mt-4 mb-4">
+                        <div className="text-xs text-primary font-medium mb-1">Tor Onion Address:</div>
+                        <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
+                          {vpn.onionAddress}
+                        </code>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`http://${vpn.onionAddress}`} target="_blank" rel="noopener noreferrer">
+                            Visit via Tor
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    )}
+                     
                     <h4 className="text-sm font-semibold mb-3">Key Features:</h4>
                     <div className="flex flex-wrap gap-2">
                       {vpn.features.map((feature, featureIndex) => (
