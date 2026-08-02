@@ -66,11 +66,16 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
 
+  // Any query string (?category=…, ?search=…, ?page=…) is a filtered view of the
+  // same list: canonical points at /blog and the variant is noindex, follow.
+  const isFilteredView = Array.from(searchParams.keys()).length > 0;
+
   useSEO({
     title: '0xNull Blog | Privacy-First Crypto & No-KYC Prediction Markets',
     description: 'Read the 0xNull Blog for insights on privacy-first crypto, anonymous prediction markets, Monero payments and no-KYC platforms—guides, explainers and updates.',
     // Category filters are query-string views of the same list: canonical stays /blog.
     canonical: '/blog',
+    noindex: isFilteredView,
   });
 
 

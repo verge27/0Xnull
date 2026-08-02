@@ -17,6 +17,11 @@ interface SEOProps {
    * so filtered views never create duplicate canonicals.
    */
   canonical?: string;
+  /**
+   * Emit <meta name="robots" content="noindex, follow"> for filtered/search
+   * views so query-parameter variants don't get indexed as duplicates.
+   */
+  noindex?: boolean;
   /** Article-specific Open Graph metadata (blog posts, guides). */
   article?: {
     publishedTime?: string;
@@ -1085,6 +1090,11 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
       document.head.appendChild(canonical);
     }
     canonical.href = url;
+
+    // Robots directive — filtered/search views are noindex but still followed,
+    // so link equity flows to the canonical listing and post URLs.
+    updateMetaTag('robots', meta.noindex ? 'noindex, follow' : 'index, follow');
+
 
     
     // Collect all structured data
