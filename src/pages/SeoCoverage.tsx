@@ -12,6 +12,7 @@ import { RefreshCw, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-rea
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { SitemapFreshnessCard } from '@/components/seo/SitemapFreshnessCard';
+import { DeployRecheckCard } from '@/components/seo/DeployRecheckCard';
 
 
 interface Snapshot {
@@ -124,7 +125,10 @@ export default function SeoCoverage() {
           </Button>
         </header>
 
+        <DeployRecheckCard />
+
         <section className="grid gap-4 md:grid-cols-2">
+
           {tracked.map((url) => {
             const latest = latestByUrl.get(url);
             return (
