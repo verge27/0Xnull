@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { SitemapFreshnessCard } from '@/components/seo/SitemapFreshnessCard';
 import { DeployRecheckCard } from '@/components/seo/DeployRecheckCard';
 import { RobotsMonitorCard } from '@/components/seo/RobotsMonitorCard';
+import { SearchConsoleOverviewCard } from '@/components/seo/SearchConsoleOverviewCard';
 
 
 interface Snapshot {
@@ -115,9 +116,9 @@ export default function SeoCoverage() {
       <main className="container mx-auto px-4 py-10 space-y-8">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Search Console indexing coverage</h1>
+            <h1 className="text-3xl font-bold">Internal SEO dashboard</h1>
             <p className="mt-1 text-muted-foreground">
-              Tracks index status, last crawl and errors for the VPS and CS2 guides over time.
+              Search Console coverage, crawl errors, sitemap health and performance in one place.
             </p>
           </div>
           <Button onClick={() => load(true)} disabled={refreshing}>
@@ -125,6 +126,8 @@ export default function SeoCoverage() {
             {refreshing ? 'Checking…' : 'Check now'}
           </Button>
         </header>
+
+        <SearchConsoleOverviewCard />
 
         <DeployRecheckCard />
 
