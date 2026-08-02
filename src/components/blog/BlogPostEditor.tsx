@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,9 @@ import { Loader2, Save, Eye, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { BlogImportDialog } from './BlogImportDialog';
+import { OgImagePreflight } from './OgImagePreflight';
+import { checkPostImages, type OgImageReport } from '@/lib/checkBlogImages';
+
 
 const CATEGORIES = [
   { value: 'crypto', label: 'Crypto' },
@@ -36,6 +39,41 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
     meta_description: '',
     featured_image: '',
   });
+  const [imageReport, setImageReport] = useState<OgImageReport | null>(null);
+
+  const handleImageReport = useCallback((report: OgImageReport | null) => {
+    setImageReport(report);
+  }, []);
+
+  /** Summarise broken images as a toast. Returns true when everything is fine. */
+  const warnAboutImages = (report: OgImageReport | null) => {
+    if (!report) return true;
+
+    if (report.problems.length > 0) {
+      const first = report.problems[0];
+      const extra = report.problems.length - 1;
+      toast.warning(
+        `${report.problems.length} social image${report.problems.length > 1 ? 's' : ''} could not be loaded: ` +
+          `${first.url || first.source}${extra > 0 ? ` and ${extra} more` : ''}. ` +
+          'Social previews will fall back or show nothing.',
+        { duration: 15000 },
+      );
+      return false;
+    }
+
+    if (report.warnings.length > 0) {
+      toast.warning(
+        `${report.warnings.length} image${report.warnings.length > 1 ? 's are' : ' is'} in this build but not live yet. ` +
+          'Publish the site so crawlers can fetch them.',
+        { duration: 12000 },
+      );
+      return false;
+    }
+
+    return true;
+  };
+  
+
   
   const handleImport = (data: { title: string; content: string; slug: string; excerpt: string }) => {
     setFormData((prev) => ({
@@ -83,6 +121,21 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
     }
     
     setLoading(true);
+
+    // Re-validate the resolved og:image chain against the live site before saving.
+    try {
+      const freshReport = await checkPostImages({
+        featured_image: formData.featured_image,
+        content: formData.content,
+        category: formData.category,
+      });
+      setImageReport(freshReport);
+      warnAboutImages(freshReport);
+    } catch (imageErr) {
+      console.error('og:image preflight failed:', imageErr);
+    }
+    
+
     
     try {
       const status = publish ? 'published' : 'draft';
@@ -274,6 +327,17 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
             onChange={(e) => setFormData((prev) => ({ ...prev, featured_image: e.target.value }))}
           />
         </div>
+
+        <OgImagePreflight
+          post={{
+            featured_image: formData.featured_image,
+            content: formData.content,
+            category: formData.category,
+          }}
+          onReport={handleImageReport}
+        />
+        
+
         
         <div className="space-y-2">
           <Label htmlFor="meta">Meta Description</Label>
@@ -286,7 +350,16 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
           />
         </div>
         
+        {imageReport && imageReport.problems.length > 0 ? (
+          <p className="text-sm text-destructive">
+            {imageReport.problems.length} social image
+            {imageReport.problems.length > 1 ? 's are' : ' is'} unreachable — publishing will produce a broken or
+            fallback preview.
+          </p>
+        ) : null}
+
         <div className="flex gap-2 pt-4">
+
           <Button
             variant="outline"
             onClick={() => handleSave(false)}
