@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { BetSlipPanel } from '@/components/BetSlipPanel';
 import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { RelatedGuides } from '@/components/RelatedGuides';
+
 
 const categories = [
   {
