@@ -285,6 +285,7 @@ export default function BlogPost() {
         {/* Breadcrumbs */}
         <SeoBreadcrumbs
           className="mb-4"
+          schemaId="blog-post-breadcrumb-jsonld"
           items={[
             { name: 'Home', href: '/' },
             { name: 'Blog', href: '/blog' },
