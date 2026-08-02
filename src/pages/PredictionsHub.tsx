@@ -194,7 +194,7 @@ export default function PredictionsHub() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
-                  How to <Link to="/blog/cs2-betting-guide-crypto" className="text-primary hover:underline">bet on CS2 matches with crypto</Link>, how map veto and roster changes move the odds, and which Counter-Strike 2 markets carry real liquidity. Pairs with our{' '}
+                  How to <Link to="/blog/cs2-betting-guide-crypto" className="text-primary hover:underline">bet on CS2 matches with crypto</Link>, how map veto and roster changes move the odds and which Counter-Strike 2 markets carry real liquidity. Pairs with our{' '}
                   <Link to="/esports-predictions" className="text-primary hover:underline">live esports markets</Link>.
                 </CardContent>
               </Card>
