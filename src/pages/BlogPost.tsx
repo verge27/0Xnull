@@ -66,13 +66,48 @@ export default function BlogPost() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useSEO(post ? {
-    // Use the post title as-is (lets you control exact meta title per post)
-    title: post.title,
-    description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
-    image: post.featured_image || undefined,
-    canonical: `/blog/${post.slug}`,
-  } : undefined);
+  const canonicalUrl = post ? `https://0xnull.io/blog/${post.slug}` : undefined;
+  const postImage = post?.featured_image || 'https://0xnull.io/og-image.png';
+
+  useSEO(
+    post
+      ? {
+          // Use the post title as-is (lets you control exact meta title per post)
+          title: post.title,
+          description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
+          image: post.featured_image || undefined,
+          canonical: `/blog/${post.slug}`,
+          type: 'article',
+          article: {
+            publishedTime: post.published_at || undefined,
+            author: post.author_name,
+            section: post.category || undefined,
+            tags: post.tags || [],
+          },
+        }
+      : undefined,
+    post
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: post.title,
+          description: post.meta_description || post.excerpt || post.title,
+          image: postImage,
+          url: canonicalUrl,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+          datePublished: post.published_at || undefined,
+          dateModified: post.published_at || undefined,
+          keywords: (post.tags || []).join(', ') || undefined,
+          articleSection: post.category || undefined,
+          author: { '@type': 'Person', name: post.author_name },
+          publisher: {
+            '@type': 'Organization',
+            name: '0xNull',
+            logo: { '@type': 'ImageObject', url: 'https://0xnull.io/favicon.jpg' },
+          },
+        }
+      : undefined,
+  );
 
 
   // Inject FAQPage structured data when the post has an FAQ section
