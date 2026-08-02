@@ -38,6 +38,15 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Brave Search",
+    url: "https://search.brave.com",
+    onionAddress: "search.brave4u7jddbv7cyviptqjc7jusxh72uik7zt6adtckl5f4nwy2v72qd.onion",
+    description: "Privacy-focused search engine with a Tor onion service. Onion address announced by Brave; verify on brave.com before use.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Privacy"],
+    isRecommended: false
+  },
+  {
     name: "CIA",
     url: "https://www.cia.gov",
     onionAddress: "ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion",
@@ -47,12 +56,26 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Darknet Trust",
+    description: "Darknet profile-search service reported as down in current directory listings. No reliable v3 address available.",
+    category: "Search Engine",
+    tags: ["Darknet", "Search Engine", "Down"],
+    isRecommended: false
+  },
+  {
     name: "Darknetlist",
     url: "https://darknetlist.is/",
     description: "A directory of darknet markets and privacy-focused services.",
     category: "Directory",
     tags: ["Darknet", "Privacy", "Directory"],
     isRecommended: true
+  },
+  {
+    name: "Dig",
+    description: "Anonymous darknet AI assistant. A claimed onion address appears in directories but could not be independently verified in this session.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "AI", "Unverified"],
+    isRecommended: false
   },
   {
     name: "Dread",
@@ -79,6 +102,22 @@ const externalLinks: ExternalLink[] = [
     description: "Official Meta mirror. Network-layer privacy only — Meta still logs you.",
     category: "Comms",
     tags: ["Tor", "Mirror", "Social"],
+    isRecommended: false
+  },
+  {
+    name: "Grams",
+    url: "https://en.wikipedia.org/wiki/Grams_(search)",
+    description: "Original Grams shut down in December 2017. Any service claiming the Grams name today is an unaffiliated clone — assume hostile and do not enter credentials.",
+    category: "Search Engine",
+    tags: ["Darknet", "Search Engine", "Defunct"],
+    isRecommended: false
+  },
+  {
+    name: "I2P Search",
+    url: "https://i2psearch.com/",
+    description: "Indexes I2P eepsites, not Tor hidden services. Requires an I2P router; Tor Browser will not resolve .i2p addresses.",
+    category: "Search Engine",
+    tags: ["I2P", "Search Engine", "Privacy"],
     isRecommended: false
   },
   {
@@ -159,6 +198,22 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Shoot",
+    description: "Darknet search engine reported as down in current directory listings. No reliable v3 address available.",
+    category: "Search Engine",
+    tags: ["Darknet", "Search Engine", "Down"],
+    isRecommended: false
+  },
+  {
+    name: "Startpage",
+    url: "https://www.startpage.com",
+    onionAddress: "startpagel6srwcjlue4zgq3zevrujfaow726kjytqbbjyrswwmjzcqd.onion",
+    description: "Privacy search engine with a v3 onion service. Address published in Tor Project's built-in search provider list; verify independently.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Privacy"],
+    isRecommended: false
+  },
+  {
     name: "The Tor Project",
     url: "https://www.torproject.org",
     onionAddress: "2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion",
@@ -168,12 +223,28 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Torgle",
+    url: "https://www.torgle.net/",
+    description: "Directory of Tor onion services. No independently verifiable v3 address currently available; treat as unverified.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Unverified"],
+    isRecommended: false
+  },
+  {
     name: "Torch",
     url: "http://xmh57jrknzkhv6y3ls3ubitzfqnkrwxhopf5aygthi7d6rplyvk3noyd.onion/",
     onionAddress: "xmh57jrknzkhv6y3ls3ubitzfqnkrwxhopf5aygthi7d6rplyvk3noyd.onion",
     description: "Oldest index with ~1M+ sites. Unfiltered so expect more noise.",
     category: "Search Engine",
     tags: ["Tor", "Search Engine", "Darknet"],
+    isRecommended: false
+  },
+  {
+    name: "VormWeb",
+    url: "https://vormweb.de/en/",
+    description: "Search engine with a claimed hidden service mirror. No published v3 address could be verified from an authoritative source.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Unverified"],
     isRecommended: false
   },
   {
