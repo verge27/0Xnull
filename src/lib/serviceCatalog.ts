@@ -45,7 +45,7 @@ export const SERVICE_GROUPS: Record<ServiceGroup, { label: string; blurb: string
   },
   predictions: {
     label: 'Predictions',
-    blurb: 'Binary markets on public outcomes. Pooled stakes, published resolution.',
+    blurb: 'Binary markets on public outcomes. Pooled stakes, published resolution. Your token stays the same; every market gets its own address.',
   },
   infra: {
     label: 'Infrastructure',
