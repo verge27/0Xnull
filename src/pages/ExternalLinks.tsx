@@ -56,6 +56,14 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "DarkGPT",
+    onionAddress: "66xz7tc67eqhsqhk42hq5wqavgu5cnwxh53hxhfhhp6puqlnhzxhjcqd.onion",
+    description: "Tor-native uncensored AI chat. The operator is anonymous so treat every prompt as logged and avoid anything adjacent to your real infrastructure.",
+    category: "AI",
+    tags: ["Tor", "AI", "Onion", "Privacy"],
+    isRecommended: false
+  },
+  {
     name: "Darknet Trust",
     description: "Darknet profile-search service reported as down in current directory listings. No reliable v3 address available.",
     category: "Search Engine",
