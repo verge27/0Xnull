@@ -1036,11 +1036,24 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     updateMetaTag('og:url', url, 'property');
     updateMetaTag('og:type', meta.type || defaultMeta.type, 'property');
     
-    // Twitter
+    // Twitter Card — a complete set so shares render title, description and image
+    const socialImage = meta.image || defaultMeta.image;
+    const socialImageAlt = meta.imageAlt || meta.title || defaultMeta.title;
+    updateMetaTag('og:image:alt', socialImageAlt, 'property');
+    updateMetaTag('twitter:card', meta.twitterCard || 'summary_large_image');
+    updateMetaTag('twitter:site', '@0xNull');
     updateMetaTag('twitter:title', meta.title || defaultMeta.title);
     updateMetaTag('twitter:description', meta.description || defaultMeta.description);
-    updateMetaTag('twitter:image', meta.image || defaultMeta.image);
+    updateMetaTag('twitter:image', socialImage);
+    updateMetaTag('twitter:image:alt', socialImageAlt);
     updateMetaTag('twitter:url', url);
+
+    // Article bylines show up as labelled fields on Twitter/X cards
+    if (meta.type === 'article' && meta.article?.author) {
+      updateMetaTag('twitter:label1', 'Written by');
+      updateMetaTag('twitter:data1', meta.article.author);
+    }
+
     
     // Article-specific Open Graph tags (removed on non-article pages)
     document
