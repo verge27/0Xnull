@@ -13,6 +13,8 @@ import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
 import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIdentity';
+import { TokenStatusWidget } from '@/components/TokenStatusWidget';
+
 import { useState, FormEvent, useEffect } from 'react';
 import { getWishlist, getConversations } from '@/lib/data';
 import { toast } from 'sonner';
