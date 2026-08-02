@@ -5,6 +5,10 @@ interface SEOProps {
   title?: string;
   description?: string;
   image?: string;
+  /** Alt text describing the social preview image. */
+  imageAlt?: string;
+  /** Twitter card type. Defaults to summary_large_image. */
+  twitterCard?: 'summary' | 'summary_large_image';
   url?: string;
   type?: string;
   /**
