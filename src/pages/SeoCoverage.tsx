@@ -205,6 +205,8 @@ export default function SeoCoverage() {
 
         <SitemapFreshnessCard />
 
+        <RobotsMonitorCard />
+
 
 
         <Card>
