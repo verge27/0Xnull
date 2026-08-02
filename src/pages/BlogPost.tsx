@@ -23,6 +23,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
+import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
+
 
 interface BlogPostData {
   id: string;
