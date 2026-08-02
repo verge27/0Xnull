@@ -1038,6 +1038,24 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     updateMetaTag('twitter:image', meta.image || defaultMeta.image);
     updateMetaTag('twitter:url', url);
     
+    // Article-specific Open Graph tags (removed on non-article pages)
+    document
+      .querySelectorAll('meta[property^="article:"]')
+      .forEach((el) => el.remove());
+    if (meta.type === 'article' && meta.article) {
+      const a = meta.article;
+      if (a.publishedTime) updateMetaTag('article:published_time', a.publishedTime, 'property');
+      if (a.modifiedTime) updateMetaTag('article:modified_time', a.modifiedTime, 'property');
+      if (a.author) updateMetaTag('article:author', a.author, 'property');
+      if (a.section) updateMetaTag('article:section', a.section, 'property');
+      (a.tags || []).slice(0, 10).forEach((tag) => {
+        const el = document.createElement('meta');
+        el.setAttribute('property', 'article:tag');
+        el.setAttribute('content', tag);
+        document.head.appendChild(el);
+      });
+    }
+
     // Canonical URL — keep exactly one so crawlers never see conflicting signals
     const canonicalLinks = document.querySelectorAll('link[rel="canonical"]');
     canonicalLinks.forEach((link, index) => {
