@@ -116,7 +116,7 @@ export default function BlogPost() {
       url: canonicalUrl,
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
       datePublished: post.published_at || undefined,
-      dateModified: post.published_at || undefined,
+      dateModified: post.updated_at || post.published_at || undefined,
       inLanguage: 'en',
       isAccessibleForFree: true,
       wordCount: plainText.split(/\s+/).filter(Boolean).length,
