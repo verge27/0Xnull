@@ -1079,6 +1079,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_index_snapshots: {
+        Row: {
+          checked_at: string
+          coverage_state: string | null
+          created_at: string
+          error_message: string | null
+          google_canonical: string | null
+          id: string
+          indexing_state: string | null
+          last_crawl_time: string | null
+          page_fetch_state: string | null
+          robots_txt_state: string | null
+          url: string
+          user_canonical: string | null
+          verdict: string | null
+        }
+        Insert: {
+          checked_at?: string
+          coverage_state?: string | null
+          created_at?: string
+          error_message?: string | null
+          google_canonical?: string | null
+          id?: string
+          indexing_state?: string | null
+          last_crawl_time?: string | null
+          page_fetch_state?: string | null
+          robots_txt_state?: string | null
+          url: string
+          user_canonical?: string | null
+          verdict?: string | null
+        }
+        Update: {
+          checked_at?: string
+          coverage_state?: string | null
+          created_at?: string
+          error_message?: string | null
+          google_canonical?: string | null
+          id?: string
+          indexing_state?: string | null
+          last_crawl_time?: string | null
+          page_fetch_state?: string | null
+          robots_txt_state?: string | null
+          url?: string
+          user_canonical?: string | null
+          verdict?: string | null
+        }
+        Relationships: []
+      }
       swap_history: {
         Row: {
           amount: string
