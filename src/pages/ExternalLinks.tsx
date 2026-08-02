@@ -219,55 +219,62 @@ const ExternalLinks = () => {
           {/* External Links */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-6">External Resources</h2>
-            <div className="grid gap-6">
-              {externalLinks.map((link, index) => (
-                <Card key={index} className={`hover:border-primary/50 transition-colors ${link.isRecommended ? 'border-primary/30 bg-primary/5' : ''}`}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between flex-wrap gap-2">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <LinkIcon className="h-5 w-5 text-primary" />
-                          {link.name}
-                          {link.isRecommended && <Badge className="bg-primary text-primary-foreground">Recommended</Badge>}
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary">{link.category}</Badge>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={link.url} target="_blank" rel="noopener noreferrer">
-                            Visit {link.name}
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
-                        </Button>
-                      </div>
-                    </div>
-                    <CardDescription className="mt-2">{link.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <h4 className="text-sm font-semibold mb-3">Tags:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {link.tags.map((tag, tagIndex) => (
-                        <Badge key={tagIndex} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    {link.onionAddress && (
-                      <div className="mt-4 pt-4 border-t border-border/50">
-                        <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
-                        <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
-                          {link.onionAddress}
-                        </code>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
-                            Visit via Tor
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+            <div className="space-y-12">
+              {sortedCategories.map((category) => (
+                <section key={category}>
+                  <h3 className="text-xl font-semibold mb-4">{category}</h3>
+                  <div className="grid gap-6">
+                    {groupedLinks[category].map((link, index) => (
+                      <Card key={index} className={`hover:border-primary/50 transition-colors ${link.isRecommended ? 'border-primary/30 bg-primary/5' : ''}`}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between flex-wrap gap-2">
+                            <div>
+                              <CardTitle className="flex items-center gap-2">
+                                <LinkIcon className="h-5 w-5 text-primary" />
+                                {link.name}
+                                {link.isRecommended && <Badge className="bg-primary text-primary-foreground">Recommended</Badge>}
+                              </CardTitle>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="secondary">{link.category}</Badge>
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                  Visit {link.name}
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </a>
+                              </Button>
+                            </div>
+                          </div>
+                          <CardDescription className="mt-2">{link.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <h4 className="text-sm font-semibold mb-3">Tags:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {link.tags.map((tag, tagIndex) => (
+                              <Badge key={tagIndex} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          {link.onionAddress && (
+                            <div className="mt-4 pt-4 border-t border-border/50">
+                              <h4 className="text-sm font-semibold mb-2">Tor Onion Address:</h4>
+                              <code className="block text-xs bg-muted px-2 py-1 rounded break-all mb-2">
+                                {link.onionAddress}
+                              </code>
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={`http://${link.onionAddress}`} target="_blank" rel="noopener noreferrer">
+                                  Visit via Tor
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </a>
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           </div>
