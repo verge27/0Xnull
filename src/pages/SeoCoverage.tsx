@@ -125,7 +125,10 @@ export default function SeoCoverage() {
           </Button>
         </header>
 
+        <DeployRecheckCard />
+
         <section className="grid gap-4 md:grid-cols-2">
+
           {tracked.map((url) => {
             const latest = latestByUrl.get(url);
             return (
