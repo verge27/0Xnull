@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/generate-sitemap.mjs",
+    "predev": "node scripts/generate-sitemap.mjs && node scripts/generate-rss.mjs",
     "dev": "vite",
-    "prebuild": "node scripts/generate-sitemap.mjs",
+    "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-rss.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "lint:oxford": "node scripts/check-oxford-commas.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "rss": "node scripts/generate-rss.mjs"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",
