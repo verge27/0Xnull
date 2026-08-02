@@ -107,22 +107,33 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
       
       // Refresh the sitemap and nudge Search Console when a post goes live.
       if (publish) {
-        supabase.functions
-          .invoke('sitemap-refresh')
-          .then(({ data, error: refreshError }) => {
-            if (refreshError) {
-              console.error('Sitemap refresh failed:', refreshError);
+        void (async () => {
+          const maxAttempts = 4;
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            const { data, error: refreshError } = await supabase.functions.invoke('sitemap-refresh');
+
+            if (!refreshError) {
+              if (data?.static_stale) {
+                toast.warning(
+                  `Sitemap has ${data.dynamic_url_count} URLs but the live file still has ${data.live_url_count}. Click Publish to ship the updated sitemap.xml.`,
+                  { duration: 10000 },
+                );
+              } else if (data?.search_console === 'submitted') {
+                toast.success('Sitemap resubmitted to Search Console.');
+              }
               return;
             }
-            if (data?.static_stale) {
-              toast.warning(
-                `Sitemap has ${data.dynamic_url_count} URLs but the live file still has ${data.live_url_count}. Click Publish to ship the updated sitemap.xml.`,
-                { duration: 10000 },
-              );
-            } else if (data?.search_console === 'submitted') {
-              toast.success('Sitemap resubmitted to Search Console.');
+
+            console.error(`Sitemap refresh failed (attempt ${attempt}/${maxAttempts}):`, refreshError);
+            if (attempt === maxAttempts) {
+              toast.error('Sitemap refresh failed after several retries. Try again from the SEO dashboard.');
+              return;
             }
-          });
+            // Exponential backoff with jitter: ~1s, 2s, 4s.
+            const delay = 1000 * 2 ** (attempt - 1);
+            await new Promise((resolve) => setTimeout(resolve, delay / 2 + Math.random() * (delay / 2)));
+          }
+        })();
       }
 
       
