@@ -95,6 +95,20 @@ const Kokoro = () => {
           </p>
         </div>
 
+        <ServicePriceBar
+          className="mb-8 text-left"
+          price="$0.02 per message"
+          tokenMetered
+          trust={
+            <>
+              Conversations are not retained and no account is attached to them. Billing draws from a
+              throwaway token — see the{' '}
+              <Link to="/docs#token" className="text-primary hover:underline">token mechanics</Link>.
+            </>
+          }
+        />
+
+
         <TokenRequired>
           {/* Chat Container */}
           <Card className="border-primary/20 bg-card/50 backdrop-blur">
