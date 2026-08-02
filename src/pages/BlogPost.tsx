@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -67,47 +67,76 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
 
   const canonicalUrl = post ? `https://0xnull.io/blog/${post.slug}` : undefined;
-  const postImage = post?.featured_image || 'https://0xnull.io/og-image.png';
+  const postImage = post?.featured_image
+    ? (post.featured_image.startsWith('http')
+        ? post.featured_image
+        : `https://0xnull.io${post.featured_image.startsWith('/') ? '' : '/'}${post.featured_image}`)
+    : 'https://0xnull.io/og-image.png';
 
-  useSEO(
-    post
-      ? {
-          // Use the post title as-is (lets you control exact meta title per post)
-          title: post.title,
-          description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
-          image: post.featured_image || undefined,
-          canonical: `/blog/${post.slug}`,
-          type: 'article',
-          article: {
-            publishedTime: post.published_at || undefined,
-            author: post.author_name,
-            section: post.category || undefined,
-            tags: post.tags || [],
-          },
-        }
-      : undefined,
-    post
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
-          headline: post.title,
-          description: post.meta_description || post.excerpt || post.title,
-          image: postImage,
-          url: canonicalUrl,
-          mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
-          datePublished: post.published_at || undefined,
-          dateModified: post.published_at || undefined,
-          keywords: (post.tags || []).join(', ') || undefined,
-          articleSection: post.category || undefined,
-          author: { '@type': 'Person', name: post.author_name },
-          publisher: {
-            '@type': 'Organization',
-            name: '0xNull',
-            logo: { '@type': 'ImageObject', url: 'https://0xnull.io/favicon.jpg' },
-          },
-        }
-      : undefined,
+  const seoMeta = useMemo(
+    () =>
+      post
+        ? {
+            // Use the post title as-is (lets you control exact meta title per post)
+            title: post.title,
+            description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
+            image: postImage,
+            canonical: `/blog/${post.slug}`,
+            type: 'article',
+            article: {
+              publishedTime: post.published_at || undefined,
+              modifiedTime: post.published_at || undefined,
+              author: post.author_name,
+              section: post.category || undefined,
+              tags: post.tags || [],
+            },
+          }
+        : undefined,
+    [post, postImage],
   );
+
+  const articleSchema = useMemo(() => {
+    if (!post) return undefined;
+    // Google truncates headlines past ~110 characters in rich results.
+    const headline = post.title.length > 110 ? `${post.title.slice(0, 107).trimEnd()}...` : post.title;
+    const description = post.meta_description || post.excerpt || post.title;
+    const plainText = post.content
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[#>*_`|-]/g, ' ');
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      '@id': `${canonicalUrl}#article`,
+      headline,
+      name: post.title,
+      description,
+      image: [postImage],
+      url: canonicalUrl,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+      datePublished: post.published_at || undefined,
+      dateModified: post.published_at || undefined,
+      inLanguage: 'en',
+      isAccessibleForFree: true,
+      wordCount: plainText.split(/\s+/).filter(Boolean).length,
+      keywords: (post.tags || []).length ? post.tags.join(', ') : undefined,
+      articleSection: post.category || undefined,
+      author: {
+        '@type': 'Person',
+        name: post.author_name,
+        url: 'https://0xnull.io/blog',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: '0xNull',
+        url: 'https://0xnull.io',
+        logo: { '@type': 'ImageObject', url: 'https://0xnull.io/favicon.jpg' },
+      },
+    };
+  }, [post, postImage, canonicalUrl]);
+
+  useSEO(seoMeta, articleSchema);
 
 
   // Inject FAQPage structured data when the post has an FAQ section
