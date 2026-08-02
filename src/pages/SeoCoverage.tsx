@@ -46,7 +46,7 @@ function verdictBadge(snapshot: Snapshot) {
 }
 
 export default function SeoCoverage() {
-  useSEO({ noIndex: true });
+  useSEO({ title: 'Search Console coverage — internal', description: 'Internal indexing coverage dashboard.' });
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [tracked, setTracked] = useState<string[]>([]);
