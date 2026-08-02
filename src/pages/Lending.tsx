@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AssetIcon } from '@/components/lending/AssetIcon';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { UtilizationBar } from '@/components/lending/UtilizationBar';
 import { LendingTokenPrompt } from '@/components/lending/LendingTokenPrompt';
 import { LendingPrivacyTiers } from '@/components/lending/LendingPrivacyTiers';
