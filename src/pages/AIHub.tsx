@@ -78,7 +78,21 @@ export default function AIHub() {
             </p>
           </div>
 
-          {/* Features */}
+          {/* Price + trust */}
+          <ServicePriceBar
+            className="mb-12"
+            price="$0.02 per message · $0.15 per voice generation"
+            tokenMetered
+            trust={
+              <>
+                Prompts are not logged and no account is attached to them. Everything is paid from a bearer
+                token you can throw away — see the{' '}
+                <Link to="/docs#token" className="text-primary hover:underline">token mechanics</Link>.
+              </>
+            }
+          />
+
+
           <h2 className="sr-only">Features</h2>
           <div className="grid sm:grid-cols-3 gap-4 mb-12">
             {features.map((feature) => {
