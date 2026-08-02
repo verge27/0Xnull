@@ -18,7 +18,8 @@ import {
   Gamepad2,
   Trophy,
   TrendingUp,
-  Zap
+  Zap,
+  Rss
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
