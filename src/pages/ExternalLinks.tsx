@@ -295,8 +295,39 @@ const externalLinks: ExternalLink[] = [
     tags: ["Malware", "Security", "Research", "Papers"],
     isRecommended: false,
     isVerified: false
+  },
+  {
+    name: "OnionArchive",
+    url: "http://x4ijfwy76n6jl7rs4qyhe6qi5rv6xyuos3kaczgjpjcajigjzk3k7wqd.onion/",
+    onionAddress: "x4ijfwy76n6jl7rs4qyhe6qi5rv6xyuos3kaczgjpjcajigjzk3k7wqd.onion",
+    description: "Archive of onion service resources and mirrors. Address confirmed reachable at time of listing.",
+    category: "Research Archive",
+    tags: ["Tor", "Archive", "Research"],
+    isRecommended: false,
+    isVerified: true
+  },
+  {
+    name: "The Nihilism OPSEC Blog",
+    url: "http://blog.nowherejezfoltodf4jiyl6r56jnzintap5vyjlia7fkirfsnfizflqd.onion/",
+    onionAddress: "blog.nowherejezfoltodf4jiyl6r56jnzintap5vyjlia7fkirfsnfizflqd.onion",
+    description: "Long-form operational security guides covering anonymity, hardening and threat models. Address confirmed reachable at time of listing.",
+    category: "Knowledge",
+    tags: ["OPSEC", "Privacy", "Guides", "Security"],
+    isRecommended: false,
+    isVerified: true
+  },
+  {
+    name: "Tor Project Blog",
+    url: "http://pzhdfe7jraknpj2qgu5cz2u3i4deuyfwmonvzu5i3nyw4t4bmg7o5pad.onion/",
+    onionAddress: "pzhdfe7jraknpj2qgu5cz2u3i4deuyfwmonvzu5i3nyw4t4bmg7o5pad.onion",
+    description: "Onion mirror of blog.torproject.org for release notes and security announcements. Distinct from the main Tor Project onion listed under Infrastructure.",
+    category: "Infrastructure",
+    tags: ["Tor", "News", "Security"],
+    isRecommended: false,
+    isVerified: true
   }
 ];
+
 
 const priorityOrder = ["Directory", "Search Engine", "Monero", "Comms"];
 
