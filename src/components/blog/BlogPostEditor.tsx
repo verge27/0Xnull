@@ -39,6 +39,41 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
     meta_description: '',
     featured_image: '',
   });
+  const [imageReport, setImageReport] = useState<OgImageReport | null>(null);
+
+  const handleImageReport = useCallback((report: OgImageReport | null) => {
+    setImageReport(report);
+  }, []);
+
+  /** Summarise broken images as a toast. Returns true when everything is fine. */
+  const warnAboutImages = (report: OgImageReport | null) => {
+    if (!report) return true;
+
+    if (report.problems.length > 0) {
+      const first = report.problems[0];
+      const extra = report.problems.length - 1;
+      toast.warning(
+        `${report.problems.length} social image${report.problems.length > 1 ? 's' : ''} could not be loaded: ` +
+          `${first.url || first.source}${extra > 0 ? ` and ${extra} more` : ''}. ` +
+          'Social previews will fall back or show nothing.',
+        { duration: 15000 },
+      );
+      return false;
+    }
+
+    if (report.warnings.length > 0) {
+      toast.warning(
+        `${report.warnings.length} image${report.warnings.length > 1 ? 's are' : ' is'} in this build but not live yet. ` +
+          'Publish the site so crawlers can fetch them.',
+        { duration: 12000 },
+      );
+      return false;
+    }
+
+    return true;
+  };
+  
+
   
   const handleImport = (data: { title: string; content: string; slug: string; excerpt: string }) => {
     setFormData((prev) => ({
