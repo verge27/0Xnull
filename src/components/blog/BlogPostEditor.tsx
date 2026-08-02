@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,9 @@ import { Loader2, Save, Eye, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { BlogImportDialog } from './BlogImportDialog';
+import { OgImagePreflight } from './OgImagePreflight';
+import { checkPostImages, type OgImageReport } from '@/lib/checkBlogImages';
+
 
 const CATEGORIES = [
   { value: 'crypto', label: 'Crypto' },
