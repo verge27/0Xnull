@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
   try {
     // --- Auth: cron secret (scheduled runs) or an admin JWT (manual runs) ---
-    const cronSecret = Deno.env.get('CRON_SECRET');
+    const cronSecret = Deno.env.get('SEO_RECHECK_CRON_SECRET') ?? Deno.env.get('CRON_SECRET');
     const providedSecret = req.headers.get('x-cron-secret');
     let isCron = false;
     if (cronSecret && providedSecret && providedSecret === cronSecret) {
