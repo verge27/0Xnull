@@ -212,11 +212,10 @@ const App = () => (
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />
+                  <Route path="/3ds-scanner" element={<ThreeDSScanner />} />
                   <Route path="/docs" element={<Docs />} />
                   <Route path="/canary" element={<Canary />} />
 
-                  {/* Influencer */}
-                  
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
                   <Route path="/influencer/:code" element={<InfluencerDashboard />} />
