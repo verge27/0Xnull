@@ -1052,6 +1052,51 @@ export type Database = {
           },
         ]
       }
+      robots_txt_checks: {
+        Row: {
+          changed_from_previous: boolean
+          checked_at: string
+          content: string | null
+          content_hash: string
+          http_status: number | null
+          id: string
+          is_healthy: boolean
+          issues: Json
+          robots_url: string
+          sitemap_directive: string | null
+          sitemap_http_status: number | null
+          sitemap_url_count: number
+        }
+        Insert: {
+          changed_from_previous?: boolean
+          checked_at?: string
+          content?: string | null
+          content_hash: string
+          http_status?: number | null
+          id?: string
+          is_healthy?: boolean
+          issues?: Json
+          robots_url: string
+          sitemap_directive?: string | null
+          sitemap_http_status?: number | null
+          sitemap_url_count?: number
+        }
+        Update: {
+          changed_from_previous?: boolean
+          checked_at?: string
+          content?: string | null
+          content_hash?: string
+          http_status?: number | null
+          id?: string
+          is_healthy?: boolean
+          issues?: Json
+          robots_url?: string
+          sitemap_directive?: string | null
+          sitemap_http_status?: number | null
+          sitemap_url_count?: number
+        }
+        Relationships: []
+      }
       rpc_rate_limits: {
         Row: {
           created_at: string
