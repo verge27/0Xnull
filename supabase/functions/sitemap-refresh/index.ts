@@ -8,6 +8,74 @@ const GATEWAY = 'https://connector-gateway.lovable.dev/google_search_console';
 const THROTTLE_MS = 5 * 60 * 1000;
 let lastRun = 0;
 
+// Retry policy: exponential backoff with jitter for transient failures.
+const MAX_ATTEMPTS = 4; // 1 initial try + 3 retries
+const BASE_DELAY_MS = 500; // 500ms -> 1s -> 2s (+ jitter)
+const MAX_DELAY_MS = 8000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function backoffDelay(attempt: number) {
+  const exponential = Math.min(BASE_DELAY_MS * 2 ** (attempt - 1), MAX_DELAY_MS);
+  // Full jitter avoids synchronized retries when several publishes fire at once.
+  return Math.round(exponential / 2 + Math.random() * (exponential / 2));
+}
+
+/** Transient: network failures, rate limits and server-side errors. */
+function isRetryableStatus(status: number) {
+  return status === 408 || status === 425 || status === 429 || status >= 500;
+}
+
+type FetchAttempt = { response: Response; attempts: number };
+
+/**
+ * fetch() with exponential backoff. Retries on network errors and retryable
+ * HTTP statuses. Returns the final response (even if not ok) or throws the
+ * last network error after exhausting attempts.
+ */
+async function fetchWithRetry(
+  label: string,
+  input: string,
+  init: RequestInit = {},
+  timeoutMs = 15000,
+): Promise<FetchAttempt> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(input, { ...init, signal: controller.signal });
+      clearTimeout(timer);
+
+      if (!isRetryableStatus(response.status) || attempt === MAX_ATTEMPTS) {
+        if (attempt > 1) console.log(`${label}: succeeded on attempt ${attempt} (status ${response.status})`);
+        return { response, attempts: attempt };
+      }
+
+      const body = await response.text().catch(() => '');
+      const delay = backoffDelay(attempt);
+      console.warn(
+        `${label}: retryable status ${response.status} on attempt ${attempt}/${MAX_ATTEMPTS}, retrying in ${delay}ms. Body: ${body.slice(0, 300)}`,
+      );
+      await sleep(delay);
+    } catch (error) {
+      clearTimeout(timer);
+      lastError = error;
+      if (attempt === MAX_ATTEMPTS) break;
+      const delay = backoffDelay(attempt);
+      console.warn(
+        `${label}: network error on attempt ${attempt}/${MAX_ATTEMPTS} (${error instanceof Error ? error.message : String(error)}), retrying in ${delay}ms`,
+      );
+      await sleep(delay);
+    }
+  }
+
+  throw new Error(
+    `${label} failed after ${MAX_ATTEMPTS} attempts: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+  );
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -24,20 +92,22 @@ Deno.serve(async (req) => {
 
   const result: Record<string, unknown> = { sitemap: SITEMAP_URL };
 
-
   try {
     // 1. Regenerate the dynamic sitemap so its cached output reflects the newest posts.
     const projectUrl = Deno.env.get('SUPABASE_URL');
     let dynamicCount = 0;
     if (projectUrl) {
       try {
-        const res = await fetch(`${projectUrl}/functions/v1/sitemap`, {
-          headers: { apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '' },
-        });
+        const { response: res, attempts } = await fetchWithRetry(
+          'dynamic sitemap regeneration',
+          `${projectUrl}/functions/v1/sitemap`,
+          { headers: { apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '' } },
+        );
         const xml = await res.text();
         dynamicCount = (xml.match(/<url>/g) ?? []).length;
         result.dynamic_status = res.status;
         result.dynamic_url_count = dynamicCount;
+        result.dynamic_attempts = attempts;
       } catch (e) {
         console.error('Dynamic sitemap regeneration failed:', e);
         result.dynamic_error = e instanceof Error ? e.message : String(e);
@@ -46,16 +116,20 @@ Deno.serve(async (req) => {
 
     // 1b. Compare against the deployed static file so we can flag a stale deploy.
     try {
-      const liveRes = await fetch(`${SITEMAP_URL}?cb=${now}`, { headers: { 'Cache-Control': 'no-cache' } });
+      const { response: liveRes, attempts } = await fetchWithRetry(
+        'live sitemap check',
+        `${SITEMAP_URL}?cb=${now}`,
+        { headers: { 'Cache-Control': 'no-cache' } },
+      );
       const liveXml = await liveRes.text();
       const liveCount = (liveXml.match(/<url>/g) ?? []).length;
       result.live_url_count = liveCount;
+      result.live_attempts = attempts;
       result.static_stale = dynamicCount > 0 && liveCount !== dynamicCount;
     } catch (e) {
       console.error('Live sitemap check failed:', e);
       result.live_error = e instanceof Error ? e.message : String(e);
     }
-
 
     // 2. Tell Search Console to refetch the sitemap.
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
@@ -75,10 +149,16 @@ Deno.serve(async (req) => {
     };
 
     // Resolve the verified property covering the site.
-    const sitesRes = await fetch(`${GATEWAY}/webmasters/v3/sites`, { headers });
+    const { response: sitesRes, attempts: siteAttempts } = await fetchWithRetry(
+      'Search Console property listing',
+      `${GATEWAY}/webmasters/v3/sites`,
+      { headers },
+    );
+    result.sites_attempts = siteAttempts;
+
     if (!sitesRes.ok) {
       const body = await sitesRes.text();
-      console.error(`Listing Search Console properties failed [${sitesRes.status}]: ${body}`);
+      console.error(`Listing Search Console properties failed [${sitesRes.status}] after ${siteAttempts} attempts: ${body}`);
       return new Response(
         JSON.stringify({ ...result, error: 'Could not list Search Console properties', status: sitesRes.status, details: body }),
         { status: sitesRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
@@ -112,21 +192,23 @@ Deno.serve(async (req) => {
     }
 
     const siteUrl = matches[0].siteUrl;
-    const submitRes = await fetch(
+    const { response: submitRes, attempts: submitAttempts } = await fetchWithRetry(
+      'Search Console sitemap submission',
       `${GATEWAY}/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/sitemaps/${encodeURIComponent(SITEMAP_URL)}`,
       { method: 'PUT', headers },
     );
+    result.submit_attempts = submitAttempts;
 
     if (!submitRes.ok) {
       const body = await submitRes.text();
-      console.error(`Sitemap submission failed [${submitRes.status}]: ${body}`);
+      console.error(`Sitemap submission failed [${submitRes.status}] after ${submitAttempts} attempts: ${body}`);
       return new Response(
         JSON.stringify({ ...result, error: 'Sitemap submission failed', status: submitRes.status, details: body }),
         { status: submitRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
-    console.log(`Sitemap resubmitted to Search Console for ${siteUrl}`);
+    console.log(`Sitemap resubmitted to Search Console for ${siteUrl} (attempts: ${submitAttempts})`);
     result.search_console = 'submitted';
     result.property = siteUrl;
 
