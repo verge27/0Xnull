@@ -7,6 +7,7 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { SEORichText } from '@/components/SEORichText';
 import { SwapPrivacyTiers } from '@/components/SwapPrivacyTiers';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 const swapsBackground = '/images/backgrounds/swaps-background.webp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
