@@ -186,6 +186,14 @@ const externalLinks: ExternalLink[] = [
   }
 ];
 
+const groupedLinks = externalLinks.reduce<Record<string, ExternalLink[]>>((acc, link) => {
+  if (!acc[link.category]) acc[link.category] = [];
+  acc[link.category].push(link);
+  return acc;
+}, {});
+
+const sortedCategories = Object.keys(groupedLinks).sort();
+
 const ExternalLinks = () => {
   useSEO();
   return (
