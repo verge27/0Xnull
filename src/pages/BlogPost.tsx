@@ -39,6 +39,7 @@ interface BlogPostData {
   subcategory: string | null;
   tags: string[];
   published_at: string | null;
+  updated_at?: string | null;
   views: number;
   market_id: string | null;
   meta_description: string | null;
@@ -115,7 +116,7 @@ export default function BlogPost() {
       url: canonicalUrl,
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
       datePublished: post.published_at || undefined,
-      dateModified: post.published_at || undefined,
+      dateModified: post.updated_at || post.published_at || undefined,
       inLanguage: 'en',
       isAccessibleForFree: true,
       wordCount: plainText.split(/\s+/).filter(Boolean).length,
