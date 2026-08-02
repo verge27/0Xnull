@@ -218,11 +218,25 @@ export default function BlogPost() {
       <Navbar />
       
       <article className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Breadcrumbs */}
+        <SeoBreadcrumbs
+          className="mb-4"
+          items={[
+            { name: 'Home', href: '/' },
+            { name: 'Blog', href: '/blog' },
+            ...(post.category
+              ? [{ name: categoryInfo.label, href: `/blog?category=${post.category}` }]
+              : []),
+            { name: post.title, href: `/blog/${post.slug}` },
+          ]}
+        />
+
         {/* Back button */}
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate('/blog')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blog
         </Button>
+
 
         {/* Category & Tags */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
