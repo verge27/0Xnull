@@ -12,6 +12,7 @@ import { BetSlipPanel } from '@/components/BetSlipPanel';
 import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { RelatedGuides } from '@/components/RelatedGuides';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 
 
 const categories = [
