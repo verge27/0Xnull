@@ -152,38 +152,6 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
-    name: "Sci-Hub",
-    url: "https://en.wikipedia.org/wiki/Sci-Hub",
-    description: "Onion address rotates. Check Ahmia for current mirrors.",
-    category: "Knowledge",
-    tags: ["Tor", "Research", "Knowledge"],
-    isRecommended: false
-  },
-  {
-    name: "SecureDrop",
-    url: "https://securedrop.org",
-    description: "Per-organization instances with unique onions. Pull addresses from securedrop.org.",
-    category: "Whistleblowing",
-    tags: ["Whistleblowing", "Privacy", "Journalism"],
-    isRecommended: false
-  },
-  {
-    name: "Shoot",
-    description: "Darknet search engine reported as down in current directory listings. No reliable v3 address available.",
-    category: "Search Engine",
-    tags: ["Darknet", "Search Engine", "Down"],
-    isRecommended: false
-  },
-  {
-    name: "Startpage",
-    url: "https://www.startpage.com",
-    onionAddress: "startpagel6srwcjlue4zgq3zevrujfaow726kjytqbbjyrswwmjzcqd.onion",
-    description: "Privacy search engine with a v3 onion service. Address published in Tor Project's built-in search provider list; verify independently.",
-    category: "Search Engine",
-    tags: ["Tor", "Search Engine", "Privacy"],
-    isRecommended: false
-  },
-  {
     name: "The Tor Project",
     url: "https://www.torproject.org",
     onionAddress: "2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion",
