@@ -214,7 +214,50 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Guides Section */}
+      <section className="container mx-auto px-4 py-20 border-t border-border/30" aria-labelledby="guides-heading">
+        <h2 id="guides-heading" className="text-3xl md:text-4xl font-bold text-center mb-4">
+          Start with a guide
+        </h2>
+        <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+          Practical walkthroughs for the two things people ask us about most: betting on esports privately and renting a server nobody can trace back to you.
+        </p>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="h-full border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-2">
+              <Link to="/blog/cs2-betting-guide-crypto" className="hover:text-primary transition-colors">
+                CS2 betting guide
+              </Link>
+            </h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Learn <Link to="/blog/cs2-betting-guide-crypto" className="text-primary hover:underline">how to bet on CS2 matches with crypto</Link> — bet types, reading odds, map pool analysis and the no-KYC platforms that cover Counter-Strike 2. Then take a position on our{' '}
+              <Link to="/esports-predictions" className="text-primary hover:underline">esports prediction markets</Link>.
+            </p>
+            <Link to="/blog/cs2-betting-guide-crypto" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Read the CS2 betting guide
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="h-full border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-2">
+              <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="hover:text-primary transition-colors">
+                Anonymous VPS hosting
+              </Link>
+            </h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Our guide to <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="text-primary hover:underline">anonymous VPS hosting paid in Monero</Link> compares no-KYC providers by jurisdiction and price, and walks through buying over Tor and hardening the server. See also our{' '}
+              <Link to="/vps" className="text-primary hover:underline">anonymous VPS plans</Link>.
+            </p>
+            <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Read the VPS hosting guide
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
+
       <section className="container mx-auto px-4 py-20">
         <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 rounded-lg">
           <div className="p-12 text-center">
