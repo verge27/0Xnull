@@ -305,20 +305,27 @@ const ExternalLinks = () => {
                         <CardHeader>
                           <div className="flex items-start justify-between flex-wrap gap-2">
                             <div>
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="flex items-center gap-2 flex-wrap">
                                 <LinkIcon className="h-5 w-5 text-primary" />
                                 {link.name}
                                 {link.isRecommended && <Badge className="bg-primary text-primary-foreground">Recommended</Badge>}
+                                {(link.tags.some((t) => ["Unverified", "Defunct", "Down"].includes(t))) && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    {link.tags.find((t) => ["Unverified", "Defunct", "Down"].includes(t))}
+                                  </Badge>
+                                )}
                               </CardTitle>
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <Badge variant="secondary">{link.category}</Badge>
-                              <Button variant="outline" size="sm" asChild>
-                                <a href={link.url} target="_blank" rel="noopener noreferrer">
-                                  Visit {link.name}
-                                  <ExternalLink className="h-3 w-3 ml-1" />
-                                </a>
-                              </Button>
+                              {link.url && (
+                                <Button variant="outline" size="sm" asChild>
+                                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                                    Visit {link.name}
+                                    <ExternalLink className="h-3 w-3 ml-1" />
+                                  </a>
+                                </Button>
+                              )}
                             </div>
                           </div>
                           <CardDescription className="mt-2">{link.description}</CardDescription>
