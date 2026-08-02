@@ -136,6 +136,28 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Add seller pages for sellers with at least one active listing
+    if (listings && listings.length > 0) {
+      const sellers = new Map<string, string>();
+      for (const listing of listings) {
+        if (!listing.seller_id) continue;
+        const lastmod = listing.updated_at
+          ? new Date(listing.updated_at).toISOString().split('T')[0]
+          : '2025-01-02';
+        const existing = sellers.get(listing.seller_id);
+        if (!existing || lastmod > existing) sellers.set(listing.seller_id, lastmod);
+      }
+      console.log(`Adding ${sellers.size} seller pages to sitemap`);
+      for (const [sellerId, lastmod] of sellers) {
+        xml += '  <url>\n';
+        xml += `    <loc>${SITE_URL}/seller/${sellerId}</loc>\n`;
+        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.5</priority>\n`;
+        xml += '  </url>\n';
+      }
+    }
+
     xml += '</urlset>';
 
     console.log('Sitemap generated successfully');
