@@ -374,6 +374,19 @@ const Browse = () => {
               </p>
             </>
           )}
+
+          <ServicePriceBar
+            className="mt-6"
+            price="Free to list · buyers pay the listed price in XMR"
+            trust={
+              <>
+                Shipping details are PGP-encrypted in your browser, and order funds sit in escrow with a
+                timed release so a silent operator cannot strand them. See{' '}
+                <Link to="/docs#escrow" className="text-primary hover:underline">escrow and the dead man's switch</Link>.
+              </>
+            }
+          />
+
           
           
           {/* Breadcrumb Navigation */}
