@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { RefreshCw, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { SitemapFreshnessCard } from '@/components/seo/SitemapFreshnessCard';
+
 
 interface Snapshot {
   id: string;
@@ -196,6 +198,10 @@ export default function SeoCoverage() {
             );
           })}
         </section>
+
+        <SitemapFreshnessCard />
+
+
 
         <Card>
           <CardHeader>
