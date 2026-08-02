@@ -242,6 +242,10 @@ async function main() {
     const dir = join(DIST, 'blog', post.slug);
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'index.html'), html);
+    // Sibling .html copy: some static hosts resolve extensionless URLs via
+    // `<path>.html` before trying `<path>/index.html`. Writing both means the
+    // prerendered page wins whichever try-files order the host uses.
+    writeFileSync(join(DIST, 'blog', `${post.slug}.html`), html);
     written++;
   }
 
