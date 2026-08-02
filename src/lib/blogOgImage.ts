@@ -59,12 +59,43 @@ export interface OgImageSource {
  * site default. Always returns an absolute https URL.
  */
 export function resolveBlogOgImage(post?: OgImageSource | null): string {
-  if (!post) return DEFAULT_OG_IMAGE;
-
-  const candidate =
-    (post.featured_image && post.featured_image.trim()) ||
-    firstContentImage(post.content) ||
-    (post.category ? CATEGORY_FALLBACKS[post.category] : undefined);
-
-  return candidate ? absoluteImageUrl(candidate) : DEFAULT_OG_IMAGE;
+  return resolveBlogOgImageSource(post).url;
 }
+
+export type OgImageTier = 'featured' | 'content' | 'category' | 'default';
+
+export interface ResolvedOgImage {
+  url: string;
+  /** Which step of the fallback chain produced the URL. */
+  tier: OgImageTier;
+  /** Human label for the editor UI. */
+  label: string;
+}
+
+const TIER_LABELS: Record<OgImageTier, string> = {
+  featured: 'Featured image',
+  content: 'First in-body image',
+  category: 'Category fallback thumbnail',
+  default: 'Site default og-image.png',
+};
+
+/** Same resolution as resolveBlogOgImage, but reports which tier was used. */
+export function resolveBlogOgImageSource(post?: OgImageSource | null): ResolvedOgImage {
+  const pick = (tier: OgImageTier, src: string): ResolvedOgImage => ({
+    tier,
+    url: absoluteImageUrl(src),
+    label: TIER_LABELS[tier],
+  });
+
+  const featured = post?.featured_image?.trim();
+  if (featured) return pick('featured', featured);
+
+  const body = firstContentImage(post?.content);
+  if (body) return pick('content', body);
+
+  const category = post?.category ? CATEGORY_FALLBACKS[post.category] : undefined;
+  if (category) return pick('category', category);
+
+  return pick('default', DEFAULT_OG_IMAGE);
+}
+
