@@ -1079,6 +1079,45 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_deploy_checks: {
+        Row: {
+          asset_count: number | null
+          checked_at: string
+          deploy_fingerprint: string
+          forced: boolean
+          id: string
+          inspection_summary: Json | null
+          served_sitemap_count: number | null
+          sitemap_status: Json | null
+          sitemap_submitted: boolean
+          triggered_by: string
+        }
+        Insert: {
+          asset_count?: number | null
+          checked_at?: string
+          deploy_fingerprint: string
+          forced?: boolean
+          id?: string
+          inspection_summary?: Json | null
+          served_sitemap_count?: number | null
+          sitemap_status?: Json | null
+          sitemap_submitted?: boolean
+          triggered_by?: string
+        }
+        Update: {
+          asset_count?: number | null
+          checked_at?: string
+          deploy_fingerprint?: string
+          forced?: boolean
+          id?: string
+          inspection_summary?: Json | null
+          served_sitemap_count?: number | null
+          sitemap_status?: Json | null
+          sitemap_submitted?: boolean
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       seo_index_snapshots: {
         Row: {
           checked_at: string
