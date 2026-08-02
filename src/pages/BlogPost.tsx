@@ -24,6 +24,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { format } from 'date-fns';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
 import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
+import { resolveBlogOgImage } from '@/lib/blogOgImage';
 
 
 interface BlogPostData {
@@ -67,11 +68,7 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
 
   const canonicalUrl = post ? `https://0xnull.io/blog/${post.slug}` : undefined;
-  const postImage = post?.featured_image
-    ? (post.featured_image.startsWith('http')
-        ? post.featured_image
-        : `https://0xnull.io${post.featured_image.startsWith('/') ? '' : '/'}${post.featured_image}`)
-    : 'https://0xnull.io/og-image.png';
+  const postImage = resolveBlogOgImage(post);
 
   const seoMeta = useMemo(
     () =>
