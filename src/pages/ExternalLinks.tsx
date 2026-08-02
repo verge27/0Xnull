@@ -10,20 +10,38 @@ import { SubmitLinkForm } from "@/components/SubmitLinkForm";
 
 const externalLinks = [
   {
-    name: "Darknetlist",
-    url: "https://darknetlist.is/",
-    description: "A directory of darknet markets and privacy-focused services.",
-    category: "Directory",
-    tags: ["Darknet", "Privacy", "Directory"],
-    isRecommended: true
-  },
-  {
     name: "Ahmia",
     url: "https://ahmia.fi/",
     onionAddress: "juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion",
     description: "A search engine for indexing Tor onion services and hidden content.",
     category: "Search Engine",
     tags: ["Tor", "Onion", "Search Engine", "Privacy"],
+    isRecommended: true
+  },
+  {
+    name: "BBC News",
+    url: "https://www.bbc.com/news",
+    onionAddress: "bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion",
+    description: "International edition mirror.",
+    category: "News",
+    tags: ["News", "Tor", "Mirror"],
+    isRecommended: false
+  },
+  {
+    name: "CIA",
+    url: "https://www.cia.gov",
+    onionAddress: "ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion",
+    description: "Official anonymous tip channel. Verify the onion address on cia.gov.",
+    category: "Infrastructure",
+    tags: ["Tor", "Official", "Whistleblowing"],
+    isRecommended: false
+  },
+  {
+    name: "Darknetlist",
+    url: "https://darknetlist.is/",
+    description: "A directory of darknet markets and privacy-focused services.",
+    category: "Directory",
+    tags: ["Darknet", "Privacy", "Directory"],
     isRecommended: true
   },
   {
@@ -36,12 +54,117 @@ const externalLinks = [
     isRecommended: false
   },
   {
+    name: "DuckDuckGo",
+    url: "https://duckduckgo.com",
+    onionAddress: "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion",
+    description: "Searches the clearnet via Tor. Address published on DDG's official help pages.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "Facebook",
+    url: "https://facebook.com",
+    onionAddress: "facebookwkhpilnemxj7asaniu7vnjjbiltxjqhye3mhbshg7kx5tfyd.onion",
+    description: "Official Meta mirror. Network-layer privacy only — Meta still logs you.",
+    category: "Comms",
+    tags: ["Tor", "Mirror", "Social"],
+    isRecommended: false
+  },
+  {
+    name: "Just Another Library",
+    url: "http://libraryfyuybp7oyidyya3ah5xvwgyx6weauoini7zyz555litmmumad.onion/",
+    onionAddress: "libraryfyuybp7oyidyya3ah5xvwgyx6weauoini7zyz555litmmumad.onion",
+    description: "Stick to public-domain material.",
+    category: "Knowledge",
+    tags: ["Tor", "Library", "Knowledge"],
+    isRecommended: false
+  },
+  {
     name: "Mental Outlaw",
     url: "https://youtube.com/@mentaloutlaw?si=DzuNJpvBi5P6VZTk",
     description: "Privacy-focused tech commentary tutorials and security news.",
     category: "YouTube Channel",
     tags: ["Privacy", "Security", "YouTube", "Education"],
     isRecommended: true
+  },
+  {
+    name: "NYT",
+    url: "https://www.nytimes.com",
+    onionAddress: "ej3kv4ebuugcmuwxctx5ic7zxh73rnxt42soo3tdneu2c2wu55j3vpyd.onion",
+    description: "Paywall still applies.",
+    category: "News",
+    tags: ["News", "Tor", "Mirror"],
+    isRecommended: false
+  },
+  {
+    name: "ProPublica",
+    url: "https://www.propublica.org",
+    onionAddress: "p53lf57qovyuvwsc6xnrppyply3vtqm7l6pcobkmyqsiofyeznfu5uqd.onion",
+    description: "First major outlet on Tor. Verify the onion address on propublica.org.",
+    category: "News",
+    tags: ["News", "Tor", "Mirror"],
+    isRecommended: false
+  },
+  {
+    name: "Proton Mail",
+    url: "https://proton.me",
+    onionAddress: "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion",
+    description: "Published on Proton's official Tor access page.",
+    category: "Comms",
+    tags: ["Tor", "Email", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "Reddit",
+    url: "https://reddit.com",
+    onionAddress: "reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad.onion",
+    description: "Official mirror.",
+    category: "Comms",
+    tags: ["Tor", "Forum", "Social"],
+    isRecommended: false
+  },
+  {
+    name: "Riseup",
+    url: "https://riseup.net",
+    description: "Publishes per-service onions on their Tor docs page. Verify via riseup.net.",
+    category: "Comms",
+    tags: ["Tor", "Email", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "Sci-Hub",
+    url: "https://en.wikipedia.org/wiki/Sci-Hub",
+    description: "Onion address rotates. Check Ahmia for current mirrors.",
+    category: "Knowledge",
+    tags: ["Tor", "Research", "Knowledge"],
+    isRecommended: false
+  },
+  {
+    name: "SecureDrop",
+    url: "https://securedrop.org",
+    description: "Per-organization instances with unique onions. Pull addresses from securedrop.org.",
+    category: "Whistleblowing",
+    tags: ["Whistleblowing", "Privacy", "Journalism"],
+    isRecommended: false
+  },
+  {
+    name: "The Tor Project",
+    url: "https://www.torproject.org",
+    onionAddress: "2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion",
+    description: "Docs, downloads and Tor Metrics access without clearnet exit.",
+    category: "Infrastructure",
+    tags: ["Tor", "Browser", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "Torch",
+    url: "http://xmh57jrknzkhv6y3ls3ubitzfqnkrwxhopf5aygthi7d6rplyvk3noyd.onion/",
+    onionAddress: "xmh57jrknzkhv6y3ls3ubitzfqnkrwxhopf5aygthi7d6rplyvk3noyd.onion",
+    description: "Oldest index with ~1M+ sites. Unfiltered so expect more noise.",
+    category: "Search Engine",
+    tags: ["Tor", "Search Engine", "Darknet"],
+    isRecommended: false
   },
   {
     name: "vx-underground",
