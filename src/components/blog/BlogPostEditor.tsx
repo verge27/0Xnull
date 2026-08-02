@@ -327,6 +327,17 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
             onChange={(e) => setFormData((prev) => ({ ...prev, featured_image: e.target.value }))}
           />
         </div>
+
+        <OgImagePreflight
+          post={{
+            featured_image: formData.featured_image,
+            content: formData.content,
+            category: formData.category,
+          }}
+          onReport={handleImageReport}
+        />
+        
+
         
         <div className="space-y-2">
           <Label htmlFor="meta">Meta Description</Label>
