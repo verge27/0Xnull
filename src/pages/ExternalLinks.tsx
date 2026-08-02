@@ -20,6 +20,14 @@ type ExternalLink = {
 
 const externalLinks: ExternalLink[] = [
   {
+    name: "Darknetlist",
+    url: "https://darknetlist.is/",
+    description: "A directory of darknet resources and onion services for privacy research.",
+    category: "Directory",
+    tags: ["Directory", "Darknet", "Onion", "Privacy"],
+    isRecommended: false
+  },
+  {
     name: "Ahmia",
     url: "https://ahmia.fi/",
     onionAddress: "juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion",
