@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
+import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
+
 
 const BLOG_SEO_CONTENT = `
 <p>The 0xNull Blog is a privacy-first crypto blog dedicated to anonymous prediction markets, no-KYC platforms and financial privacy. Here you'll find in-depth articles, guides and explainers designed to help users understand how privacy-focused crypto services work—without hype, tracking or data collection.</p>
