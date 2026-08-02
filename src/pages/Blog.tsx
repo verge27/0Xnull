@@ -153,6 +153,14 @@ export default function Blog() {
             <p className="text-lg text-muted-foreground">
               Deep dives into prediction markets, crypto privacy and the future of decentralized betting
             </p>
+            <div className="mt-6 flex justify-center">
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <a href="/rss.xml" target="_blank" rel="noopener noreferrer">
+                  <Rss className="w-4 h-4" />
+                  Subscribe via RSS
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
