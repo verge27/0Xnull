@@ -29,6 +29,8 @@ const staticPages = [
   { path: '/voice', priority: '0.7', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/kokoro', priority: '0.6', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/browse', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
+  { path: '/marketplace', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
+
   { path: '/get-started', priority: '0.7', changefreq: 'monthly', lastmod: '2024-12-15' },
   { path: '/safety', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-01' },
   { path: '/vpn-resources', priority: '0.6', changefreq: 'monthly', lastmod: '2024-12-01' },
@@ -65,7 +67,7 @@ Deno.serve(async (req) => {
     // Fetch active listings
     const { data: listings, error: listingsError } = await supabase
       .from('listings')
-      .select('id, updated_at')
+      .select('id, seller_id, updated_at')
       .eq('status', 'active')
       .order('updated_at', { ascending: false })
       .limit(1000);
@@ -130,6 +132,28 @@ Deno.serve(async (req) => {
         xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += `    <changefreq>weekly</changefreq>\n`;
         xml += `    <priority>0.6</priority>\n`;
+        xml += '  </url>\n';
+      }
+    }
+
+    // Add seller pages for sellers with at least one active listing
+    if (listings && listings.length > 0) {
+      const sellers = new Map<string, string>();
+      for (const listing of listings) {
+        if (!listing.seller_id) continue;
+        const lastmod = listing.updated_at
+          ? new Date(listing.updated_at).toISOString().split('T')[0]
+          : '2025-01-02';
+        const existing = sellers.get(listing.seller_id);
+        if (!existing || lastmod > existing) sellers.set(listing.seller_id, lastmod);
+      }
+      console.log(`Adding ${sellers.size} seller pages to sitemap`);
+      for (const [sellerId, lastmod] of sellers) {
+        xml += '  <url>\n';
+        xml += `    <loc>${SITE_URL}/seller/${sellerId}</loc>\n`;
+        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.5</priority>\n`;
         xml += '  </url>\n';
       }
     }
