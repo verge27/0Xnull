@@ -346,8 +346,23 @@ const VoicePage = () => {
                 No accounts, no tracking.
               </p>
             </div>
+
+            <div className="max-w-3xl mx-auto">
+              <ServicePriceBar
+                price="$0.15 per generation · $2 per cloned voice"
+                tokenMetered
+                trust={
+                  <>
+                    Uploaded samples and generated audio are not tied to an identity, because there is no
+                    account to tie them to. See the{' '}
+                    <Link to="/docs#token" className="text-primary hover:underline">token mechanics</Link>.
+                  </>
+                }
+              />
+            </div>
           </div>
         </section>
+
 
         {/* TTS Interface */}
         <section className="py-12 container mx-auto px-4">
