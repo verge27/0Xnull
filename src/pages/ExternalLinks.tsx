@@ -129,7 +129,7 @@ const externalLinks: ExternalLink[] = [
     name: "Proton Mail",
     url: "https://proton.me",
     onionAddress: "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion",
-    description: "Published on Proton's official Tor access page.",
+    description: "Encrypted email provider. Onion address published on Proton's official Tor access page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
     isRecommended: false
