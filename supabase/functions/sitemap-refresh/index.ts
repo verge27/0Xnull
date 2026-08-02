@@ -4,12 +4,26 @@ const SITE_URL = 'https://0xnull.io';
 const SITEMAP_URL = `${SITE_URL}/sitemap.xml`;
 const GATEWAY = 'https://connector-gateway.lovable.dev/google_search_console';
 
+// Throttle: at most one Search Console resubmission every 5 minutes.
+const THROTTLE_MS = 5 * 60 * 1000;
+let lastRun = 0;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const now = Date.now();
+  if (now - lastRun < THROTTLE_MS) {
+    return new Response(
+      JSON.stringify({ sitemap: SITEMAP_URL, search_console: 'throttled', retry_in_ms: THROTTLE_MS - (now - lastRun) }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+  lastRun = now;
+
   const result: Record<string, unknown> = { sitemap: SITEMAP_URL };
+
 
   try {
     // 1. Regenerate the dynamic sitemap so its cached output reflects the newest posts.
