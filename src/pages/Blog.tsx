@@ -119,6 +119,22 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      <div className="container mx-auto px-4 pt-6">
+        <SeoBreadcrumbs
+          items={[
+            { name: 'Home', href: '/' },
+            ...(activeCategory !== 'all'
+              ? [
+                  { name: 'Blog', href: '/blog' },
+                  { name: getCategoryInfo(activeCategory).label, href: `/blog?category=${activeCategory}` },
+                ]
+              : [{ name: 'Blog', href: '/blog' }]),
+          ]}
+        />
+      </div>
+
+
       
       {/* Hero Section */}
       <section className="relative py-20 overflow-visible">
