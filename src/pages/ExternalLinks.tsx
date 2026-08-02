@@ -65,6 +65,14 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "DarkGPT",
+    onionAddress: "66xz7tc67eqhsqhk42hq5wqavgu5cnwxh53hxhfhhp6puqlnhzxhjcqd.onion",
+    description: "Tor-native uncensored AI chat. The operator is anonymous so treat every prompt as logged and avoid anything adjacent to your real infrastructure.",
+    category: "AI",
+    tags: ["Tor", "AI", "Onion", "Privacy"],
+    isRecommended: false
+  },
+  {
     name: "DuckDuckGo",
     url: "https://duckduckgo.com",
     onionAddress: "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion",
@@ -129,7 +137,7 @@ const externalLinks: ExternalLink[] = [
     name: "Proton Mail",
     url: "https://proton.me",
     onionAddress: "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion",
-    description: "Published on Proton's official Tor access page.",
+    description: "Encrypted email provider. Onion address published on Proton's official Tor access page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
     isRecommended: false
@@ -146,9 +154,19 @@ const externalLinks: ExternalLink[] = [
   {
     name: "Riseup",
     url: "https://riseup.net",
-    description: "Publishes per-service onions on their Tor docs page. Verify via riseup.net.",
+    onionAddress: "vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion",
+    description: "Main site mirror for mail, lists and VPN. Per-service onions are published on riseup.net's Tor docs page.",
     category: "Comms",
     tags: ["Tor", "Email", "Privacy"],
+    isRecommended: false
+  },
+  {
+    name: "DanWin1210",
+    url: "https://danwin1210.me",
+    onionAddress: "danielas3rtn54uwmofdo3x2bsdifr47huasnmbgqzfrec5ubupvtpid.onion",
+    description: "Daniel Winzen's hosting, mail and XMPP operation. Cross-check the onion address against danwin1210.me before use.",
+    category: "Comms",
+    tags: ["Tor", "Email", "XMPP", "Hosting"],
     isRecommended: false
   },
   {
