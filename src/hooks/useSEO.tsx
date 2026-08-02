@@ -69,7 +69,7 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Use anonymous crypto swaps on 0xNull with no KYC or accounts. Swap cryptocurrencies privately with Monero support on a privacy-first platform.',
   },
   '/browse': {
-    title: 'Anonymous Crypto Marketplace | No-KYC Prediction Markets – 0xNull',
+    title: 'Anonymous No-KYC Crypto Marketplace – 0xNull',
     description: 'Explore 0xNull Marketplace, an anonymous crypto marketplace with no-KYC prediction markets, digital services and Monero payments—built for privacy-first users.',
   },
   '/ai': {
@@ -129,7 +129,7 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Anonymous MMA and boxing betting. Predict UFC, boxing and combat sports outcomes with Monero.',
   },
   '/cricket': {
-    title: 'Anonymous Cricket Prediction Markets | No-KYC Cricket Predictions – 0xNull',
+    title: 'Anonymous Cricket Prediction Markets – 0xNull',
     description: 'Access anonymous cricket prediction markets on 0xNull. Make no-KYC cricket predictions using Monero and other cryptocurrencies on a privacy-first platform.',
   },
   '/flash': {
@@ -145,7 +145,7 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Anonymous slap fighting betting. Predict Power Slap and slap fighting match outcomes.',
   },
   '/get-started': {
-    title: 'How to Use Anonymous Crypto Prediction Markets | Get Started – 0xNull',
+    title: 'Get Started with Anonymous Crypto Markets – 0xNull',
     description: 'Learn how to use anonymous crypto prediction markets on 0xNull. No KYC, no accounts, Monero payments and full privacy from the start.',
   },
   '/tor-guide': {
@@ -217,7 +217,7 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Sign in to 0xNull. Access your marketplace and prediction market accounts.',
   },
   '/creators': {
-    title: '0xNull Creators | Anonymous Adult Content Platform (No KYC, Monero)',
+    title: '0xNull Creators | No-KYC Adult Content Platform',
     description: '0xNull Creators is a privacy-first adult content platform with no KYC, no accounts and Monero-only payments. Create and support content anonymously.',
   },
   '/creator/register': {
