@@ -197,6 +197,10 @@ export default function SeoCoverage() {
           })}
         </section>
 
+        <SitemapFreshnessCard />
+
+
+
         <Card>
           <CardHeader>
             <CardTitle>Snapshot history</CardTitle>
