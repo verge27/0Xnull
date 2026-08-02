@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 
+# Blog — index and posts are public; admin/editor routes are private
+Allow: /blog
+Allow: /blog/
+Disallow: /blog/admin
+
 # Private / per-user routes
 Disallow: /auth
 Disallow: /checkout/
@@ -25,14 +30,11 @@ Disallow: /creator/login
 
 # Admin / internal
 Disallow: /admin/
-
-
-Disallow: /blog/admin
 Disallow: /influencer/
 Disallow: /partners/
 Disallow: /api-analytics
 Disallow: /verify
 
 Sitemap: https://0xnull.io/sitemap.xml
-
 Sitemap: https://0xnull.io/rss.xml
+
