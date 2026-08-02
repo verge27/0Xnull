@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { SitemapFreshnessCard } from '@/components/seo/SitemapFreshnessCard';
 import { DeployRecheckCard } from '@/components/seo/DeployRecheckCard';
+import { RobotsMonitorCard } from '@/components/seo/RobotsMonitorCard';
 
 
 interface Snapshot {
@@ -204,6 +205,8 @@ export default function SeoCoverage() {
         </section>
 
         <SitemapFreshnessCard />
+
+        <RobotsMonitorCard />
 
 
 
