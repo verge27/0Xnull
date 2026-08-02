@@ -71,13 +71,13 @@ export function usePasskey() {
         publicKey: {
           challenge: challenge as unknown as BufferSource,
           rp: {
-            name: 'TariMarket',
+            name: '0xNull',
             id: window.location.hostname
           },
           user: {
             id: userId as unknown as BufferSource,
-            name: 'TariMarket User',
-            displayName: 'TariMarket Encryption'
+            name: '0xNull User',
+            displayName: '0xNull Encryption'
           },
           pubKeyCredParams: [
             { alg: -7, type: 'public-key' },  // ES256

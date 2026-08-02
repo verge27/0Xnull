@@ -29,9 +29,9 @@ export default defineConfig(({ mode }) => ({
       injectRegister: null, // We handle registration manually
       includeAssets: ["favicon.ico", "favicon.svg", "favicon-192.png", "favicon-512.png", "apple-touch-icon.png", "robots.txt"],
       manifest: {
-        name: "TariMarket",
-        short_name: "TariMarket",
-        description: "Privacy-first marketplace and predictions platform",
+        name: "0xNull",
+        short_name: "0xNull",
+        description: "One token. Every private service. No accounts, ever.",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",
         display: "standalone",
