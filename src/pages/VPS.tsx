@@ -402,6 +402,19 @@ const VPS = () => {
             <p className="text-muted-foreground">Privacy-focused virtual servers via SporeStack</p>
           </div>
 
+          <ServicePriceBar
+            className="mb-8"
+            price="Provider pricing, paid in Monero"
+            trust={
+              <>
+                Servers are rented with no name attached and no card on file. How the rest of the platform
+                stays verifiable is written up in the{' '}
+                <Link to="/docs" className="text-primary hover:underline">docs</Link>.
+              </>
+            }
+          />
+
+
           {!savedToken ? (
             /* Token Setup */
             <Card className="max-w-md mx-auto">
