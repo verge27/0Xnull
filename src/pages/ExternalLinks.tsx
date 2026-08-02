@@ -56,36 +56,6 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
-    name: "DarkGPT",
-    onionAddress: "66xz7tc67eqhsqhk42hq5wqavgu5cnwxh53hxhfhhp6puqlnhzxhjcqd.onion",
-    description: "Tor-native uncensored AI chat. The operator is anonymous so treat every prompt as logged and avoid anything adjacent to your real infrastructure.",
-    category: "AI",
-    tags: ["Tor", "AI", "Onion", "Privacy"],
-    isRecommended: false
-  },
-  {
-    name: "Darknet Trust",
-    description: "Darknet profile-search service reported as down in current directory listings. No reliable v3 address available.",
-    category: "Search Engine",
-    tags: ["Darknet", "Search Engine", "Down"],
-    isRecommended: false
-  },
-  {
-    name: "Darknetlist",
-    url: "https://darknetlist.is/",
-    description: "A directory of darknet markets and privacy-focused services.",
-    category: "Directory",
-    tags: ["Darknet", "Privacy", "Directory"],
-    isRecommended: true
-  },
-  {
-    name: "Dig",
-    description: "Anonymous darknet AI assistant. A claimed onion address appears in directories but could not be independently verified in this session.",
-    category: "Search Engine",
-    tags: ["Tor", "Search Engine", "AI", "Unverified"],
-    isRecommended: false
-  },
-  {
     name: "Dread",
     url: "http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion/",
     onionAddress: "dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion",
