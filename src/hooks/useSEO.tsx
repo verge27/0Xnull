@@ -17,6 +17,11 @@ interface SEOProps {
    * so filtered views never create duplicate canonicals.
    */
   canonical?: string;
+  /**
+   * Emit <meta name="robots" content="noindex, follow"> for filtered/search
+   * views so query-parameter variants don't get indexed as duplicates.
+   */
+  noindex?: boolean;
   /** Article-specific Open Graph metadata (blog posts, guides). */
   article?: {
     publishedTime?: string;
