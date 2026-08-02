@@ -69,7 +69,9 @@ export default function BlogPost() {
     title: post.title,
     description: post.meta_description || post.excerpt || `Read ${post.title} on 0xNull Blog`,
     image: post.featured_image || undefined,
+    canonical: `/blog/${post.slug}`,
   } : undefined);
+
 
   // Inject FAQPage structured data when the post has an FAQ section
   useEffect(() => {
