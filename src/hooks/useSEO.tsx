@@ -1091,6 +1091,11 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     }
     canonical.href = url;
 
+    // Robots directive — filtered/search views are noindex but still followed,
+    // so link equity flows to the canonical listing and post URLs.
+    updateMetaTag('robots', meta.noindex ? 'noindex, follow' : 'index, follow');
+
+
     
     // Collect all structured data
     const allStructuredData: StructuredData[] = [];
