@@ -1041,7 +1041,7 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
     const socialImageAlt = meta.imageAlt || meta.title || defaultMeta.title;
     updateMetaTag('og:image:alt', socialImageAlt, 'property');
     updateMetaTag('twitter:card', meta.twitterCard || 'summary_large_image');
-    updateMetaTag('twitter:site', '@0xNull');
+    
     updateMetaTag('twitter:title', meta.title || defaultMeta.title);
     updateMetaTag('twitter:description', meta.description || defaultMeta.description);
     updateMetaTag('twitter:image', socialImage);
