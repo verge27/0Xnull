@@ -537,22 +537,20 @@ export async function startConversation(
       }
     }
 
-    // Create new conversation
+    // Create new conversation (creator_id must match the caller for RLS)
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
-      .insert({ listing_id: listingId })
+      .insert({ listing_id: listingId, creator_id: buyerId })
       .select()
       .single();
 
     if (convError) throw convError;
 
-    // Add participants
+    // Add self as participant. The seller joins themselves via the
+    // listing-seller branch of the participants insert policy.
     const { error: partError } = await supabase
       .from('conversation_participants')
-      .insert([
-        { conversation_id: conversation.id, user_id: buyerId },
-        { conversation_id: conversation.id, user_id: sellerId },
-      ]);
+      .insert({ conversation_id: conversation.id, user_id: buyerId });
 
     if (partError) throw partError;
 
