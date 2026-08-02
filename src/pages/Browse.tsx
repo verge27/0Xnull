@@ -13,6 +13,7 @@ import { peptidesUKPartnerListings } from '@/lib/partners/peptidesUK';
 import { ukPeptidesPartnerListings } from '@/lib/partners/ukPeptides';
 import { ReferralListingCard } from '@/components/ReferralListingCard';
 import { DisclaimerBanner } from '@/components/DisclaimerBanner';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
