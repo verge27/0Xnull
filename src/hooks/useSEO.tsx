@@ -7,7 +7,14 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: string;
+  /**
+   * Absolute path to use as the canonical URL (e.g. '/blog').
+   * Defaults to the current pathname, which already drops query strings
+   * so filtered views never create duplicate canonicals.
+   */
+  canonical?: string;
 }
+
 
 interface StructuredData {
   '@context': string;
