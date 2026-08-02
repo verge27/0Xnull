@@ -13,6 +13,7 @@ import { peptidesUKPartnerListings } from '@/lib/partners/peptidesUK';
 import { ukPeptidesPartnerListings } from '@/lib/partners/ukPeptides';
 import { ReferralListingCard } from '@/components/ReferralListingCard';
 import { DisclaimerBanner } from '@/components/DisclaimerBanner';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -374,6 +375,19 @@ const Browse = () => {
               </p>
             </>
           )}
+
+          <ServicePriceBar
+            className="mt-6"
+            price="Free to list · buyers pay the listed price in XMR"
+            trust={
+              <>
+                Shipping details are PGP-encrypted in your browser, and order funds sit in escrow with a
+                timed release so a silent operator cannot strand them. See{' '}
+                <Link to="/docs#escrow" className="text-primary hover:underline">escrow and the dead man's switch</Link>.
+              </>
+            }
+          />
+
           
           
           {/* Breadcrumb Navigation */}

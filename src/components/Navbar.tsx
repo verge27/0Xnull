@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel, Landmark, Terminal, Globe } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel, Landmark, Terminal, Globe, FileText } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -214,6 +214,17 @@ export const Navbar = () => {
                     <span>Insights & Analysis</span>
                   </Link>
 
+                  {/* Docs */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Docs</div>
+                  <Link to="/docs" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <span>Token mechanics & trust</span>
+                  </Link>
+                  <Link to="/canary" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
+                    <span className="text-muted-foreground">Warrant canary</span>
+                  </Link>
+
+
                   {/* Free Software */}
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Free Software</div>
                   <Link to="/free-software" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
@@ -368,6 +379,15 @@ export const Navbar = () => {
                 <span className="hidden md:inline">Blog</span>
               </Link>
             </Button>
+
+            {/* Docs Link */}
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/docs">
+                <FileText className="w-4 h-4" />
+                <span className="hidden md:inline">Docs</span>
+              </Link>
+            </Button>
+
 
             {/* Free Software Link */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>

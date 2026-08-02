@@ -50,6 +50,8 @@ const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
 const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
+const Docs = lazy(() => import("./pages/Docs"));
+const Canary = lazy(() => import("./pages/Canary"));
 
 // Heavy prediction pages (largest bundles - definitely lazy load)
 const CryptoPredictions = lazy(() => import("./pages/CryptoPredictions"));
@@ -211,7 +213,9 @@ const App = () => (
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />
                   <Route path="/3ds-scanner" element={<ThreeDSScanner />} />
-                  
+                  <Route path="/docs" element={<Docs />} />
+                  <Route path="/canary" element={<Canary />} />
+
                   {/* Influencer */}
                   <Route path="/influencer" element={<Influencer />} />
                   <Route path="/influencer/:code" element={<InfluencerDashboard />} />

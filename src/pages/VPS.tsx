@@ -5,6 +5,8 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { SEORichText } from '@/components/SEORichText';
+import { Link } from 'react-router-dom';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -401,6 +403,19 @@ const VPS = () => {
             <h1 className="text-4xl font-bold mb-2">Anonymous VPS</h1>
             <p className="text-muted-foreground">Privacy-focused virtual servers via SporeStack</p>
           </div>
+
+          <ServicePriceBar
+            className="mb-8"
+            price="Provider pricing, paid in Monero"
+            trust={
+              <>
+                Servers are rented with no name attached and no card on file. How the rest of the platform
+                stays verifiable is written up in the{' '}
+                <Link to="/docs" className="text-primary hover:underline">docs</Link>.
+              </>
+            }
+          />
+
 
           {!savedToken ? (
             /* Token Setup */

@@ -10,6 +10,8 @@ import { Sparkles, Send, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useToken } from '@/hooks/useToken';
 import { TokenRequired } from '@/components/TokenManager';
+import { Link } from 'react-router-dom';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -94,6 +96,20 @@ const Kokoro = () => {
             $0.02-0.05 per message • No logs
           </p>
         </div>
+
+        <ServicePriceBar
+          className="mb-8 text-left"
+          price="$0.02 per message"
+          tokenMetered
+          trust={
+            <>
+              Conversations are not retained and no account is attached to them. Billing draws from a
+              throwaway token — see the{' '}
+              <Link to="/docs#token" className="text-primary hover:underline">token mechanics</Link>.
+            </>
+          }
+        />
+
 
         <TokenRequired>
           {/* Chat Container */}

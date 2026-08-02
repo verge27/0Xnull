@@ -7,6 +7,7 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { SEORichText } from '@/components/SEORichText';
 import { SwapPrivacyTiers } from '@/components/SwapPrivacyTiers';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
 const swapsBackground = '/images/backgrounds/swaps-background.webp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -852,6 +853,19 @@ const Swaps = () => {
             <h1 className="text-4xl font-bold mb-2">Crypto Swaps</h1>
             <p className="text-muted-foreground">Exchange cryptocurrencies privately</p>
           </div>
+
+          <ServicePriceBar
+            className="mb-6"
+            price="Provider rate, no 0xNull markup"
+            trust={
+              <>
+                No registration, no swap history tied to you and the quote you see is the provider's own.
+                Read how the wider platform is built to be verifiable in the{' '}
+                <Link to="/docs" className="text-primary hover:underline">docs</Link>.
+              </>
+            }
+          />
+
 
           {/* Aggregator selection removed — Trocador only */}
 
