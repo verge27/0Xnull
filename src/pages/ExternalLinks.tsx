@@ -8,7 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubmitLinkForm } from "@/components/SubmitLinkForm";
 
-const externalLinks = [
+type ExternalLink = {
+  name: string;
+  url: string;
+  onionAddress?: string;
+  description: string;
+  category: string;
+  tags: string[];
+  isRecommended: boolean;
+};
+
+const externalLinks: ExternalLink[] = [
   {
     name: "Ahmia",
     url: "https://ahmia.fi/",
