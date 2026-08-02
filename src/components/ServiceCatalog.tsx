@@ -29,6 +29,11 @@ const ServiceRow = ({ service }: { service: CatalogService }) => {
             {service.external && <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />}
           </div>
           <p className="text-sm text-muted-foreground mt-1">{service.what}</p>
+          {service.explainer && (
+            <p className="text-xs text-muted-foreground/80 mt-2 border-l-2 border-primary/30 pl-3">
+              {service.explainer}
+            </p>
+          )}
         </div>
       </div>
 
