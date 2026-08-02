@@ -10,6 +10,8 @@ import { SEORichText } from '@/components/SEORichText';
 import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 import { useVoucherFromUrl } from '@/hooks/useVoucher';
+import { RelatedGuides } from '@/components/RelatedGuides';
+
 
 // Responsive hero background images for different screen sizes
 // Using 100vw sizing, browser selects based on viewport * DPR.
