@@ -10,7 +10,7 @@ import { SubmitLinkForm } from "@/components/SubmitLinkForm";
 
 type ExternalLink = {
   name: string;
-  url: string;
+  url?: string;
   onionAddress?: string;
   description: string;
   category: string;
