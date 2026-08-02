@@ -28,6 +28,24 @@ const externalLinks: ExternalLink[] = [
     isRecommended: false
   },
   {
+    name: "Monero",
+    url: "https://www.getmonero.org/",
+    onionAddress: "monerotoruzizulg5ttgat2emf4d6fbmiea25detrmmy7erypseyteyd.onion",
+    description: "Official getmonero.org onion. The address is published on the Monero project's site.",
+    category: "Monero",
+    tags: ["Tor", "Monero", "Privacy", "Cryptocurrency"],
+    isRecommended: false
+  },
+  {
+    name: "Wasabi Wallet",
+    url: "https://wasabiwallet.io/",
+    onionAddress: "wasabiukrxmkdgve5kynjztuovbg43uxcbcxn6y2okcrsg7gb6jdmbad.onion",
+    description: "Privacy-focused Bitcoin wallet. Published on wasabiwallet.io. The zkSNACKs coordinator backend was shut down in 2024; the wallet still works pointed at a custom coordinator.",
+    category: "Monero",
+    tags: ["Tor", "Bitcoin", "Privacy", "Wallet"],
+    isRecommended: false
+  },
+  {
     name: "Ahmia",
     url: "https://ahmia.fi/",
     onionAddress: "juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion",
@@ -227,7 +245,7 @@ const groupedLinks = externalLinks.reduce<Record<string, ExternalLink[]>>((acc, 
   return acc;
 }, {});
 
-const priorityOrder = ["Directory", "Search Engine", "Comms"];
+const priorityOrder = ["Directory", "Search Engine", "Monero", "Comms"];
 const allCategories = Object.keys(groupedLinks);
 const remainingCategories = allCategories
   .filter((category) => !priorityOrder.includes(category))
