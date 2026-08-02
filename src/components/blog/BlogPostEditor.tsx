@@ -105,6 +105,17 @@ export function BlogPostEditor({ onSave }: BlogPostEditorProps) {
       
       toast.success(publish ? 'Post published!' : 'Draft saved!');
       
+      // Refresh the sitemap and nudge Search Console when a post goes live.
+      if (publish) {
+        supabase.functions
+          .invoke('sitemap-refresh')
+          .then(({ error: refreshError }) => {
+            if (refreshError) console.error('Sitemap refresh failed:', refreshError);
+          });
+      }
+      
+
+      
       // Reset form
       setFormData({
         title: '',
