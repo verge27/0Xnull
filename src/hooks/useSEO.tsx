@@ -13,6 +13,14 @@ interface SEOProps {
    * so filtered views never create duplicate canonicals.
    */
   canonical?: string;
+  /** Article-specific Open Graph metadata (blog posts, guides). */
+  article?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    author?: string;
+    section?: string;
+    tags?: string[];
+  };
 }
 
 
