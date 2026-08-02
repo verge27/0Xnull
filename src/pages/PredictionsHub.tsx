@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { BetSlipPanel } from '@/components/BetSlipPanel';
 import { MultibetDepositModal } from '@/components/MultibetDepositModal';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { RelatedGuides } from '@/components/RelatedGuides';
+
 
 const categories = [
   {
@@ -178,42 +180,14 @@ export default function PredictionsHub() {
             })}
           </div>
 
-          {/* Guides */}
-          <div className="mt-12">
-            <h2 className="text-xl font-semibold mb-2">Betting guides</h2>
-            <p className="text-muted-foreground text-sm mb-4">
-              Background reading before you take a position on a market.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="bg-secondary/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">
-                    <Link to="/blog/cs2-betting-guide-crypto" className="hover:text-primary transition-colors">
-                      CS2 betting guide: bet types, odds and no-KYC platforms
-                    </Link>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  How to <Link to="/blog/cs2-betting-guide-crypto" className="text-primary hover:underline">bet on CS2 matches with crypto</Link>, how map veto and roster changes move the odds and which Counter-Strike 2 markets carry real liquidity. Pairs with our{' '}
-                  <Link to="/esports-predictions" className="text-primary hover:underline">live esports markets</Link>.
-                </CardContent>
-              </Card>
-              <Card className="bg-secondary/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">
-                    <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="hover:text-primary transition-colors">
-                      Anonymous VPS hosting: no-logs servers paid in Monero
-                    </Link>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Betting privately starts with the connection you bet from. Our guide to{' '}
-                  <Link to="/blog/anonymous-vps-hosting-crypto-guide" className="text-primary hover:underline">anonymous VPS hosting</Link>{' '}
-                  covers no-KYC providers, paying in XMR and hardening a box you can run your own VPN on.
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <RelatedGuides
+            className="mt-12"
+            compact
+            headingId="betting-guides-heading"
+            heading="Betting guides"
+            intro="Background reading before you take a position on a market."
+          />
+
 
           {/* Help Link */}
           <div className="mt-8 text-center">
