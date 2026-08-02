@@ -196,8 +196,13 @@ Deno.serve(async (req) => {
     const rows = [];
     const summary: Record<string, string | null> = {};
     for (const url of TRACKED_URLS) {
-      const { result, error } = await inspectUrl(headers, property, url);
-      summary[url] = error ? `error: ${error}` : (result?.verdict ?? null);
+      const { result, richResults, error } = await inspectUrl(headers, property, url);
+      const richTypes = (richResults?.detectedItems ?? [])
+        .map((i: { richResultType?: string }) => i.richResultType)
+        .filter(Boolean);
+      summary[url] = error
+        ? `error: ${error}`
+        : `${result?.verdict ?? 'UNKNOWN'}${richTypes.length ? ` | rich: ${richTypes.join(', ')}` : ''}`;
       rows.push({
         url,
         verdict: result?.verdict ?? null,
