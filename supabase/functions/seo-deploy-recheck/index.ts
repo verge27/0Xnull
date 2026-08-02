@@ -92,7 +92,12 @@ async function inspectUrl(headers: Record<string, string>, property: string, url
     return { error: `[${res.status}] ${body.slice(0, 400)}` };
   }
   const data = await res.json();
-  return { result: data?.inspectionResult?.indexStatusResult ?? {} };
+  return {
+    result: data?.inspectionResult?.indexStatusResult ?? {},
+    // Same signal Google's Rich Results Test reports: detected rich-result
+    // types (Article, FAQ, Breadcrumbs) plus any validation issues.
+    richResults: data?.inspectionResult?.richResultsResult ?? null,
+  };
 }
 
 Deno.serve(async (req) => {
