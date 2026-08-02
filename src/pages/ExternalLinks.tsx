@@ -200,7 +200,7 @@ const ExternalLinks = () => {
 
           {/* External Links */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Recommended External Resources</h2>
+            <h2 className="text-2xl font-bold mb-6">External Resources</h2>
             <div className="grid gap-6">
               {externalLinks.map((link, index) => (
                 <Card key={index} className={`hover:border-primary/50 transition-colors ${link.isRecommended ? 'border-primary/30 bg-primary/5' : ''}`}>
