@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "prompt", // Manual registration in main.tsx
       injectRegister: null, // We handle registration manually
-      includeAssets: ["favicon.ico", "favicon.svg", "favicon.jpg", "robots.txt"],
+      includeAssets: ["favicon.ico", "favicon.svg", "favicon-192.png", "favicon-512.png", "apple-touch-icon.png", "robots.txt"],
       manifest: {
         name: "TariMarket",
         short_name: "TariMarket",
@@ -42,9 +42,16 @@ export default defineConfig(({ mode }) => ({
             type: "image/svg+xml",
           },
           {
-            src: "/favicon.jpg",
+            src: "/favicon-192.png",
             sizes: "192x192",
-            type: "image/jpeg",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/favicon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
           },
         ],
       },
