@@ -1,8 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Target, Zap, BarChart3, Lock, ArrowRight, ExternalLink, Rocket, RefreshCw, ShoppingBag, TrendingUp, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Key, ArrowRight, ExternalLink, Rocket, FileText } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
@@ -11,6 +8,9 @@ import { useSEO } from '@/hooks/useSEO';
 import { BackgroundImage } from '@/components/OptimizedImage';
 import { useVoucherFromUrl } from '@/hooks/useVoucher';
 import { RelatedGuides } from '@/components/RelatedGuides';
+import { ServiceCatalog } from '@/components/ServiceCatalog';
+import { OnboardingStrip } from '@/components/OnboardingStrip';
+import { TrustGrid } from '@/components/TrustGrid';
 
 
 // Responsive hero background images for different screen sizes
@@ -30,70 +30,33 @@ const heroResponsiveSources = [
   { src: heroImages.large, width: 1920 },
 ];
 
+const tokenFacts = [
+  {
+    label: 'Issued instantly',
+    body: 'A 0xn_ token is a 64-character bearer string. No email, no password, no recovery question.',
+  },
+  {
+    label: 'Funded in Monero',
+    body: 'Send XMR to the address the token generates. The balance shows in USD after one confirmation.',
+  },
+  {
+    label: 'Metered per use',
+    body: 'Every service draws down the same balance. Rate limits attach to the token, not your IP.',
+  },
+  {
+    label: 'Lose it, lose access',
+    body: 'There is nothing on our side that could prove the token was yours. Save it before you fund it.',
+  },
+];
+
 const Index = () => {
   useSEO({
-    title: '0xNull | Anonymous Prediction Markets & Crypto Marketplace',
-    description: 'Privacy-first anonymous prediction markets and crypto marketplace. Trade goods, predict outcomes, pay with Monero. No KYC, no tracking, no accounts.',
+    title: '0xNull | One token, every private service, no accounts',
+    description: 'One anonymous token unlocks AI, a Monero marketplace, swaps, lending and prediction markets. No KYC, no accounts, priced per use.',
   });
   
   // Capture voucher/ref from URL params (e.g., ?ref=AWF0XDOTA)
   useVoucherFromUrl();
-  
-  const offerings = [
-    {
-      icon: BarChart3,
-      title: 'Prediction Markets',
-      description: 'Sports, esports, combat, crypto. Bet yes or no. XMR in, XMR out. No account.',
-      href: '/predictions',
-    },
-    {
-      icon: ShoppingBag,
-      title: 'Marketplace',
-      description: 'Buy and sell products and services anonymously. Pay with crypto, ship anywhere.',
-      href: '/browse',
-    },
-    {
-      icon: RefreshCw,
-      title: 'Swaps',
-      description: 'Swap 300+ coins privately. No registration. No history. Just rates.',
-      href: '/swaps',
-    },
-    {
-      icon: TrendingUp,
-      title: 'Lending',
-      description: 'Deposit, earn yield via Aave, withdraw. No KYC. No identity. Optional ZK shielding.',
-      href: '/lending',
-    },
-    {
-      icon: Shield,
-      title: '3DS Scanner',
-      description: 'Check if any checkout enforces 3D Secure. Free.',
-      href: '/3ds-scanner',
-    },
-  ];
-
-  const pillars = [
-    {
-      icon: Target,
-      title: 'No Account Needed',
-      description: 'Scan QR, send XMR, you\'re in. No signup, no email, no identity.'
-    },
-    {
-      icon: Zap,
-      title: 'Instant Payouts',
-      description: 'Winners paid automatically when markets resolve. No withdrawal requests.'
-    },
-    {
-      icon: BarChart3,
-      title: '0.4% Rake on Winnings',
-      description: 'No fee on losses or no-contest. Unopposed bets refunded in full.'
-    },
-    {
-      icon: Lock,
-      title: 'Fully Private',
-      description: 'XMR only. No blockchain trail. No KYC. Ever.'
-    }
-  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -110,7 +73,7 @@ const Index = () => {
         overlayClassName="bg-gradient-to-b from-background/70 via-background/60 to-background"
       >
         
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
+        <div className="container mx-auto px-4 py-20 md:py-28 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* KYCNOT.ME Badge */}
             <a 
@@ -128,42 +91,31 @@ const Index = () => {
               <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </a>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
-              <span className="sr-only">0xNull — Anonymous Prediction Markets &amp; Crypto Marketplace. </span>
-              <span aria-hidden="true">Join the Quiet Riot.</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight drop-shadow-lg">
+              One token. Every private service. No accounts, ever.
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto drop-shadow-md">
-              No name. No account. No compromise. Just your token.
+              0xNull issues one anonymous credential — a <span className="font-mono text-foreground">0xn_</span> token —
+              funded in Monero and metered in USD. It pays for AI, the marketplace, swaps, lending and
+              prediction markets. There is no signup step at any of them.
             </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/lending">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
-                  <TrendingUp className="w-5 h-5" aria-hidden="true" />
-                  Lending
-                </button>
-              </Link>
-              <Link to="/predictions">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-cyan-static transition-transform hover:scale-105 hover:bg-accent">
-                  <BarChart3 className="w-5 h-5" aria-hidden="true" />
-                  Predictions
-                </button>
-              </Link>
-              <Link to="/browse">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
-                  <ShoppingBag className="w-5 h-5" aria-hidden="true" />
-                  Marketplace
-                </button>
-              </Link>
-              <Link to="/swaps">
-                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-cyan-static transition-transform hover:scale-105 hover:bg-accent">
-                  <RefreshCw className="w-5 h-5" aria-hidden="true" />
-                  Swaps
-                </button>
-              </Link>
-              <Link to="/get-started">
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link to="/dashboard">
                 <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md bg-primary text-primary-foreground font-medium neon-glow-primary transition-transform hover:scale-105 hover:bg-primary/90">
+                  <Key className="w-5 h-5" aria-hidden="true" />
+                  Get a token
+                </button>
+              </Link>
+              <a href="#catalog">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-cyan-static transition-transform hover:scale-105 hover:bg-accent">
                   <Rocket className="w-5 h-5" aria-hidden="true" />
-                  Get Started
+                  See what it unlocks
+                </button>
+              </a>
+              <Link to="/docs">
+                <button className="inline-flex items-center gap-2 text-lg px-8 h-11 rounded-md border border-input bg-background/50 backdrop-blur-sm text-foreground font-medium neon-glow-magenta-static transition-transform hover:scale-105 hover:bg-accent">
+                  <FileText className="w-5 h-5" aria-hidden="true" />
+                  How it works
                 </button>
               </Link>
             </div>
@@ -171,49 +123,71 @@ const Index = () => {
         </div>
       </BackgroundImage>
 
-      {/* Offerings Section */}
-      <section className="container mx-auto px-4 py-20" aria-labelledby="offerings-heading">
-        <h2 id="offerings-heading" className="text-3xl md:text-4xl font-bold text-center mb-4">
-          One token. Everything.
-        </h2>
-        <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-          Prediction markets, private swaps, anonymous lending and a censorship-resistant marketplace — all under one roof, all XMR-native.
-        </p>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {offerings.map((offering) => {
-            const Icon = offering.icon;
-            return (
-              <Link key={offering.title} to={offering.href} className="group">
-                <div className="h-full border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6 transition-all hover:border-primary/40 hover:bg-card/80">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors" aria-hidden="true">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">{offering.title}</h3>
-                  <p className="text-muted-foreground text-sm">{offering.description}</p>
-                </div>
-              </Link>
-            );
-          })}
+      {/* Token explainer */}
+      <section className="container mx-auto px-4 py-20" aria-labelledby="token-heading">
+        <div className="max-w-2xl mb-10">
+          <h2 id="token-heading" className="text-3xl md:text-4xl font-bold mb-4">
+            The token is the product
+          </h2>
+          <p className="text-muted-foreground">
+            Everything else on this site is something the token unlocks. It is a bearer credential:
+            whoever holds the string holds the balance, and nobody — including us — can connect it to a
+            person.
+          </p>
         </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {tokenFacts.map((fact) => (
+            <div key={fact.label} className="rounded-lg border border-border/60 bg-card/50 backdrop-blur p-6">
+              <h3 className="font-semibold mb-2">{fact.label}</h3>
+              <p className="text-sm text-muted-foreground">{fact.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-sm">
+          <Link to="/docs#token" className="text-primary hover:underline">
+            Full token mechanics: issuance, balances, refills and rate limits →
+          </Link>
+        </p>
       </section>
 
-      {/* Features / Pillars Section */}
-      <section className="container mx-auto px-4 py-20 border-t border-border/30" aria-labelledby="features-heading">
-        <h2 id="features-heading" className="sr-only">Key Features</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pillars.map((pillar, index) => {
-            const Icon = pillar.icon;
-            return (
-              <div key={index} className="border border-border/50 bg-card/50 backdrop-blur rounded-lg p-6">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{pillar.title}</h3>
-                <p className="text-muted-foreground text-sm">{pillar.description}</p>
-              </div>
-            );
-          })}
+      {/* Onboarding strip */}
+      <section className="container mx-auto px-4 py-20 border-t border-border/30" aria-labelledby="onboarding-heading">
+        <div className="max-w-2xl mb-10">
+          <h2 id="onboarding-heading" className="text-3xl md:text-4xl font-bold mb-4">
+            Three steps from landing to using
+          </h2>
+          <p className="text-muted-foreground">
+            No form stands between you and the first service. This is the whole path.
+          </p>
         </div>
+        <OnboardingStrip />
+      </section>
+
+      {/* Service catalog */}
+      <section id="catalog" className="container mx-auto px-4 py-20 border-t border-border/30 scroll-mt-20" aria-labelledby="catalog-heading">
+        <div className="max-w-2xl mb-10">
+          <h2 id="catalog-heading" className="text-3xl md:text-4xl font-bold mb-4">
+            Service catalog
+          </h2>
+          <p className="text-muted-foreground">
+            What each service does, what it costs and whether it is live. Anonymous metering only works
+            if the meter is legible, so the prices sit here rather than behind a quote form.
+          </p>
+        </div>
+        <ServiceCatalog />
+      </section>
+
+      {/* Trust */}
+      <section className="container mx-auto px-4 py-20 border-t border-border/30" aria-labelledby="trust-heading">
+        <div className="max-w-2xl mb-10">
+          <h2 id="trust-heading" className="text-3xl md:text-4xl font-bold mb-4">
+            Why trust an operator you cannot name
+          </h2>
+          <p className="text-muted-foreground">
+            You should not have to. Each of these replaces a promise with a mechanism you can check.
+          </p>
+        </div>
+        <TrustGrid />
       </section>
 
       {/* Guides Section */}
@@ -231,10 +205,10 @@ const Index = () => {
         <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 rounded-lg">
           <div className="p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Get Started?
+              Get your token
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Access the permissionless economy today.
+              Issued instantly, funded in Monero, spent anywhere on the catalog.
             </p>
             <Link to="/get-started">
               <button className="inline-flex items-center gap-2 text-base px-6 h-11 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
@@ -245,6 +219,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+
 
       {/* SEO Rich Text Section */}
       <SEORichText 
