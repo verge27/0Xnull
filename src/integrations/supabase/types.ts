@@ -256,18 +256,21 @@ export type Database = {
       conversations: {
         Row: {
           created_at: string
+          creator_id: string | null
           id: string
           listing_id: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          creator_id?: string | null
           id?: string
           listing_id?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          creator_id?: string | null
           id?: string
           listing_id?: string | null
           updated_at?: string
