@@ -131,7 +131,7 @@ export default function BlogPost() {
         '@type': 'Organization',
         name: '0xNull',
         url: 'https://0xnull.io',
-        logo: { '@type': 'ImageObject', url: 'https://0xnull.io/favicon.jpg' },
+        logo: { '@type': 'ImageObject', url: 'https://0xnull.io/favicon-512.png' },
       },
     };
   }, [post, postImage, canonicalUrl]);

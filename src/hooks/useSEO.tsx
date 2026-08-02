@@ -531,7 +531,7 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
       '@type': 'Organization',
       name: '0xNull',
       url: 'https://0xnull.io',
-      logo: 'https://0xnull.io/favicon.jpg',
+      logo: 'https://0xnull.io/favicon-512.png',
       sameAs: [],
     },
   ],
@@ -841,7 +841,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
     mainEntityOfPage: {
@@ -867,7 +867,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
   },
@@ -889,7 +889,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
   },
@@ -911,7 +911,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
     proficiencyLevel: 'Beginner',
@@ -934,7 +934,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
     proficiencyLevel: 'Beginner',
@@ -957,7 +957,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
     proficiencyLevel: 'Beginner',
@@ -980,7 +980,7 @@ const articleSchemas: Record<string, StructuredData> = {
       name: '0xNull',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://0xnull.io/favicon.jpg',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
   },
