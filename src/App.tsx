@@ -44,7 +44,6 @@ const FiatOfframp = lazy(() => import("./pages/FiatOfframp"));
 const FiatOnramp = lazy(() => import("./pages/FiatOnramp"));
 const ApiAnalytics = lazy(() => import("./pages/ApiAnalytics"));
 const Voice = lazy(() => import("./pages/Voice"));
-const Kokoro = lazy(() => import("./pages/Kokoro"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
@@ -173,7 +172,6 @@ const App = () => (
                   {/* AI */}
                   <Route path="/ai" element={<AIHub />} />
                   <Route path="/voice" element={<Voice />} />
-                  <Route path="/kokoro" element={<Kokoro />} />
                   
                   {/* Lending */}
                   <Route path="/lending" element={<Lending />} />

@@ -69,17 +69,6 @@ export const SERVICE_CATALOG: CatalogService[] = [
     tokenMetered: true,
   },
   {
-    name: 'Kokoro Companion',
-    what: 'Conversational AI companion with generated voice replies. No transcript retention.',
-    price: '$0.02',
-    priceNote: 'per message',
-    status: 'beta',
-    group: 'ai',
-    href: '/kokoro',
-    icon: MessageCircle,
-    tokenMetered: true,
-  },
-  {
     name: 'NanoGPT',
     what: '200+ models including frontier and uncensored open weights. No prompt logging.',
     price: 'From $8',

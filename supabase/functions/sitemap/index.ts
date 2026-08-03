@@ -27,7 +27,6 @@ const staticPages = [
   { path: '/phone', priority: '0.7', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/ai', priority: '0.8', changefreq: 'weekly', lastmod: '2024-12-20' },
   { path: '/voice', priority: '0.7', changefreq: 'weekly', lastmod: '2024-12-15' },
-  { path: '/kokoro', priority: '0.6', changefreq: 'weekly', lastmod: '2024-12-15' },
   { path: '/browse', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
   { path: '/marketplace', priority: '0.7', changefreq: 'daily', lastmod: '2025-01-02' },
 

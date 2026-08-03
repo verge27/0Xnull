@@ -27,15 +27,6 @@ const services = [
     price: 'From $0.15',
     color: 'text-primary',
   },
-  {
-    title: 'Kokoro Companion',
-    description: 'AI companion for conversation and connection. No logs, no judgment.',
-    icon: MessageCircle,
-    href: '/kokoro',
-    price: 'From $0.02',
-    color: 'text-purple-500',
-    comingSoon: true,
-  },
 ];
 
 const features = [

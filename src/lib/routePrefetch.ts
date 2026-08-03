@@ -36,7 +36,6 @@ const routeImports: Record<string, ImportFn> = {
   // AI
   '/ai': () => import('@/pages/AIHub'),
   '/voice': () => import('@/pages/Voice'),
-  '/kokoro': () => import('@/pages/Kokoro'),
   
   // Infrastructure
   '/infra': () => import('@/pages/InfraHub'),

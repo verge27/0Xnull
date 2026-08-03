@@ -21,8 +21,7 @@
 - [Lending](/lending): Anonymous lending with Aave, Pendle and Morpho integrations.
 - [Lending Privacy Tiers](/lending/privacy): Moderate, Max ZK and Max Native privacy explained.
 - [AI Hub](/ai): Privacy-first AI services paid with crypto.
-- [Voice Cloning](/voice): AI voice cloning powered by Kokoro.
-- [Kokoro AI Companion](/kokoro): Conversational AI with no logs.
+- [Voice Cloning](/voice): AI voice cloning with anonymous crypto payments.
 - [Infrastructure](/infra): Anonymous VPS, eSIM and privacy tooling.
 - [VPS Hosting](/vps): No-KYC virtual servers paid in crypto.
 - [Phone Numbers / eSIM](/phone): Anonymous eSIMs and phone numbers.
