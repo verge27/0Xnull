@@ -291,6 +291,20 @@ serve(async (req) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     
+    const serviceLabel = targetPath.startsWith('/api/lending') ? 'lending' : 'prediction';
+    const unavailableResponse = (reason: string) => {
+      console.error(`[xnull-proxy] Upstream unavailable for ${targetPath}: ${reason}`);
+      return new Response(JSON.stringify({
+        error: `The ${serviceLabel} service is temporarily unavailable. Please try again in a moment.`,
+        status: 503,
+        upstream: true,
+        retry: true,
+      }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    };
+
     let response: Response;
     try {
       response = await fetch(targetUrl.toString(), { ...fetchOptions, signal: controller.signal });
@@ -312,11 +326,18 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      throw e;
+      // Transient upstream connection failures -> clean JSON envelope, not a 500
+      return unavailableResponse(e instanceof Error ? e.message : String(e));
     }
     clearTimeout(timeoutId);
-    
-    const responseText = await response.text();
+
+    let responseText: string;
+    try {
+      responseText = await response.text();
+    } catch (e) {
+      // Upstream dropped the connection mid-body
+      return unavailableResponse(e instanceof Error ? e.message : String(e));
+    }
 
     console.log(`Response status: ${response.status}, body preview: ${responseText.substring(0, 200)}`);
 

@@ -546,8 +546,8 @@ export async function startConversation(
 
     if (convError) throw convError;
 
-    // Add self as participant. The seller joins themselves via the
-    // listing-seller branch of the participants insert policy.
+    // Add self as participant. The listing's seller is added automatically by
+    // the conversations_add_seller_participant database trigger.
     const { error: partError } = await supabase
       .from('conversation_participants')
       .insert({ conversation_id: conversation.id, user_id: buyerId });
