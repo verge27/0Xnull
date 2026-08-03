@@ -127,6 +127,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/docs</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/canary</loc>
+    <lastmod>2026-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/safety</loc>
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -248,7 +260,7 @@
   </url>
   <url>
     <loc>https://0xnull.io/blog/burner-phone-number-app-2026</loc>
-    <lastmod>2026-08-02</lastmod>
+    <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
