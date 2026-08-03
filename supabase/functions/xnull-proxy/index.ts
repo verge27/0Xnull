@@ -24,7 +24,6 @@ const ALLOWED_PATH_PREFIXES = [
   '/api/swap',
   '/api/vouchers',
   '/api/voice',
-  '/api/kokoro',
   '/api/3ds',
 ];
 

@@ -120,10 +120,6 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'AI Voice Cloning - 0xNull',
     description: 'Clone any voice with AI. High-quality text-to-speech synthesis with anonymous crypto payments.',
   },
-  '/kokoro': {
-    title: 'Kokoro AI Companion - 0xNull',
-    description: 'AI companion for conversation and connection. No logs, no judgment, pay with crypto.',
-  },
   '/combat': {
     title: 'MMA & Boxing Predictions - 0xNull',
     description: 'Anonymous MMA and boxing betting. Predict UFC, boxing and combat sports outcomes with Monero.',
@@ -368,11 +364,6 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
   '/external-links': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'External Links', url: 'https://0xnull.io/external-links' },
-  ],
-  '/kokoro': [
-    { name: 'Home', url: 'https://0xnull.io/' },
-    { name: 'AI Hub', url: 'https://0xnull.io/ai' },
-    { name: 'Kokoro', url: 'https://0xnull.io/kokoro' },
   ],
   '/slap': [
     { name: 'Home', url: 'https://0xnull.io/' },
@@ -805,14 +796,6 @@ const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
     name: 'Privacy VPN Resources',
     description: 'Curated list of privacy-focused VPN services.',
     url: 'https://0xnull.io/vpn-resources',
-  },
-  '/kokoro': {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Kokoro AI Companion',
-    description: 'Private AI companion for conversation.',
-    url: 'https://0xnull.io/kokoro',
-    applicationCategory: 'LifestyleApplication',
   },
   '/slap': {
     '@context': 'https://schema.org',

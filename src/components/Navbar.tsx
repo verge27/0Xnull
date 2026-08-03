@@ -242,10 +242,6 @@ export const Navbar = () => {
                   <Link to="/creator/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Become a Creator</span>
                   </Link>
-                  <Link to="/kokoro" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Kokoro</span>
-                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded">Soon</span>
-                  </Link>
                   <Link to="/fan/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
                     <span className="text-muted-foreground">Fan Dashboard</span>
                   </Link>
@@ -406,13 +402,6 @@ export const Navbar = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/kokoro" className="cursor-pointer flex items-center justify-between">
-                    Kokoro Companion
-                    <span className="text-[10px] bg-amber-600 text-black font-medium px-1.5 py-0.5 rounded ml-2">Soon</span>
-                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

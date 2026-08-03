@@ -259,20 +259,9 @@ class ApiClient {
     return this.request<Voice[]>(`/api/voice/clones?token=${this.token}`);
   }
 
-  // AI Chat Services
-  async kokoroChat(messages: ChatMessage[]): Promise<ApiResponse<ChatResponse>> {
-    if (!this.token) {
-      return { error: 'No token set' };
-    }
-    return this.request<ChatResponse>('/api/kokoro/chat', {
-      method: 'POST',
-      body: JSON.stringify({ token: this.token, messages }),
-    });
-  }
-
   // Streaming chat (for real-time responses)
   async *streamChat(
-    endpoint: '/api/kokoro/chat',
+    endpoint: string,
     messages: ChatMessage[]
   ): AsyncGenerator<string, void, unknown> {
     if (!this.token) {
