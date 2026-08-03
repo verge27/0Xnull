@@ -103,12 +103,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/kokoro</loc>
-    <lastmod>2024-12-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/browse</loc>
     <lastmod>2025-01-02</lastmod>
     <changefreq>daily</changefreq>
