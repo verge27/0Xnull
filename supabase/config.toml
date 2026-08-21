@@ -95,3 +95,5 @@ verify_jwt = false
 
 [functions.pk-create-market]
 verify_jwt = false
+[functions.hodlhodl-offers]
+verify_jwt = false

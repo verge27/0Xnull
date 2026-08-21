@@ -92,6 +92,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: '0xNull Lending Protocol | Anonymous No-KYC Crypto Lending',
     description: 'Access the 0xNull decentralized lending protocol with no KYC. Lend and borrow crypto anonymously with privacy-first smart contracts and transparent rates.',
   },
+  '/buy': {
+    title: 'Buy Bitcoin No KYC with Cash or Bank Transfer – 0xNull',
+    description: 'Buy bitcoin without ID using Hodl Hodl peer-to-peer multisig escrow, then swap BTC to Monero on 0xNull. No accounts, no KYC, no card on-ramp.',
+  },
   '/cashout': {
     title: 'Cash Out Crypto - 0xNull',
     description: 'Cash out your cryptocurrency anonymously. Convert XMR to fiat with privacy.',
