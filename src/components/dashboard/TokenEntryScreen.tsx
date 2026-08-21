@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Key, ArrowRight, Copy, Check, AlertTriangle, Loader2, Shield, Clipboard } from 'lucide-react';
+import { Key, ArrowRight, Copy, Check, AlertTriangle, Loader2, Shield, Clipboard, Banknote } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
@@ -15,7 +16,7 @@ interface TokenEntryScreenProps {
 }
 
 export const TokenEntryScreen = ({ onTokenSet }: TokenEntryScreenProps) => {
-  const [mode, setMode] = useState<'choose' | 'enter' | 'generate'>('choose');
+  const [mode, setMode] = useState<'choose' | 'enter' | 'xmr' | 'generate'>('choose');
   const [tokenInput, setTokenInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -130,7 +131,7 @@ export const TokenEntryScreen = ({ onTokenSet }: TokenEntryScreenProps) => {
 
           <Card
             className="cursor-pointer hover:border-primary/50 transition-colors text-left"
-            onClick={() => setMode('generate')}
+            onClick={() => setMode('xmr')}
           >
             <CardContent className="py-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
@@ -190,11 +191,60 @@ export const TokenEntryScreen = ({ onTokenSet }: TokenEntryScreenProps) => {
     );
   }
 
+  // Do you already have XMR?
+  if (mode === 'xmr') {
+    return (
+      <div className="max-w-lg mx-auto text-center space-y-6 py-16 px-4">
+        <Button variant="ghost" size="sm" onClick={() => setMode('choose')} className="mb-4">
+          ← Back
+        </Button>
+        <div>
+          <h2 className="text-xl font-bold">Do you have Monero?</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Tokens are funded in XMR. Grab some first if you need it.
+          </p>
+        </div>
+        <div className="grid gap-4 text-left">
+          <Card
+            className="cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => setMode('generate')}
+          >
+            <CardContent className="py-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">I have XMR</p>
+                <p className="text-sm text-muted-foreground">Generate a token and fund it now</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          <Link to="/buy" className="block">
+            <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+              <CardContent className="py-5 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <Banknote className="w-6 h-6 text-green-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">I need XMR</p>
+                  <p className="text-sm text-muted-foreground">Buy bitcoin without an ID, then swap it to Monero</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // Generate new token
   if (mode === 'generate' && !newToken) {
     return (
       <div className="max-w-md mx-auto text-center space-y-6 py-16 px-4">
-        <Button variant="ghost" size="sm" onClick={() => setMode('choose')} className="mb-4">
+        <Button variant="ghost" size="sm" onClick={() => setMode('xmr')} className="mb-4">
           ← Back
         </Button>
         <div className="w-16 h-16 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
