@@ -112,10 +112,10 @@ const GetStarted = () => {
           <Coins className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold">
-          Buy crypto without KYC
+          Buy Bitcoin without KYC
         </h1>
         <p className="text-lg text-muted-foreground">
-          Get Bitcoin, USDT or other crypto with no identity verification.
+          Use a peer-to-peer offer to get Bitcoin with no identity verification.
         </p>
       </div>
 
@@ -124,17 +124,15 @@ const GetStarted = () => {
           <Button
             size="lg"
             className="w-full text-lg py-6"
-            onClick={() => window.open("https://trocador.app/?ref=mkaShKWUZA", "_blank")}
+            onClick={() => navigate("/buy")}
           >
-            Go to Trocador
-            <ExternalLink className="ml-2 h-5 w-5" />
+            View live Hodl Hodl offers
+            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           
           <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
             <p className="text-sm text-center">
-              <span className="font-semibold text-amber-400">Tip:</span> Click the{" "}
-              <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Buy/Sell</span>{" "}
-              tab at the top right to buy crypto with fiat
+              <span className="font-semibold text-amber-400">Tip:</span> Pick an offer with a seller rating and payment method you trust, then send the trade to our referral link.
             </p>
           </div>
           
@@ -143,10 +141,10 @@ const GetStarted = () => {
               <p className="font-medium">No account required</p>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
-              <p className="font-medium">Card or bank transfer</p>
+              <p className="font-medium">P2P fiat payments</p>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
-              <p className="font-medium">Takes 5-10 minutes</p>
+              <p className="font-medium">Swap BTC → XMR next</p>
             </div>
           </div>
         </CardContent>
