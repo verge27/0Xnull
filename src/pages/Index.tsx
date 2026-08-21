@@ -118,6 +118,11 @@ const Index = () => {
                 </button>
               </Link>
             </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              <Link to="/buy" className="hover:text-foreground transition-colors underline underline-offset-4 decoration-muted-foreground/40">
+                No Monero yet? Buy it without an ID →
+              </Link>
+            </p>
           </div>
         </div>
       </BackgroundImage>

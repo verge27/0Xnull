@@ -351,13 +351,27 @@ export const Navbar = () => {
               </Link>
             </Button>
 
-            {/* Swaps Link */}
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/swaps">
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden md:inline">Swaps</span>
-              </Link>
-            </Button>
+            {/* Swaps Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
+                  <RefreshCw className="w-4 h-4" />
+                  <span className="hidden md:inline">Swaps</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-popover border-border z-50">
+                <DropdownMenuItem asChild>
+                  <Link to="/buy" className="cursor-pointer">Buy (no KYC)</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/swaps" className="cursor-pointer">Swap</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/cashout" className="cursor-pointer">Cash out</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Blog Link */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>

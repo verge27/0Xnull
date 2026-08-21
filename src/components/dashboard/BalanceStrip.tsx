@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Key, Copy, Check, Eye, EyeOff, LogOut, Plus } from 'lucide-react';
+import { Key, Copy, Check, Eye, EyeOff, LogOut, Plus, Banknote } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface BalanceStripProps {
@@ -57,6 +58,11 @@ export const BalanceStrip = ({ token, balance, onFund, onLogout }: BalanceStripP
           </div>
           <Button size="sm" onClick={onFund} className="gap-1">
             <Plus className="w-3.5 h-3.5" /> Fund
+          </Button>
+          <Button size="sm" variant="outline" asChild className="gap-1">
+            <Link to="/cashout">
+              <Banknote className="w-3.5 h-3.5" /> Cash out
+            </Link>
           </Button>
           {showLogoutConfirm ? (
             <div className="flex gap-1">
