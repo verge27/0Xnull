@@ -373,6 +373,10 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'External Links', url: 'https://0xnull.io/external-links' },
   ],
+  '/work': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Work Paid in Monero', url: 'https://0xnull.io/work' },
+  ],
   '/slap': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Predictions', url: 'https://0xnull.io/predict' },
