@@ -628,6 +628,157 @@ print(bet["amount_xmr"])`}
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Jobs API */}
+          <TabsContent value="jobs" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5" />
+                  Jobs API
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Read-only feed of work paid in Monero, aggregated from public boards. No auth, no key, no rate limit beyond fair use. Same data as the <a href="/work" className="underline">/work</a> page.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Base URL</h3>
+                  <code className="block bg-muted px-3 py-2 rounded text-xs break-all">{JOBS_BASE}</code>
+                </div>
+
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api</code>
+                    <span className="text-muted-foreground">— Listings, filtered and paginated</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/sources</code>
+                    <span className="text-muted-foreground">— Boards we aggregate and their fetch health</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/stats</code>
+                    <span className="text-muted-foreground">— Totals and last aggregation time</span>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-3">Query parameters</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parameter</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Description</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell><code className="text-xs">q</code></TableCell>
+                        <TableCell className="text-xs">string</TableCell>
+                        <TableCell className="text-xs">Case-insensitive match on title or description</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">tag</code></TableCell>
+                        <TableCell className="text-xs">string</TableCell>
+                        <TableCell className="text-xs">Single tag, for example <code>rust</code> or <code>writing</code></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">source</code></TableCell>
+                        <TableCell className="text-xs">string</TableCell>
+                        <TableCell className="text-xs">Source id from <code>/jobs-api/sources</code></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">pay_type</code></TableCell>
+                        <TableCell className="text-xs">enum</TableCell>
+                        <TableCell className="text-xs"><code>hourly</code>, <code>fixed</code> or <code>unknown</code></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">sort</code></TableCell>
+                        <TableCell className="text-xs">enum</TableCell>
+                        <TableCell className="text-xs"><code>newest</code> (default), <code>pay_desc</code> or <code>pay_asc</code></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">since</code></TableCell>
+                        <TableCell className="text-xs">ISO 8601</TableCell>
+                        <TableCell className="text-xs">Only listings seen after this timestamp — use it to poll for new work</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">limit</code></TableCell>
+                        <TableCell className="text-xs">integer</TableCell>
+                        <TableCell className="text-xs">1 to 100, default 25</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">offset</code></TableCell>
+                        <TableCell className="text-xs">integer</TableCell>
+                        <TableCell className="text-xs">0 to 10000, default 0</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Example response</h3>
+                  <CodeBlock
+                    language="json"
+                    code={`{
+  "count": 1,
+  "total": 23,
+  "limit": 25,
+  "offset": 0,
+  "has_more": false,
+  "generated_at": "2026-08-24T18:00:00.000Z",
+  "disclaimer": "Listings are aggregated from third-party boards and are not vetted by 0xNull. No escrow, no dispute mediation.",
+  "jobs": [
+    {
+      "id": "monero-jobs:1a2b3c",
+      "source": "monero-jobs",
+      "title": "Rust developer for wallet tooling",
+      "description": "Part-time contract, paid weekly in XMR.",
+      "url": "https://monero.jobs/jobs/1a2b3c",
+      "pay_xmr": 0.35,
+      "pay_type": "hourly",
+      "tags": ["rust", "monero"],
+      "posted_at": "2026-08-22T09:14:00.000Z",
+      "first_seen_at": "2026-08-22T10:00:00.000Z",
+      "last_seen_at": "2026-08-24T18:00:00.000Z"
+    }
+  ]
+}`}
+                  />
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Poll for new listings</h3>
+                  <CodeBlock
+                    language="python"
+                    code={`import requests, time
+
+BASE = "${JOBS_BASE}"
+last_seen = None
+
+while True:
+    params = {"limit": 100, "sort": "newest"}
+    if last_seen:
+        params["since"] = last_seen
+    data = requests.get(BASE, params=params, timeout=20).json()
+
+    for job in data["jobs"]:
+        pay = f"{job['pay_xmr']} XMR" if job["pay_xmr"] else "pay not stated"
+        print(job["title"], "-", pay, "-", job["url"])
+
+    last_seen = data["generated_at"]
+    time.sleep(600)  # the index refreshes every 30 minutes`}
+                  />
+                </div>
+
+                <div className="rounded-lg border border-border/60 bg-muted/40 p-4 text-sm text-muted-foreground space-y-2">
+                  <p className="font-semibold text-foreground">Terms of use</p>
+                  <p>Listings are third-party content, cached for up to 5 minutes and refreshed every 30 minutes. They are unvetted: we hold no funds, run no escrow and mediate no disputes. Keep the <code>url</code> intact so applicants reach the original board, and cache responses rather than hammering the endpoint.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* Integration Examples */}
