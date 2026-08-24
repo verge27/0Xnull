@@ -335,22 +335,107 @@ serve(async (req) => {
     auth: { persistSession: false },
   });
 
-  const only = new URL(req.url).searchParams.get('source');
+  const params = new URL(req.url).searchParams;
+  const only = params.get('source');
+  const isIngest = params.get('ingest') === '1';
 
-  // Scheduled runs only touch enabled sources; an explicit ?source= overrides that.
-  const { data: enabledRows } = await supabase.from('sources').select('id').eq('enabled', true);
-  const enabled = new Set((enabledRows ?? []).map((r) => String(r.id)));
+  let adapters: Adapter[];
 
-  const adapters = only
-    ? ADAPTERS.filter((a) => a.sourceId === only)
-    : ADAPTERS.filter((a) => enabled.has(a.sourceId));
+  if (isIngest) {
+    // Push ingestion: the caller supplies the raw rows (used for sources we
+    // cannot fetch server-side, e.g. Telegram groups without a web preview).
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'ingest requires POST' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!serviceKey || presented !== serviceKey) {
+      console.error('[aggregate-jobs] ingest requires the service role key');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!only) {
+      return new Response(JSON.stringify({ error: 'ingest requires ?source=' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-  if (adapters.length === 0) {
-    return new Response(JSON.stringify({ error: only ? `unknown source: ${only}` : 'no enabled sources' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    const { data: sourceRow } = await supabase.from('sources').select('id').eq('id', only).maybeSingle();
+    if (!sourceRow) {
+      return new Response(JSON.stringify({ error: `unknown source: ${only}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let payload: unknown;
+    try {
+      payload = await req.json();
+    } catch (_e) {
+      payload = null;
+    }
+    if (!Array.isArray(payload)) {
+      return new Response(JSON.stringify({ error: 'body must be a JSON array of RawJob' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const rows: RawJob[] = [];
+    for (const [i, item] of payload.entries()) {
+      const r = item as Partial<RawJob> | null;
+      const externalId = r && r.externalId != null ? String(r.externalId).trim() : '';
+      const title = r && r.title != null ? tidy(String(r.title)).slice(0, 200) : '';
+      const body = r && r.body != null ? tidy(String(r.body)) : '';
+      const url = r && r.url != null ? String(r.url).trim() : '';
+      if (!externalId || !title || !url) {
+        return new Response(
+          JSON.stringify({ error: `item ${i}: externalId, title and url are required` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+      if (!/^https?:\/\//i.test(url)) {
+        return new Response(JSON.stringify({ error: `item ${i}: url must be http(s)` }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      let postedAt: string | undefined;
+      if (r?.postedAt) {
+        const d = new Date(String(r.postedAt));
+        if (Number.isNaN(d.getTime())) {
+          return new Response(JSON.stringify({ error: `item ${i}: postedAt is not a valid date` }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        postedAt = d.toISOString();
+      }
+      rows.push({ externalId, title, body, url, postedAt, payText: r?.payText ? String(r.payText) : undefined });
+    }
+
+    adapters = [{ sourceId: only, fetch: async () => rows }];
+  } else {
+    // Scheduled runs only touch enabled sources; an explicit ?source= overrides that.
+    const { data: enabledRows } = await supabase.from('sources').select('id').eq('enabled', true);
+    const enabled = new Set((enabledRows ?? []).map((r) => String(r.id)));
+
+    adapters = only
+      ? ADAPTERS.filter((a) => a.sourceId === only)
+      : ADAPTERS.filter((a) => enabled.has(a.sourceId));
+
+    if (adapters.length === 0) {
+      return new Response(JSON.stringify({ error: only ? `unknown source: ${only}` : 'no enabled sources' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   }
+
 
 
   const { data: blocklistRows } = await supabase.from('blocklist').select('pattern, is_regex');
