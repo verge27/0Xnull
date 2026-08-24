@@ -65,7 +65,7 @@ const BuyNoKyc = () => {
       const data = await res.json();
       const list: Offer[] = Array.isArray(data?.offers) ? data.offers : [];
       setOffers(list);
-      setFailed(list.length === 0);
+      setFailed(false);
     } catch {
       setOffers([]);
       setFailed(true);
@@ -175,7 +175,22 @@ const BuyNoKyc = () => {
             </Alert>
           )}
 
-          {!loading && !failed && (
+          {!loading && !failed && offers.length === 0 && (
+            <Card className="bg-card/40 border-border/50">
+              <CardContent className="p-6 text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  No live {currency} sell offers right now. Try another currency or check Hodl Hodl directly.
+                </p>
+                <Button asChild size="sm" variant="outline">
+                  <a href={REFERRAL_URL} target="_blank" rel="noopener noreferrer">
+                    Open on Hodl Hodl <ExternalLink className="ml-2 h-3 w-3" />
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {!loading && !failed && offers.length > 0 && (
             <div className="space-y-3">
               {offers.map((o) => (
                 <Card key={o.id} className="bg-card/40 border-border/50">
