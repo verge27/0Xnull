@@ -46,7 +46,9 @@ interface JobRow {
   posted_at: string | null;
   first_seen_at: string;
   last_seen_at: string;
+  sources?: { name: string; url: string } | null;
 }
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -107,10 +109,11 @@ serve(async (req) => {
       let query = supabase
         .from('jobs')
         .select(
-          'id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, last_seen_at',
+          'id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, last_seen_at, sources(name, url)',
           { count: 'exact' },
         )
         .eq('hidden', false);
+
 
       if (q) {
         const escaped = q.replace(/[%,()]/g, ' ').trim();
@@ -137,8 +140,11 @@ serve(async (req) => {
       const jobs = (data as JobRow[] ?? []).map((j) => ({
         id: j.id,
         source: j.source_id,
+        source_name: j.sources?.name ?? null,
+        source_url: j.sources?.url ?? null,
         title: j.title,
         description: j.body,
+
         url: j.url,
         pay_xmr: j.pay_xmr,
         pay_type: j.pay_type,
