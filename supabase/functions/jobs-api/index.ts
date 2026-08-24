@@ -143,8 +143,8 @@ serve(async (req) => {
         source_name: j.sources?.name ?? null,
         source_url: j.sources?.url ?? null,
         title: j.title,
-
         description: j.body,
+
         url: j.url,
         pay_xmr: j.pay_xmr,
         pay_type: j.pay_type,
