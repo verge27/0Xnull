@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Briefcase, ExternalLink, Search, AlertTriangle, RefreshCw, Clock, Coins } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -423,6 +424,13 @@ const Work = () => {
               </p>
               <p className="text-sm text-muted-foreground">
                 Listings that advertise illegal work are filtered out automatically. If something slipped through, tell us and we will block it.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Building a bot or board of your own? This feed is available as a free public JSON API — see the{" "}
+                <Link to="/api-docs" className="text-primary underline underline-offset-4">
+                  Jobs API documentation
+                </Link>
+                .
               </p>
             </CardContent>
           </Card>
