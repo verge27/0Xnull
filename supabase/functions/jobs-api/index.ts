@@ -46,7 +46,9 @@ interface JobRow {
   posted_at: string | null;
   first_seen_at: string;
   last_seen_at: string;
+  sources?: { name: string; url: string } | null;
 }
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
