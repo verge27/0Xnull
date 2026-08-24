@@ -136,7 +136,7 @@ Centralized backend + Monero settlement + accountable operator = better tradeoff
 | Trocador | Swap aggregation, AnonPay |
 | NanoGPT | AI model routing |
 | SporeStack | Anonymous VPS provisioning |
-| LNVPN | eSIM affiliate |
+| nadanada | eSIM affiliate |
 | The Odds API | Sports oracle data |
 | XMRBazaar | Marketplace referrals |
 
