@@ -51,10 +51,10 @@ const formatXmr = (value: number) =>
     .replace(/\.$/, "");
 
 const relativeTime = (iso: string) => {
-  const then = new Date(iso).getTime();
-  const diff = Date.now() - then;
+  const diff = Date.now() - new Date(iso).getTime();
   const day = 86_400_000;
-  if (diff < 3_600_000) return "just now";
+  if (diff < 120_000) return "just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
   if (diff < day) return `${Math.floor(diff / 3_600_000)}h ago`;
   if (diff < 30 * day) return `${Math.floor(diff / day)}d ago`;
   return `${Math.floor(diff / (30 * day))}mo ago`;
