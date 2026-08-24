@@ -140,11 +140,12 @@ print(bet["amount_xmr"])`}
 
         {/* API Reference */}
         <Tabs defaultValue="predictions" className="mb-8">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
             <TabsTrigger value="predictions">Predictions</TabsTrigger>
             <TabsTrigger value="multibets">Multibets</TabsTrigger>
             <TabsTrigger value="sports">Sports</TabsTrigger>
             <TabsTrigger value="esports">Esports</TabsTrigger>
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
           </TabsList>
 
           {/* Predictions API */}
