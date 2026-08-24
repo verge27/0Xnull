@@ -86,7 +86,7 @@ const pageMeta: Record<string, SEOProps> = {
   },
   '/phone': {
     title: 'Anonymous Phone Numbers No KYC | Buy Private eSIMs with Crypto – 0xNull',
-    description: 'Buy anonymous phone numbers and eSIMs with no KYC on 0xNull. Instant activation, global coverage and crypto payments including Monero and Lightning.',
+    description: 'Anonymous phone numbers and eSIMs with no KYC, via nadanada (formerly LNVPN). Instant activation, global coverage, Monero, Lightning or card.',
   },
   '/lending': {
     title: '0xNull Lending Protocol | Anonymous No-KYC Crypto Lending',

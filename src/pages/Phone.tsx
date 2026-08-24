@@ -10,14 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 const esimBackground = '/images/backgrounds/esim-background.webp';
 
-const AFFILIATE_BASE = "https://lnvpn.net";
+const AFFILIATE_BASE = "https://nadanada.me";
 const REF = "?ref=syndicate";
 
 const features = [
   { icon: "🔒", title: "No KYC", description: "No identity verification. No email. No account. Just pay and use." },
   { icon: "⚡", title: "Instant Activation", description: "Services activate immediately after payment confirmation" },
   { icon: "🌍", title: "Global Coverage", description: "Phone numbers and eSIMs for dozens of countries" },
-  { icon: "💰", title: "Crypto Only", description: "Lightning, Bitcoin, Monero, USDT/USDC accepted" }
+  { icon: "💰", title: "Flexible Payment", description: "Lightning, Bitcoin, Monero and other crypto, plus card and Apple Pay" }
 ];
 
 const services = [
@@ -34,9 +34,9 @@ const services = [
   {
     icon: PhoneIcon,
     title: "Rental Numbers",
-    badge: "3 Months",
-    description: "Rent a phone number for 3 months. Receive SMS from any sender - services, banks, friends. Access via unique code, no app needed.",
-    features: ["3-month rental period", "Receive SMS from any source", "Works with WhatsApp, Signal, Telegram", "Web-based inbox (unique code access)", "UK, US and other countries"],
+    badge: "3, 6 or 9 Months",
+    description: "Rent a phone number for 3, 6 or 9 months. Receive SMS from any sender - services, banks, friends. Access via unique code, no app needed.",
+    features: ["3, 6 or 9 month rental terms", "Receive SMS from any source", "Works with WhatsApp, Signal, Telegram", "Web-based inbox (unique code access)", "UK numbers live, plus US and other countries"],
     pricing: [{ label: "UK Number (3 months)", value: "~$12.00" }, { label: "US Number (3 months)", value: "~$15.00" }],
     ctaText: "Rent Phone Number",
     ctaUrl: `${AFFILIATE_BASE}/phone-numbers${REF}`
@@ -45,8 +45,8 @@ const services = [
     icon: Wifi,
     title: "Data eSIM",
     badge: "Global",
-    description: "Prepaid data eSIMs for travel or privacy. Install via QR code, no physical SIM needed. Data-only (no voice/SMS number included).",
-    features: ["Instant QR code delivery", "Hotspot/tethering supported", "Global coverage (100+ countries)", "Top up anytime", "No account required"],
+    description: "Data eSIMs for 200+ countries from $0.99. Install via QR code, no physical SIM needed. Data-only (no voice/SMS number included).",
+    features: ["Instant QR code delivery", "Hotspot/tethering supported", "Coverage in 200+ countries", "Top up anytime", "No account required"],
     pricing: [{ label: "Starting from", value: "$0.99" }, { label: "Data packages", value: "1GB - 100GB" }],
     ctaText: "Get eSIM",
     ctaUrl: `${AFFILIATE_BASE}/esim${REF}`
@@ -95,12 +95,12 @@ const Phone = () => {
             </Badge>
             <h1 className="text-4xl font-bold mb-3">Anonymous Phone & eSIM</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-              Disposable phone numbers for verification. Data eSIMs for global connectivity. No KYC, no accounts, pay with crypto.
+              Disposable phone numbers for verification. Data eSIMs for global connectivity. No KYC, no accounts, pay with crypto, card or Apple Pay.
             </p>
             <p className="text-sm text-muted-foreground">
               Powered by{" "}
               <a href={`${AFFILIATE_BASE}${REF}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                LNVPN
+                nadanada (formerly LNVPN)
               </a>
               {" • Privacy-first since day one"}
             </p>
@@ -135,7 +135,7 @@ const Phone = () => {
           {/* Services */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-center mb-2">Choose Your Service</h2>
-            <p className="text-muted-foreground text-center mb-8">All services are provided via LNVPN's privacy-focused infrastructure</p>
+            <p className="text-muted-foreground text-center mb-8">All services are provided via nadanada's privacy-focused infrastructure</p>
             
             <div className="grid md:grid-cols-2 gap-6">
               {services.map((service, idx) => {
@@ -278,7 +278,7 @@ const Phone = () => {
                 </div>
                 
                 <p className="text-muted-foreground mb-6">
-                  The services above (LNVPN) provide virtual phone numbers and data eSIMs. 
+                  The services above (nadanada) provide virtual phone numbers and data eSIMs. 
                   If you need to keep your existing physical SIM card active whilst travelling or living abroad, that's a different use case: <strong>SIM hosting</strong>.
                 </p>
 
@@ -342,7 +342,7 @@ const Phone = () => {
           
           <p>Phone numbers and eSIMs are available for dozens of countries worldwide, making them ideal for verification, privacy-focused communication, travel or online services that require a phone number. Activation occurs instantly after payment confirmation, with no manual approval or delays.</p>
           
-          <p>All phone services on 0xNull are crypto-only, supporting Bitcoin (Lightning), Monero, USDT and USDC. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
+          <p>Phone services on 0xNull support Bitcoin (Lightning), Monero, USDT and USDC, plus card and Apple Pay for users who don't need the crypto path. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
           
           <p>Whether you need a temporary number, a private phone line or an anonymous eSIM for global use, 0xNull provides fast, no-KYC phone services designed for anonymity and convenience.</p>
           

@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 
 const vpnServices = [
   {
-    name: "LNVPN",
-    url: "https://lnvpn.net/?ref=0xnull",
+    name: "nadanada",
+    url: "https://nadanada.me/?ref=syndicate",
     description: "Token-style VPN access via Lightning Network and Monero. No account required — mirrors 0xNull's privacy-first model. Also offers eSIM and burner numbers.",
     kycLevel: 0,
     kycNote: "Explicit never",
