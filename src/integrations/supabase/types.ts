@@ -83,6 +83,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocklist: {
+        Row: {
+          is_regex: boolean
+          pattern: string
+          reason: string | null
+        }
+        Insert: {
+          is_regex?: boolean
+          pattern: string
+          reason?: string | null
+        }
+        Update: {
+          is_regex?: boolean
+          pattern?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_name: string
@@ -393,6 +411,112 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fetch_runs: {
+        Row: {
+          blocked: number | null
+          error: string | null
+          fetched: number | null
+          finished_at: string | null
+          id: number
+          inserted: number | null
+          source_id: string | null
+          started_at: string
+          updated: number | null
+        }
+        Insert: {
+          blocked?: number | null
+          error?: string | null
+          fetched?: number | null
+          finished_at?: string | null
+          id?: number
+          inserted?: number | null
+          source_id?: string | null
+          started_at?: string
+          updated?: number | null
+        }
+        Update: {
+          blocked?: number | null
+          error?: string | null
+          fetched?: number | null
+          finished_at?: string | null
+          id?: number
+          inserted?: number | null
+          source_id?: string | null
+          started_at?: string
+          updated?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fetch_runs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          body: string
+          dedupe_key: string
+          external_id: string
+          first_seen_at: string
+          hidden: boolean
+          hidden_reason: string | null
+          id: string
+          last_seen_at: string
+          pay_type: string
+          pay_xmr: number | null
+          posted_at: string | null
+          source_id: string
+          tags: string[]
+          title: string
+          url: string
+        }
+        Insert: {
+          body?: string
+          dedupe_key: string
+          external_id: string
+          first_seen_at?: string
+          hidden?: boolean
+          hidden_reason?: string | null
+          id: string
+          last_seen_at?: string
+          pay_type?: string
+          pay_xmr?: number | null
+          posted_at?: string | null
+          source_id: string
+          tags?: string[]
+          title: string
+          url: string
+        }
+        Update: {
+          body?: string
+          dedupe_key?: string
+          external_id?: string
+          first_seen_at?: string
+          hidden?: boolean
+          hidden_reason?: string | null
+          id?: string
+          last_seen_at?: string
+          pay_type?: string
+          pay_xmr?: number | null
+          posted_at?: string | null
+          source_id?: string
+          tags?: string[]
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listing_analytics: {
         Row: {
@@ -1211,6 +1335,39 @@ export type Database = {
           url?: string
           user_canonical?: string | null
           verdict?: string | null
+        }
+        Relationships: []
+      }
+      sources: {
+        Row: {
+          enabled: boolean
+          escrow: boolean
+          id: string
+          kind: string
+          last_error: string | null
+          last_ok_at: string | null
+          name: string
+          url: string
+        }
+        Insert: {
+          enabled?: boolean
+          escrow?: boolean
+          id: string
+          kind: string
+          last_error?: string | null
+          last_ok_at?: string | null
+          name: string
+          url: string
+        }
+        Update: {
+          enabled?: boolean
+          escrow?: boolean
+          id?: string
+          kind?: string
+          last_error?: string | null
+          last_ok_at?: string | null
+          name?: string
+          url?: string
         }
         Relationships: []
       }
