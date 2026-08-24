@@ -336,13 +336,22 @@ serve(async (req) => {
   });
 
   const only = new URL(req.url).searchParams.get('source');
-  const adapters = only ? ADAPTERS.filter((a) => a.sourceId === only) : ADAPTERS;
+
+  // Scheduled runs only touch enabled sources; an explicit ?source= overrides that.
+  const { data: enabledRows } = await supabase.from('sources').select('id').eq('enabled', true);
+  const enabled = new Set((enabledRows ?? []).map((r) => String(r.id)));
+
+  const adapters = only
+    ? ADAPTERS.filter((a) => a.sourceId === only)
+    : ADAPTERS.filter((a) => enabled.has(a.sourceId));
+
   if (adapters.length === 0) {
-    return new Response(JSON.stringify({ error: `unknown source: ${only}` }), {
+    return new Response(JSON.stringify({ error: only ? `unknown source: ${only}` : 'no enabled sources' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
 
   const { data: blocklistRows } = await supabase.from('blocklist').select('pattern, is_regex');
   const blocklist: Blocklist = (blocklistRows ?? []).map((r) => ({
