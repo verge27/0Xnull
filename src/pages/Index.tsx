@@ -123,6 +123,12 @@ const Index = () => {
                 No Monero yet? Buy it without an ID →
               </Link>
             </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              <Link to="/work" className="hover:text-foreground transition-colors underline underline-offset-4 decoration-muted-foreground/40">
+                Looking for work paid in XMR? Browse live jobs →
+              </Link>
+            </p>
+
           </div>
         </div>
       </BackgroundImage>
