@@ -232,10 +232,14 @@ export const Navbar = () => {
                     <Globe className="w-5 h-5 text-primary" />
                     <span>External Links</span>
                   </Link>
+
+                  {/* Jobs */}
+                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jobs</div>
                   <Link to="/work" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
                     <Briefcase className="w-5 h-5 text-primary" />
                     <span>Work Paid in XMR</span>
                   </Link>
+
 
 
                   <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Companions</div>
