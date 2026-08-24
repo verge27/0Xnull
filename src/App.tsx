@@ -49,6 +49,7 @@ const Verify = lazy(() => import("./pages/Verify"));
 const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
 const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
+const Work = lazy(() => import("./pages/Work"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
 const Docs = lazy(() => import("./pages/Docs"));
 const Canary = lazy(() => import("./pages/Canary"));
@@ -209,6 +210,7 @@ const App = () => (
                   <Route path="/support" element={<Support />} />
                   <Route path="/tor-guide" element={<TorGuide />} />
                   <Route path="/external-links" element={<ExternalLinks />} />
+                  <Route path="/work" element={<Work />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />

@@ -184,6 +184,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'External Links - 0xNull',
     description: 'Curated privacy and darknet resources outside the 0xNull ecosystem.',
   },
+  '/work': {
+    title: 'Jobs Paid in Monero (XMR) - 0xNull',
+    description: 'Live aggregated feed of jobs and freelance gigs paid in Monero. No KYC, no account, refreshed every 30 minutes.',
+  },
   '/wishlist': {
     title: 'My Wishlist - 0xNull',
     description: 'Your saved marketplace items. Track products you want to purchase later.',
@@ -368,6 +372,10 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
   '/external-links': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'External Links', url: 'https://0xnull.io/external-links' },
+  ],
+  '/work': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Work Paid in Monero', url: 'https://0xnull.io/work' },
   ],
   '/slap': [
     { name: 'Home', url: 'https://0xnull.io/' },

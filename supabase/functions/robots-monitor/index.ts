@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
 
     if (insertError) console.error('robots-monitor insert failed:', insertError.message);
 
-    // 6. Alert on regressions, recoveries, or content changes
+    // 6. Alert on regressions, recoveries or content changes
     let alertSent = false;
     const shouldAlert = becameUnhealthy || recovered || changed;
     const resendKey = Deno.env.get('RESEND_API_KEY');
