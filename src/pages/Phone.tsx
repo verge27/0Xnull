@@ -342,7 +342,7 @@ const Phone = () => {
           
           <p>Phone numbers and eSIMs are available for dozens of countries worldwide, making them ideal for verification, privacy-focused communication, travel or online services that require a phone number. Activation occurs instantly after payment confirmation, with no manual approval or delays.</p>
           
-          <p>All phone services on 0xNull are crypto-only, supporting Bitcoin (Lightning), Monero, USDT and USDC. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
+          <p>Phone services on 0xNull support Bitcoin (Lightning), Monero, USDT and USDC, plus card and Apple Pay for users who don't need the crypto path. Monero is recommended for maximum privacy, ensuring payments remain confidential and untraceable.</p>
           
           <p>Whether you need a temporary number, a private phone line or an anonymous eSIM for global use, 0xNull provides fast, no-KYC phone services designed for anonymity and convenience.</p>
           
