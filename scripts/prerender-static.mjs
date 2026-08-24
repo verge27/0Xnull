@@ -37,7 +37,7 @@ const ROUTES = [
     ogTitle: 'Anonymous Phone Numbers & eSIMs — no KYC',
     ogDescription:
       'Disposable numbers, 3, 6 or 9 month rentals and global data eSIMs from nadanada (formerly LNVPN). No identity checks, no accounts.',
-    image: '/images/backgrounds/esim-background.webp',
+    image: '/og-image.png',
     headline: 'Anonymous Phone & eSIM',
     jsonLd: [
       {

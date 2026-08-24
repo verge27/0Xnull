@@ -8,7 +8,7 @@
     "dev": "vite",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-rss.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/prerender-blog.mjs && node scripts/check-seo-blog.mjs",
+    "postbuild": "node scripts/prerender-blog.mjs && node scripts/prerender-static.mjs && node scripts/check-seo-blog.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "lint:oxford": "node scripts/check-oxford-commas.mjs",
@@ -17,7 +17,7 @@
     "sitemap": "node scripts/generate-sitemap.mjs",
     "preview": "vite preview",
     "rss": "node scripts/generate-rss.mjs",
-    "prerender": "node scripts/prerender-blog.mjs"
+    "prerender": "node scripts/prerender-blog.mjs && node scripts/prerender-static.mjs"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",
