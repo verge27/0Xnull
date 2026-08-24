@@ -209,8 +209,8 @@ const App = () => (
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/tor-guide" element={<TorGuide />} />
+                  <Route path="/external-links" element={<ExternalLinks />} />
                   <Route path="/work" element={<Work />} />
-                  <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/get-started" element={<GetStarted />} />
                   <Route path="/api-docs" element={<ApiDocs />} />
                   <Route path="/free-software" element={<FreeSoftware />} />
