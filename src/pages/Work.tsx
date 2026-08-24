@@ -344,7 +344,9 @@ const Work = () => {
                         )}
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {relativeTime(job.posted_at ?? job.first_seen_at)}
+                          {job.posted_at
+                            ? `Posted ${relativeTime(job.posted_at)}`
+                            : `First seen ${relativeTime(job.first_seen_at)}`}
                         </span>
                       </div>
 
