@@ -140,7 +140,10 @@ serve(async (req) => {
       const jobs = (data as JobRow[] ?? []).map((j) => ({
         id: j.id,
         source: j.source_id,
+        source_name: j.sources?.name ?? null,
+        source_url: j.sources?.url ?? null,
         title: j.title,
+
         description: j.body,
         url: j.url,
         pay_xmr: j.pay_xmr,
