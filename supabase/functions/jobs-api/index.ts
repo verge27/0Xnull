@@ -109,10 +109,11 @@ serve(async (req) => {
       let query = supabase
         .from('jobs')
         .select(
-          'id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, last_seen_at',
+          'id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, last_seen_at, sources(name, url)',
           { count: 'exact' },
         )
         .eq('hidden', false);
+
 
       if (q) {
         const escaped = q.replace(/[%,()]/g, ' ').trim();
