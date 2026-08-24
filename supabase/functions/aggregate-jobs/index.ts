@@ -420,13 +420,26 @@ serve(async (req) => {
 
     adapters = [{ sourceId: only, fetch: async () => rows }];
   } else {
-    // Scheduled runs only touch enabled sources; an explicit ?source= overrides that.
-    const { data: enabledRows } = await supabase.from('sources').select('id').eq('enabled', true);
-    const enabled = new Set((enabledRows ?? []).map((r) => String(r.id)));
+    // Scheduled runs only touch enabled sources in fetch mode; ingest-mode sources
+    // are push-only and are never crawled from here. An explicit ?source= overrides
+    // the enabled flag but not the mode.
+    const { data: sourceRows } = await supabase.from('sources').select('id, enabled, mode');
+    const rows = sourceRows ?? [];
+    const pushOnly = new Set(rows.filter((r) => String(r.mode) === 'ingest').map((r) => String(r.id)));
+    const crawlable = new Set(
+      rows.filter((r) => r.enabled && String(r.mode) !== 'ingest').map((r) => String(r.id)),
+    );
+
+    if (only && pushOnly.has(only)) {
+      return new Response(
+        JSON.stringify({ error: `source ${only} is push-only; POST with ?ingest=1 instead` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
 
     adapters = only
       ? ADAPTERS.filter((a) => a.sourceId === only)
-      : ADAPTERS.filter((a) => enabled.has(a.sourceId));
+      : ADAPTERS.filter((a) => crawlable.has(a.sourceId));
 
     if (adapters.length === 0) {
       return new Response(JSON.stringify({ error: only ? `unknown source: ${only}` : 'no enabled sources' }), {
@@ -434,6 +447,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
   }
 
 

@@ -1346,6 +1346,7 @@ export type Database = {
           kind: string
           last_error: string | null
           last_ok_at: string | null
+          mode: string
           name: string
           url: string
         }
@@ -1356,6 +1357,7 @@ export type Database = {
           kind: string
           last_error?: string | null
           last_ok_at?: string | null
+          mode?: string
           name: string
           url: string
         }
@@ -1366,6 +1368,7 @@ export type Database = {
           kind?: string
           last_error?: string | null
           last_ok_at?: string | null
+          mode?: string
           name?: string
           url?: string
         }
