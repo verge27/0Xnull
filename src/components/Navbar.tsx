@@ -451,6 +451,12 @@ export const Navbar = () => {
                   <Link to="/phone" className="cursor-pointer">eSIM & Phone</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/work" className="cursor-pointer flex items-center gap-2">
+                    <Briefcase className="w-3 h-3 text-primary" />
+                    Work Paid in XMR
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/external-links" className="cursor-pointer flex items-center gap-2">
                     <Globe className="w-3 h-3 text-primary" />
                     External Links
