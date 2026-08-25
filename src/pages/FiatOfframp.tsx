@@ -428,7 +428,85 @@ const FiatOfframp = () => {
             </Card>
           )}
 
+          {/* Payout system */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Globe className="h-5 w-5 text-primary" />
+                How the payout system works
+              </CardTitle>
+              <CardDescription>
+                SimpleSwap routes crypto-to-fiat payouts through Guardarian, its regulated payout provider. The payout itself is not API-native — it finishes on a hosted checkout.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 text-sm">
+              <ol className="space-y-2 text-muted-foreground list-decimal list-inside">
+                <li>You request a quote and limits for the crypto-to-fiat pair here.</li>
+                <li>The exchange is created through the SimpleSwap API.</li>
+                <li>SimpleSwap returns a redirect to Guardarian's hosted checkout.</li>
+                <li>Guardarian runs KYC and receives your crypto deposit.</li>
+                <li>Guardarian sends the fiat payout by card or bank transfer.</li>
+              </ol>
+
+              <div>
+                <h3 className="font-semibold mb-2">Where payouts are usually available</h3>
+                <p className="text-muted-foreground mb-3">
+                  Eligibility is the intersection of the countries SimpleSwap permits, the countries Guardarian permits and the payout methods Guardarian can offer for that transaction. These are candidates, not guarantees.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { region: 'Europe outside the EU', list: 'Switzerland, Norway, Iceland, Liechtenstein, Bosnia and Herzegovina, Moldova, Montenegro, non-occupied Ukraine' },
+                    { region: 'Latin America', list: 'Argentina, Brazil, Chile, Costa Rica, Dominican Republic, Ecuador, El Salvador, Guatemala, Honduras, Mexico, Paraguay, Peru, Uruguay' },
+                    { region: 'Asia-Pacific', list: 'Australia, Hong Kong, Indonesia, New Zealand, Philippines, Thailand, Vietnam' },
+                    { region: 'Central Asia and Caucasus', list: 'Armenia, Azerbaijan, Kazakhstan, Uzbekistan' },
+                    { region: 'Middle East', list: 'UAE, Turkey, Jordan, Kuwait, Oman' },
+                    { region: 'Africa', list: 'South Africa, Nigeria, Ghana, Senegal, Tanzania, Uganda, Zambia, Rwanda, Benin' },
+                  ].map(r => (
+                    <div key={r.region} className="rounded-lg border bg-secondary/30 p-3">
+                      <p className="font-medium mb-1">{r.region}</p>
+                      <p className="text-muted-foreground text-xs">{r.list}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-destructive" />
+                  Excluded markets
+                </h3>
+                <div className="space-y-1 text-muted-foreground">
+                  {[
+                    ['United Kingdom', 'blocked by SimpleSwap and Guardarian'],
+                    ['United States', 'blocked by SimpleSwap'],
+                    ['European Union', 'SimpleSwap currently excludes every member state'],
+                    ['Canada', 'blocked by Guardarian'],
+                    ['Japan', 'blocked by SimpleSwap'],
+                    ['India', 'blocked by Guardarian'],
+                    ['Singapore, Malaysia, South Korea', 'blocked by Guardarian'],
+                    ['China', 'blocked by both'],
+                    ['Israel, Qatar, Saudi Arabia', 'blocked by Guardarian'],
+                    ['Kenya', 'blocked by Guardarian'],
+                    ['Colombia', 'blocked by SimpleSwap'],
+                  ].map(([market, reason]) => (
+                    <p key={market} className="text-xs">
+                      <span className="text-foreground font-medium">{market}</span> — {reason}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 space-y-2 text-xs text-muted-foreground">
+                <p className="font-medium text-yellow-400">Before you start</p>
+                <p>There is no country-eligibility endpoint. A quote can pass every check here and still be refused at Guardarian checkout.</p>
+                <p>Restricted country lists are worded as "including but not limited to", so absence from a list is not a guarantee of service.</p>
+                <p>Guardarian checkout requires identity verification. For a fully private route, use the cash flow on the Buy page instead.</p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Info Section */}
+
           <Card className="mt-6">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
