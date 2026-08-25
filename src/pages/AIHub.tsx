@@ -57,6 +57,58 @@ export default function AIHub() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* NanoGPT Featured Section */}
+          <Card className="bg-gradient-to-br from-primary/15 via-primary/5 to-secondary/20 border-primary/30 overflow-hidden mb-12">
+            <CardContent className="py-8 px-6 md:px-8">
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Brain className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">NanoGPT</h3>
+                    <p className="text-sm text-muted-foreground">The anti-FraudGPT. Legitimate, cheaper, better.</p>
+                  </div>
+                </div>
+
+                <p className="text-muted-foreground">
+                  200+ AI models — including GPT-5.2, Claude, Gemini and deep uncensored open-source catalogues.
+                  No KYC, no prompt logging, TEE-verified privacy. Pay with XMR, ETH, BTC or fiat. From $8/month or pay-per-prompt.
+                </p>
+
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Shield className="h-4 w-4 text-primary shrink-0" />
+                    <span>No prompt logging</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Eye className="h-4 w-4 text-primary shrink-0" />
+                    <span>TEE verified privacy</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Server className="h-4 w-4 text-primary shrink-0" />
+                    <span>200+ models</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild size="lg">
+                    <a href="https://nano-gpt.com/r/NfWFCFJi" target="_blank" rel="noopener noreferrer">
+                      Try NanoGPT
+                      <ExternalLink className="h-4 w-4 ml-2" />
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild size="lg">
+                    <a href="https://nano-gpt.com/r/NfWFCFJi" target="_blank" rel="noopener noreferrer">
+                      View All Models
+                      <ExternalLink className="h-4 w-4 ml-2" />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Hero */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
