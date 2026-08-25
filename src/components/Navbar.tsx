@@ -118,183 +118,61 @@ export const Navbar = () => {
                   <Menu className="w-5 h-5 text-primary" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <Shield className="w-6 h-6 text-primary" />
-                    <span className="text-gradient">0xNull</span>
-                  </SheetTitle>
+              <SheetContent
+                side="left"
+                className="w-[min(86vw,360px)] max-w-none h-[100dvh] p-0 flex flex-col gap-0 bg-card border-r border-border [&>button:last-child]:hidden"
+                style={{
+                  paddingTop: 'env(safe-area-inset-top)',
+                  paddingBottom: 'env(safe-area-inset-bottom)',
+                }}
+              >
+                <SheetHeader className="px-4 pt-4 pb-3 border-b border-border space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <SheetTitle className="flex items-center gap-2">
+                      <Shield className="w-6 h-6 text-primary" aria-hidden="true" />
+                      <span className="text-gradient text-xl font-bold">0xNull</span>
+                    </SheetTitle>
+                    <SheetClose asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Close navigation menu">
+                        <X className="w-5 h-5" aria-hidden="true" />
+                      </Button>
+                    </SheetClose>
+                  </div>
+                  <MobileWalletRow onNavigate={() => setMobileMenuOpen(false)} />
                 </SheetHeader>
-                {/* Mobile Token Badge */}
-                <MobileTokenBadge onNavigate={() => setMobileMenuOpen(false)} />
 
-                <nav className="flex flex-col gap-1 mt-2">
-                  <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30 mb-4">
-                    <Rocket className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Get Started</span>
-                  </Link>
-
-                  {/* Swaps - Second */}
-                  <Link to="/swaps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors border border-border mb-4">
-                    <RefreshCw className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Swaps</span>
-                  </Link>
-
-                  {/* Predictions */}
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Predictions</div>
-                  <Link to="/esports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Gamepad2 className="w-5 h-5 text-purple-500" />
-                    <span>Esports</span>
-                  </Link>
-                  <Link to="/sports-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Trophy className="w-5 h-5 text-green-500" />
-                    <span>Sports</span>
-                  </Link>
-                  <Link to="/predictions/sports/combat" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Combat</span>
-                  </Link>
-                  <Link to="/predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Bitcoin className="w-5 h-5 text-orange-500" />
-                    <span>Crypto</span>
-                  </Link>
-                  <Link to="/flash" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <Zap className="w-4 h-4 text-purple-500" />
-                    <span className="text-muted-foreground">Flash (5min)</span>
-                    <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded">NEW</span>
-                  </Link>
-                  <Link to="/governance-predictions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Gavel className="w-5 h-5 text-amber-500" />
-                    <span>Governance</span>
-                  </Link>
-                  <Link to="/my-slips" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Receipt className="w-5 h-5 text-primary" />
-                    <span>My Slips</span>
-                  </Link>
-                  <Link to="/payouts" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Wallet className="w-5 h-5 text-emerald-500" />
-                    <span>Payout History</span>
-                  </Link>
-                  {betSlip.items.length > 0 && (
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        betSlip.setIsOpen(true);
-                      }}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/30"
-                    >
-                      <Receipt className="w-5 h-5 text-primary" />
-                      <span className="font-medium">Bet Slip</span>
-                      <Badge className="ml-auto bg-primary">{betSlip.items.length}</Badge>
-                    </button>
-                  )}
-
-                  {/* Lending */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Lending</div>
-                  <Link to="/lending" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Landmark className="w-5 h-5 text-primary" />
-                    <span>Markets</span>
-                  </Link>
-                  <Link to="/lending/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Dashboard</span>
-                  </Link>
-
-                  {/* Blog */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Blog</div>
-                  <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    <span>Insights & Analysis</span>
-                  </Link>
-
-                  {/* Docs */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Docs</div>
-                  <Link to="/docs" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <span>Token mechanics & trust</span>
-                  </Link>
-                  <Link to="/canary" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Warrant canary</span>
-                  </Link>
-
-
-                  {/* Free Software */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Free Software</div>
-                  <Link to="/free-software" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Terminal className="w-5 h-5 text-primary" />
-                    <span>Open-Source Tools</span>
-                  </Link>
-                  <Link to="/3ds-scanner" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">3DS Scanner</span>
-                  </Link>
-
-                  {/* External Links */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">External Links</div>
-                  <Link to="/external-links" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Globe className="w-5 h-5 text-primary" />
-                    <span>External Links</span>
-                  </Link>
-
-                  {/* Jobs */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jobs</div>
-                  <Link to="/work" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Briefcase className="w-5 h-5 text-primary" />
-                    <span>Work Paid in XMR</span>
-                  </Link>
-
-
-
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Companions</div>
-                  <Link to="/creators" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <span>Browse Creators</span>
-                  </Link>
-                  <Link to="/creator/register" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Become a Creator</span>
-                  </Link>
-                  <Link to="/fan/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Fan Dashboard</span>
-                  </Link>
-
-                  {/* Infra */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infra</div>
-                  <Link to="/ai" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Bot className="w-5 h-5 text-primary" />
-                    <span>AI Hub</span>
-                  </Link>
-                  <Link to="/voice" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors pl-8">
-                    <span className="text-muted-foreground">Voice</span>
-                  </Link>
-
-                  {/* Infrastructure */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Infrastructure</div>
-                  <Link to="/vps" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Server className="w-5 h-5 text-blue-500" />
-                    <span>VPS</span>
-                  </Link>
-                  <Link to="/phone" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <Smartphone className="w-5 h-5 text-green-500" />
-                    <span>eSIM</span>
-                  </Link>
-
-                  {/* Marketplace - Bottom */}
-                  <div className="px-3 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</div>
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                    <ShoppingBag className="w-5 h-5 text-primary" />
-                    <span>Browse</span>
-                  </Link>
-                  {isAuthenticated && (
-                    <>
-                      <Link to="/sell" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>Sell</span>
-                      </Link>
-                      <Link to="/orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                        <span>My Orders</span>
-                      </Link>
-                    </>
-                  )}
+                <nav className="flex-1 overflow-y-auto px-3 py-3">
+                  {MOBILE_NAV.map((item, index) => {
+                    const active =
+                      item.to === '/'
+                        ? location.pathname === '/'
+                        : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+                    return (
+                      <div key={item.to}>
+                        {index === 1 && (
+                          <div className="px-3 pt-4 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                            Services
+                          </div>
+                        )}
+                        <Link
+                          to={item.to}
+                          onClick={() => setMobileMenuOpen(false)}
+                          aria-current={active ? 'page' : undefined}
+                          className={`flex items-center gap-3 h-[52px] px-3 rounded-lg transition-colors ${
+                            active
+                              ? 'bg-primary/10 border border-primary/40 text-foreground'
+                              : 'border border-transparent hover:bg-secondary/50 text-foreground/90'
+                          }`}
+                        >
+                          <item.icon className="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true" />
+                          <span className="font-medium truncate">{item.label}</span>
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </nav>
               </SheetContent>
+
             </Sheet>
 
             {/* Desktop Navigation - Reordered: Predictions, AI, Infra, Marketplace */}
