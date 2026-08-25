@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText, TrendingUp } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -206,11 +206,19 @@ export const Navbar = () => {
             </Button>
 
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/predictions">
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden md:inline">Predictions</span>
+              </Link>
+            </Button>
+
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
               <Link to="/docs">
                 <FileText className="w-4 h-4" />
                 <span className="hidden md:inline">Docs</span>
               </Link>
             </Button>
+
 
 
 
