@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, RefreshCw, ShieldCheck, Clock, Star, AlertTriangle, ArrowRightLeft } from 'lucide-react';
+import { ExternalLink, RefreshCw, ShieldCheck, Clock, Star, AlertTriangle, ArrowRightLeft, CreditCard } from 'lucide-react';
+
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
@@ -12,7 +13,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const REFERRAL_URL = 'https://hodlhodl.com/join/LNNJ';
+const SIMPLESWAP_REFERRAL_URL = 'https://simpleswap.io/?ref=9996a1ef14d0';
 const CURRENCIES = ['GBP', 'EUR', 'USD', 'CHF', 'CAD', 'AUD'];
+
 
 interface Offer {
   id: string;
@@ -268,9 +271,37 @@ const BuyNoKyc = () => {
           </Card>
         </section>
 
+        {/* SimpleSwap card path */}
+        <section className="mb-10" aria-labelledby="card-path">
+          <h2 id="card-path" className="text-2xl font-bold mb-4">Card path</h2>
+          <p className="text-muted-foreground mb-6 max-w-3xl leading-relaxed">
+            Card purchases run on regulated rails and the payment processor may require ID — for the fully private path use the cash flow above.
+          </p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="bg-card/40 border-border/50">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">USD → USDT</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Buy USDT with a card or bank transfer, then swap it to XMR on-site.
+                </p>
+                <Button asChild className="w-full">
+                  <a href={`${SIMPLESWAP_REFERRAL_URL}&from=USD&to=USDT`} target="_blank" rel="noopener noreferrer">
+                    Buy USD → USDT on SimpleSwap <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">Routes last verified: 25th of August 2026</p>
+        </section>
+
         <p className="text-sm text-muted-foreground text-center">
           No accounts. No KYC. No JavaScript trackers. Just a link and an escrow.
         </p>
+
       </main>
 
       <Footer />
