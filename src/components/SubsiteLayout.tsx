@@ -57,15 +57,26 @@ export const SubsiteLayout = ({
             )}
 
             <div className="flex items-center gap-4">
-              {links.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {links.map((link) =>
+                link.to.startsWith('#') ? (
+                  <a
+                    key={link.to}
+                    href={link.to}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {link.label}
+                  </Link>
+                ),
+              )}
+
             </div>
 
             <Link
