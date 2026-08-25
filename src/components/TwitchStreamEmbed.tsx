@@ -276,15 +276,44 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
       </CardHeader>
       
       <CardContent className="p-0">
+        {metadataFailed && !loading && (
+          <div className="px-4 py-2 border-b border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-xs text-amber-300">
+              Live metadata unavailable — showing the default channel.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-amber-300 hover:text-amber-200"
+              onClick={() => fetchTopStream(activeFilter)}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
         {loading || !locationInfo ? (
           <div className="aspect-video bg-muted/50 flex items-center justify-center">
             <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
-        ) : error || !streamInfo?.channel || !iframeSrc ? (
-          <div className="aspect-video bg-muted/30 flex items-center justify-center p-4">
+        ) : !iframeSrc ? (
+          <div className="aspect-video bg-muted/30 flex flex-col items-center justify-center gap-3 p-4">
             <p className="text-sm text-muted-foreground text-center">
               No live streams right now - check back during match times
             </p>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => fetchTopStream(activeFilter)}>
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Retry
+              </Button>
+              <a
+                href={`https://twitch.tv/${FALLBACK_CHANNEL}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-purple-400 hover:text-purple-300 hover:underline"
+              >
+                Watch on Twitch →
+              </a>
+            </div>
           </div>
         ) : (
           <div className="aspect-video">
@@ -296,10 +325,11 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
               allow="autoplay; fullscreen; encrypted-media"
               frameBorder={0}
               className="border-0"
-              title={`${streamInfo.channelName || streamInfo.channel} - Twitch Stream`}
+              title={`${streamInfo?.channelName || channelToRender} - Twitch Stream`}
             />
           </div>
         )}
+
         
         {/* Stream Info Footer */}
         {streamInfo?.channel && !loading && !error && (
