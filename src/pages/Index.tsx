@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Smartphone, ArrowLeftRight, Wallet, Briefcase, Server, Bot } from 'lucide-react';
+import { Smartphone, ArrowLeftRight, Wallet, Briefcase, Server, Bot, TrendingUp } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { useVoucherFromUrl } from '@/hooks/useVoucher';
+
 
 interface Panel {
   to: string;
@@ -13,18 +14,18 @@ interface Panel {
   description: string;
 }
 
-const panels: Panel[] = [
-  {
-    to: '/ai',
-    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'AI & Voice',
-    description: 'Private AI chat and voice tools. No account.',
-  },
+const primaryPanels: Panel[] = [
   {
     to: '/phone',
     icon: <Smartphone className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Phone & eSIM',
     description: 'Anonymous numbers and data eSIMs. No KYC.',
+  },
+  {
+    to: '/vps',
+    icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'VPS',
+    description: 'Anonymous servers, paid in crypto.',
   },
   {
     to: '/swaps',
@@ -39,18 +40,26 @@ const panels: Panel[] = [
     description: 'Buy or sell crypto on the route your country allows.',
   },
   {
-    to: '/work',
-    icon: <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'Work',
-    description: 'XMR-paying jobs, aggregated from every board.',
+    to: '/ai',
+    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'AI & Voice',
+    description: 'Private AI chat and voice tools. No account.',
   },
   {
-    to: '/vps',
-    icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'VPS',
-    description: 'Anonymous servers, paid in crypto.',
+    to: '/lending',
+    icon: <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'Lending',
+    description: 'Earn on XMR and stablecoins. Passive yield.',
   },
 ];
+
+const newPanel: Panel = {
+  to: '/work',
+  icon: <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+  title: 'Work',
+  description: 'XMR-paying jobs, aggregated from every board.',
+};
+
 
 const moreLinks = [
   { label: 'Predictions', to: '/predict' },
@@ -64,6 +73,7 @@ const moreLinks = [
   { label: 'Cash out', to: '/cashout' },
   { label: 'Get Started', to: '/get-started' },
 ];
+
 
 const Index = () => {
   useSEO({
@@ -91,7 +101,7 @@ const Index = () => {
         {/* Primary panel grid */}
         <section className="container mx-auto px-4 pb-12">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-            {panels.map((panel) => (
+            {primaryPanels.map((panel) => (
               <Link
                 key={panel.to}
                 to={panel.to}
@@ -105,6 +115,20 @@ const Index = () => {
           </div>
         </section>
 
+        {/* New / below-the-fold panel */}
+        <section className="container mx-auto px-4 pb-12">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">New</h2>
+          <Link
+            to={newPanel.to}
+            className="group flex flex-col sm:flex-row items-center sm:items-start gap-3 rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.25)] transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-card/80 hover:shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.4)] active:translate-y-0 active:scale-[0.98]"
+          >
+            <div className="shrink-0">{newPanel.icon}</div>
+            <div className="text-center sm:text-left">
+              <h3 className="text-base font-semibold leading-tight">{newPanel.title}</h3>
+              <p className="text-sm text-muted-foreground leading-snug">{newPanel.description}</p>
+            </div>
+          </Link>
+        </section>
 
         {/* Secondary links */}
         <section className="container mx-auto px-4 pb-20">
@@ -123,6 +147,7 @@ const Index = () => {
             </div>
           </div>
         </section>
+
       </main>
 
       <Footer />
