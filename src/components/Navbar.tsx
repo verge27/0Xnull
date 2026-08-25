@@ -6,13 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
-import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIdentity';
+import { useNavbarIdentity } from '@/components/NavbarIdentity';
 import { TokenStatusWidget } from '@/components/TokenStatusWidget';
 
 import { useState, FormEvent, useEffect } from 'react';
