@@ -1192,60 +1192,14 @@ const Swaps = () => {
               {/* Rates & Execute */}
               <Card>
                 <CardHeader>
-                  <CardTitle>{aggregator === 'exolix' ? 'Exchange Rate' : 'Available Providers'}</CardTitle>
+                  <CardTitle>Available Providers</CardTitle>
                   <CardDescription>
-                    {aggregator === 'exolix' 
-                      ? (exolixRate ? 'Rate fetched from Exolix' : 'Enter swap details to see rate')
-                      : (rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates')
-                    }
+                    {rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {aggregator === 'exolix' ? (
-                    // Exolix single rate display
-                    !exolixRate ? (
-                      <div className="text-center text-muted-foreground py-8">
-                        <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                        {hasFetchedRates ? (
-                          <>
-                            <p className="font-medium text-foreground">Rate not available</p>
-                            <p className="text-sm mt-1">{exolixRate === null && hasFetchedRates ? 'This pair may not be supported.' : 'Enter details to get rate.'}</p>
-                          </>
-                        ) : (
-                          <p>No rate yet</p>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        <div className="p-4 rounded-lg border border-primary bg-primary/5">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium">Exolix</span>
-                            <Badge variant="outline" className="text-xs">No KYC</Badge>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">You receive:</span>
-                            <span className="font-semibold text-primary">{exolixRate.toAmount} {toCoin.toUpperCase()}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Rate: 1 {fromCoin.toUpperCase()} = {exolixRate.rate.toFixed(6)} {toCoin.toUpperCase()}
-                          </div>
-                        </div>
-                        <Button
-                          className="w-full"
-                          onClick={executeTrade}
-                          disabled={!receiveAddress || executingTrade}
-                        >
-                          {executingTrade ? (
-                            <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Creating trade...</>
-                          ) : (
-                            <>Execute Swap with Exolix<ExternalLink className="h-4 w-4 ml-2" /></>
-                          )}
-                        </Button>
-                      </>
-                    )
-                  ) : (
-                    // Trocador multi-provider display
-                    rates.length === 0 ? (
+                  {rates.length === 0 ? (
+
                       <div className="text-center text-muted-foreground py-8">
                         <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
                         {hasFetchedRates ? (
