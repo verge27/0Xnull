@@ -14,7 +14,14 @@ export interface StreamInfo {
   viewerCount?: number;
   gameName?: string;
   thumbnailUrl?: string;
+  unavailable?: boolean;
+  reason?: string;
 }
+
+// Channel used when Twitch metadata cannot be fetched (auth/API failure).
+// The player itself still works without our API credentials.
+const FALLBACK_CHANNEL = 'awfdota';
+
 
 interface TwitchStreamEmbedProps {
   selectedGame: string;
@@ -113,9 +120,15 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     });
   }, []);
 
+  // Metadata failed (auth error, API outage, network) — we still render the player.
+  const metadataFailed = Boolean(error || streamInfo?.unavailable);
+
+  // Channel to render: live metadata channel, else the configured fallback.
+  const channelToRender = streamInfo?.channel ?? (metadataFailed ? FALLBACK_CHANNEL : null);
+
   // Build iframe src with broad parent allowlist
   const iframeSrc = useMemo(() => {
-    if (!locationInfo || !streamInfo?.channel) return null;
+    if (!locationInfo || !channelToRender) return null;
 
     const parentDomains = [
       '0xnull.io',
@@ -131,21 +144,22 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     const uniqueParents = [...new Set(parentDomains.filter(Boolean))];
     const parentParams = uniqueParents.map(p => `parent=${p}`).join('&');
 
-    return `https://player.twitch.tv/?channel=${streamInfo.channel}&${parentParams}&muted=true`;
-  }, [locationInfo, streamInfo?.channel]);
+    return `https://player.twitch.tv/?channel=${channelToRender}&${parentParams}&muted=true`;
+  }, [locationInfo, channelToRender]);
 
   // Debug logging
   useEffect(() => {
-    if (locationInfo && streamInfo?.channel && iframeSrc) {
+    if (locationInfo && channelToRender && iframeSrc) {
       console.log('Twitch Debug:', {
         hostname: locationInfo.hostname,
         host: locationInfo.host,
         origin: locationInfo.origin,
-        channel: streamInfo.channel,
-        iframeSrc: iframeSrc
+        channel: channelToRender,
+        fallback: !streamInfo?.channel,
+        iframeSrc,
       });
     }
-  }, [locationInfo, streamInfo?.channel, iframeSrc]);
+  }, [locationInfo, channelToRender, streamInfo?.channel, iframeSrc]);
 
   const fetchTopStream = useCallback(async (game: string) => {
     setLoading(true);
@@ -165,11 +179,12 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     } catch (err) {
       console.error('Error fetching Twitch stream:', err);
       setError('Could not load stream');
-      setStreamInfo({ channel: null });
+      setStreamInfo({ channel: null, unavailable: true, reason: 'fetch_failed' });
     } finally {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     fetchTopStream(activeFilter);
@@ -261,15 +276,44 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
       </CardHeader>
       
       <CardContent className="p-0">
+        {metadataFailed && !loading && (
+          <div className="px-4 py-2 border-b border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-xs text-amber-300">
+              Live metadata unavailable — showing the default channel.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-amber-300 hover:text-amber-200"
+              onClick={() => fetchTopStream(activeFilter)}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
         {loading || !locationInfo ? (
           <div className="aspect-video bg-muted/50 flex items-center justify-center">
             <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
-        ) : error || !streamInfo?.channel || !iframeSrc ? (
-          <div className="aspect-video bg-muted/30 flex items-center justify-center p-4">
+        ) : !iframeSrc ? (
+          <div className="aspect-video bg-muted/30 flex flex-col items-center justify-center gap-3 p-4">
             <p className="text-sm text-muted-foreground text-center">
               No live streams right now - check back during match times
             </p>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => fetchTopStream(activeFilter)}>
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Retry
+              </Button>
+              <a
+                href={`https://twitch.tv/${FALLBACK_CHANNEL}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-purple-400 hover:text-purple-300 hover:underline"
+              >
+                Watch on Twitch →
+              </a>
+            </div>
           </div>
         ) : (
           <div className="aspect-video">
@@ -281,10 +325,11 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
               allow="autoplay; fullscreen; encrypted-media"
               frameBorder={0}
               className="border-0"
-              title={`${streamInfo.channelName || streamInfo.channel} - Twitch Stream`}
+              title={`${streamInfo?.channelName || channelToRender} - Twitch Stream`}
             />
           </div>
         )}
+
         
         {/* Stream Info Footer */}
         {streamInfo?.channel && !loading && !error && (
@@ -346,6 +391,25 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
             </p>
           </div>
         )}
+
+        {/* Fallback footer when metadata is unavailable but the player renders */}
+        {!streamInfo?.channel && channelToRender && !loading && (
+          <div className="px-4 py-3 border-t border-purple-500/20 bg-background/50 flex items-center justify-between flex-wrap gap-2">
+            <a
+              href={`https://twitch.tv/${channelToRender}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+            >
+              {channelToRender}
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <span className="text-xs text-muted-foreground">
+              If the channel is offline, the player shows Twitch's offline screen.
+            </span>
+          </div>
+        )}
+
       </CardContent>
     </Card>
   );

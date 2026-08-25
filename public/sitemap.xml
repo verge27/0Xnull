@@ -343,14 +343,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/how-to-buy-monero-2026</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/blog/grapheneos-setup-guide</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -362,6 +356,12 @@
   </url>
   <url>
     <loc>https://0xnull.io/blog/temporary-phone-number-anonymous</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/how-to-buy-monero-2026</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
