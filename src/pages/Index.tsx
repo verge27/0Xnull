@@ -78,33 +78,32 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         {/* Header */}
-        <section className="container mx-auto px-4 pt-16 pb-10 md:pt-24 md:pb-12">
+        <section className="container mx-auto px-4 pt-8 pb-5 md:pt-14 md:pb-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-5 tracking-tight">0xNull</h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">0xNull</h1>
+            <p className="text-sm md:text-lg text-muted-foreground">
               One anonymous credential, funded in Monero and spent across every service. No accounts, no signup.
             </p>
           </div>
         </section>
 
         {/* Primary panel grid */}
-        <section className="container mx-auto px-4 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <section className="container mx-auto px-4 pb-12">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
             {panels.map((panel) => (
               <Link
                 key={panel.to}
                 to={panel.to}
-                className="group block rounded-lg border border-border/60 bg-card/50 backdrop-blur p-6 h-full transition-colors hover:border-primary/40 hover:bg-card/70"
+                className="group flex aspect-square sm:aspect-[4/3] lg:aspect-[3/2] flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 p-3 text-center backdrop-blur shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.25)] transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-card/80 hover:shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.4)] active:translate-y-0 active:scale-[0.98] md:p-5"
               >
-                <div className="flex flex-col h-full">
-                  <div className="mb-4">{panel.icon}</div>
-                  <h2 className="text-lg font-semibold mb-2">{panel.title}</h2>
-                  <p className="text-sm text-muted-foreground mt-auto">{panel.description}</p>
-                </div>
+                <div className="shrink-0">{panel.icon}</div>
+                <h2 className="text-sm md:text-base font-semibold leading-tight">{panel.title}</h2>
+                <p className="text-[11px] md:text-sm text-muted-foreground leading-snug line-clamp-3">{panel.description}</p>
               </Link>
             ))}
           </div>
         </section>
+
 
         {/* Secondary links */}
         <section className="container mx-auto px-4 pb-20">
