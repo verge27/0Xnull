@@ -317,10 +317,13 @@ export interface PredictionV2Pool {
 export interface PredictionV2Payout {
   bet_id: string;
   market_id: string;
+  title: string;
   side: 'YES' | 'NO';
+  outcome: 'YES' | 'NO' | 'DRAW' | null;
+  stake_cents: number;
   amount_cents: number;
   payout_cents: number;
-  status: 'won' | 'refunded';
+  status: 'won' | 'lost' | 'refunded';
   resolved_at: number;
 }
 
