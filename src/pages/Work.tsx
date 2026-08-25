@@ -25,7 +25,16 @@ type Job = {
   tags: string[];
   posted_at: string | null;
   first_seen_at: string;
+  listing_type: string;
 };
+
+type ListingType = "all" | "hiring" | "offering";
+
+const LISTING_TABS: { value: ListingType; label: string; hint: string }[] = [
+  { value: "hiring", label: "Jobs on offer", hint: "Someone paying for work" },
+  { value: "offering", label: "Freelancers available", hint: "People offering their services" },
+  { value: "all", label: "Everything", hint: "Both kinds of listing" },
+];
 
 type Source = {
   id: string;
