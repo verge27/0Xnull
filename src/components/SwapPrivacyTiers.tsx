@@ -12,7 +12,7 @@ import {
 const tiers = [
   {
     name: 'Direct Swap',
-    subtitle: 'Mixer-level privacy via Trocador or Exolix',
+    subtitle: 'Mixer-level privacy via Trocador',
     badge: '🟡 Moderate',
     badgeClass: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/40',
     icon: ShieldAlert,
