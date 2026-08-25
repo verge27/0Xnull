@@ -82,13 +82,20 @@ export const requestDirectQuote = async (
   amount: number,
 ): Promise<QuoteResult> => {
   try {
-    const currencyFrom = side === 'sell' ? asset.toLowerCase() : fiat.toLowerCase();
-    const currencyTo = side === 'sell' ? fiat.toLowerCase() : asset.toLowerCase();
+    const cryptoTicker = asset.toLowerCase();
+    const cryptoNetwork = ASSET_NETWORKS[asset] ?? cryptoTicker;
+    const fiatTicker = fiat.toLowerCase();
+    const currencyFrom = side === 'sell' ? cryptoTicker : fiatTicker;
+    const networkFrom = side === 'sell' ? cryptoNetwork : fiatTicker;
+    const currencyTo = side === 'sell' ? fiatTicker : cryptoTicker;
+    const networkTo = side === 'sell' ? fiatTicker : cryptoNetwork;
     const { data, error } = await supabase.functions.invoke('simpleswap-api', {
       body: {
         action: 'get_estimated',
         currency_from: currencyFrom,
+        network_from: networkFrom,
         currency_to: currencyTo,
+        network_to: networkTo,
         amount,
       },
     });
@@ -109,7 +116,17 @@ export const requestDirectQuote = async (
   }
 };
 
-export const ASSETS = ['XMR', 'BTC', 'USDT', 'ETH', 'LTC'];
+/** SimpleSwap network identifiers per asset ticker. */
+export const ASSET_NETWORKS: Record<string, string> = {
+  XMR: 'xmr',
+  BTC: 'btc',
+  ETH: 'eth',
+  USDT: 'eth',
+  USDC: 'eth',
+  LTC: 'ltc',
+};
+
+export const ASSETS = ['XMR', 'BTC', 'ETH', 'USDT', 'USDC', 'LTC'];
 export const FIATS = ['EUR', 'GBP', 'USD', 'CHF', 'AUD', 'BRL', 'MXN', 'TRY', 'ZAR'];
 export const PAYMENT_METHODS = [
   'Bank transfer',
