@@ -73,7 +73,9 @@ export default function InfraHub() {
           </div>
 
           {/* Features */}
+          <h2 className="sr-only">Why 0xNull infrastructure</h2>
           <div className="grid sm:grid-cols-3 gap-4 mb-12">
+
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
