@@ -1418,10 +1418,8 @@ const Swaps = () => {
           {/* Info Section */}
           <div className="mt-8 space-y-6">
             <div className="text-center text-sm text-muted-foreground">
-              <p>Powered by {aggregator === 'exolix' 
-                ? <a href="https://exolix.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Exolix</a>
-                : <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a>
-              } exchange {aggregator === 'trocador' ? 'aggregator' : ''}</p>
+              <p>Powered by <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
+
               <p className="mt-1">All swaps are non-custodial and anonymous</p>
             </div>
 
