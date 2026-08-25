@@ -5,6 +5,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting: 20 requests per minute per IP (protects paid AI credits)
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60 * 1000;
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (ip: string): boolean => {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return true;
+  }
+
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+};
+
+const getClientIP = (req: Request): string => {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+         req.headers.get('x-real-ip') ||
+         'unknown';
+};
+
 const SITE_KNOWLEDGE = `
 You are a helpful assistant for 0xNull Marketplace, a privacy-focused Monero (XMR) marketplace platform.
 
@@ -193,12 +221,37 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting check
+  const clientIP = getClientIP(req);
+  if (!checkRateLimit(clientIP)) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
+      status: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
+    });
+  }
+
   try {
     const { message, conversationHistory = [] } = await req.json();
     
     if (!message || typeof message !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Invalid message' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Bound input size to prevent abuse of paid AI credits
+    if (message.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: 'Message exceeds maximum length of 2000 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!Array.isArray(conversationHistory) || conversationHistory.length > 20) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid conversation history' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
