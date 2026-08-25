@@ -137,6 +137,7 @@ const Work = () => {
     const needle = search.trim().toLowerCase();
 
     const filtered = jobs.filter((job) => {
+      if (listingType !== "all" && (job.listing_type ?? "hiring") !== listingType) return false;
       if (payType !== "all" && job.pay_type !== payType) return false;
       if (sourceId !== "all" && job.source_id !== sourceId) return false;
       if (activeTag && !(job.tags ?? []).includes(activeTag)) return false;
