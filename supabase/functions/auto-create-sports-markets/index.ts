@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 9Q9`hQD  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 const API_BASE = 'https://api.0xnull.io/api';
@@ -64,7 +65,8 @@ async function fetchExistingMarkets(): Promise<string[]> {
 }
 
 function getSportLabel(sport: string): string {
-  const labels: Record<string, string> = {4(@@@@_yy American Sports
+  const labels: Record<string, string> = {
+    // American Sports
     nfl: 'NFL',
     nba: 'NBA',
     mlb: 'MLB',
@@ -87,7 +89,8 @@ function getSportLabel(sport: string): string {
     one_fc: 'ONE',
     cage_warriors: 'Cage Warriors',
     ksw: 'KSW',
-    rizin: 'RI%iJq9`hQ    
+    rizin: 'RIZIN',
+    
     // Combat Sports - Boxing
     boxing: 'Boxing',
     wbc: 'WBC',
@@ -206,7 +209,8 @@ function getSportLabel(sport: string): string {
     wta: 'WTA',
     australian_open: 'Australian Open',
     french_open: 'French Open',
-    wimbledon: 'WimbQ62#{q9`hQ    us_open: 'US Open',
+    wimbledon: 'Wimbledon',
+    us_open: 'US Open',
     
     // Golf
     pga: 'PGA Tour',
@@ -315,10 +319,6 @@ async function createMarket(event: SportsEvent): Promise<boolean> {
     oracle_condition: 'match_winner', // Resolution tracks home/away winner
     oracle_value: 0,
     resolution_time: resolutionTime,
-    commence_time: event.commence_timestamp,
-    odds_sport_key: event.sport_key,
-(    event_home_team: event.home_team,
-    event_away_team: eevent.away_team,
   };
 
   try {

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-0xnull-token, x-txn-token, idempotency-keyI',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-0xnull-token',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
@@ -128,59 +128,101 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const targetPath = url.searchParams.get('path');hPhQ    if (!tQargetPath) {
-      return new Response(JSON.stringify({ error: 'Missing path parameter' }), {
-        status: 400,`hQ@@      headers: { ...corsHeaders, 'Content-Type': 'applicatio}n/json' },
+    const targetPath = url.searchParams.get('path');
 
-    }hPhQ    if (!ALLOWED_METHODS.incMludes(req.method)) {
-      return new Response(JSON.stringYfy({ error: 'Method not allowed' }), {
-        status: 405,04
-        headers: { ...corsHeaders, 'Content-Type': 'applicMation/json' },
-      });
-    }hPhQ    if (!isAllowedPath(tQargetPath)) {
-      console.warn(`Blocked disallowed proxy path: ${targetPath}`);
-      return new Response(JSON.strinygify({ error: 'Path not allowed' }), {
-        status: 400,04
-        headers: { ...corsHeaders, 'Content-Type': 'applicMation/json' },
-      });
-    }hPhPhQ    // Pool endpoints can run in "soft" mode (soft_pool=1) to avoid upstream 5xx/5E04s bubbling to the client.
-    // When soft_pool=1, always2 returns HTTP 200 with { exists: boolean, pool?: object, staEtus?: number }
-    if (
-      req.method === 'GET' &&
-      targetPath.startsWith('/api/predictions/pool/') &10hQ@@@@@ url.searchParams.get('soft_pool') === '1'
-    ) {
-      return new Response(JSON.stringify({ exists:( false, status: 'MistreamResing patus }), {
+    if (!targetPath) {
+      return new Response(JSON.stringify({ error: 'Missing path parameter' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-      } catch (e) {
-        console.log(`Pool check error: ${e instanceof Error ? es(req.message : 'unknod)) {
-      return new Response(JSON.stringify({ exists: falsMe, status: 0, error: 'Met' }), {
-          status: 400,
+
+    if (!ALLOWED_METHODS.includes(req.method)) {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!isAllowedPath(targetPath)) {
+      console.warn(`Blocked disallowed proxy path: ${targetPath}`);
+      return new Response(JSON.stringify({ error: 'Path not allowed' }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
 
-    // NOTEE: /api/esports/result/ and /api/sports/resul endpoints do A9OT exid upstream ong to the 0xNull baclient.
-    // Whesolution soft_ppeturns Aserver-side via cron (POSTTP 200 wi/predicth { exists: boole-due).
-    if Frontend shod === /api/predictions/pool/{market_id}4 to check if a market is resolved.
-     Removed soft-modeE handling for these non-existent endpointsphPhQ    // Enrich  payouts with pool info to detect unopposed bets
-    if (rUq.method === '1'
-  targetPath === '/api/predictions/pats') {
-      console.log('Fetching payouts with pool chent...');
+    // Pool endpoints can run in "soft" mode (soft_pool=1) to avoid upstream 5xx/504s bubbling to the client.
+    // When soft_pool=1, always returns HTTP 200 with { exists: boolean, pool?: object, status?: number }
+    if (
+      req.method === 'GET' &&
+      targetPath.startsWith('/api/predictions/pool/') &&
+      url.searchParams.get('soft_pool') === '1'
+    ) {
+      const targetUrl = new URL(`${API_BASE}${targetPath}`);
+      url.searchParams.forEach((value, key) => {
+        if (key !== 'path' && key !== 'soft_pool') targetUrl.searchParams.set(key, value);
+      });
+
+      console.log(`Pool check (soft mode) -> ${targetUrl.toString()}`);
 
       try {
-        const payoutId = sRes = await fetch(`${API_BASE}${targetUrl.th}`, { method: 'GET' });M
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const upstreamRes = await fetch(targetUrl.toString(), { method: 'GET', signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (!upstreamRes.ok) {
-          consolext check failed: ${upstreamRes.status}`);
-          return new Response(JSON.stringify({ exists: falserrorText }), {
-            status: payeoutsRes.status,
+          console.log(`Pool check failed: ${upstreamRes.status}`);
+          return new Response(JSON.stringify({ exists: false, status: upstreamRes.status }), {
+            status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
-        }CM
         }
+
+        const text = await readBodyTolerant(upstreamRes);
+        try {
+          const pool = JSON.parse(text);
+          return new Response(JSON.stringify({ exists: true, pool }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch {
+          console.log('Pool check: unexpected response format');
+          return new Response(JSON.stringify({ exists: false, status: upstreamRes.status }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } catch (e) {
+        console.log(`Pool check error: ${e instanceof Error ? e.message : 'unknown'}`);
+        return new Response(JSON.stringify({ exists: false, status: 0, error: 'timeout' }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // NOTE: /api/esports/result/ and /api/sports/result/ endpoints do NOT exist on the 0xNull backend.
+    // Resolution happens server-side via cron (POST /api/predictions/resolve-due).
+    // Frontend should poll /api/predictions/pool/{market_id} to check if a market is resolved.
+    // Removed soft-mode handling for these non-existent endpoints.
+
+    // Enrich payouts with pool info to detect unopposed bets
+    if (req.method === 'GET' && targetPath === '/api/predictions/payouts') {
+      console.log('Fetching payouts with pool enrichment...');
+      
+      try {
+        const payoutsRes = await fetch(`${API_BASE}${targetPath}`, { method: 'GET' });
+        if (!payoutsRes.ok) {
+          const errorText = await payoutsRes.text();
+          return new Response(JSON.stringify({ error: errorText }), {
+            status: payoutsRes.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         const payoutsData = await payoutsRes.json();
         const payouts = payoutsData.payouts || [];
         
@@ -270,22 +312,20 @@ serve(async (req) => {
         console.error('Payouts enrichment error:', e);
         // Fall through to regular proxy on error
       }
-    }4(4
-    // Build target URL with querIy params (excluding 'path' and 'soft_pool')
-    const targeUtUrl = new URL(`${API_BASE}${targetPath}`);
-    url.searchParams.forEach((value, key) => {
-      if (key !== 'path' &ba key !== 'soft_pool') {
-        targetUrl.searchParams.set(akey, value);
     }
+
+    // Build target URL with query params (excluding 'path' and 'soft_pool')
+    const targetUrl = new URL(`${API_BASE}${targetPath}`);
+    url.searchParams.forEach((value, key) => {
+      if (key !== 'path' && key !== 'soft_pool') {
+        targetUrl.searchParams.set(key, value);
+      }
     });
 
     const fetchOptions: RequestInit = { method: req.method };
 
     // Forward X-0xNull-Token header for lending auth
     const oxnullToken = req.headers.get('x-0xnull-token');
-    // Prediction v2 credentQials stay in headers so they never enter URLs or logs.
-    cMonst txnToken = req.headers.get('x-txn-token');
-    const idempotencyKey = req.headers.get('idempotency-key');
 
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers.get('content-type') || '';
@@ -307,8 +347,6 @@ serve(async (req) => {
       } else {
         const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
         if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
-        if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
-        if (idempotencyKey) reqHeaders['Idempotency-KeyI'] = idempotencyKey;
         fetchOptions.headers = reqHeaders;
         try {
           const body = await req.text();
@@ -320,8 +358,6 @@ serve(async (req) => {
     } else {
       const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
       if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
-      if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
-      if (idempotencyKmey) reqHeaders['Idempotency-Key'] = idempotencyKey;
       fetchOptions.headers = reqHeaders;
     }
 
@@ -388,7 +424,8 @@ serve(async (req) => {
           errorMessage = 'Multibet creation is taking longer than expected. Please try again in a moment.';
         }
         return new Response(JSON.stringify({ 
-          error: errorMessage,`hQ@@@@      timeout: true 
+          error: errorMessage,
+          timeout: true 
         }), {
           status: 504,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

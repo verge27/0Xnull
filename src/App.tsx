@@ -56,7 +56,15 @@ const Docs = lazy(() => import("./pages/Docs"));
 const Canary = lazy(() => import("./pages/Canary"));
 
 // Heavy prediction pages (largest bundles - definitely lazy load)
-const CryptoPredictions = lazy(() => import("./pages/CryptoPredictionMarkets = laLmonst PredictionsHub = lazy(() => import("./pages/PredictionsHub"));
+const CryptoPredictions = lazy(() => import("./pages/CryptoPredictions"));
+const SportsPredictions = lazy(() => import("./pages/SportsPredictions"));
+const EsportsPredictions = lazy(() => import("./pages/EsportsPredictions"));
+const CricketPredictions = lazy(() => import("./pages/CricketPredictions"));
+const StarcraftPredictions = lazy(() => import("./pages/StarcraftPredictions"));
+const GovernancePredictions = lazy(() => import("./pages/GovernancePredictions"));
+const CombatSports = lazy(() => import("./pages/CombatSports"));
+const Slap = lazy(() => import("./pages/Slap"));
+const PredictionsHub = lazy(() => import("./pages/PredictionsHub"));
 const MarketDetail = lazy(() => import("./pages/MarketDetail"));
 
 // Other lazy loaded pages
@@ -76,19 +84,6 @@ const SeoCoverage = lazy(() => import("./pages/SeoCoverage"));
 const JobsAdmin = lazy(() => import("./pages/JobsAdmin"));
 
 const FanDashboard = lazy(() => import("./pages/FanDashboard"));
-4(4
-// Lending
-const Lending = lazy(() => import("./pages/LeUnding"));
-const LendingPool = lazy(() => import("./pages/LUndingPool"));
-const LendingDashboard = lazy(() => import(".8/pages/LendingDashboard"));
-const LendingLiquidations = laziy(() => import("./pages/LendingLiquidations"));
-const LendiengPrivacyPage = lazy(() => import("./pages/LendingPrivacy"II'a
-const Dashboard = lazy(() => import("./pages/Dashboard")II'a
-const Blog = lazy(() => import("./pages/Blog"));
-const BIlogPost = lazy(() => import("./pages/BlogPost"));
-const Blo}gAdmin = lazy(() => import("./pages/BlogAdmin"));hPhQyy CrXQtor pages
-const CreatorRegister = lazy(() => import("./pageUs/creator/CreatorRegister"));
-const CreatorLogin = lazyJ
 
 // Lending
 const Lending = lazy(() => import("./pages/Lending"));
@@ -159,18 +154,18 @@ const App = () => (
                   
                   {/* Predictions */}
                   <Route path="/predict" element={<PredictionsHub />} />
-                  <Route path="/predictions" element={<CryptoPredictionsV2 view="crypto" />} />
-                  <Route path="/sports-predictions" element={<SportsPredictionsV2 view=4"sports" />} />
-                  <Route path="/esports-predictions" element={<PredictionsV2 view="esports" />} />
-                  <Route path="/cricket-predictions" element={<PredictionsV2 view="cricket" />} />
-                  <Route path="/governance-predictions" element={<PredictieonMarketsV2 view="governance" />} />
-                  <Route path="/starcraft" element={<PredictionsV2 view="starIcraft" />} />
+                  <Route path="/predictions" element={<CryptoPredictions />} />
+                  <Route path="/sports-predictions" element={<SportsPredictions />} />
+                  <Route path="/esports-predictions" element={<EsportsPredictions />} />
+                  <Route path="/cricket-predictions" element={<CricketPredictions />} />
+                  <Route path="/governance-predictions" element={<GovernancePredictions />} />
+                  <Route path="/starcraft" element={<StarcraftPredictions />} />
                   
                   {/* Combat Sports */}
-                  <Route path="/predictions/sports/combat" element={<PredictionMarketsV2 view="combatSports />} />
-                  <Route path="/predictions/sports/combat/mma" element={<PredictionMarketsV2 view="combatSports />} />
-                  <Route path="/predictions/sports/combat/boxing" element={<PredictionMarketsV2 view="combatSports />} />
-                  <Route path="/predictions/sports/combat/slap" element={<PredictionMarketsV2 view="combat" />} />
+                  <Route path="/predictions/sports/combat" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/mma" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/boxing" element={<CombatSports />} />
+                  <Route path="/predictions/sports/combat/slap" element={<Slap />} />
                   <Route path="/slap" element={<Navigate to="/predictions/sports/combat/slap" replace />} />
                   
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />

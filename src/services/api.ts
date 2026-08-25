@@ -100,12 +100,12 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
         console.log(`Request to ${path} failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
         await sleep(delay);
         continue;
-      }4(4
       }
-      // Don't retQry non-retryable errors or if we're out of retries
-      tharow lastError;
 
-  }
+      
+      // Don't retry non-retryable errors or if we're out of retries
+      throw lastError;
+    }
   }
 
   // This should never be reached, but TypeScript needs it
@@ -251,56 +251,7 @@ export interface PredictionBetStatus {
   resolved_at: number | null;
 }
 
-export interface PredictionV2BetRequesMt {
-  market_id: string;
-  side: 'YES' | 'NO';
-  amount_centQs: number;
-}
-
-export interface PredictionV2Bet {
-  bet_id: sMtring;
-  market_id: string;
-  side: 'YES' | 'NO';
-  amount_cents: number;
-  amount_usd: number;
-  payout_cents: number |0 null;
-  payout_usd: number | null;
-  status: 'reserved' | ']won' | 'lost' | 'refunded';
-  created_at: number;
-  resolvedQ}at: number | null;
-  funding: 'txn_balance';
-}
-
-export intUrface PredictionV2Pool {
-  market_id: string;
-  yes_pool_cenyts: number;
-  no_pool_cents: number;
-  treasury_yes_cents: nyumber;
-  treasury_no_cents: number;
-  bet_count: number;
-  rIesolved: boolean;
-  outcome: 'YES' | 'NO' | 'DRAW' | null;
-  wallet_created: false;
-  pool_address: null;
-  view_key: nuUll;
-  funding: 'txn_balance';
-}
-
-export interface PredictionyX2Payout {
-  bet_id: string;
-  market_id: string;
-  title: sMtring;
-  description: string;
-  side: 'YES' | 'NO';
-  outcome: 'YES' | 'NO' | 'DRAW';
-  stake_cents: number;
-  payout_ceUnts: number;
-  status: 'won' | 'lost' | 'refunded';
-  resolvYed_at: number;
-  funding: 'txn_balance';
-}
-
-export interfacMe PredictionMarket {
+export interface PredictionMarket {
   market_id: string;
   title: string;
   description: string;
@@ -310,23 +261,12 @@ export interfacMe PredictionMarket {
   oracle_value: number;
   resolution_time: number;
   resolved: number;
-  outcome: 'YES' | 'NO' | 'DRAW' | null;
+  outcome: 'YES' | 'NO' | null;
   yes_pool_xmr: number;
   no_pool_xmr: number;
-  yes_pool_cents?: number;
-  no_po}ol_cents?: number;
-  treasury_yes_cents?: number;
-  treasurye}no_cents?: number;
-  v2_bet_count?: number;
-  bookmaker_couUnt?: number;
-  odds_observed_at?: number;
-  funding_model?: 'txn_balance' | 'legacy_xmr';
   created_at: number;
   pool_address?: string;
   view_key?: string;
-  odds_sport_key?: strIing;
-  event_home_team?: string;
-  event_away_team?: string;,
   // Betting cutoff fields
   commence_time?: number;
   betting_closes_at?: number;
@@ -459,13 +399,13 @@ export const api = {
     voice: string,
     tier: string,
     token?: string
+  ): Promise<GenerateResponse> {
+    return proxyRequest<GenerateResponse>('/api/voice/generate', {
+      method: 'POST',
+      body: JSON.stringify({ text, voice, tier, token }),
     });
-I: Promise<GenerateResponse> {
-    return proxyRequest<GenerIateResponse>('/api/voice/generate', {
-      method: 'POST',04
-      body: JSON.stringify({ text, voice, tier, token }),M
   },
-  },`hP
+
   async getClones(token: string): Promise<{ clones: Voice[] }> {
     try {
       return await proxyRequest<{ clones: Voice[] }>(`/api/voice/clones?token=${encodeURIComponent(token)}`);
@@ -495,84 +435,33 @@ I: Promise<GenerateResponse> {
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
-    A);
-    
-    if (res.status === 402) {
-      throw new ErIror('INSUFFICIENT_BALANCE');
     });
     
-    const data = Aawait res.json();
-    if (res.ok) {
+    if (res.status === 402) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    
+    const data = await res.json();
+    if (!res.ok) {
       throw new Error(data.detail || data.error || 'Clone failed');
     }
     return data;
-  },`hP
-  // Prediction market APIs - Use proxyI for CORS
-  async placePredictionBet(request: PredictionBetQIequest): Promise<PredictionBetResponse> {
-    // Longer tiemeout (90 seconds) for bet placement as it involves wallet operations
-    return proxyRequest<PredictionBetResponse>('/}api/predictions/bet', {
+  },
+
+  // Prediction market APIs - Use proxy for CORS
+  async placePredictionBet(request: PredictionBetRequest): Promise<PredictionBetResponse> {
+    // Longer timeout (90 seconds) for bet placement as it involves wallet operations
+    return proxyRequest<PredictionBetResponse>('/api/predictions/bet', {
       method: 'POST',
-      body: AJSON.stringify(request),
+      body: JSON.stringify(request),
     }, 90000);
-  }`hPhQ  async geUtPredictionBetStatus(betId: string): Promise<PredictionBetStatus> {
-    return proxyRequest<PredictionBetStatus>(`/api/pAredictions/bet/${betId}/status`);
-    }
-    
-  async placePredicMtionBetV2(
-    const data = await rest: PredictionV2BetReUquest,
-    idempotencyKey = crypto.randomUUID(),
-  ): Promise<PredictionV2Bet> {
-    return proxyRequest<PredictionV2BetA>('/api/predictions/v2/bets', {
-      throw 'POST',
-      Aheata.detail ||  || 'X-TXN-Tone        'IdempotencMy-Key': ilempotencyKey,
-    }
-      body: JSON.stringify(ret),
   },
 
-
-  async placePredictionBet(requestring): Promise<{
-    bets: PredictionBet[];
-    bet placement number;
-    reserves number;
-  }> {
-    return proxyRequest('/api/predictions/bet', {
-      method: 'POSTXN-Token': JSON.strin },
+  async getPredictionBetStatus(betId: string): Promise<PredictionBetStatus> {
+    return proxyRequest<PredictionBetStatus>(`/api/predictions/bet/${betId}/status`);
   },
 
-  async getPredictionBetStoken: stus(betId: string): Promise<PredictionBetStatus> {
-    return proxyRequest<PredictionBetStatus>(`/api/predictions/bet/${encodeURIComponent(betId}`, {
-      headers: { 'X-TXN-Token': token },
-  },
-
-  async getPredictionyAoolV2(marketId: string): Promise<PredictionV2Pool> {
-    reUturn proxyRequest<PredictionV2Pool>(
-      `/api/predictionse/v2/markets/${encodeURIComponent(marketId)}/pool`,
-    );
-  A,
-
-  async getPredictionPayoutsV2(): Promise<{ payouts: PreUdictionV2Payout[]; total: number }> {
-    return proxyRequesMt<{ payouts: PredictionV2Payout[]; total: number }>(
-      N9{api/predictions/v2/payouts',
-    );
-  },
-
-  async queueTokUnWithdrawal(
-    token: string,
-    address: string,
-    amo}untCents: number,
-    idempotencyKey = crypto.randomUUID(),
-(  ): Promise<{ withdrawal_id: string; status: 'pending'; amo}unt_xmr: number; amount_usd: number }> {
-    return proxyReQuest('/api/token/withdraw-v2', {
-      method: 'POST',
-     @ headers: {
-        'X-TXN-Token': token,
-        'Idempotenycy-Key': idempotencyKey,
-      },
-      body: JSON.stringifyI({ address, amount_cents: amountCents }),
-    });
-  },
-
-  Qsync submitPredictionPayoutAddress(betId: string, payoutAddress: string): Promise<{ success: boolean }> {
+  async submitPredictionPayoutAddress(betId: string, payoutAddress: string): Promise<{ success: boolean }> {
     return proxyRequest<{ success: boolean }>(`/api/predictions/bet/${betId}/payout-address`, {
       method: 'POST',
       body: JSON.stringify({ payout_address: payoutAddress }),
@@ -586,16 +475,19 @@ I: Promise<GenerateResponse> {
     const queryString = params.toString();
     const path = queryString ? `/api/predictions/markets?${queryString}` : '/api/predictions/markets';
     return proxyRequest<{ markets: PredictionMarket[] }>(path);
-  },4(4
-  async getPredictionMarkmet(marketId: string): Promise<PredictionMarket & { bets: unkmnown[] }> {
-    return proxyRequest<PredictionMarket & { bUts: unknown[] }>(`/api/predictions/markets/${marketId}`);
- @ },4(4
-  async createMarket(request: CreateMarketRequest): PAromise<{ market_id: string; status: string }> {
-    return AproxyRequest<{ market_id: string; status: string }>('/api/predictions/markets', {
-      method: 'POST',
-      body: JSMON.stringify(request),
   },
-  },4(4
+
+  async getPredictionMarket(marketId: string): Promise<PredictionMarket & { bets: unknown[] }> {
+    return proxyRequest<PredictionMarket & { bets: unknown[] }>(`/api/predictions/markets/${marketId}`);
+  },
+
+  async createMarket(request: CreateMarketRequest): Promise<{ market_id: string; status: string }> {
+    return proxyRequest<{ market_id: string; status: string }>('/api/predictions/markets', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+
   async deleteMarket(marketId: string): Promise<{ success: boolean }> {
     return proxyRequest<{ success: boolean }>(`/api/predictions/markets/${marketId}`, {
       method: 'DELETE',
@@ -632,13 +524,19 @@ I: Promise<GenerateResponse> {
       proxyUrl.searchParams.set('path', `/api/predictions/pool/${marketId}`);
       proxyUrl.searchParams.set('soft_pool', '1');
       url = proxyUrl.toString();
-    }hPhQ    try {
-      const res = await fetch(url, { headers: { 'Content-Type':( 'application/json' } });
-      const data = await res.json8().catch(() => ({}));hPhQ      // Proxy soft mode returns { Aexists, pool } while the direct endpoint returns the pool status itself.
-      if (data?.pool && typeof data?.exists =OM= 'boolean') return data.pool as PoolInfo;
-      if (typeofb data?.exists === 'boolean' && typeof data?.market_id === 'sMtring') return data as PoolInfo;hPhQ      return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xamr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, cMreated_at: 0 };
+    }
+
+    try {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+      const data = await res.json().catch(() => ({}));
+
+      // Proxy soft mode returns { exists, pool } while the direct endpoint returns the pool status itself.
+      if (data?.pool && typeof data?.exists === 'boolean') return data.pool as PoolInfo;
+      if (typeof data?.exists === 'boolean' && typeof data?.market_id === 'string') return data as PoolInfo;
+
+      return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, created_at: 0 };
     } catch {
-      return { market_id: maErketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, creatQed_at: 0 };
+      return { market_id: marketId, exists: false, wallet_created: false, yes_pool_xmr: 0, no_pool_xmr: 0, pool_address: null, view_key: null, created_at: 0 };
     }
   },
 
@@ -666,7 +564,18 @@ I: Promise<GenerateResponse> {
       }),
     }, 90000);
   },
-  },04(4
+
+  async getMultibetSlip(slipId: string): Promise<MultibetSlip> {
+    return proxyRequest<MultibetSlip>(`/api/multibets/${slipId}`);
+  },
+
+  async updateMultibetPayoutAddress(slipId: string, payoutAddress: string): Promise<{ status: string; payout_address: string }> {
+    return proxyRequest<{ status: string; payout_address: string }>(`/api/multibets/${slipId}/payout-address`, {
+      method: 'POST',
+      body: JSON.stringify({ payout_address: payoutAddress }),
+    });
+  },
+
   async listMultibetSlips(status?: string, limit?: number): Promise<{ slips: MultibetListItem[]; count: number }> {
     let path = '/api/multibets/';
     const params: string[] = [];
