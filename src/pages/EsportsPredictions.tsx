@@ -44,7 +44,6 @@ import { PendingDataIndicator } from '@/components/PendingDataIndicator';
 import { BackoffBadge } from '@/components/BackoffBadge';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Gamepad2, Calendar, Users, Swords, ArrowRight, HelpCircle, Info, Radio, ExternalLink, Lock, Activity, Wallet, ChevronDown } from 'lucide-react';
-import ExolixWidget from '@/components/ExolixWidget';
 import { VoucherBadge } from '@/components/VoucherBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -731,21 +730,6 @@ export default function EsportsPredictions() {
             </Link>
           </div>
 
-          {/* Exolix Swap Widget */}
-          <Collapsible className="mb-6">
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full justify-between">
-                <span className="flex items-center gap-2">
-                  <Wallet className="w-4 h-4" />
-                  Swap to XMR instantly
-                </span>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <ExolixWidget fromCoin="BTC" toCoin="XMR" />
-            </CollapsibleContent>
-          </Collapsible>
 
           {/* Twitch Stream + Community Links */}
           <div className="mb-6">
