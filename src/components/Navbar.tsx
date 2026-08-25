@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText, TrendingUp } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
