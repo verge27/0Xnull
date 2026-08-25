@@ -620,21 +620,8 @@ const Swaps = () => {
     setHasFetchedRates(false);
   };
 
-  // Handle aggregator change
-  const handleAggregatorChange = (newAggregator: string) => {
-    setAggregator(newAggregator as Aggregator);
-    // Reset selections when switching aggregators
-    setFromCoin('');
-    setFromNetwork('');
-    setToCoin('');
-    setToNetwork('');
-    setAmount('');
-    setRates([]);
-    setExolixRate(null);
-    setSelectedProvider(null);
-    setHasFetchedRates(false);
-    setTrade(null);
-  };
+
+
 
 
   const fetchRates = async () => {
