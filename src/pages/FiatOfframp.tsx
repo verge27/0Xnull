@@ -408,6 +408,24 @@ const FiatOfframp = () => {
                   <p className="text-xs text-muted-foreground">In case the exchange fails, funds will be returned here</p>
                 </div>
 
+                {payoutError && (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 space-y-2">
+                    <p className="flex items-center gap-2 text-sm font-medium text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      {payoutError.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{payoutError.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Nothing was sent, so your crypto is untouched. If Guardarian stopped you on its hosted checkout, the reason is usually your country or the identity check — use the eligibility checklist below.
+                    </p>
+                    <details className="text-xs text-muted-foreground">
+                      <summary className="cursor-pointer">Technical detail</summary>
+                      <code className="break-all">{payoutError.raw}</code>
+                    </details>
+                  </div>
+                )}
+
+
                 <Button 
                   className="w-full" 
                   size="lg" 
