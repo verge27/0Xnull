@@ -1,5 +1,6 @@
 import { Phone as PhoneIcon, MessageSquare, Wifi, Shield, ExternalLink, Zap, AlertTriangle, Lightbulb, CheckCircle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from '@/components/Footer';
 import { SEORichText } from '@/components/SEORichText';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,12 @@ const esimBackground = '/images/backgrounds/esim-background.webp';
 
 const AFFILIATE_BASE = "https://nadanada.me";
 const REF = "?ref=syndicate";
+
+const PHONE_SECTION_IDS: Record<string, string | undefined> = {
+  "Disposable Numbers": "numbers",
+  "Data eSIM": "esim",
+  "No-Log VPN": "vpn",
+};
 
 const features = [
   { icon: "🔒", title: "No KYC", description: "No identity verification. No email. No account. Just pay and use." },
@@ -84,6 +91,7 @@ const Phone = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
       
       <Navbar />
+      <SubsiteLayout section={"Phone & eSIM"} sectionPath="/phone" links={[{ label: 'Numbers', to: '#numbers' }, { label: 'eSIM', to: '#esim' }, { label: 'VPN', to: '#vpn' }]} />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
@@ -141,7 +149,11 @@ const Phone = () => {
               {services.map((service, idx) => {
                 const Icon = service.icon;
                 return (
-                  <Card key={idx} className="hover:border-primary/50 transition-colors">
+                  <Card
+                    key={idx}
+                    id={PHONE_SECTION_IDS[service.title]}
+                    className="scroll-mt-24 hover:border-primary/50 transition-colors"
+                  >
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
