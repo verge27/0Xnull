@@ -120,9 +120,15 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     });
   }, []);
 
+  // Metadata failed (auth error, API outage, network) — we still render the player.
+  const metadataFailed = Boolean(error || streamInfo?.unavailable);
+
+  // Channel to render: live metadata channel, else the configured fallback.
+  const channelToRender = streamInfo?.channel ?? (metadataFailed ? FALLBACK_CHANNEL : null);
+
   // Build iframe src with broad parent allowlist
   const iframeSrc = useMemo(() => {
-    if (!locationInfo || !streamInfo?.channel) return null;
+    if (!locationInfo || !channelToRender) return null;
 
     const parentDomains = [
       '0xnull.io',
@@ -138,21 +144,22 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     const uniqueParents = [...new Set(parentDomains.filter(Boolean))];
     const parentParams = uniqueParents.map(p => `parent=${p}`).join('&');
 
-    return `https://player.twitch.tv/?channel=${streamInfo.channel}&${parentParams}&muted=true`;
-  }, [locationInfo, streamInfo?.channel]);
+    return `https://player.twitch.tv/?channel=${channelToRender}&${parentParams}&muted=true`;
+  }, [locationInfo, channelToRender]);
 
   // Debug logging
   useEffect(() => {
-    if (locationInfo && streamInfo?.channel && iframeSrc) {
+    if (locationInfo && channelToRender && iframeSrc) {
       console.log('Twitch Debug:', {
         hostname: locationInfo.hostname,
         host: locationInfo.host,
         origin: locationInfo.origin,
-        channel: streamInfo.channel,
-        iframeSrc: iframeSrc
+        channel: channelToRender,
+        fallback: !streamInfo?.channel,
+        iframeSrc,
       });
     }
-  }, [locationInfo, streamInfo?.channel, iframeSrc]);
+  }, [locationInfo, channelToRender, streamInfo?.channel, iframeSrc]);
 
   const fetchTopStream = useCallback(async (game: string) => {
     setLoading(true);
@@ -172,11 +179,12 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
     } catch (err) {
       console.error('Error fetching Twitch stream:', err);
       setError('Could not load stream');
-      setStreamInfo({ channel: null });
+      setStreamInfo({ channel: null, unavailable: true, reason: 'fetch_failed' });
     } finally {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     fetchTopStream(activeFilter);
