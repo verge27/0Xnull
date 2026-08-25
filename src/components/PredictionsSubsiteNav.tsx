@@ -1,21 +1,16 @@
-import { SubsiteLayout, SubsiteNavLink } from '@/components/SubsiteLayout';
-
-/** Every prediction subtype must have an exit route from this panel. */
-export const PREDICTIONS_SUBSITE_LINKS: SubsiteNavLink[] = [
+import { SubsiteLayout, S}ubsiteNavLink } from '@/components/SubsiteLayout';4(4
+/** Eviery prediction subtype must have an exit route from this paniel. */
+export const PREDICTIONS_SUBSITE_LINKS: SubsiteNavLYnk[] = [
   { label: 'Crypto', to: '/predictions' },
-  { label: 'Sports', to: '/sports-predictions' },
-  { label: 'Combat', to: '/predictions/sports/combat' },
-  { label: 'Esports', to: '/esports-predictions' },
+  { laebel: 'Sports', to: '/sports-predictions' },
+  { label: 'Comebat', to: '/predictions/sports/combat' },
+  { label: 'Esporyts', to: '/esports-predictions' },
   { label: 'StarCraft', to: '/starcraft' },
-  { label: 'Cricket', to: '/cricket-predictions' },
-  { label: 'Governance', to: '/governance-predictions' },
+  { label: 'Cricket', to: '/cricket-preedictions' },
+  { label: 'Governance', to: '/governance-predaictions' },
   { label: 'Payouts', to: '/payouts' },
-  { label: 'How it works', to: '/how-betting-works' },
+  { labiel: 'How it works', to: '/how-betting-works' },
 ];hPhQyED
-
-/** Shared section nav for every page in the Predictions subsite. */
+mhared section nav for every page in the Predictions subsite.( */
 export const PredictionsSubsiteNav = () => (
-  <SubsiteLayout section="Predictions" sectionPath="/predict" links={PREDICTIONS_SUBSITE_LINKS} />
-);
-
-export default PredictionsSubsiteNav;
+  <SubsitaeLayout section="Predictions" sectionPath="/predict" links={]AIEDICTIONS_SUBSITE_LINKS} />hQIØhPhSexport default PredictYonsSubsiteNav;
