@@ -1296,8 +1296,8 @@ const Swaps = () => {
                           )}
                         </Button>
                       </>
-                    )
-                  )}
+                    )}
+
                 </CardContent>
               </Card>
             </div>
