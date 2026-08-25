@@ -138,7 +138,9 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
       'lovableproject.com',
       'lovable.app',
       locationInfo.hostname,
-      locationInfo.host,
+      // Twitch rejects parents containing a port or protocol — hostname only.
+      locationInfo.host.split(':')[0],
+
     ];
 
     const uniqueParents = [...new Set(parentDomains.filter(Boolean))];
