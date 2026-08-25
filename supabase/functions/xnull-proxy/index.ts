@@ -32,6 +32,45 @@ const ALLOWED_METHODS = ['GET', 'POST', 'PUT'];
 // The upstream API sometimes sends a Content-Length that far exceeds the bytes it
 // actually writes, so Deno aborts with "error reading a body from connection".
 // Read the stream manually and keep whatever arrived: if it parses as JSON it is complete.
+// Salvage a JSON payload that was cut off mid-stream by trimming back to the last
+// complete element and closing any brackets that were still open there.
+function repairTruncatedJson(text: string): string | null {
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+  let safeIndex = -1;
+  let safeStack: string[] = [];
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') { inString = true; continue; }
+    if (ch === '{' || ch === '[') { stack.push(ch === '{' ? '}' : ']'); continue; }
+    if (ch === '}' || ch === ']') {
+      stack.pop();
+      if (stack.length > 0) {
+        safeIndex = i + 1;
+        safeStack = [...stack];
+      }
+    }
+  }
+
+  if (safeIndex <= 0) return null;
+  const closing = [...safeStack].reverse().join('');
+  const candidate = text.slice(0, safeIndex) + closing;
+  try {
+    JSON.parse(candidate);
+    return candidate;
+  } catch {
+    return null;
+  }
+}
+
 async function readBodyTolerant(res: Response): Promise<string> {
   if (!res.body) return '';
   const reader = res.body.getReader();
@@ -59,10 +98,14 @@ async function readBodyTolerant(res: Response): Promise<string> {
   }
   const text = new TextDecoder().decode(buf);
   if (truncated) {
-    // Only usable if the payload is actually complete JSON
     try {
       JSON.parse(text);
     } catch {
+      const repaired = repairTruncatedJson(text);
+      if (repaired) {
+        console.warn('[xnull-proxy] Recovered a truncated JSON payload from upstream');
+        return repaired;
+      }
       throw new Error('Upstream connection closed before a complete response was received');
     }
   }
