@@ -304,6 +304,24 @@ const PAY_SIGNALS =
 const SCOPE_SIGNALS =
   /\b(dev(eloper|elopment)?|engineer|program(mer|ming)|code|website|web\s?app|frontend|backend|full\s?stack|design(er)?|graphic|logo|writ(er|ing)|content|translat(e|or|ion)|marketing|seo|video|edit(or|ing)|audio|bot|script|scraper|sysadmin|devops|security|pentest|support|moderat(or|ion)|sales|research|data)\b/i;
 
+// ---------- listing type ----------
+
+// Directories of freelancer profiles are always people advertising themselves.
+const SERVICE_SOURCES = new Set(['monerica-freelancers', 'freelanceforcoins']);
+
+const OFFERING_SIGNALS =
+  /(\bi (can|will|am able to|offer|do|build|design|write|provide)\b|available for (hire|work)|\bfor hire\b|my services|offering my|hire me|dm me for|\bi'?m a \b|\bi am a \b|open (for|to) (work|commissions)|accepting (clients|commissions|orders)|\bportfolio\b)/i;
+const HIRING_SIGNALS =
+  /(we are hiring|\bhiring\b|we need\b|looking to hire|job offer|\bvacancy\b|we'?re looking for|paying \d)/i;
+
+function classifyListing(sourceId: string, title: string, body: string): 'hiring' | 'offering' {
+  if (SERVICE_SOURCES.has(sourceId)) return 'offering';
+  const text = `${title}\n${body}`;
+  if (HIRING_SIGNALS.test(text)) return 'hiring';
+  if (OFFERING_SIGNALS.test(text)) return 'offering';
+  return 'hiring';
+}
+
 function assessQuality(title: string, body: string): string | null {
   const text = `${title}\n${body}`.trim();
   const words = text.split(/\s+/).filter(Boolean);
