@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-0xnull-token',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-0xnull-token, x-txn-token, idempotency-key',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
@@ -326,6 +326,9 @@ serve(async (req) => {
 
     // Forward X-0xNull-Token header for lending auth
     const oxnullToken = req.headers.get('x-0xnull-token');
+    // Prediction v2 credentials stay in headers so they never enter URLs or logs.
+    const txnToken = req.headers.get('x-txn-token');
+    const idempotencyKey = req.headers.get('idempotency-key');
 
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers.get('content-type') || '';
@@ -347,6 +350,10 @@ serve(async (req) => {
       } else {
         const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
         if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+      if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
+      if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
+        if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
+        if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
         fetchOptions.headers = reqHeaders;
         try {
           const body = await req.text();

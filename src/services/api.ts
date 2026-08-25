@@ -271,6 +271,57 @@ export interface PredictionMarket {
   commence_time?: number;
   betting_closes_at?: number;
   betting_open?: boolean;
+  // Prediction v2 ledger fields (cents)
+  odds_sport_key?: string;
+  yes_pool_cents?: number;
+  no_pool_cents?: number;
+  treasury_yes_cents?: number;
+  treasury_no_cents?: number;
+}
+
+export interface PredictionV2BetRequest {
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_cents: number;
+}
+
+export interface PredictionV2Bet {
+  bet_id: string;
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_cents: number;
+  amount_usd: number;
+  payout_cents: number | null;
+  payout_usd: number | null;
+  status: 'reserved' | 'won' | 'lost' | 'refunded';
+  created_at: number;
+  resolved_at: number | null;
+  funding: 'txn_balance';
+}
+
+export interface PredictionV2Pool {
+  market_id: string;
+  yes_pool_cents: number;
+  no_pool_cents: number;
+  treasury_yes_cents: number;
+  treasury_no_cents: number;
+  bet_count: number;
+  resolved: boolean;
+  outcome: 'YES' | 'NO' | 'DRAW' | null;
+  wallet_created: false;
+  pool_address: null;
+  view_key: null;
+  funding: 'txn_balance';
+}
+
+export interface PredictionV2Payout {
+  bet_id: string;
+  market_id: string;
+  side: 'YES' | 'NO';
+  amount_cents: number;
+  payout_cents: number;
+  status: 'won' | 'refunded';
+  resolved_at: number;
 }
 
 export interface PoolInfo {
@@ -563,6 +614,58 @@ export const api = {
         voucher_code: voucherCode,
       }),
     }, 90000);
+  },
+
+  async getMultibetSlip(slipId: string): Promise<MultibetSlip> {
+    return proxyRequest<MultibetSlip>(`/api/multibets/${slipId}`);
+  },
+
+  async updateMultibetPayoutAddress(slipId: string, payoutAddress: string): Promise<{ status: string; payout_address: string }> {
+    return proxyRequest<{ status: string; payout_address: string }>(`/api/multibets/${slipId}/payout-address`, {
+      method: 'POST',
+      body: JSON.stringify({ payout_address: payoutAddress }),
+    });
+  },
+
+  async placePredictionBetV2(
+    token: string,
+    request: PredictionV2BetRequest,
+    idempotencyKey = crypto.randomUUID(),
+  ): Promise<PredictionV2Bet> {
+    return proxyRequest<PredictionV2Bet>('/api/predictions/v2/bets', {
+      method: 'POST',
+      headers: {
+        'X-TXN-Token': token,
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: JSON.stringify(request),
+    });
+  },
+
+  async listPredictionBetsV2(token: string): Promise<{
+    bets: PredictionV2Bet[];
+    balance_cents: number;
+    reserved_cents: number;
+  }> {
+    return proxyRequest('/api/predictions/v2/bets', {
+      headers: { 'X-TXN-Token': token },
+    });
+  },
+
+  async getPredictionBetV2(token: string, betId: string): Promise<PredictionV2Bet> {
+    return proxyRequest<PredictionV2Bet>(`/api/predictions/v2/bets/${encodeURIComponent(betId)}`, {
+      headers: { 'X-TXN-Token': token },
+    });
+  },
+
+  async getPredictionPoolV2(marketId: string): Promise<PredictionV2Pool> {
+    return proxyRequest<PredictionV2Pool>(
+      `/api/predictions/v2/markets/${encodeURIComponent(marketId)}/pool`,
+    );
+  },
+
+  async getPredictionPayoutsV2(): Promise<{ payouts: PredictionV2Payout[]; total: number }> {
+    return proxyRequest('/api/predictions/v2/payouts');
   },
 
   async getMultibetSlip(slipId: string): Promise<MultibetSlip> {

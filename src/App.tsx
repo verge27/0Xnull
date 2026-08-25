@@ -56,14 +56,7 @@ const Docs = lazy(() => import("./pages/Docs"));
 const Canary = lazy(() => import("./pages/Canary"));
 
 // Heavy prediction pages (largest bundles - definitely lazy load)
-const CryptoPredictions = lazy(() => import("./pages/CryptoPredictions"));
-const SportsPredictions = lazy(() => import("./pages/SportsPredictions"));
-const EsportsPredictions = lazy(() => import("./pages/EsportsPredictions"));
-const CricketPredictions = lazy(() => import("./pages/CricketPredictions"));
-const StarcraftPredictions = lazy(() => import("./pages/StarcraftPredictions"));
-const GovernancePredictions = lazy(() => import("./pages/GovernancePredictions"));
-const CombatSports = lazy(() => import("./pages/CombatSports"));
-const Slap = lazy(() => import("./pages/Slap"));
+const PredictionMarketsV2 = lazy(() => import("./pages/PredictionMarketsV2"));
 const PredictionsHub = lazy(() => import("./pages/PredictionsHub"));
 const MarketDetail = lazy(() => import("./pages/MarketDetail"));
 
@@ -154,18 +147,18 @@ const App = () => (
                   
                   {/* Predictions */}
                   <Route path="/predict" element={<PredictionsHub />} />
-                  <Route path="/predictions" element={<CryptoPredictions />} />
-                  <Route path="/sports-predictions" element={<SportsPredictions />} />
-                  <Route path="/esports-predictions" element={<EsportsPredictions />} />
-                  <Route path="/cricket-predictions" element={<CricketPredictions />} />
-                  <Route path="/governance-predictions" element={<GovernancePredictions />} />
-                  <Route path="/starcraft" element={<StarcraftPredictions />} />
+                  <Route path="/predictions" element={<PredictionMarketsV2 view="crypto" />} />
+                  <Route path="/sports-predictions" element={<PredictionMarketsV2 view="sports" />} />
+                  <Route path="/esports-predictions" element={<PredictionMarketsV2 view="esports" />} />
+                  <Route path="/cricket-predictions" element={<PredictionMarketsV2 view="cricket" />} />
+                  <Route path="/governance-predictions" element={<PredictionMarketsV2 view="governance" />} />
+                  <Route path="/starcraft" element={<PredictionMarketsV2 view="starcraft" />} />
                   
                   {/* Combat Sports */}
-                  <Route path="/predictions/sports/combat" element={<CombatSports />} />
-                  <Route path="/predictions/sports/combat/mma" element={<CombatSports />} />
-                  <Route path="/predictions/sports/combat/boxing" element={<CombatSports />} />
-                  <Route path="/predictions/sports/combat/slap" element={<Slap />} />
+                  <Route path="/predictions/sports/combat" element={<PredictionMarketsV2 view="combat" />} />
+                  <Route path="/predictions/sports/combat/mma" element={<PredictionMarketsV2 view="combat" />} />
+                  <Route path="/predictions/sports/combat/boxing" element={<PredictionMarketsV2 view="combat" />} />
+                  <Route path="/predictions/sports/combat/slap" element={<PredictionMarketsV2 view="combat" />} />
                   <Route path="/slap" element={<Navigate to="/predictions/sports/combat/slap" replace />} />
                   
                   <Route path="/how-betting-works" element={<HowBettingWorks />} />
