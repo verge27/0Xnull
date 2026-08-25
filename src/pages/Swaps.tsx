@@ -702,13 +702,8 @@ const Swaps = () => {
   };
 
   const executeTrade = async () => {
-    if (aggregator === 'trocador' && !selectedProvider) {
+    if (!selectedProvider) {
       toast({ title: 'Missing fields', description: 'Please select a provider', variant: 'destructive' });
-      return;
-    }
-    
-    if (aggregator === 'exolix' && !exolixRate) {
-      toast({ title: 'Missing rate', description: 'Please get a rate first', variant: 'destructive' });
       return;
     }
 
@@ -724,59 +719,8 @@ const Swaps = () => {
 
     setExecutingTrade(true);
     try {
-      if (aggregator === 'exolix') {
-        // Exolix trade
-        const { data, error } = await supabase.functions.invoke('exolix-api', {
-          body: {
-            action: 'create_transaction',
-            coinFrom: fromCoin.toUpperCase(),
-            networkFrom: fromNetwork,
-            coinTo: toCoin.toUpperCase(),
-            networkTo: toNetwork,
-            amount: amount,
-            withdrawalAddress: receiveAddress,
-            withdrawalExtraId: addressMemo || '',
-            refundAddress: refundAddress || '',
-            rateType: 'float',
-          },
-        });
+      {
 
-        if (error) throw error;
-        if (data.error) throw new Error(data.error);
-
-        const tradeData: TradeResponse = {
-          trade_id: data.id,
-          address: data.depositAddress,
-          address_memo: data.depositExtraId || undefined,
-          status: data.status,
-          amount_from: String(data.amount),
-          amount_to: String(data.amountTo),
-        };
-
-        setTrade(tradeData);
-
-        // Save to history (only when signed-in; anonymous swaps stay in localStorage)
-        if (user?.id) {
-          await supabase.from('swap_history').insert({
-            trade_id: data.id,
-            from_coin: fromCoin,
-            from_network: fromNetwork,
-            to_coin: toCoin,
-            to_network: toNetwork,
-            amount: amount,
-            receive_address: receiveAddress,
-            provider: 'Exolix',
-            provider_address: data.depositAddress,
-            provider_memo: data.depositExtraId,
-            status: data.status,
-            user_id: user.id,
-          });
-        }
-
-        saveTradeIdToLocal(data.id);
-        fetchSwapHistory();
-        toast({ title: 'Trade created!', description: `Send ${amount} ${fromCoin.toUpperCase()} to the address shown` });
-      } else {
         // Trocador trade
         const { data, error } = await supabase.functions.invoke('trocador-new-trade', {
           body: {
