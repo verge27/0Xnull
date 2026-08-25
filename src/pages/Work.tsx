@@ -25,7 +25,16 @@ type Job = {
   tags: string[];
   posted_at: string | null;
   first_seen_at: string;
+  listing_type: string;
 };
+
+type ListingType = "all" | "hiring" | "offering";
+
+const LISTING_TABS: { value: ListingType; label: string; hint: string }[] = [
+  { value: "hiring", label: "Jobs on offer", hint: "Someone paying for work" },
+  { value: "offering", label: "Freelancers available", hint: "People offering their services" },
+  { value: "all", label: "Everything", hint: "Both kinds of listing" },
+];
 
 type Source = {
   id: string;
@@ -75,6 +84,7 @@ const Work = () => {
   const [payType, setPayType] = useState<string>("all");
   const [sourceId, setSourceId] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [listingType, setListingType] = useState<ListingType>("hiring");
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +96,7 @@ const Work = () => {
       const [jobsRes, sourcesRes] = await Promise.all([
         supabase
           .from("jobs")
-          .select("id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at")
+          .select("id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, listing_type")
           .eq("hidden", false)
           .order("first_seen_at", { ascending: false })
           .limit(500),
@@ -127,6 +137,7 @@ const Work = () => {
     const needle = search.trim().toLowerCase();
 
     const filtered = jobs.filter((job) => {
+      if (listingType !== "all" && (job.listing_type ?? "hiring") !== listingType) return false;
       if (payType !== "all" && job.pay_type !== payType) return false;
       if (sourceId !== "all" && job.source_id !== sourceId) return false;
       if (activeTag && !(job.tags ?? []).includes(activeTag)) return false;
@@ -153,7 +164,19 @@ const Work = () => {
       if (bp === undefined) return -1;
       return sort === "pay-high" ? bp - ap : ap - bp;
     });
-  }, [jobs, search, sort, payType, sourceId, activeTag]);
+  }, [jobs, search, sort, payType, sourceId, activeTag, listingType]);
+
+  const typeCounts = useMemo(() => {
+    const counts = { hiring: 0, offering: 0 };
+    jobs.forEach((job) => {
+      if ((job.listing_type ?? "hiring") === "offering") counts.offering++;
+      else counts.hiring++;
+    });
+    return counts;
+  }, [jobs]);
+
+  const countForTab = (value: ListingType) =>
+    value === "all" ? jobs.length : value === "offering" ? typeCounts.offering : typeCounts.hiring;
 
   const unavailableSources = sources.filter((s) => !s.enabled);
   const liveSources = sources.filter((s) => s.enabled);
@@ -184,10 +207,38 @@ const Work = () => {
               Every XMR job we can find, in one place. Aggregated from public boards, refreshed every 30 minutes.
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-sm">
-              <Badge variant="outline">{jobs.length} open listings</Badge>
+              <Badge variant="outline">{typeCounts.hiring} jobs on offer</Badge>
+              <Badge variant="outline">{typeCounts.offering} freelancers available</Badge>
               <Badge variant="outline">{liveSources.length} live sources</Badge>
               <Badge variant="outline">No account needed</Badge>
             </div>
+          </div>
+
+          {/* Listing type */}
+          <div
+            role="tablist"
+            aria-label="Listing type"
+            className="grid gap-2 sm:grid-cols-3 mb-6"
+          >
+            {LISTING_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={listingType === tab.value}
+                onClick={() => setListingType(tab.value)}
+                className={`rounded-lg border px-4 py-3 text-left transition-colors ${
+                  listingType === tab.value
+                    ? "border-primary bg-primary/10"
+                    : "border-border/50 hover:border-primary/50"
+                }`}
+              >
+                <span className="block text-sm font-medium">
+                  {tab.label} <span className="text-muted-foreground">({countForTab(tab.value)})</span>
+                </span>
+                <span className="block text-xs text-muted-foreground">{tab.hint}</span>
+              </button>
+            ))}
           </div>
 
           {/* Filters */}
@@ -340,6 +391,16 @@ const Work = () => {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <Badge
+                          variant="outline"
+                          className={
+                            (job.listing_type ?? "hiring") === "offering"
+                              ? "border-blue-500/50 text-blue-400"
+                              : "border-primary/50 text-primary"
+                          }
+                        >
+                          {(job.listing_type ?? "hiring") === "offering" ? "Offering services" : "Hiring"}
+                        </Badge>
                         {source && <Badge variant="secondary">{source.name}</Badge>}
                         <Badge variant="outline">{PAY_TYPE_LABELS[job.pay_type] ?? job.pay_type}</Badge>
                         {source?.escrow && (
