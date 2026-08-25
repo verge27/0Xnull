@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp, Globe, AlertTriangle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { RampSubsiteNav } from '@/components/RampSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { PayoutEligibilityChecklist } from '@/components/PayoutEligibilityChecklist';
