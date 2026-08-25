@@ -22,22 +22,45 @@ import { toast } from 'sonner';
 const TokenDashboardBadge = () => <TokenStatusWidget />;
 
 
-const MobileTokenBadge = ({ onNavigate }: { onNavigate: () => void }) => {
+/** Mirrors the homepage service cards exactly (icons, labels, order, destinations). */
+const MOBILE_NAV = [
+  { to: '/', label: 'Home', icon: Shield },
+  { to: '/ai', label: 'AI & Voice', icon: Bot },
+  { to: '/phone', label: 'Phone & eSIM', icon: Smartphone },
+  { to: '/swaps', label: 'Swaps', icon: ArrowLeftRight },
+  { to: '/ramp', label: 'Fiat On/Off Ramp', icon: Wallet },
+  { to: '/work', label: 'Work', icon: Briefcase },
+  { to: '/vps', label: 'VPS', icon: Server },
+];
+
+const MobileWalletRow = ({ onNavigate }: { onNavigate: () => void }) => {
   const { token, balance, hasToken } = useToken();
-  if (!hasToken || !token) return null;
-  const truncated = `${token.slice(0, 8)}…${token.slice(-4)}`;
+
+  if (!hasToken || !token) {
+    return (
+      <Button asChild size="sm" className="w-full">
+        <Link to="/get-started" onClick={onNavigate}>
+          <Rocket className="w-4 h-4 mr-1.5" aria-hidden="true" />
+          Get Started
+        </Link>
+      </Button>
+    );
+  }
+
+  const truncated = `${token.slice(0, 6)}…${token.slice(-4)}`;
   return (
     <Link
       to="/dashboard"
       onClick={onNavigate}
-      className="flex items-center gap-2 px-3 py-2.5 mt-4 rounded-lg bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-colors"
+      className="flex items-center gap-2 min-w-0 px-3 py-2.5 rounded-lg bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-colors"
     >
-      <Key className="w-4 h-4 text-primary flex-shrink-0" />
-      <code className="font-mono text-xs text-muted-foreground truncate">{truncated}</code>
-      <span className="font-mono text-sm font-semibold ml-auto">${balance.toFixed(2)}</span>
+      <Key className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+      <code className="font-mono text-xs text-muted-foreground truncate min-w-0">{truncated}</code>
+      <span className="font-mono text-sm font-semibold ml-auto flex-shrink-0">${balance.toFixed(2)}</span>
     </Link>
   );
 };
+
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
