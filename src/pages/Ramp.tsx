@@ -204,16 +204,7 @@ const Ramp = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <SubsiteLayout
-        section="Fiat On/Off Ramp"
-        sectionPath="/ramp"
-        links={[
-          { label: 'Route finder', to: '/ramp' },
-          { label: 'Buy', to: '/buy' },
-          { label: 'Cash out', to: '/cashout' },
-          { label: 'Swaps', to: '/swaps' },
-        ]}
-      />
+      <RampSubsiteNav />
 
       <main className="flex-1 container mx-auto px-4 py-10 max-w-4xl">
         <header className="mb-8">
