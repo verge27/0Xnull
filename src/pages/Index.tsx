@@ -14,18 +14,18 @@ interface Panel {
   description: string;
 }
 
-const panels: Panel[] = [
-  {
-    to: '/ai',
-    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'AI & Voice',
-    description: 'Private AI chat and voice tools. No account.',
-  },
+const primaryPanels: Panel[] = [
   {
     to: '/phone',
     icon: <Smartphone className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Phone & eSIM',
     description: 'Anonymous numbers and data eSIMs. No KYC.',
+  },
+  {
+    to: '/vps',
+    icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'VPS',
+    description: 'Anonymous servers, paid in crypto.',
   },
   {
     to: '/swaps',
@@ -40,18 +40,26 @@ const panels: Panel[] = [
     description: 'Buy or sell crypto on the route your country allows.',
   },
   {
-    to: '/work',
-    icon: <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'Work',
-    description: 'XMR-paying jobs, aggregated from every board.',
+    to: '/ai',
+    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'AI & Voice',
+    description: 'Private AI chat and voice tools. No account.',
   },
   {
-    to: '/vps',
-    icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'VPS',
-    description: 'Anonymous servers, paid in crypto.',
+    to: '/lending',
+    icon: <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'Lending',
+    description: 'Earn on XMR and stablecoins. Passive yield.',
   },
 ];
+
+const newPanel: Panel = {
+  to: '/work',
+  icon: <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+  title: 'Work',
+  description: 'XMR-paying jobs, aggregated from every board.',
+};
+
 
 const moreLinks = [
   { label: 'Predictions', to: '/predict' },
