@@ -164,7 +164,19 @@ const Work = () => {
       if (bp === undefined) return -1;
       return sort === "pay-high" ? bp - ap : ap - bp;
     });
-  }, [jobs, search, sort, payType, sourceId, activeTag]);
+  }, [jobs, search, sort, payType, sourceId, activeTag, listingType]);
+
+  const typeCounts = useMemo(() => {
+    const counts = { hiring: 0, offering: 0 };
+    jobs.forEach((job) => {
+      if ((job.listing_type ?? "hiring") === "offering") counts.offering++;
+      else counts.hiring++;
+    });
+    return counts;
+  }, [jobs]);
+
+  const countForTab = (value: ListingType) =>
+    value === "all" ? jobs.length : value === "offering" ? typeCounts.offering : typeCounts.hiring;
 
   const unavailableSources = sources.filter((s) => !s.enabled);
   const liveSources = sources.filter((s) => s.enabled);
