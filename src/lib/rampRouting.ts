@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logRampEvent } from '@/lib/rampAnalytics';
 import {
   RAMP_ELIGIBILITY_CONFIG,
   type CountryEligibility,
@@ -36,7 +37,12 @@ export const loadRampConfig = async (): Promise<RampEligibilityConfig> => {
     const data = (await res.json()) as RampEligibilityConfig;
     if (!Array.isArray(data?.countries) || data.countries.length === 0) throw new Error('empty config');
     cached = data;
-  } catch {
+  } catch (e) {
+    logRampEvent({
+      event_type: 'config_failure',
+      error_message: e instanceof Error ? e.message : 'Eligibility config fetch failed',
+      reason: 'Fell back to the bundled eligibility config.',
+    });
     cached = RAMP_ELIGIBILITY_CONFIG;
   }
   return cached;
@@ -108,11 +114,15 @@ export const requestDirectQuote = async (
       (typeof data === 'string' || typeof data === 'number' ? data : null);
 
     if (estimate === null || estimate === undefined || Number(estimate) <= 0) {
-      return { ok: false, error: 'The provider could not return a live quote for this pair and amount.' };
+      const error = 'The provider could not return a live quote for this pair and amount.';
+      logRampEvent({ event_type: 'quote_failure', side, asset, fiat, amount, quote_ok: false, provider: 'SimpleSwap', error_message: error });
+      return { ok: false, error };
     }
     return { ok: true, estimate: String(estimate) };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'Quote request failed' };
+    const error = e instanceof Error ? e.message : 'Quote request failed';
+    logRampEvent({ event_type: 'quote_failure', side, asset, fiat, amount, quote_ok: false, provider: 'SimpleSwap', error_message: error });
+    return { ok: false, error };
   }
 };
 

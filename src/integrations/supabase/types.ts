@@ -1101,6 +1101,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ramp_events: {
+        Row: {
+          amount: number | null
+          asset: string | null
+          country_code: string | null
+          created_at: string
+          decision: string | null
+          direct_allowed: boolean | null
+          error_message: string | null
+          event_type: string
+          fiat: string | null
+          hodlhodl_allowed: boolean | null
+          id: string
+          payment_method: string | null
+          provider: string | null
+          quote_ok: boolean | null
+          reason: string | null
+          session_id: string | null
+          side: string | null
+          target_url: string | null
+        }
+        Insert: {
+          amount?: number | null
+          asset?: string | null
+          country_code?: string | null
+          created_at?: string
+          decision?: string | null
+          direct_allowed?: boolean | null
+          error_message?: string | null
+          event_type: string
+          fiat?: string | null
+          hodlhodl_allowed?: boolean | null
+          id?: string
+          payment_method?: string | null
+          provider?: string | null
+          quote_ok?: boolean | null
+          reason?: string | null
+          session_id?: string | null
+          side?: string | null
+          target_url?: string | null
+        }
+        Update: {
+          amount?: number | null
+          asset?: string | null
+          country_code?: string | null
+          created_at?: string
+          decision?: string | null
+          direct_allowed?: boolean | null
+          error_message?: string | null
+          event_type?: string
+          fiat?: string | null
+          hodlhodl_allowed?: boolean | null
+          id?: string
+          payment_method?: string | null
+          provider?: string | null
+          quote_ok?: boolean | null
+          reason?: string | null
+          session_id?: string | null
+          side?: string | null
+          target_url?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           content: string | null
