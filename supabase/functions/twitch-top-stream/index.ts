@@ -182,8 +182,8 @@ serve(async (req) => {
 
     if (!clientId || !clientSecret) {
       console.error('Missing Twitch credentials');
-      return new Response(JSON.stringify({ error: 'Twitch credentials not configured' }), {
-        status: 500,
+      return new Response(JSON.stringify({ channel: null, unavailable: true, reason: 'not_configured' }), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -192,12 +192,15 @@ serve(async (req) => {
     try {
       oauthToken = await getAppAccessToken(clientId, clientSecret);
     } catch (e) {
-      console.error('Twitch token fetch failed:', e);
-      return new Response(JSON.stringify({ error: 'Twitch auth failed', details: String(e) }), {
-        status: 500,
+      // Bad/rotated credentials must not break the page — degrade to "no stream".
+      console.error('Twitch token fetch failed (check TWITCH_CLIENT_ID/TWITCH_CLIENT_SECRET):', e);
+      tokenCache = null;
+      return new Response(JSON.stringify({ channel: null, unavailable: true, reason: 'auth_failed' }), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     // Check priority override channels first
     const overrideCacheKey = 'priority_override';
