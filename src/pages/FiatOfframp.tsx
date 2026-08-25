@@ -195,9 +195,13 @@ const FiatOfframp = () => {
       });
       
       toast({ title: 'Exchange created!', description: 'Send crypto to the provided address' });
+      setPayoutError(null);
     } catch (error) {
       console.error('Error creating exchange:', error);
-      toast({ title: 'Failed to create exchange', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
+      const raw = error instanceof Error ? error.message : 'Unknown error';
+      const friendly = describePayoutFailure(raw);
+      setPayoutError({ ...friendly, raw });
+      toast({ title: friendly.title, description: friendly.description, variant: 'destructive' });
     }
     setCreatingExchange(false);
   };
