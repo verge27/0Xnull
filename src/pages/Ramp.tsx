@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowRightLeft, Bitcoin, CheckCircle2, ExternalLink, Inf
 
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { SubsiteLayout } from '@/components/SubsiteLayout';
+import { RampSubsiteNav } from '@/components/RampSubsiteNav';
 import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
