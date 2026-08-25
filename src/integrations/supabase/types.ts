@@ -1630,6 +1630,14 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      get_jobs_cron_schedules: {
+        Args: never
+        Returns: {
+          active: boolean
+          jobname: string
+          schedule: string
+        }[]
+      }
       get_swap_by_trade_id: {
         Args: { p_trade_id: string }
         Returns: {
