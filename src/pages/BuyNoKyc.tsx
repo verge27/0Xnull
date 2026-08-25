@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, RefreshCw, ShieldCheck, Clock, Star, AlertTriangle, ArrowRightLeft } from 'lucide-react';
+import { ExternalLink, RefreshCw, ShieldCheck, Clock, Star, AlertTriangle, ArrowRightLeft, CreditCard } from 'lucide-react';
+
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
@@ -12,7 +13,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const REFERRAL_URL = 'https://hodlhodl.com/join/LNNJ';
+const SIMPLESWAP_REFERRAL_URL = 'https://simpleswap.io/?ref=9996a1ef14d0';
 const CURRENCIES = ['GBP', 'EUR', 'USD', 'CHF', 'CAD', 'AUD'];
+
 
 interface Offer {
   id: string;
