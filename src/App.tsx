@@ -43,6 +43,7 @@ const GrapheneOS = lazy(() => import("./pages/GrapheneOS"));
 const FiatOfframp = lazy(() => import("./pages/FiatOfframp"));
 
 const BuyNoKyc = lazy(() => import("./pages/BuyNoKyc"));
+const Ramp = lazy(() => import("./pages/Ramp"));
 const ApiAnalytics = lazy(() => import("./pages/ApiAnalytics"));
 const Voice = lazy(() => import("./pages/Voice"));
 const Verify = lazy(() => import("./pages/Verify"));
@@ -204,7 +205,8 @@ const App = () => (
                   <Route path="/grapheneos" element={<GrapheneOS />} />
                   <Route path="/cashout" element={<FiatOfframp />} />
                   <Route path="/buy" element={<BuyNoKyc />} />
-                  <Route path="/onramp" element={<Navigate to="/buy" replace />} />
+                  <Route path="/ramp" element={<Ramp />} />
+                  <Route path="/onramp" element={<Navigate to="/ramp" replace />} />
                   <Route path="/api-analytics" element={<ApiAnalytics />} />
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/support" element={<Support />} />

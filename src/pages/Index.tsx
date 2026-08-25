@@ -33,10 +33,10 @@ const panels: Panel[] = [
     description: 'Non-custodial crypto swaps, settled in XMR.',
   },
   {
-    to: '/buy',
+    to: '/ramp',
     icon: <Wallet className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'Fiat On-ramp',
-    description: 'Cash to BTC via Hodl Hodl, no KYC.',
+    title: 'Fiat On/Off Ramp',
+    description: 'Buy or sell crypto on the route your country allows.',
   },
   {
     to: '/work',
@@ -61,6 +61,7 @@ const moreLinks = [
   { label: 'Philosophy', to: '/philosophy' },
   { label: 'Docs', to: '/docs' },
   { label: 'Buy', to: '/buy' },
+  { label: 'Cash out', to: '/cashout' },
   { label: 'Get Started', to: '/get-started' },
 ];
 
