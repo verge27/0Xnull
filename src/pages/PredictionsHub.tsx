@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Receipt, Zap, Gavel } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +79,7 @@ export default function PredictionsHub() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">

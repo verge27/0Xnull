@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { format, startOfDay, subDays } from 'date-fns';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -323,6 +324,7 @@ export default function Payouts() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <main className="container mx-auto px-4 py-8 flex-1">
         {/* Header */}

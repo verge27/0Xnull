@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -106,6 +107,7 @@ const MarketDetail = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
+        <PredictionsSubsiteNav />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -117,6 +119,7 @@ const MarketDetail = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
+        <PredictionsSubsiteNav />
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Market not found</h1>
           <p className="text-muted-foreground mb-6">This prediction market doesn't exist or has been removed.</p>
@@ -148,6 +151,7 @@ const MarketDetail = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back button */}

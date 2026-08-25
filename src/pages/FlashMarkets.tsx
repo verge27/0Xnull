@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Timer, Zap, Volume2, VolumeX } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { SEORichText } from '@/components/SEORichText';
 import { VoucherBadge } from '@/components/VoucherBadge';
@@ -344,6 +345,7 @@ export default function FlashMarkets() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <main 
         className="flex-1 flex items-center justify-center p-4 relative"
