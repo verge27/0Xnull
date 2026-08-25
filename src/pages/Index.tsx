@@ -74,6 +74,7 @@ const moreLinks = [
   { label: 'Get Started', to: '/get-started' },
 ];
 
+
 const Index = () => {
   useSEO({
     title: '0xNull | One token, every private service, no accounts',
