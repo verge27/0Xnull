@@ -76,11 +76,14 @@ const isRetryableError = (error: Error): boolean => {
 };
 
 // Helper to make requests - adapts for Tor vs clearnet
-// Includes automatic retry for wallet creation failures
+// Includes automatic retry for wallet creation failures and transient upstream 502/503s on reads
 async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutMs = 8000): Promise<T> {
-  const shouldRetry = isWalletOperation(path);
-  const maxRetries = shouldRetry ? 2 : 1; // 1 retry = 2 total attempts
-  const retryDelayMs = 5000; // 5 seconds between retries
+  const isWalletOp = isWalletOperation(path);
+  const method = (options.method || 'GET').toUpperCase();
+  const isIdempotentRead = method === 'GET';
+  const shouldRetry = isWalletOp || isIdempotentRead;
+  const maxRetries = shouldRetry ? (isWalletOp ? 2 : 3) : 1;
+  const retryDelayMs = isWalletOp ? 5000 : 1000; // reads back off quickly
 
   let lastError: Error | null = null;
 
@@ -92,10 +95,12 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
       
       // Only retry if it's a retryable error and we have retries left
       if (attempt < maxRetries && isRetryableError(lastError)) {
-        console.log(`Wallet operation failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelayMs/1000}s...`);
-        await sleep(retryDelayMs);
+        const delay = isWalletOp ? retryDelayMs : retryDelayMs * attempt; // linear backoff for reads
+        console.log(`Request to ${path} failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
+        await sleep(delay);
         continue;
       }
+
       
       // Don't retry non-retryable errors or if we're out of retries
       throw lastError;
