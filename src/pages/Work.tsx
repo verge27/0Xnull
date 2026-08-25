@@ -96,7 +96,7 @@ const Work = () => {
       const [jobsRes, sourcesRes] = await Promise.all([
         supabase
           .from("jobs")
-          .select("id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at")
+          .select("id, source_id, title, body, url, pay_xmr, pay_type, tags, posted_at, first_seen_at, listing_type")
           .eq("hidden", false)
           .order("first_seen_at", { ascending: false })
           .limit(500),
