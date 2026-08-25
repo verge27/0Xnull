@@ -53,7 +53,7 @@ const routeImports: Record<string, ImportFn> = {
   '/grapheneos': () => import('@/pages/GrapheneOS'),
   '/cashout': () => import('@/pages/FiatOfframp'),
   '/buy': () => import('@/pages/BuyNoKyc'),
-  '/onramp': () => import('@/pages/FiatOnramp'),
+  
   '/verify': () => import('@/pages/Verify'),
   '/support': () => import('@/pages/Support'),
   '/tor-guide': () => import('@/pages/TorGuide'),

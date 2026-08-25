@@ -33,10 +33,10 @@ const panels: Panel[] = [
     description: 'Non-custodial crypto swaps, settled in XMR.',
   },
   {
-    to: '/onramp',
+    to: '/buy',
     icon: <Wallet className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Fiat On-ramp',
-    description: 'Cash to XMR, no exchange account.',
+    description: 'Cash to BTC via Hodl Hodl, no KYC.',
   },
   {
     to: '/work',
