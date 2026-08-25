@@ -1,10 +1,13 @@
 import { Shield, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PayoutEligibilityChecklist } from "@/components/PayoutEligibilityChecklist";
+import { PAYOUT_CAVEATS } from "@/lib/payoutEligibility";
 
 const vpnServices = [
   {
