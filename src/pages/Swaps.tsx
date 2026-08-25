@@ -645,30 +645,12 @@ const Swaps = () => {
 
     setLoadingRates(true);
     setRates([]);
-    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
 
     try {
-      if (aggregator === 'exolix') {
-        // Exolix API
-        const { data, error } = await supabase.functions.invoke('exolix-api', {
-          body: {
-            action: 'rate',
-            coinFrom: fromCoin.toUpperCase(),
-            networkFrom: fromNetwork,
-            coinTo: toCoin.toUpperCase(),
-            networkTo: toNetwork,
-            amount: amount,
-            rateType: 'float',
-          },
-        });
+      {
 
-        if (error) throw error;
-        if (data.error) throw new Error(data.error);
-
-        setExolixRate(data);
-      } else {
         // Trocador API
         const { data, error } = await supabase.functions.invoke('trocador-new-rate', {
           body: {
