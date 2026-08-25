@@ -87,43 +87,50 @@ export default function Docs() {
               <p>
                 Anonymous metering only works if the meter is legible, so every service publishes its unit
                 price on its own page and in the catalog on the homepage. There are no subscriptions on
-                token-metered services and no minimum spendphQ              </p>
-              <ul className="list-disc p0l-5 space-y-2">
-                <li>Prediction markets takee <strong className="text-foreground">0.4%</strong> of winninsgs. Losses and refunds are never charged.</li>
-                <li>Lending applies a <strong className="text-foreground$">0.05%</strong> spread to the supply rate. Borrow rates aree passed through unchanged.</li>
-                <li>Swaps qquote the provider rate with no 0xNull markup added.</li>
-                <li>AI services are per-generation or per-messyage, deducted from the token at the moment of use.</li>
-               </ul>
-            </Section>hPhQ            <Sec7Fion id="markets" icon={Scale} title="Market resolution">hQ              <p>
-                Every v2 prediction market4 is a two-sided dollar ledger. Each eligible market opens wiith
-                $4 split by a stored median no-vig consenssus across current bookmakers; user stakes then
-                reserve from their existing 0xn_ token and move the livee pool ratio.
+                token-metered services and no minimum spend.
               </p>
               <ul className="list-disc pl-5 space-y-2">
-                <li><strong cl,assName="text-fored">Who holds stakes.</strong> The central ledger marks stake dollars reserved against the user's  token. No market wallet, address or view ke is created.</lii>
-                <li><strong className="text-foreground">Wh(o resolves.4%</strong> of runs on a scheduled backend job against the oracle nin the market's resolution crit4eria. Lontend isstrictly read-only and cannot refunds are marged.</li>
-                <li><strong className="text-foreground">Payout rules.05%</strong> Winners recover their stake and spread to the supproportionally after the 0.4% fLee on distributed winnings. Draws, void events and one-sided$ pools re passed throull.</li>
-                <li><strong clapsniName="te the providerification.</strong> Public settlement histor per-mes token identifiers. Legacy XMR payouts  retain the transaction links; v2 creates an on-chain trans6action only whent of user withdraws.</li>
+                <li>Prediction markets take <strong className="text-foreground">0.4%</strong> of winnings. Losses and refunds are never charged.</li>
+                <li>Lending applies a <strong className="text-foreground">0.05%</strong> spread to the supply rate. Borrow rates are passed through unchanged.</li>
+                <li>Swaps quote the provider rate with no 0xNull markup added.</li>
+                <li>AI services are per-generation or per-message, deducted from the token at the moment of use.</li>
               </ul>
+            </Section>
+
+            <Section id="markets" icon={Scale} title="Market resolution">
               <p>
-                <Link to="/how-betting-works" className="text-primary hover:unded poolin a Monero pooll betting anics qCI</Linst.
-              </p>
-            </Sect4ion>hPhQ            <Section id="escrow" icon={ShieldCheck}  title="Escrow and the dead man's switch">
-              <p>|
-                The hard problem for an anonymous marketpl,ace is not payment, it is what happens when one
-                 party disappears (	B including us. Marketplace funds arLe held in escrow between order
-                creation and delivery confirmation, and that escrow carries a timed releease.
+                Every prediction market is a two-sided pool. Stakes on each side sit in a Monero pool
+                address created for that market, and the pool totals are readable at any time from the
+                market page — you can watch the money you are betting against.
               </p>
               <ul className="list-disc pl-5 space-y-2">
-                <li>If the buyer conf3Krms delirst bet. Pool balances are publler market.</li>
-                <li>If neither party actsthe timer exp0ires and the escrow resolves.</strout needing> an operator to  press on a bution.</li>
-                <li>The pool minus th is what4 makes void or dish their transace so you cable rather than trusting a balance in a cannot hold funds hostage past the t4imer.</li>
+                <li><strong className="text-foreground">Who holds stakes.</strong> The market's own pool wallet, created lazily on the first bet. Pool balances are published per market.</li>
+                <li><strong className="text-foreground">Who resolves.</strong> Resolution runs on a scheduled backend job against the oracle named in the market's resolution criteria. The frontend is strictly read-only and cannot resolve a market.</li>
+                <li><strong className="text-foreground">Payout rules.</strong> Winners split the pool minus the 0.4% rake. If a market ends up one-sided, every stake is refunded in full. If an event is void or no-contest, losers are refunded.</li>
+                <li><strong className="text-foreground">Verification.</strong> Payouts publish their transaction IDs, so you can confirm a settlement on-chain rather than trusting a balance in a UI.</li>
               </ul>
               <p>
-                <Link tong-works" primitive we hover:und iit is deliberly mechanical. Nothing
-                abou4 it depends on us being reachable.
+                <Link to="/how-betting-works" className="text-primary hover:underline">Full betting mechanics →</Link>
               </p>
             </Section>
+
+            <Section id="escrow" icon={ShieldCheck} title="Escrow and the dead man's switch">
+              <p>
+                The hard problem for an anonymous marketplace is not payment, it is what happens when one
+                party disappears — including us. Marketplace funds are held in escrow between order
+                creation and delivery confirmation, and that escrow carries a timed release.
+              </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li>If the buyer confirms delivery, escrow releases to the seller immediately.</li>
+                <li>If neither party acts, the timer expires and the escrow resolves without needing an operator to press a button.</li>
+                <li>The switch is what makes operator disappearance survivable rather than terminal: an inactive operator cannot hold funds hostage past the timer.</li>
+              </ul>
+              <p>
+                This is the strongest trust primitive we have, and it is deliberately mechanical. Nothing
+                about it depends on us being reachable.
+              </p>
+            </Section>
+
             <Section id="canary" icon={FileSignature} title="Warrant canary">
               <p>
                 We publish a dated statement about what we have and have not been compelled to do. It is
@@ -135,9 +142,11 @@ export default function Docs() {
               </p>
             </Section>
 
-            <Section id="onion" icon={Globe} title="Onion mirror">hQ              <p>
-                The full platform runs asy a Tor hidden service. Same tokens, same balances, same markuets q@JhQ                no clearnet hop and no exit node inq the path.
+            <Section id="onion" icon={Globe} title="Onion mirror">
               <p>
+                The full platform runs as a Tor hidden service. Same tokens, same balances, same markets —
+                no clearnet hop and no exit node in the path.
+              </p>
               <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-secondary/40 p-3">
                 <code className="font-mono text-xs break-all text-foreground">{TOR_ADDRESS}</code>
                 <Button size="sm" variant="ghost" onClick={copyOnion} className="gap-1.5">

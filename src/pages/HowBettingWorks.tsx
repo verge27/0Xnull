@@ -10,25 +10,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { HelpCircle, TrendingUp, Users, Shield, Zap, Calculator } from 'lucide-react';
-import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig$NvhPhSexport default function HowBettingWorks() {
-  useSEO(
+import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 
+export default function HowBettingWorks() {
+  useSEO();
   const [betAmount, setBetAmount] = useState<string>('50');
   const [yesPool, setYesPool] = useState<string>('200');
   const [noPool, setNoPool] = useState<string>('300');
-  const [selectedSide, setSelectedSide] = useState<'yes' | 'no'>('yes');hPhQ  const bet = parseFloat(betAmount) || 0;
-  const yes = parseFloat(yesPool) || 0;
-  const no = parseFloaat(noPool) || 0;
+  const [selectedSide, setSelectedSide] = useState<'yes' | 'no'>('yes');
 
-  const bewYesPool) || selectedSide =OOH	'yes' ? yes + bet : yes;
-  const newNoPool) || selectedSide =O== 'no' ? no + bet : no;
+  const bet = parseFloat(betAmount) || 0;
+  const yes = parseFloat(yesPool) || 0;
+  const no = parseFloat(noPool) || 0;
+  
+  const newYesPool = selectedSide === 'yes' ? yes + bet : yes;
+  const newNoPool = selectedSide === 'no' ? no + bet : no;
   const totalPool = newYesPool + newNoPool;
-  const winningPool = selectedSide === 'yes' ? neuwYesPool : newNoPool;
+  const winningPool = selectedSide === 'yes' ? newYesPool : newNoPool;
   
-  const newYesingPool = selectedSide === 'yes' ? newYesPool : newNoPool;
-  
-  const distributablePrmoolAfterFee = totalPool * 0.996;
-  const payout = winningPool > 0 ? (bet / winningPool) * distributableProolAfterFee : 0;
+  const poolAfterFee = totalPool * 0.996;
+  const payout = winningPool > 0 ? (bet / winningPool) * poolAfterFee : 0;
   const profit = payout - bet;
   const roi = bet > 0 ? (profit / bet) * 100 : 0;
   const impliedOdds = winningPool > 0 ? totalPool / winningPool : 0;
@@ -69,7 +70,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 <li>All bets go into a shared pool</li>
                 <li>Odds are determined by the ratio of money on each side</li>
                 <li>Winners split the total pool proportionally to their stake</li>
-                <li>The 0.4% fee is wiuthheld from distributed winnings only — no fee on losses, edraws or refunds</li>
+                <li>The house takes a flat <strong className="text-foreground">0.4% fee on winnings only</strong> — no fee on losses, refunds or no-contest</li>
               </ul>
             </CardContent>
           </Card>
@@ -85,16 +86,15 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>A market is created: "Will Newcastle United win?"</li>
                   <li>Two pools exist: YES pool and NO pool</li>
-                  <li>Each eligible mmarketh starts with $4 split by the median no-vig probability  across current bookmakers</li>
+                  <li>Both start at 0</li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">2. Betting Phase</h3>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Users reserve dollaars already held beir 0xn_ t XMR on YES or NO</li>
+                  <li>Users bet XMR on YES or NO</li>
                   <li>The pools grow as bets come in</li>
                   <li>Implied odds update in real-time based on pool ratios</li>
-                  <li>No market wallet, deposiut address or view key is created</li>
                 </ul>
               </div>
               <div>
@@ -102,7 +102,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>Oracle checks the result (The Odds API, CoinGecko, etc.)</li>
                   <li>Winning side splits the entire pool</li>
-                  <li>Winnings funds cree same 0xn_ token  automatis deducted</li>
+                  <li>0.4% fee is deducted</li>
                 </ul>
               </div>
             </CardContent>
@@ -124,31 +124,102 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   <li>Alice bets $10 on YES (Makhachev wins)</li>
                   <li>Bob bets $100 on NO (Makhachev loses)</li>
                 </ul>
-              </div>4(4
               </div>
 
-                 <h4 className="font-semibold mb-2">Pool State:</h4>
+              <div>
+                <h4 className="font-semibold mb-2">Pool State:</h4>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHeead>Pool</TableHead>
                       <TableHead>Pool</TableHead>
                       <TableHead>Amount</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>Alicee</TableCell>
                       <TableCell className="text-emerald-400">YES</TableCell>
                       <TableCell>$10</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>NO</TableCell>
-                      <TableCell classNamee="text-emerald-400">YES</TableCell>
-                      <<TableCell>$100</TableCell>
-                    </TableRow>a
+                      <TableCell className="text-red-400">NO</TableCell>
+                      <TableCell>$100</TableCell>
                     </TableRow>
-                      <TabmleCell>Charlie</TableCell>
+                    <TableRow className="font-semibold">
+                      <TableCell>Total</TableCell>
+                      <TableCell>$110</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Implied Odds:</h4>
+                <ul className="list-disc list-inside text-muted-foreground">
+                  <li><span className="text-emerald-400">YES:</span> $110 / $10 = 11.0x (9.1% implied probability)</li>
+                  <li><span className="text-red-400">NO:</span> $110 / $100 = 1.1x (90.9% implied probability)</li>
+                </ul>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <h4 className="font-semibold text-emerald-400 mb-2">Scenario A: Makhachev Wins (YES)</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>Total Pool: $110</li>
+                    <li>Fee (0.4%): $0.44</li>
+                    <li>Pool After Fee: $109.56</li>
+                    <li className="text-emerald-400 font-semibold">Alice's Payout: $109.56</li>
+                    <li className="text-emerald-400">Alice's Profit: +$99.56 (995.6% ROI)</li>
+                    <li className="text-red-400">Bob's Loss: -$100</li>
+                  </ul>
+                </div>
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                  <h4 className="font-semibold text-red-400 mb-2">Scenario B: Makhachev Loses (NO)</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>Total Pool: $110</li>
+                    <li>Fee (0.4%): $0.44</li>
+                    <li>Pool After Fee: $109.56</li>
+                    <li className="text-red-400 font-semibold">Bob's Payout: $109.56</li>
+                    <li className="text-red-400">Bob's Profit: +$9.56 (9.56% ROI)</li>
+                    <li className="text-emerald-400">Alice's Loss: -$10</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Example 2 - Multiple Bettors */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Complex Example: Multiple Bettors</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">
+                <strong className="text-foreground">Market:</strong> "Will BTC be above $95,000 on Dec 21?"
+              </p>
+
+              <div>
+                <h4 className="font-semibold mb-2">Bets:</h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Bettor</TableHead>
+                      <TableHead>Side</TableHead>
+                      <TableHead>Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Alice</TableCell>
+                      <TableCell className="text-emerald-400">YES</TableCell>
+                      <TableCell>$50</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Bob</TableCell>
+                      <TableCell className="text-emerald-400">YES</TableCell>
+                      <TableCell>$150</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Charlie</TableCell>
                       <TableCell className="text-red-400">NO</TableCell>
                       <TableCell>$200</TableCell>
                     </TableRow>
@@ -168,8 +239,9 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   <li><span className="text-red-400">NO:</span> $300 (Charlie $200 + Diana $100)</li>
                   <li><strong className="text-foreground">Total:</strong> $500</li>
                 </ul>
-              </div>4(4
               </div>
+
+              <div>
                 <h4 className="font-semibold mb-2">Implied Odds:</h4>
                 <ul className="list-disc list-inside text-muted-foreground">
                   <li><span className="text-emerald-400">YES:</span> $500 / $200 = 2.5x (40% implied probability)</li>
@@ -250,13 +322,16 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 </div>
               </div>
             </CardContent>
-          </Card>hPhQ          {/*  Edge Case */}
           </Card>
-            <CardHeader>hQ              <CardTitle>Edge Case: Refunds & No-Contest</CaqrdTitle>
-            </CardHeader>
-            <CardContenut className="space-y-4">
-              <p className="text-muuted-foreground">There are two scenarios where you get a full refund with <strong className="text-foreground">zero fees<,/strong>:</p>
 
+          {/* Edge Case */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Edge Case: Refunds & No-Contest</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">There are two scenarios where you get a full refund with <strong className="text-foreground">zero fees</strong>:</p>
+              
               <div className="p-4 rounded-lg bg-muted/50">
                 <p className="text-sm font-semibold text-foreground mb-2">1. One-Sided Market (Unopposed)</p>
                 <p className="text-sm text-muted-foreground">
@@ -307,7 +382,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 <TableBody>
                   <TableRow>
                     <TableCell className="text-red-400">House sets odds (10-15% vig)</TableCell>
-                    <TableCell className="text-emerald-400">Market sensus opens; pool flow moves odds</TableCell>
+                    <TableCell className="text-emerald-400">Market sets odds (0.4% fee)</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">House can refuse bets</TableCell>
@@ -315,20 +390,20 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">House profits from losers</TableCell>
-                    <TableCell className="text-emerald-400">House only sides; fees stay separat fee</TableCell>
+                    <TableCell className="text-emerald-400">House only takes flat fee</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">Odds can be manipulated</TableCell>
-                    <TableCell className="text-emerald-400">Odds and liquidity are visiablect in dollars</TableCell>
+                    <TableCell className="text-emerald-400">Odds reflect actual money</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">KYC required</TableCell>
-                    <TableCell className="text-emerald-400">Anonymous 0xn_ token</TableCell>
+                    <TableCell className="text-emerald-400">Anonymous (XMR)</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
               <p className="text-muted-foreground mt-4">
-                Treasury positions are opened from a stored bookmakerounapshot. The fee ledger is separe who treasury utrading regardlesulate.
+                <strong className="text-foreground">The house doesn't care who wins.</strong> 0xNull makes 0.4% regardless of outcome. No incentive to manipulate.
               </p>
             </CardContent>
           </Card>
@@ -343,14 +418,14 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 font-mono text-center">
-                winner_payout = (winner_stake / total_winner_share 9r losing_pool × 0.996)
+                winner_payout = (winner_stake / total_winning_pool) × (total_pool × 0.996)
               </div>
               <p className="text-muted-foreground">Where:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li><strong className="text-foreground">winner_stake</strong> = how much you bet</li>
                 <li><strong className="text-foreground">total_winning_pool</strong> = all bets on the winning side</li>
-                <li><strong className="text-foreground">total_pool</strong> = all bets con the losine available for distribuution</li>
-                <li><strong className="text-foreground">0.996</strong> = 1 pool after the 0.4% fee on diqstributed winnings</li>
+                <li><strong className="text-foreground">total_pool</strong> = all bets combined</li>
+                <li><strong className="text-foreground">0.996</strong> = 1 - 0.4% fee</li>
               </ul>
             </CardContent>
           </Card>
@@ -433,20 +508,24 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Pool (after your bet):</span>
-                      <span className="font-mono">${winninegPool.toFixed(2)}</span>
+                      <span className="font-mono">${totalPool.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{selectedSidds:</span>
+                      <span className="text-muted-foreground">{selectedSide.toUpperCase()} Pool:</span>
                       <span className="font-mono">${winningPool.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreforeground">Implied Probability:</span>
+                      <span className="text-muted-foreground">Implied Odds:</span>
+                      <span className="font-mono">{impliedOdds.toFixed(2)}x</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Implied Probability:</span>
                       <span className="font-mono">{impliedProbability.toFixed(1)}%</span>
                     </div>
                     <div className="border-t border-border pt-3 mt-3">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Prmofit Pool After Fee:</span>
-                        <span className="font-mono">${distributableProolAfterFee.toFixed(2)}</span>
+                        <span className="text-muted-foreground">Pool After Fee (0.4%):</span>
+                        <span className="font-mono">${poolAfterFee.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between mt-2">
                         <span className="font-semibold">Your Payout:</span>
@@ -490,7 +569,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                 <TableBody>
                   <TableRow>
                     <TableCell>Fee</TableCell>
-                    <TableCell>0.4% f distriated winnings</TableCell>
+                    <TableCell>0.4% flat</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Odds</TableCell>
@@ -498,7 +577,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   </TableRow>
                   <TableRow>
                     <TableCell>Settlement</TableCell>
-                    <TableCell>XMR (Mon balancero)</TableCell>
+                    <TableCell>XMR (Monero)</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Resolution</TableCell>
@@ -510,7 +589,7 @@ import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/betti
                   </TableRow>
                   <TableRow>
                     <TableCell>Maximum bet</TableCell>
-                    <TableCell>$10,000</TableCell>
+                    <TableCell>None</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>KYC</TableCell>

@@ -19,7 +19,7 @@ const ApiDocs = () => {
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4">0xNull API Documentation</h1>
           <p className="text-xl text-muted-foreground mb-6">
-             TXN-funded prediction markets backed by Monero
+            Permissionless prediction markets with Monero settlement
           </p>
           
           <div className="flex flex-wrap gap-3">
@@ -29,7 +29,7 @@ const ApiDocs = () => {
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <CircleDollarSign className="w-4 h-4 mr-2" />
-              Settlement: Moner
+              Settlement: Monero (XMR)
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <Zap className="w-4 h-4 mr-2" />
@@ -37,7 +37,7 @@ const ApiDocs = () => {
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <Shield className="w-4 h-4 mr-2" />
-              Auth: Non
+              Auth: None — permissionless
             </Badge>
           </div>
         </div>
@@ -57,24 +57,34 @@ const ApiDocs = () => {
 
 BASE = "https://0xnull.io/api"
 
-# 1. Geate or restore one 0xn_ token, then fund it upcoken = requests.get(f"{BASE}/sports/even/creague").json()["tmoken"]
+# 1. Get upcoming sports events
+events = requests.get(f"{BASE}/sports/events?sport=premier_league").json()
 
-# 2. Read the current seeded catalogue
-markets = requests.get(f"{BASE}/predictions/miets").json()["markets"]
+# 2. Get odds with best price aggregation
+odds = requests.get(f"{BASE}/sports/odds/premier_league").json()
 
-# 3. Create a prediction marken balance
-market = requests.post(f"{BASE}/predictions/markets", headers={
-    "X-TYa8-Token": token,
-    "Idempotency-Key": str(uuid.uuid4()),
-}}, json={
-    "market_id": markets[0]["epl_lid"],
-    "side": "YES",
-    "t_cents": 100
+# 3. Create a prediction market
+market = requests.post(f"{BASE}/predictions/markets", json={
+    "market_id": "epl_liverpool_win_2024",
+    "title": "Liverpool to win vs Man City",
+    "oracle_type": "sports",
+    "oracle_asset": "event_id_here",
+    "oracle_condition": "Liverpool",
+    "resolution_time": 1703462400
 }).json()
 
-# 4. market waallet is created": "e stake is al_liveaddreserved
-print(bet["sutatus": "funding"])`}
+# 4. Place a bet
+bet = requests.post(f"{BASE}/predictions/bet", json={
+    "market_id": "epl_liverpool_win_2024",
+    "side": "YES",
+    "amount_usd": 100,
+    "payout_address": "4..."  # Your XMR address
+}).json()
 
+# Returns deposit address — send XMR to confirm bet
+print(bet["deposit_address"])
+print(bet["amount_xmr"])`}
+            />
           </CardContent>
         </Card>
 
@@ -88,10 +98,10 @@ print(bet["sutatus": "funding"])`}
               <h3 className="font-semibold mb-3">How Betting Works</h3>
               <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
                 <li><strong className="text-foreground">Create or find a market</strong> — Markets are prediction questions with YES/NO outcomes</li>
-                <li><strong aclassName="text-foreground">Fund one token</strong> q@J Reusee the same 0xn_ balance across markets</li>
-                <<li><strong className="text-foreground">Place a bet</strong> — The stake mou get a unique XMR reserved immediately</li>
-                <li><strong className="text-foreground"<>Market resolves</strong> — Oracle determines outcome automatically</li>
-                <li><strong className="text-foreground">Settlement pouts</strong> — Winners or refundsplit the same tosers' pomationally</li>
+                <li><strong className="text-foreground">Place a bet</strong> — You get a unique XMR deposit address</li>
+                <li><strong className="text-foreground">Send XMR</strong> — Your bet is confirmed when deposit is received</li>
+                <li><strong className="text-foreground">Market resolves</strong> — Oracle determines outcome automatically</li>
+                <li><strong className="text-foreground">Payouts processed</strong> — Winners split losers' pool proportionally</li>
               </ol>
             </div>
 
@@ -133,7 +143,8 @@ print(bet["sutatus": "funding"])`}
         {/* API Reference */}
         <Tabs defaultValue="predictions" className="mb-8">
           <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
-            <TabsTrigger value="predictions">Predictions</TabsTrYgger>
+            <TabsTrigger value="predictions">Predictions</TabsTrigger>
+            <TabsTrigger value="multibets">Multibets</TabsTrigger>
             <TabsTrigger value="sports">Sports</TabsTrigger>
             <TabsTrigger value="esports">Esports</TabsTrigger>
             <TabsTrigger value="jobs">Jobs</TabsTrigger>
@@ -142,12 +153,13 @@ print(bet["sutatus": "funding"])`}
           {/* Predictions API */}
           <TabsContent value="predictions" className="space-y-4">
             <Card>
-              <CardHeadeer>
-                <CardTitle className="flex items-center  gap-2">
-                  <Trophy className="w-5 h-5" />hQ                  Prediction Markets API
-                </ACardTitle>
               <CardHeader>
-                <CardAContent className="space-y-6">
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Prediction Markets API
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 {/* List Markets */}
                 <div>
                   <h3 className="font-semibold mb-2">List Markets</h3>
@@ -161,18 +173,18 @@ print(bet["sutatus": "funding"])`}
   "markets": [
     {
       "market_id": "btc_100k_dec2024",
-      "title": "BTC above $100k wins vs Away Deam",
+      "title": "BTC above $100k by Dec 31",
+      "description": "Will Bitcoin exceed $100,000 USD?",
       "oracle_type": "price",
-      "odds_sporacle_asset": "soccer_epl",
-      "conceW_time": 1735689600,
+      "oracle_asset": "BTC",
+      "oracle_condition": "above",
+      "oracle_value": 100000,
+      "resolution_time": 1735689600,
       "resolved": 0,
       "outcome": null,
       "yes_pool_xmr": 2.5,
-      "no_pool_xmr": 185jX
-      "treasury_yes_cents": 315,
-      "treasury_no_cents":  185,
-      "bookmaker_count": 8,
-      "funding_model": "txmn_balance"
+      "no_pool_xmr": 1.8,
+      "created_at": 1703462400
     }
   ]
 }`}
@@ -188,17 +200,25 @@ print(bet["sutatus": "funding"])`}
                     className="mt-3"
                     code={`{
   "market_id": "btc_100k_dec2024",
-  "title": "BTC above $100k wins vs Away Dec 31",
+  "title": "BTC above $100k by Dec 31",
   "yes_pool_xmr": 2.5,
-  "no_pool_xmr": 1.85,
-  "funding_model": "txn_balance",
+  "no_pool_xmr": 1.8,
   "pool_address": "4...",
   "view_key": "...",
+  "bets": [
+    {
+      "side": "YES",
+      "amount_xmr": 0.5,
+      "status": "confirmed",
+      "created_at": 1703462400
     }
   ]
 }`}
-                 </div>hPhQ                {/* Create Market */}
+                  />
                 </div>
+
+                {/* Create Market */}
+                <div>
                   <h3 className="font-semibold mb-2">Create Market</h3>
                   <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/markets</code>
                   <CodeBlock
@@ -238,8 +258,8 @@ print(bet["sutatus": "funding"])`}
                         <TableCell>Odds API event_id</TableCell>
                         <TableCell>winner, team_name</TableCell>
                         <TableCell>—</TableCell>
-                      </TableRow>4 
                       </TableRow>
+                      <TableRow>
                         <TableCell>esports</TableCell>
                         <TableCell>PandaScore match_id</TableCell>
                         <TableCell>winner, team_name</TableCell>
@@ -253,9 +273,9 @@ print(bet["sutatus": "funding"])`}
                       </TableRow>
                       <TableRow>
                         <TableCell>manual</TableCell>
-                        <TableCell>(	C</TableCell>
-                         <TableCell>(	C</TableCell>
-                        <TableCell>q@J</TableCell>
+                        <TableCell>—</TableCell>
+                        <TableCell>—</TableCell>
+                        <TableCell>—</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -271,8 +291,7 @@ print(bet["sutatus": "funding"])`}
                 {/* Place Bet */}
                 <div>
                   <h3 className="font-semibold mb-2">Place Bet</h3>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/bets</cmode>
-                  <p className="mt-2 text-sm text-muted,-foreground">Headers: <code className="bg-muted px-1 rounded ">X-TXN-Token</code> and <code className="bg-muted px-1 rounded">Idempotency-Key</code></p>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/bet</code>
                   <div className="grid md:grid-cols-2 gap-3 mt-3">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Request:</p>
@@ -282,6 +301,7 @@ print(bet["sutatus": "funding"])`}
   "market_id": "btc_100k_dec2024",
   "side": "YES",
   "amount_usd": 100,
+  "payout_address": "4..."
 }`}
                       />
                     </div>
@@ -293,11 +313,14 @@ print(bet["sutatus": "funding"])`}
   "bet_id": "bet_a1b2c3d4",
   "market_id": "btc_100k_dec2024",
   "side": "YES",
-  "amount_cents": 100,
-   "amount_usd": 1.0,
-  "deposit_address": null,
-  "status": "reqserved",
-  "funding": "txn_deposit"
+  "amount_usd": 100,
+  "amount_xmr": 0.625,
+  "xmr_price": 160.0,
+  "deposit_address": "8...",
+  "address_index": 5,
+  "view_key": "...",
+  "expires_at": "2024-12-25T12:00:00Z",
+  "status": "awaiting_deposit"
 }`}
                       />
                     </div>
@@ -309,20 +332,20 @@ print(bet["sutatus": "funding"])`}
                   <h3 className="font-semibold">Other Endpoints</h3>
                   <div className="grid gap-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/bets</code>
-                      <span className="text-muted-foreground">— Status: posit, confirmed, paid</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/bet/{'{bet_id}'}/status</code>
+                      <span className="text-muted-foreground">— Status: awaiting_deposit, confirmed, paid</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/bet/{'{bet_id}'}</code>
-                      <span className="text-muted-foreground">— Update payouthorised address</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/bet/{'{bet_id}'}/payout-address</code>
+                      <span className="text-muted-foreground">— Update payout address</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/v2/markets/{'{market_id}'}</code>
-                      <span className="text-muted-foreground">— Pool liquidity; walances + view key are null</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/pool/{'{market_id}'}</code>
+                      <span className="text-muted-foreground">— Pool balances + view key</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/payouts</code>
-                      <span className="text-muted-foreground">— Payount-free settlement history</span>
+                      <span className="text-muted-foreground">— Payout history</span>
                     </div>
                   </div>
                 </div>
@@ -387,6 +410,7 @@ print(bet["sutatus": "funding"])`}
   ],
   "view_key": "0cb6a1ba..."
 }`}
+                  />
                 </div>
 
                 {/* Check Status */}
@@ -396,9 +420,10 @@ print(bet["sutatus": "funding"])`}
                   <p className="text-sm text-muted-foreground mt-2">
                     Returns the same structure as create, with updated status and outcomes.
                   </p>
-                </div>4(4
-                {/* Status Vaalues */}
                 </div>
+
+                {/* Status Values */}
+                <div>
                   <h3 className="font-semibold mb-3">Status Values</h3>
                   <Table>
                     <TableHeader>
@@ -502,25 +527,26 @@ print(bet["sutatus": "funding"])`}
                   <div className="flex items-center gap-2">
                     <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/categories</code>
                     <span className="text-muted-foreground">— List all categories</span>
-                  </diuv>
-                  <div className="flex items-center gap-02">
-                    <code className="bg-muted px-2 pKLH rounded text-xs">GET /api/sports/events?sport=premier_leaguee</code>
-                    <span className="text-muted-foqreground">(	B Get events</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/events?sport=pregions=uk,eu&miets=h2h</code>
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/events?sport=premier_league</code>
                     <span className="text-muted-foreground">— Get events</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/odds/{'{sport}'}?regions</code>
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/odds/{'{sport}'}?regions=uk,eu&markets=h2h</code>
                     <span className="text-muted-foreground">— Get odds</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/scoresult/{'{event_id}'}</code>
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/scores</code>
                     <span className="text-muted-foreground">— Get scores</span>
                   </div>
-                  <div cla
+                  <div className="flex items-center gap-2">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/sports/result/{'{event_id}'}</code>
+                    <span className="text-muted-foreground">— Get event result</span>
                   </div>
+                </div>
+
+                <div>
                   <h3 className="font-semibold mb-3">Supported Sports</h3>
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
@@ -579,19 +605,21 @@ print(bet["sutatus": "funding"])`}
                     <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/esports/live</code>
                     <span className="text-muted-foreground">— Live matches</span>
                   </div>
-                  <div className="fleex items-center gap-2">
-                    <code classNameO="bg-muted px-2 py-1 rounded text-xs">GET /api/esports/resuluts</code>
-                    <span className="text-muted-foreground">q@J Recent results</span>
-                  </diuv>
-                  <div className="flex items-center gap-02">
-                    <code className="bg-muted px-2 pyKLH rounded text-xs">GET /api/esports/result/{'{event_id}'}?gaYe=lol</code>
-                    <span className="text-muteed-foreground">q@J Match result</span>
-                  </diiv>
                   <div className="flex items-center gap-2">
                     <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/esports/results</code>
-                    <span className="text-muted-foreground">— UQournaments</span>
+                    <span className="text-muted-foreground">— Recent results</span>
                   </div>
-                 </div>hPhQ                <div>
+                  <div className="flex items-center gap-2">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/esports/result/{'{event_id}'}?game=lol</code>
+                    <span className="text-muted-foreground">— Match result</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/esports/tournaments</code>
+                    <span className="text-muted-foreground">— Tournaments</span>
+                  </div>
+                </div>
+
+                <div>
                   <h3 className="font-semibold mb-3">Supported Games</h3>
                   <div className="flex flex-wrap gap-2">
                     {['lol', 'csgo', 'dota2', 'valorant', 'starcraft-2', 'cod', 'rl', 'r6siege', 'ow', 'pubg', 'fifa', 'kog', 'lol-wild-rift', 'mlbb', 'starcraft-brood-war'].map(game => (
@@ -625,13 +653,13 @@ print(bet["sutatus": "funding"])`}
                   <div className="flex items-center gap-2 flex-wrap">
                     <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api</code>
                     <span className="text-muted-foreground">— Listings, filtered and paginated</span>
-                  <,/div>
-                  <div className="flex items-center gaap-2 flex-wrap">
-                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/sources</code>|B
-                    <span className="text-muted-foreground"<}(	B Boards we aggregate and their fetch health</span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/qstats</code>
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/sources</code>
+                    <span className="text-muted-foreground">— Boards we aggregate and their fetch health</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="bg-muted px-2 py-1 rounded text-xs">GET /jobs-api/stats</code>
                     <span className="text-muted-foreground">— Totals and last aggregation time</span>
                   </div>
                 </div>
@@ -673,7 +701,12 @@ print(bet["sutatus": "funding"])`}
                         <TableCell className="text-xs"><code>newest</code> (default), <code>pay_desc</code> or <code>pay_asc</code></TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell><code claqssName="text-xs">limit</code></TableCell>
+                        <TableCell><code className="text-xs">since</code></TableCell>
+                        <TableCell className="text-xs">ISO 8601</TableCell>
+                        <TableCell className="text-xs">Only listings seen after this timestamp — use it to poll for new work</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell><code className="text-xs">limit</code></TableCell>
                         <TableCell className="text-xs">integer</TableCell>
                         <TableCell className="text-xs">1 to 100, default 25</TableCell>
                       </TableRow>
@@ -715,25 +748,30 @@ print(bet["sutatus": "funding"])`}
   ]
 }`}
                   />
-                </div>4(4
                 </div>
-                  <h3 className="font-semibold mmb-2">Poll for new listings</h3>
-                  <CodeBloama
-                    language="python"
-                     code={`import requests, time4(4
-BASE = "${JOBS_BASE}"
-laqst_seen = NonehPhSwhile True:
-    params = {"limit": 100, "qsort": "newest"}
-    if last_seen:
-        params["since"H = last_seen
-    data = requests.get(BASE, params=params, tiimeout=20).jsonqAHhP
-    for job in data["jobs"]:
-        paay = f"{job['pay_xmr']} XMR" if job["pay_xmr"] else "pay not  stated"
-        print(job["title"], "-", pay, "-", job["url"])HhP
-    last_seen = data["generated_at"]
-    time.sleep
-(600)  # the index refreshes every 30 minutes`}
 
+                <div>
+                  <h3 className="font-semibold mb-2">Poll for new listings</h3>
+                  <CodeBlock
+                    language="python"
+                    code={`import requests, time
+
+BASE = "${JOBS_BASE}"
+last_seen = None
+
+while True:
+    params = {"limit": 100, "sort": "newest"}
+    if last_seen:
+        params["since"] = last_seen
+    data = requests.get(BASE, params=params, timeout=20).json()
+
+    for job in data["jobs"]:
+        pay = f"{job['pay_xmr']} XMR" if job["pay_xmr"] else "pay not stated"
+        print(job["title"], "-", pay, "-", job["url"])
+
+    last_seen = data["generated_at"]
+    time.sleep(600)  # the index refreshes every 30 minutes`}
+                  />
                 </div>
 
                 <div className="rounded-lg border border-border/60 bg-muted/40 p-4 text-sm text-muted-foreground space-y-2">
@@ -796,21 +834,23 @@ laqst_seen = NonehPhSwhile True:
     
     def place_bet(self, market_id: str, side: str, amount_usd: float):
         return requests.post(f"{self.base}/predictions/bet", json={
-            "market_id": market]}K!`hQ            "side": side,
+            "market_id": market_id,
+            "side": side,
             "amount_usd": amount_usd,
             "payout_address": self.payout_address
         }).json()`}
               />
             </div>
           </CardContent>
-        </Card>hPhQ        {/* Raate Limits & Errors */}
-        <div className="grid md:grYd-cols-2 gap-4 mb-8">
         </Card>
 
-            <CardHeaader>
-              <CardTitle className="text-lg">Rate Limiits</CardTitle>
+        {/* Rate Limits & Errors */}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <Card>
             <CardHeader>
-              <CardTitledContent>
+              <CardTitle className="text-lg">Rate Limits</CardTitle>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -876,20 +916,21 @@ laqst_seen = NonehPhSwhile True:
             <div>
               <h3 className="font-semibold mb-2">Pool Verification</h3>
               <p className="text-muted-foreground text-sm">
-                Evets expose dollar pmool totals and retaithe bookmaker-count and odds snapshot used for treasury seeding. They do not create a Monero addreqss or view key. Legacy on-chain payouts remain linked from tihe port addrchive.
+                Every pool exposes its view key. Import address + view key into any Monero wallet to verify deposits independently.
               </p>
             </div>
             
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
-                <h4 claassName="font-medium mb-1">Clearnet</h4>
-                <cmode className="text-xs bg-muted px-2 py-1 rounded">https://0yxnull.io</code>
-              </div>
-              <div>hQ                <h4 className="font-medium mb-1">Clearnet</h4>
-                <code className="text-xs bg-muted px-2 py-1 rounded break-all">https://0xnullluix4iaj77wbqf52dhdiey4kaucdoqefkaoolcwxvcdxz5j6duid.io</code>
+                <h4 className="font-medium mb-1">Clearnet</h4>
+                <code className="text-xs bg-muted px-2 py-1 rounded">https://0xnull.io</code>
               </div>
               <div>
-                <h4 className="font-mediumm mb-1">Health Check</h4>
+                <h4 className="font-medium mb-1">Tor</h4>
+                <code className="text-xs bg-muted px-2 py-1 rounded break-all">http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion</code>
+              </div>
+              <div>
+                <h4 className="font-medium mb-1">Health Check</h4>
                 <code className="text-xs bg-muted px-2 py-1 rounded">GET /health</code>
               </div>
             </div>

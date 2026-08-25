@@ -14,20 +14,27 @@ interface ServiceCardsGridProps {
   balance?: number;
 }
 
-/* ─── Tier Badges qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJA@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJA@qJ@qJ@qJ@ */
+/* ─── Tier Badges ──────────────────────────────────────── */
 
 const TokenBadge = () => (
   <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/40 text-emerald-400 bg-emerald-500/10 px-1.5 py-0">
     TOKEN BALANCE
   </Badge>
-);4(4
-const ExternalBadge = 
 );
-H => (
-  <Badge variant="outline" className="text-[10px] font-mediut-medium border-muted-foreground/40 text-muted-foreground bg-muted/30 px-1.5 py-0">
+
+const StandaloneBadge = () => (
+  <Badge variant="outline" className="text-[10px] font-medium border-blue-500/40 text-blue-400 bg-blue-500/10 px-1.5 py-0">
+    STANDALONE XMR
+  </Badge>
+);
+
+const ExternalBadge = () => (
+  <Badge variant="outline" className="text-[10px] font-medium border-muted-foreground/40 text-muted-foreground bg-muted/30 px-1.5 py-0">
     EXTERNAL
   </Badge>
-E'ahPhQyQqqJ@qJ@qJ@ Component qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qK)@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qK)@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@
+);
+
+/* ─── Component ────────────────────────────────────────── */
 
 export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError, balance = 0 }: ServiceCardsGridProps) => {
   // Calculate lending totals
@@ -53,7 +60,7 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
 
   return (
     <div className="space-y-6 mb-8">
-      {/* qJ@qJ@qJ@ Tier 1: Token-Powered qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qqJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@ */}
+      {/* ─── Tier 1: Token-Powered ─────────────────────── */}
       <div>
         <div className="flex items-baseline gap-3 mb-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Your Services</h2>
@@ -100,21 +107,21 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
             </CardContent>
           </Card>
 
-          {/* Prediction Markets */}
+          {/* Flash Markets */}
           <Card className="border-l-[3px] border-l-emerald-500 hover:border-l-emerald-400 transition-colors">
             <CardContent className="py-5 space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                  <TrendingUUp className="w-4 h-4 text-yellow-400" />
+                  <Zap className="w-4 h-4 text-yellow-400" />
                 </div>
-                <span className="font-semibold">Prkets</span>
+                <span className="font-semibold">Flash Markets</span>
                 <TokenBadge />
               </div>
               <p className="text-xs text-muted-foreground">
-                Quick-reserve predictions token balance. Wimns and refunds return here automatically.
+                Quick-resolution crypto price predictions. 5-minute markets powered by your token balance.
               </p>
               <Button size="sm" variant="outline" asChild className="w-full gap-1">
-                <Link to="/predict">View Flash <ArrowRight className="w-3 h-3" /></Link>
+                <Link to="/flash">View Flash <ArrowRight className="w-3 h-3" /></Link>
               </Button>
             </CardContent>
           </Card>
@@ -159,17 +166,36 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
         </div>
       </div>
 
-      {/* AqJ@qJ@qJ@ Tier 2 & 3: Other Services qJ@qJ@qJ@qJ@qJ@qJ@qJ@qK)@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@qJ@ */}
+      {/* ─── Tier 2 & 3: Other Services ────────────────── */}
       <div>
         <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-1">Other Services</h2>
         <p className="text-xs text-muted-foreground mb-4">Independent services with separate funding</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Swaps — Standalone */}
-          <Card className="border-l-[3px] border-l-blue-foreground/40 hover:border-l-blue-foreground/600 transition-colors bg-card/80">
+          {/* Predictions — Standalone */}
+          <Card className="border-l-[3px] border-l-blue-500 hover:border-l-blue-400 transition-colors">
             <CardContent className="py-5 space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <div classM9ame="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                </div>
+                <span className="font-semibold">Predictions</span>
+                <StandaloneBadge />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Each bet generates its own XMR deposit address. Winnings are paid out to your payout address. Not linked to your token balance.
+              </p>
+              <Button size="sm" variant="outline" asChild className="w-full gap-1">
+                <Link to="/predict">View Markets <ArrowRight className="w-3 h-3" /></Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Swaps — External */}
+          <Card className="border-l-[3px] border-l-muted-foreground/40 hover:border-l-muted-foreground/60 transition-colors bg-card/80">
+            <CardContent className="py-5 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
                   <ArrowLeftRight className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <span className="font-semibold">Swaps</span>

@@ -81,7 +81,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'Privacy infrastructure services. VPS, eSIM, swaps and more with anonymous crypto payments.',
   },
   '/vps': {
-    title: 'Anonymous VPS Hosting with Cryptocurrency | No-KYC VPS – 0xNuca9`hQD    description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments and privacy-first virtual servers.',
+    title: 'Anonymous VPS Hosting with Cryptocurrency | No-KYC VPS – 0xNull',
+    description: 'Get anonymous VPS hosting with cryptocurrency on 0xNull. No KYC, no accounts, Monero payments and privacy-first virtual servers.',
   },
   '/phone': {
     title: 'Anonymous Phone Numbers No KYC | Buy Private eSIMs with Crypto – 0xNull',
@@ -212,8 +213,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'View and track your betting slips. Check multibet status and potential payouts.',
   },
   '/payouts': {
-    title: 'Payouttlement Ledger - 0xNull',
-    description: 'View TXA8-fund manage your prediction ments and the read-only arke of legacy Monero payouts.',
+    title: 'Payouts - 0xNull',
+    description: 'View and manage your prediction market payouts. Track winning bets and withdrawals.',
   },
   '/auth': {
     title: 'Login - 0xNull',
@@ -256,12 +257,12 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Crypto', url: 'https://0xnull.io/predictions' },
   ],
   '/predict': [
-    { name: 'HomeI', url: 'https://0xnull.io/' },
-    { name: 'Predictions Hueb', url: 'https://0xnull.io/predict' },
-  ],
-  '/swaps': l0
     { name: 'Home', url: 'https://0xnull.io/' },
-    { nameme: 'Infrastructure', url: 'https://0xnull.io/infra' },
+    { name: 'Predictions Hub', url: 'https://0xnull.io/predict' },
+  ],
+  '/swaps': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
     { name: 'Swaps', url: 'https://0xnull.io/swaps' },
   ],
   '/browse': [
@@ -444,14 +445,17 @@ const faqSchemas: Record<string, StructuredData> = {
       },
       {
         '@type': 'Question',
-        name: 'What happens if a market has belled or ends on only one sidraw~Y9`hQ        acceptedAnswer: {
+        name: 'What happens if an event is cancelled or ends in a draw?',
+        acceptedAnswer: {
           '@type': 'Answer',
-          text: 'If ancelled markevents, no-contest closes ws where apposed), all bettors on both sides receive a full refund with zero fees. This ensures fake is nedAq9`hQ        },
+          text: 'For cancelled events, no-contest outcomes or draws where applicable, all bettors on both sides receive a full refund with zero fees. Your entire stake is returned.',
         },
       },
-        '@type': 'Questie{q9`hQ        name: 'How an odds cancelled in arimutuel betting?',
+      {
+        '@type': 'Question',
+        name: 'How are odds calculated in parimutuel betting?',
         acceptedAnswer: {
-          '@type': 'Anyswer',
+          '@type': 'Answer',
           text: 'Odds are calculated by dividing the total pool by the amount bet on each side. For example, if $500 total is bet with $200 on YES and $300 on NO, YES odds are 2.5x ($500/$200) and NO odds are 1.67x ($500/$300).',
         },
       },
@@ -472,28 +476,36 @@ const faqSchemas: Record<string, StructuredData> = {
       {
         '@type': 'Question',
         name: 'Is 0xNull support private?',
-        acceptedAnsweur: {
-          '@type': 'Answer',
-          text: 'Yes, wI use SimpleX for support which provides end-to-end encrypted , private messaging. No email or personal information is requuired.',
-        },
-      },
-      {
-        '@type': 'Quuestion',
-        name: 'What information should I have rXYdy before contacting support?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'For order iss}ues, we use SimpleX for betting issues, have yort des available. Never share yourypted, private mes or perses with anyonal including support.',
-        },XA
-      },
-    ],
-  },
-  '/swaps': {
-    '@context': 'httqps://schemation. Simply select your coins, enter the Ymount and provide a receiving address. The swap is required  through decentralized partners.',
+          text: 'Yes, we use SimpleX for support which provides end-to-end encrypted, private messaging. No email or personal information is required.',
         },
       },
       {
         '@type': 'Question',
-        name: 'What cryuptocurrencin I happort?',
+        name: 'What information should I have ready before contacting support?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'For order issues, have your order ID ready. For betting issues, have your bet details available. Never share your private keys or recovery phrases with anyone, including support.',
+        },
+      },
+    ],
+  },
+  '/swaps': {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How do anonymous crypto swaps work?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Our crypto swap service allows you to exchange cryptocurrencies without KYC or registration. Simply select your coins, enter the amount and provide a receiving address. The swap is processed through decentralized partners.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What cryptocurrencies can I swap?',
         acceptedAnswer: {
           '@type': 'Answer',
           text: 'We support a wide range of cryptocurrencies including BTC, ETH, XMR, LTC, DOGE and many more. Check the swap interface for the full list of available pairs.',
@@ -509,21 +521,26 @@ const faqSchemas: Record<string, StructuredData> = {
       },
     ],
   },
-};4hPhQye Structured data for different page types
-const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
 };
 
-      '@context': 'https:// Structured data for  page type': 'WebSite',
-      name: '0xNull',
-      uurl: 'https://0xnull.io',
-      descon: 'Privacy-first prediction markets and anonymous crypto marketplace',
-      potentialAction: {
-        '@type': 'SearchAction',
-         ta: 'https://0xnull.io/browse?q={searcord<string,        'query-inputructuredDame=search_ta | StringNY`hQ = {
+// Structured data for different page types
+const pageStructuredData: Record<string, StructuredData | StructuredData[]> = {
   '/': [
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+      description: 'Privacy-first prediction markets and anonymous crypto marketplace',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://0xnull.io/browse?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
       name: '0xNull',
       url: 'https://0xnull.io',
       logo: 'https://0xnull.io/favicon-512.png',
@@ -595,15 +612,17 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
     description: 'Anonymous crypto marketplace. Buy and sell goods and services with Monero.',
     url: 'https://0xnull.io/browse',
     isPartOf: {
-      '@type': 'WebSiteI9`hQ      name: '0xNull',
-      url: 'https://0xnucasKy9`hQ    },
+      '@type': 'WebSite',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
   },
   '/ai': {
-    '@context': 'https://schema.orig',
+    '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'AI Services',
-    adescription: 'Privacy-first AI services including voice cloniing and text-to-speech.',
-    url: 'https://0xnull.io/ai',A
+    description: 'Privacy-first AI services including voice cloning and text-to-speech.',
+    url: 'https://0xnull.io/ai',
     isPartOf: {
       '@type': 'WebSite',
       name: '0xNull',
@@ -617,14 +636,7 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
     description: 'Anonymous VPS hosting with cryptocurrency payments. No KYC required.',
     url: 'https://0xnull.io/vps',
     image: 'https://0xnull.io/og-image.png',
-    serviceType: 'VPS, Hosting',
-    provider: {
-      '@type': 'Organization',
-      name: '0xNull',
-      url: 'https://0xnull.io',
-    },
-    image: 'https://0xnull.io/og-image.png',
-    serviceType: 'eSIM and Phone Number S Hosting',
+    serviceType: 'VPS Hosting',
     provider: {
       '@type': 'Organization',
       name: '0xNull',
@@ -636,13 +648,36 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
       price: '3.00',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
+      url: 'https://0xnull.io/vps',
+    },
+  },
+  '/phone': {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Anonymous eSIM & Phone Numbers',
+    description: 'Anonymous eSIM and phone services with crypto payments. No KYC required.',
+    url: 'https://0xnull.io/phone',
+    image: 'https://0xnull.io/og-image.png',
+    serviceType: 'eSIM and Phone Number Service',
+    provider: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    areaServed: 'Worldwide',
+    offers: {
+      '@type': 'Offer',
+      price: '5.00',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
       url: 'https://0xnull.io/phone',
     },
   },
   '/safety': {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'Harm ReductaK{q9`hQ    description: 'Safety and harm reduction resources for privacy tools and cryptocurrencies.',
+    name: 'Harm Reduction',
+    description: 'Safety and harm reduction resources for privacy tools and cryptocurrencies.',
     url: 'https://0xnull.io/safety',
     isPartOf: {
       '@type': 'WebSite',
@@ -666,7 +701,8 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
   },
   '/how-betting-works': {
     '@context': 'https://schema.org',
-    '@type': 'How]Qy9`hQ    name: 'How Parimutuel Betting Works',
+    '@type': 'HowTo',
+    name: 'How Parimutuel Betting Works',
     description: 'Learn how parimutuel betting works on 0xNull prediction markets.',
     url: 'https://0xnull.io/how-betting-works',
     step: [
@@ -705,7 +741,8 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
   },
   '/voice': {
     '@context': 'https://schema.org',
-    '@type': 'SoftwareApplicataK{q9`hQ    name: 'AI Voice Cloning',
+    '@type': 'SoftwareApplication',
+    name: 'AI Voice Cloning',
     description: 'Clone any voice with AI. High-quality text-to-speech synthesis.',
     url: 'https://0xnull.io/voice',
     applicationCategory: 'MultimediaApplication',
@@ -818,30 +855,9 @@ const articleSchemas: Record<string, StructuredData> = {
   },
   '/philosophy': {
     '@context': 'https://schema.org',
-    '@type': 'Artaicle',
-    headline: 'The Philosophy Behind 0xNull',
-    daescription: 'Our philosophy on privacy, freedom and decentrYlization. Why we built 0xNull.',
-    url: 'https://0xnull.ieo/philosophy',
-    datePublished: '2024-01-01',
-    dateMomdified: '2025-01-02',
-    author: {
-      '@type': 'Organiuzation',
-      name: '0xNull',
-      url: 'https://0xnull.iKy9`
-    },
-    publisher: {
-      '@type': 'Organization(Q9`
-      name: '0xNull',
-      logo: {
-        '@type': 'MImageObject',
-        url: 'https://0xnull.io/favicon-512.pas99`hQ      },
-    },
-  },
-  '/safety': {
-    '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'Theduction and Safety Gull',
-    description: 'Saefety and harm reduction resour philor privacy, freedom and decrypqtocurrentralies.',
+    headline: 'The Philosophy Behind 0xNull',
+    description: 'Our philosophy on privacy, freedom and decentralization. Why we built 0xNull.',
     url: 'https://0xnull.io/philosophy',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
@@ -859,12 +875,12 @@ const articleSchemas: Record<string, StructuredData> = {
       },
     },
   },
-  '/tor-guidety': {
+  '/safety': {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'How to Access 0xNull viar',
-    description: 'Safetep guide qto accessing 0xNull through the Tor network for maximum privacy.',
-    url: 'https://0xnull.io/tor-guidety',
+    headline: 'Harm Reduction and Safety Guide',
+    description: 'Safety and harm reduction resources for privacy tools and cryptocurrencies.',
+    url: 'https://0xnull.io/safety',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
     author: {
@@ -874,7 +890,30 @@ const articleSchemas: Record<string, StructuredData> = {
     },
     publisher: {
       '@type': 'Organization',
-      name: '0xNuca9`hQD      logo: {
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon-512.png',
+      },
+    },
+  },
+  '/tor-guide': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'How to Access 0xNull via Tor',
+    description: 'Step-by-step guide to accessing 0xNull through the Tor network for maximum privacy.',
+    url: 'https://0xnull.io/tor-guide',
+    datePublished: '2024-01-01',
+    dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
         '@type': 'ImageObject',
         url: 'https://0xnull.io/favicon-512.png',
       },
@@ -888,27 +927,29 @@ const articleSchemas: Record<string, StructuredData> = {
     description: 'Quick start guide for new users of 0xNull prediction markets and marketplace.',
     url: 'https://0xnull.io/get-started',
     datePublished: '2024-01-01',
-    dateModaified: '2025-01-02',
+    dateModified: '2025-01-02',
     author: {
       '@type': 'Organization',
       name: '0xNull',
-      url: 'https://0xnull.ieo',
+      url: 'https://0xnull.io',
     },
     publisher: {
-      '@type': 'OrganizationNY`hQ      name: '0xNull',
+      '@type': 'Organization',
+      name: '0xNull',
       logo: {
-        '@type': 'IemageObject',
-        url: 'https://0xnull.io/favicon-512.pni99`
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon-512.png',
       },
     },
     proficiencyLevel: 'Beginner',
-  q},
+  },
   '/grapheneos': {
-    '@context': 'https://schema.orgNY`hQ    '@type': 'TechArticle',
-    headline: 'GrapheneOS: Tahe Privacy-First Mobile OS',
-    description: 'Why GraphenQOS is the best choice for mobile privacy and how to get staryted.',
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'GrapheneOS: The Privacy-First Mobile OS',
+    description: 'Why GrapheneOS is the best choice for mobile privacy and how to get started.',
     url: 'https://0xnull.io/grapheneos',
-    datePueblished: '2024-01-01',
+    datePublished: '2024-01-01',
     dateModified: '2025-01-02',
     author: {
       '@type': 'Organization',
@@ -927,11 +968,13 @@ const articleSchemas: Record<string, StructuredData> = {
   },
   '/vpn-resources': {
     '@context': 'https://schema.org',
-    '@type': 'Articmc)9`hQ    headline: 'Privacy-First VPN Resources',
+    '@type': 'Article',
+    headline: 'Privacy-First VPN Resources',
     description: 'A curated list of VPN services that respect your privacy.',
     url: 'https://0xnull.io/vpn-resources',
     datePublished: '2024-01-01',
-    dateModifiedt@Nd`djZ`bZ`dNY`hQ    author: {
+    dateModified: '2025-01-02',
+    author: {
       '@type': 'Organization',
       name: '0xNull',
       url: 'https://0xnull.io',
@@ -943,7 +986,6 @@ const articleSchemas: Record<string, StructuredData> = {
         '@type': 'ImageObject',
         url: 'https://0xnull.io/favicon-512.png',
       },
-    q},
     },
   },
 };
@@ -1043,10 +1085,13 @@ export function useSEO(customMeta?: SEOProps, customStructuredData?: StructuredD
       document.head.appendChild(canonical);
     }
     canonical.href = url;
-    // Robots directive q@JA filtered/search views are noindex but still followed,
-     // so link equity flows to the canonical listing and post URLs.
-    updateMetaTag('robots', meta.noindex ? 'noindex, fomllow' : 'index, follow');4(4(4
 
+    // Robots directive — filtered/search views are noindex but still followed,
+    // so link equity flows to the canonical listing and post URLs.
+    updateMetaTag('robots', meta.noindex ? 'noindex, follow' : 'index, follow');
+
+
+    
     // Collect all structured data
     const allStructuredData: StructuredData[] = [];
     
@@ -1201,8 +1246,8 @@ export function useProductSEO(listing: ProductSEOData | null) {
           minValue: 3,
           maxValue: 14,
           unitCode: 'DAY',
-        }`hA
         },
+      },
     } : undefined;
 
     // Merchant return policy
@@ -1265,26 +1310,9 @@ export function useProductSEO(listing: ProductSEOData | null) {
         hasMerchantReturnPolicy: hasMerchantReturnPolicy,
         ...(shippingDetails ? { shippingDetails: shippingDetails } : {}),
       },
-    };4(4
-    // Breadcrumb for listing
-     const breadcrumbSchema: StructuredData = {
-      '@contexqt': 'https://schema.org',
-      '@type': 'BreadcrumbList',A
-      itemListElement: [
-        {
-          '@type': 'LiustItem',
-          position: 1,
-          name: 'Home',
-           item: 'https://0xnull.io/',
-        },
-        {hA
-          '@type': 'ListItem',
-          position: 2,
-          name: 'Marketplace',
-          item: 'https://0xnull .io/browse',
     };
 
-    // Breadcrumb for ller profisting
+    // Breadcrumb for listing
     const breadcrumbSchema: StructuredData = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
@@ -1304,13 +1332,350 @@ export function useProductSEO(listing: ProductSEOData | null) {
         {
           '@type': 'ListItem',
           position: 3,
-          name: lisple,
+          name: listing.title,
           item: url,
         },
       ],
     };
 
-     structuredDataArray.push(breadcrumbSchema);
+    updateStructuredData([productSchema, breadcrumbSchema]);
+
+  }, [listing]);
+}
+
+// Generate Event schema for prediction markets
+export interface EventSEOData {
+  id: string;
+  question: string;
+  description?: string;
+  resolutionDate?: string;
+  status: 'open' | 'closed' | 'resolved';
+  totalPool?: number;
+  eventType?: 'sports' | 'esports' | 'crypto' | 'other';
+  teams?: { home?: string; away?: string };
+}
+
+// Generate ItemList schema for prediction market list pages
+export interface EventListSEOData {
+  events: Array<{
+    id: string;
+    question: string;
+    description?: string;
+    resolutionDate?: string;
+    status: 'open' | 'closed' | 'resolved';
+    totalPool?: number;
+    eventType?: 'sports' | 'esports' | 'crypto' | 'other';
+    teams?: { home?: string; away?: string };
+  }>;
+  pageTitle: string;
+  pageDescription: string;
+  pageUrl: string;
+}
+
+export function useEventListSEO(data: EventListSEOData | null) {
+  useEffect(() => {
+    if (!data || data.events.length === 0) return;
+
+    // Build ItemList schema with events
+    const itemListSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: data.pageTitle,
+      description: data.pageDescription,
+      url: data.pageUrl,
+      numberOfItems: data.events.length,
+      itemListElement: data.events.slice(0, 20).map((event, index) => {
+        const eventType = event.eventType === 'sports' || (event.teams?.home && event.teams?.away)
+          ? 'SportsEvent'
+          : 'Event';
+        
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': eventType,
+            name: event.question,
+            description: event.description || `Predict: ${event.question}`,
+            url: `${data.pageUrl}#market-${event.id}`,
+            eventStatus: event.status === 'open'
+              ? 'https://schema.org/EventScheduled'
+              : event.status === 'resolved'
+              ? 'https://schema.org/EventCancelled'
+              : 'https://schema.org/EventPostponed',
+            ...(event.resolutionDate && {
+              startDate: event.resolutionDate,
+            }),
+            ...(event.teams?.home && event.teams?.away && {
+              competitor: [
+                { '@type': 'SportsTeam', name: event.teams.home },
+                { '@type': 'SportsTeam', name: event.teams.away },
+              ],
+            }),
+            organizer: {
+              '@type': 'Organization',
+              name: '0xNull',
+              url: 'https://0xnull.io',
+            },
+          },
+        };
+      }),
+    };
+
+    updateStructuredData([itemListSchema]);
+
+  }, [data]);
+}
+
+export function useEventSEO(event: EventSEOData | null, pageType?: string) {
+  useEffect(() => {
+    if (!event) return;
+
+    const url = `https://0xnull.io/market/${event.id}`;
+    const title = event.question.length > 60 
+      ? `${event.question.slice(0, 57)}...` 
+      : event.question;
+
+    // Update document title
+    document.title = `${title} - 0xNull Predictions`;
+
+    // Update meta tags
+    const description = event.description || `Predict: ${event.question}. Anonymous betting with Monero on 0xNull.`;
+    updateMetaTag('description', description.slice(0, 160));
+
+    // Open Graph
+    updateMetaTag('og:title', `${title} - 0xNull Predictions`, 'property');
+    updateMetaTag('og:description', description.slice(0, 160), 'property');
+    updateMetaTag('og:url', url, 'property');
+    updateMetaTag('og:type', 'website', 'property');
+
+    // Twitter
+    updateMetaTag('twitter:title', `${title} - 0xNull Predictions`);
+    updateMetaTag('twitter:description', description.slice(0, 160));
+
+    // Determine event type for schema
+    let eventSchemaType = 'Event';
+    if (event.eventType === 'sports') eventSchemaType = 'SportsEvent';
+    if (event.teams?.home && event.teams?.away) eventSchemaType = 'SportsEvent';
+
+    // Event structured data
+    const eventSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': eventSchemaType,
+      name: event.question,
+      description: description,
+      url: url,
+      eventStatus: event.status === 'open' 
+        ? 'https://schema.org/EventScheduled'
+        : event.status === 'resolved'
+        ? 'https://schema.org/EventCancelled'
+        : 'https://schema.org/EventPostponed',
+      ...(event.resolutionDate && {
+        startDate: event.resolutionDate,
+        endDate: event.resolutionDate,
+      }),
+      location: {
+        '@type': 'VirtualLocation',
+        url: 'https://0xnull.io',
+      },
+      organizer: {
+        '@type': 'Organization',
+        name: '0xNull',
+        url: 'https://0xnull.io',
+      },
+      ...(event.teams?.home && event.teams?.away && {
+        competitor: [
+          {
+            '@type': 'SportsTeam',
+            name: event.teams.home,
+          },
+          {
+            '@type': 'SportsTeam',
+            name: event.teams.away,
+          },
+        ],
+      }),
+    };
+
+    // Breadcrumb for market
+    const pageName = pageType || 'Predictions';
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: pageName,
+          item: 'https://0xnull.io/predict',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: title,
+          item: url,
+        },
+      ],
+    };
+
+    updateStructuredData([eventSchema, breadcrumbSchema]);
+
+  }, [event, pageType]);
+}
+
+// Generate Seller/Organization schema with AggregateRating for reviews
+export interface SellerSEOData {
+  id: string;
+  displayName: string;
+  bio?: string;
+  avatar?: string;
+  location?: string;
+  totalSales?: number;
+  joinedAt?: string;
+  reputation: {
+    score: number;
+    reviewCount: number;
+  };
+  reviews?: Array<{
+    rating: number;
+    title?: string;
+    content?: string;
+    reviewerName?: string;
+    createdAt: string;
+  }>;
+}
+
+export function useSellerSEO(seller: SellerSEOData | null) {
+  useEffect(() => {
+    if (!seller) return;
+
+    const url = `https://0xnull.io/seller/${seller.id}`;
+    const title = `${seller.displayName} - 0xNull Marketplace Seller`;
+    const description = seller.bio 
+      ? seller.bio.slice(0, 160)
+      : `${seller.displayName} is a verified seller on 0xNull Marketplace with ${seller.reputation.reviewCount} reviews and a ${seller.reputation.score}/5 rating.`;
+
+    // Update document title
+    document.title = title;
+
+    // Update meta tags
+    updateMetaTag('description', description);
+
+    // Open Graph
+    updateMetaTag('og:title', title, 'property');
+    updateMetaTag('og:description', description, 'property');
+    updateMetaTag('og:url', url, 'property');
+    updateMetaTag('og:type', 'profile', 'property');
+    if (seller.avatar) {
+      updateMetaTag('og:image', seller.avatar, 'property');
+    }
+
+    // Twitter
+    updateMetaTag('twitter:title', title);
+    updateMetaTag('twitter:description', description);
+    if (seller.avatar) {
+      updateMetaTag('twitter:image', seller.avatar);
+    }
+
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    // Build structured data array
+    const structuredDataArray: StructuredData[] = [];
+
+    // Organization/LocalBusiness schema with AggregateRating
+    const sellerSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: seller.displayName,
+      url: url,
+      description: description,
+      ...(seller.avatar && { image: seller.avatar }),
+      ...(seller.location && {
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: seller.location,
+        },
+      }),
+      ...(seller.reputation.reviewCount > 0 && {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: seller.reputation.score.toFixed(1),
+          bestRating: '5',
+          worstRating: '1',
+          ratingCount: seller.reputation.reviewCount,
+          reviewCount: seller.reputation.reviewCount,
+        },
+      }),
+    };
+    structuredDataArray.push(sellerSchema);
+
+    // Add individual Review schemas (up to 5 most recent)
+    if (seller.reviews && seller.reviews.length > 0) {
+      seller.reviews.slice(0, 5).forEach(review => {
+        const reviewSchema: StructuredData = {
+          '@context': 'https://schema.org',
+          '@type': 'Review',
+          itemReviewed: {
+            '@type': 'Organization',
+            name: seller.displayName,
+            url: url,
+          },
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: review.rating,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          ...(review.title && { name: review.title }),
+          ...(review.content && { reviewBody: review.content }),
+          author: {
+            '@type': 'Person',
+            name: review.reviewerName || 'Anonymous',
+          },
+          datePublished: review.createdAt,
+        };
+        structuredDataArray.push(reviewSchema);
+      });
+    }
+
+    // Breadcrumb for seller profile
+    const breadcrumbSchema: StructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://0xnull.io/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Marketplace',
+          item: 'https://0xnull.io/browse',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: seller.displayName,
+          item: url,
+        },
+      ],
+    };
+    structuredDataArray.push(breadcrumbSchema);
 
     updateStructuredData(structuredDataArray);
 
@@ -1383,7 +1748,8 @@ export function useProductListSEO(data: ProductListSEOData | null) {
             }),
           },
         };
-    q};
+      }),
+    };
 
     // Breadcrumb for marketplace
     const breadcrumbSchema: StructuredData = {

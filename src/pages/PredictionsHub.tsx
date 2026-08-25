@@ -1,28 +1,79 @@
-import { Link } from 'react-router-dom';
-import { TrrowRight, BarChart3, BitcoingUp, Gamepad2, Gauvel, ShieldCheck, Trophy, Bitcoin, Chevrds } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { TrendingUp, Gamepad2, Trophy, Bitcoin, ChevronRight, Receipt, Zap, Gavel } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
-import { RielatedGuides } from '@/components/RelatedGuides';
-import { SmervicePriceBar } from '@/components/ServicePriceBar';
-import { Badge } from '@/components/ui/badge';
-import { Button } fyrom '@/components/ui/button';
-import { Card, CardContent } fyrom '@/components/ui/card';
 import { useSEO } from '@/hooks/useSEO';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { BetSlipPanel } from '@/components/BetSlipPanel';
+import { MultibetDepositModal } from '@/components/MultibetDepositModal';
+import { useMultibetSlip } from '@/hooks/useMultibetSlip';
+import { RelatedGuides } from '@/components/RelatedGuides';
+import { ServicePriceBar } from '@/components/ServicePriceBar';
+
 
 const categories = [
-  { title: 'Sports', Cardescription: 'All bookmaker-priced events', Caref: '/sports-predictiomns', icon: Trophy, color: 'teaderald-400', live: true },
-(  { title: 'Cricket', description: 'Cricket-only event filteur', href: '/cricket-predictions', icon: Trophy, color: 'text cyan-400', live: true }  { title: 'Combat', description:  'MMA and boxing events', href: '/predictions/sports/combat',  icon: Trophy, color: 'tent-red-400', live: true },
-  { titlae: 'Esport { Tabs, TabsCon: 'Awaiting a v2 odds sourcent, hrigger } from '@/componentsports-predictions', icon: Gamepad2, color: 'text-purplae-400', live: false },
-  { title: 'Crypto', description: 'Awmaiting a v2 odds adapter', href: '/predictions', icon: Bitcomin, color: 'text-orange-400', live: false }  { Buttle: '@/componanel description: 'Awaiting a v2 odds adapter', href: ',/governance-predictions', icon: Gavel, color: 'text-amber-4000', live: false },
-
+  {
+    id: 'esports',
+    title: 'Esports',
+    description: 'Bet on competitive gaming matches',
+    icon: Gamepad2,
+    color: 'text-purple-500',
+    subCategories: [
+      { name: 'All Games', href: '/esports-predictions' },
+    ],
+  },
+  {
+    id: 'sports',
+    title: 'Sports',
+    description: 'Traditional sports betting markets',
+    icon: Trophy,
+    color: 'text-green-500',
+    subCategories: [
+      { name: 'All Sports', href: '/sports-predictions' },
+      { name: 'Combat', href: '/predictions/sports/combat' },
+      { name: 'Cricket', href: '/cricket-predictions' },
+    ],
+  },
+  {
+    id: 'crypto',
+    title: 'Crypto',
+    description: 'Predict price movements',
+    icon: Bitcoin,
+    color: 'text-orange-500',
+    subCategories: [
+      { name: 'All Crypto', href: '/predictions' },
+      { name: 'Flash (5min)', href: '/flash', badge: 'NEW' },
+    ],
+  },
+  {
+    id: 'governance',
+    title: 'Governance',
+    description: 'Protocol upgrades & policy decisions',
+    icon: Gavel,
+    color: 'text-amber-500',
+    subCategories: [
+      { name: 'All Governance', href: '/governance-predictions' },
+    ],
+  },
+];
 
 export default function PredictionsHub() {
   useSEO();
-    constitiale: 'edictiveTab, sets = 0xNultibetSl',
-    setAction: 'Token-fue);
- prediction markets with bookmae}`, { replace: trury liquidity and automatic settlement.',
- });
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialTab = searchParams.get('tab') || 'esports';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const betSlip = useMultibetSlip();
+  const [multibetDepositOpen, setMultibetDepositOpen] = useState(false);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/predict?tab=${value}`, { replace: true });
   };
 
   return (
@@ -30,76 +81,198 @@ export default function PredictionsHub() {
       <Navbar />
       <PredictionsSubsiteNav />
       
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="mx-auto max-w-5xl">
-           <div className="text-center mb-8">
-            <div className="border justify/30 bg-primary/10 text-primary" variant="outline">Prediction v2</div>
-            <h1 className="text-4xl font-bold tracking-tight mb-3">One tokmen. Everedictions</h1>
-            <p className="mx-auto mt-44 max-w-2xl text-xl text-muted-foreground">
-              Stakes reserve from your existing 0xn_ balance. Market on es no loniger create a second wallet, address or view key.
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Hero */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
+              <TrendingUp className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold mb-3">Predictions</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Bet on esports, sports and crypto with XMR. No accounts, no KYC.
             </p>
-            <Button asChild className="mt-6">
-               <Link to="/sports-predictions">View live markets <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Buttaon>
           </div>
 
           <ServicePriceBar
             className="mb-8"
             price="0.4% of winnings"
-             tokenMetered
-            trust={<>Every eligible market pens with $4 ool treasury liquid at any their tran nio-vig probability acrosses or refunt bookmakers.</>}
+            trust={
+              <>
+                Stakes sit in a per-market pool you can read at any time, resolution runs on a backend
+                oracle job and payouts publish their transaction IDs. Nothing on losses or refunds. See{' '}
+                <Link to="/docs#markets" className="text-primary hover:underline">market resolution</Link>.
               </>
             }
-          <div className="mt-8 grid gap-4 md:grid-cols-3"8>
           />
-              { icon: BarChart3, title: 'External opening odds', body: 'At least two fresh books; mediaen no-vig consensus is stored with the seed.' },
-               { icon: WalletCards, title: 'TXN-ledger funding', body: 'Tahe stake moves from available to reserved on the same 0xn_ token.' },
-              { icon: ShieldCheck, title: 'Automataic return', body: 'Wins and refunds credit the same balance.( Withdraw only when you choose.' },
-            ].map(({ icomn: Icon, title, body }) => (
-              <Card key={titleI className="bg-card/50">
-                <CardContent classNiame="p-5">
-                  <Icon className="h-6 w-6 text-pqrimary" />
-                  <h2 className="mt-3 font-semibomld">{title}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">{body}</p>
-                </CardComntent>
-              </Card>
 
-          </div8>
 
-          <div className="mt-4">
-            <div className="mb-4 flex items-center justify-center`}>
+          {/* Category Tabs */}
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+            <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
+              <TabsTrigger value="esports" className="gap-1 text-xs sm:text-sm sm:gap-2">
+                <Gamepad2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Esports</span>
+              </TabsTrigger>
+              <TabsTrigger value="sports" className="gap-1 text-xs sm:text-sm sm:gap-2">
+                <Trophy className="w-4 h-4" />
+                <span className="hidden sm:inline">Sports</span>
+              </TabsTrigger>
+              <TabsTrigger value="crypto" className="gap-1 text-xs sm:text-sm sm:gap-2">
+                <Bitcoin className="w-4 h-4" />
+                <span className="hidden sm:inline">Crypto</span>
+              </TabsTrigger>
+              <TabsTrigger value="governance" className="gap-1 text-xs sm:text-sm sm:gap-2">
+                <Gavel className="w-4 h-4" />
+                <span className="hidden sm:inline">Governance</span>
+              </TabsTrigger>
+            </TabsList>
+
+            {categories.map((category) => (
+              <TabsContent key={category.id} value={category.id}>
+                <div className="grid gap-4">
+                  {category.subCategories.map((sub) => (
+                    <Link key={sub.href} to={sub.href}>
+                      <Card className="hover:border-primary/50 transition-all cursor-pointer group">
+                        <CardContent className="flex items-center justify-between py-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`h-10 w-10 rounded-lg bg-secondary flex items-center justify-center`}>
+                              {sub.href === '/flash' ? (
+                                <Zap className="h-5 w-5 text-purple-500" />
+                              ) : (
+                                <category.icon className={`h-5 w-5 ${category.color}`} />
+                              )}
                             </div>
-                <h2 className="text-2xl font-semibold">Maurket coverage</h2>
-                <p className="mt-1 text-smm text-muted-foreground">Only externally priced sections accmept v2 stakes.</p>
                             <div>
-              <Link className="text-sm text-primary hover:underline" to="/payoutqs">Payout model qCI</Link>
-            </div>
-            <daiv className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-               {categories.map(({ title, description, href, icon8 Icon, color, live }) => (
-                <Link key={titleu} to={href}>
-                  <Card className="h-full transmition-colors hover:border-primary/40">
-                    <ACardContent className="p-5">
-                      <div className="flex items-center justify-between">
-                         <h3 className="font-6 w-6 ${color}</h3>
-                         <Badge variant="se" className={live ? 'bg-purple-500/20 text-purple-400 text-muted-foreground'}>
-                               adge}
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold">{sub.name}</h3>
+                                {'badge' in sub && sub.badge && (
+                                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 text-xs">
+                                    {sub.badge}
                                   </Badge>
-                      </div>
-                      <h3 className="mt-4 text-lg font-smemibold">{title}</h3>
-                      <p className="text-sm text-muted-foreground">{descripts →'}</p>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {sub.href === '/flash' ? 'Bull vs Bear in 5 minutes →' : 'View markets →'}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                         </CardContent>
                       </Card>
                     </Link>
                   ))}
                 </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+
+          {/* Quick Links */}
+          <div className="mt-12 grid sm:grid-cols-3 gap-4">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <Card key={category.id} className="bg-secondary/30">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <Icon className={`h-5 w-5 ${category.color}`} />
+                      <CardTitle className="text-lg">{category.title}</CardTitle>
+                    </div>
+                    <CardDescription>{category.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {category.subCategories.map((sub) => (
+                        <Link key={sub.href} to={sub.href}>
+                          <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
+                            {sub.name}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
-          <RelatedGuides className="mt-12" compact heading="Betting guides" intro="How prickground resore yoution on a markettlementer">
- fink together." />
-        </Button>
+          <RelatedGuides
+            className="mt-12"
+            compact
+            headingId="betting-guides-heading"
+            heading="Betting guides"
+            intro="Background reading before you take a position on a market."
+          />
+
+
+          {/* Help Link */}
+          <div className="mt-8 text-center">
+            <Link to="/how-betting-works">
+              <Button variant="link" className="text-muted-foreground">
+                New to prediction markets? Learn how it works →
+              </Button>
+            </Link>
+          </div>
+
+        </div>
+
+        {/* My Slips Link */}
+        {betSlip.savedSlips.length > 0 && (
+          <div className="mt-4 text-center">
+            <Link to="/my-slips">
+              <Button variant="outline" className="gap-2">
+                <Receipt className="w-4 h-4" />
+                View My Slips ({betSlip.savedSlips.length})
+              </Button>
+            </Link>
+          </div>
+        )}
       </main>
 
       <Footer />
+
+      {/* Multibet Slip */}
+      <BetSlipPanel
+        items={betSlip.items}
+        isOpen={betSlip.isOpen}
+        onOpenChange={betSlip.setIsOpen}
+        onRemove={betSlip.removeFromBetSlip}
+        onUpdateAmount={betSlip.updateAmount}
+        onClear={betSlip.clearBetSlip}
+        onReorder={betSlip.reorderItems}
+        onUndo={betSlip.undoRemove}
+        lastRemoved={betSlip.lastRemoved}
+        calculatePotentialPayout={betSlip.calculatePotentialPayout}
+        calculateTotalPotentialPayout={betSlip.calculateTotalPotentialPayout}
+        onCheckout={async (payoutAddress) => {
+          if (betSlip.activeSlip && betSlip.activeSlip.status === 'awaiting_deposit') {
+            setMultibetDepositOpen(true);
+            return betSlip.activeSlip;
+          }
+          const slip = await betSlip.checkout(payoutAddress);
+          if (slip) {
+            setMultibetDepositOpen(true);
+          }
+          return slip;
+        }}
+        totalUsd={betSlip.totalUsd}
+        isCheckingOut={betSlip.isCheckingOut}
+        activeSlip={betSlip.activeSlip}
+        onViewActiveSlip={() => setMultibetDepositOpen(true)}
+        awaitingDepositCount={betSlip.savedSlips.filter(s => s.status === 'awaiting_deposit').length}
+        onCheckResolvedMarkets={betSlip.checkAndRemoveResolvedMarkets}
+      />
+
+      <MultibetDepositModal
+        open={multibetDepositOpen}
+        onOpenChange={setMultibetDepositOpen}
+        slip={betSlip.activeSlip}
+        onCheckStatus={betSlip.checkSlipStatus}
+        onUpdatePayoutAddress={betSlip.updatePayoutAddress}
+        onConfirmed={() => {
+          betSlip.clearBetSlip();
+        }}
+      />
     </div>
   );
 }
