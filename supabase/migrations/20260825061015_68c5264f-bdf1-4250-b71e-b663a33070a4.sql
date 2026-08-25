@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.prevent_profile_privileged_updates() FROM PUBLIC;
