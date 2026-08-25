@@ -545,10 +545,17 @@ serve(async (req) => {
         let hidden_reason: string | null = null;
 
         const blockedPattern = matchBlocklist(`${job.title} ${job.body}`.toLowerCase(), blocklist);
+        const qualityIssue = CHAT_SOURCES.has(adapter.sourceId)
+          ? assessQuality(job.title, job.body)
+          : null;
         if (blockedPattern) {
           hidden = true;
           hidden_reason = `blocklist: ${blockedPattern}`;
+        } else if (qualityIssue) {
+          hidden = true;
+          hidden_reason = qualityIssue;
         } else {
+
           const { data: dupe } = await supabase
             .from('jobs')
             .select('id, source_id, first_seen_at')
