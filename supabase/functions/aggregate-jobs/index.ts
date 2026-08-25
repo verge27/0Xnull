@@ -597,6 +597,7 @@ serve(async (req) => {
           dedupe_key,
           hidden,
           hidden_reason,
+          listing_type: classifyListing(adapter.sourceId, job.title, job.body),
           ...base,
         });
         if (insertError) throw new Error(insertError.message);
