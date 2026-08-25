@@ -391,6 +391,25 @@ export function TwitchStreamEmbed({ selectedGame: initialGame, onActiveGameChang
             </p>
           </div>
         )}
+
+        {/* Fallback footer when metadata is unavailable but the player renders */}
+        {!streamInfo?.channel && channelToRender && !loading && (
+          <div className="px-4 py-3 border-t border-purple-500/20 bg-background/50 flex items-center justify-between flex-wrap gap-2">
+            <a
+              href={`https://twitch.tv/${channelToRender}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+            >
+              {channelToRender}
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <span className="text-xs text-muted-foreground">
+              If the channel is offline, the player shows Twitch's offline screen.
+            </span>
+          </div>
+        )}
+
       </CardContent>
     </Card>
   );
