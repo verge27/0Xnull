@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp, Globe, ShieldAlert } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp, Globe, AlertTriangle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { PayoutEligibilityChecklist } from '@/components/PayoutEligibilityChecklist';
+import { PAYOUT_CAVEATS, describePayoutFailure } from '@/lib/payoutEligibility';
 import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,6 +67,7 @@ const FiatOfframp = () => {
   const [creatingExchange, setCreatingExchange] = useState(false);
   const [copied, setCopied] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
+  const [payoutError, setPayoutError] = useState<{ title: string; description: string; raw: string } | null>(null);
 
   const getSelectedCryptoDetails = (value: string) => {
     const [ticker, network] = value.split('-');
@@ -192,9 +196,13 @@ const FiatOfframp = () => {
       });
       
       toast({ title: 'Exchange created!', description: 'Send crypto to the provided address' });
+      setPayoutError(null);
     } catch (error) {
       console.error('Error creating exchange:', error);
-      toast({ title: 'Failed to create exchange', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
+      const raw = error instanceof Error ? error.message : 'Unknown error';
+      const friendly = describePayoutFailure(raw);
+      setPayoutError({ ...friendly, raw });
+      toast({ title: friendly.title, description: friendly.description, variant: 'destructive' });
     }
     setCreatingExchange(false);
   };
@@ -400,6 +408,24 @@ const FiatOfframp = () => {
                   <p className="text-xs text-muted-foreground">In case the exchange fails, funds will be returned here</p>
                 </div>
 
+                {payoutError && (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 space-y-2">
+                    <p className="flex items-center gap-2 text-sm font-medium text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      {payoutError.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{payoutError.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Nothing was sent, so your crypto is untouched. If Guardarian stopped you on its hosted checkout, the reason is usually your country or the identity check — use the eligibility checklist below.
+                    </p>
+                    <details className="text-xs text-muted-foreground">
+                      <summary className="cursor-pointer">Technical detail</summary>
+                      <code className="break-all">{payoutError.raw}</code>
+                    </details>
+                  </div>
+                )}
+
+
                 <Button 
                   className="w-full" 
                   size="lg" 
@@ -449,61 +475,38 @@ const FiatOfframp = () => {
               </ol>
 
               <div>
-                <h3 className="font-semibold mb-2">Where payouts are usually available</h3>
+                <h3 className="font-semibold mb-2">Country eligibility checklist</h3>
                 <p className="text-muted-foreground mb-3">
                   Eligibility is the intersection of the countries SimpleSwap permits, the countries Guardarian permits and the payout methods Guardarian can offer for that transaction. These are candidates, not guarantees.
                 </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    { region: 'Europe outside the EU', list: 'Switzerland, Norway, Iceland, Liechtenstein, Bosnia and Herzegovina, Moldova, Montenegro, non-occupied Ukraine' },
-                    { region: 'Latin America', list: 'Argentina, Brazil, Chile, Costa Rica, Dominican Republic, Ecuador, El Salvador, Guatemala, Honduras, Mexico, Paraguay, Peru, Uruguay' },
-                    { region: 'Asia-Pacific', list: 'Australia, Hong Kong, Indonesia, New Zealand, Philippines, Thailand, Vietnam' },
-                    { region: 'Central Asia and Caucasus', list: 'Armenia, Azerbaijan, Kazakhstan, Uzbekistan' },
-                    { region: 'Middle East', list: 'UAE, Turkey, Jordan, Kuwait, Oman' },
-                    { region: 'Africa', list: 'South Africa, Nigeria, Ghana, Senegal, Tanzania, Uganda, Zambia, Rwanda, Benin' },
-                  ].map(r => (
-                    <div key={r.region} className="rounded-lg border bg-secondary/30 p-3">
-                      <p className="font-medium mb-1">{r.region}</p>
-                      <p className="text-muted-foreground text-xs">{r.list}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-destructive" />
-                  Excluded markets
-                </h3>
-                <div className="space-y-1 text-muted-foreground">
-                  {[
-                    ['United Kingdom', 'blocked by SimpleSwap and Guardarian'],
-                    ['United States', 'blocked by SimpleSwap'],
-                    ['European Union', 'SimpleSwap currently excludes every member state'],
-                    ['Canada', 'blocked by Guardarian'],
-                    ['Japan', 'blocked by SimpleSwap'],
-                    ['India', 'blocked by Guardarian'],
-                    ['Singapore, Malaysia, South Korea', 'blocked by Guardarian'],
-                    ['China', 'blocked by both'],
-                    ['Israel, Qatar, Saudi Arabia', 'blocked by Guardarian'],
-                    ['Kenya', 'blocked by Guardarian'],
-                    ['Colombia', 'blocked by SimpleSwap'],
-                  ].map(([market, reason]) => (
-                    <p key={market} className="text-xs">
-                      <span className="text-foreground font-medium">{market}</span> — {reason}
-                    </p>
-                  ))}
-                </div>
+                <PayoutEligibilityChecklist />
               </div>
 
               <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 space-y-2 text-xs text-muted-foreground">
                 <p className="font-medium text-yellow-400">Before you start</p>
-                <p>There is no country-eligibility endpoint. A quote can pass every check here and still be refused at Guardarian checkout.</p>
-                <p>Restricted country lists are worded as "including but not limited to", so absence from a list is not a guarantee of service.</p>
-                <p>Guardarian checkout requires identity verification. For a fully private route, use the cash flow on the Buy page instead.</p>
+                {PAYOUT_CAVEATS.map(caveat => (
+                  <p key={caveat}>{caveat}</p>
+                ))}
+                <p>For a fully private route, use the cash flow on the Buy page instead.</p>
+              </div>
+
+              <div className="rounded-lg border p-3 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">Using a VPN with this route</p>
+                  <p className="text-xs text-muted-foreground">
+                    Guardarian records your IP, device and locale. Read the VPN guide before you start checkout.
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/vpn-resources">
+                    VPN guide
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>
+
 
           {/* Info Section */}
 

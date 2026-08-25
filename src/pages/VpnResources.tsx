@@ -1,10 +1,13 @@
 import { Shield, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PayoutEligibilityChecklist } from "@/components/PayoutEligibilityChecklist";
+import { PAYOUT_CAVEATS } from "@/lib/payoutEligibility";
 
 const vpnServices = [
   {
@@ -236,7 +239,44 @@ const VpnResources = () => {
             </div>
           </div>
 
+          {/* Fiat payout system */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Cashing out: the SimpleSwap to Guardarian payout system</CardTitle>
+              <CardDescription>
+                A VPN hides your network location, but the fiat payout leg does not stay private. Here is what happens when you cash out crypto to a bank or card.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 text-sm">
+              <ol className="space-y-2 text-muted-foreground list-decimal list-inside">
+                <li>You request a quote and limits for the crypto-to-fiat pair.</li>
+                <li>The exchange is created through the SimpleSwap API.</li>
+                <li>SimpleSwap returns a redirect to Guardarian's hosted checkout.</li>
+                <li>Guardarian runs KYC and receives your crypto deposit.</li>
+                <li>Guardarian sends the fiat payout by card or bank transfer.</li>
+              </ol>
+
+              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 space-y-2 text-xs text-muted-foreground">
+                <p className="font-medium text-yellow-400">Caveats worth knowing</p>
+                {PAYOUT_CAVEATS.map(caveat => (
+                  <p key={caveat}>{caveat}</p>
+                ))}
+                <p>SimpleSwap requires affiliates to pass on your IP, user agent, language, timezone and operating system, so a mismatch between your VPN exit and your documents can trigger a refusal.</p>
+              </div>
+
+              <PayoutEligibilityChecklist />
+
+              <Button variant="outline" asChild>
+                <Link to="/cashout">
+                  Go to the cash out page
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Additional Resources */}
+
           <Card className="bg-secondary/30">
             <CardContent className="py-8">
               <h3 className="text-lg font-bold mb-4">Additional Resources</h3>
