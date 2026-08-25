@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ExternalLink, RefreshCw, ShieldCheck, Clock, Star, AlertTriangle, ArrowRightLeft, CreditCard } from 'lucide-react';
 
 import { Navbar } from '@/components/Navbar';
+import { RampSubsiteNav } from '@/components/RampSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
