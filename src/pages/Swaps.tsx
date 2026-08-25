@@ -33,8 +33,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-type Aggregator = 'trocador' | 'exolix';
-
 // Popular coins with preferred networks - XMR FIRST
 // Using exact ticker/network values from Trocador API
 const TROCADOR_POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
@@ -48,20 +46,6 @@ const TROCADOR_POPULAR_COINS: { ticker: string; network: string; label: string }
   { ticker: 'sol', network: 'Mainnet', label: 'Solana' },
   { ticker: 'usdc', network: 'ERC20', label: 'USD Coin' },
   { ticker: 'zec', network: 'Mainnet', label: 'Zcash' },
-];
-
-// Exolix popular coins (different network naming)
-const EXOLIX_POPULAR_COINS: { ticker: string; network: string; label: string }[] = [
-  { ticker: 'xmr', network: 'XMR', label: 'Monero' },
-  { ticker: 'btc', network: 'BTC', label: 'Bitcoin' },
-  { ticker: 'eth', network: 'ETH', label: 'Ethereum' },
-  { ticker: 'usdt', network: 'ETH', label: 'Tether' },
-  { ticker: 'ltc', network: 'LTC', label: 'Litecoin' },
-  { ticker: 'doge', network: 'DOGE', label: 'Dogecoin' },
-  { ticker: 'bnb', network: 'BSC', label: 'Binance Coin' },
-  { ticker: 'sol', network: 'SOL', label: 'Solana' },
-  { ticker: 'usdc', network: 'ETH', label: 'USD Coin' },
-  { ticker: 'zec', network: 'ZEC', label: 'Zcash' },
 ];
 
 const PRIVACY_COINS = ['xmr', 'zec', 'dash'];
@@ -88,15 +72,6 @@ interface RateProvider {
   insurance: number;
   provider_logo?: string;
   USD_total_cost_percentage?: string;
-}
-
-interface ExolixRate {
-  fromAmount: number;
-  toAmount: number;
-  rate: number;
-  minAmount: number;
-  maxAmount: number;
-  message?: string;
 }
 
 interface TradeResponse {
@@ -130,9 +105,7 @@ const Swaps = () => {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-  const [aggregator, setAggregator] = useState<Aggregator>('trocador');
   const [coins, setCoins] = useState<Coin[]>([]);
-  const [exolixCoins, setExolixCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
   const [fromCoin, setFromCoin] = useState('');
   const [fromNetwork, setFromNetwork] = useState('');
@@ -144,7 +117,6 @@ const Swaps = () => {
   const [refundAddress, setRefundAddress] = useState('');
   
   const [rates, setRates] = useState<RateProvider[]>([]);
-  const [exolixRate, setExolixRate] = useState<ExolixRate | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<RateProvider | null>(null);
   const [loadingRates, setLoadingRates] = useState(false);
   const [trade, setTrade] = useState<TradeResponse | null>(null);
@@ -279,11 +251,9 @@ const Swaps = () => {
   }, [swapHistory]);
 
   const TROCADOR_CACHE_KEY = 'trocador_coins_cache';
-  const EXOLIX_CACHE_KEY = 'exolix_coins_cache';
   const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
-  // Get the current aggregator's popular coins list
-  const getPopularCoins = () => aggregator === 'exolix' ? EXOLIX_POPULAR_COINS : TROCADOR_POPULAR_COINS;
+  const getPopularCoins = () => TROCADOR_POPULAR_COINS;
 
   const fetchCoins = async () => {
     // Check localStorage cache first
@@ -364,112 +334,6 @@ const Swaps = () => {
     setLoading(false);
   };
 
-  // Fetch Exolix coins from cached database table
-  const fetchExolixCoins = async () => {
-    // Check localStorage cache first
-    try {
-      const cached = localStorage.getItem(EXOLIX_CACHE_KEY);
-      if (cached) {
-        const { coins: cachedCoins, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_DURATION_MS && cachedCoins?.length > 0) {
-          console.log('Using cached Exolix coins:', cachedCoins.length);
-          setExolixCoins(cachedCoins);
-          return;
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to read Exolix coins cache:', e);
-    }
-
-    try {
-      // First try to fetch from cached database table
-      const { data: dbCoins, error: dbError } = await supabase
-        .from('exolix_coins')
-        .select('*')
-        .order('ticker');
-      
-      if (!dbError && dbCoins && dbCoins.length > 0) {
-        const mapped: Coin[] = dbCoins.map((c: { id: string; ticker: string; name: string; network: string; memo: boolean; image: string | null }) => ({
-          id: c.id,
-          ticker: c.ticker,
-          name: c.name,
-          network: c.network,
-          memo: c.memo,
-          image: c.image,
-          minimum: 0,
-          maximum: 999999,
-        }));
-        
-        console.log('Loaded Exolix coins from database:', mapped.length);
-        setExolixCoins(mapped);
-        
-        // Cache to localStorage
-        try {
-          localStorage.setItem(EXOLIX_CACHE_KEY, JSON.stringify({
-            coins: mapped,
-            timestamp: Date.now()
-          }));
-        } catch (e) {
-          console.warn('Failed to cache Exolix coins:', e);
-        }
-        return;
-      }
-      
-      // Fallback: Fetch directly from API if database is empty
-      console.log('No cached Exolix coins in DB, fetching from API...');
-      const { data, error } = await supabase.functions.invoke('exolix-api', {
-        body: { action: 'currencies' },
-      });
-      
-      if (error) throw error;
-      
-      const currencies = data?.data || [];
-      const mapped: Coin[] = [];
-      
-      currencies.forEach((c: { code: string; name: string; icon: string; networks?: Array<{ network: string; memoNeeded: boolean }> }) => {
-        const networks = c.networks || [{ network: c.code, memoNeeded: false }];
-        networks.forEach((n: { network: string; memoNeeded: boolean }) => {
-          mapped.push({
-            id: `${c.code}-${n.network}`,
-            ticker: c.code.toLowerCase(),
-            name: c.name,
-            network: n.network,
-            memo: n.memoNeeded,
-            image: c.icon,
-            minimum: 0,
-            maximum: 999999,
-          });
-        });
-      });
-      
-      setExolixCoins(mapped);
-      
-      // Cache to localStorage
-      try {
-        localStorage.setItem(EXOLIX_CACHE_KEY, JSON.stringify({
-          coins: mapped,
-          timestamp: Date.now()
-        }));
-      } catch (e) {
-        console.warn('Failed to cache Exolix coins:', e);
-      }
-    } catch (error) {
-      console.error('Error fetching Exolix coins:', error);
-    }
-  };
-
-  // Fetch Exolix coins when switching to Exolix or on mount
-  useEffect(() => {
-    if (aggregator === 'exolix' && exolixCoins.length === 0) {
-      fetchExolixCoins();
-    }
-  }, [aggregator]);
-  
-  // Pre-fetch Exolix coins on initial load
-  useEffect(() => {
-    fetchExolixCoins();
-  }, []);
-
   const syncCoins = async () => {
     setLoading(true);
     try {
@@ -521,8 +385,7 @@ const Swaps = () => {
     }
   };
 
-  // Get active coins based on aggregator
-  const getActiveCoins = () => aggregator === 'exolix' ? exolixCoins : coins;
+  const getActiveCoins = () => coins;
 
   const getUniqueCoins = () => {
     const activeCoins = getActiveCoins();
@@ -594,7 +457,6 @@ const Swaps = () => {
       setFromNetwork('');
     }
     setRates([]);
-    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
   };
@@ -615,26 +477,12 @@ const Swaps = () => {
       setToNetwork('');
     }
     setRates([]);
-    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
   };
 
-  // Handle aggregator change
-  const handleAggregatorChange = (newAggregator: string) => {
-    setAggregator(newAggregator as Aggregator);
-    // Reset selections when switching aggregators
-    setFromCoin('');
-    setFromNetwork('');
-    setToCoin('');
-    setToNetwork('');
-    setAmount('');
-    setRates([]);
-    setExolixRate(null);
-    setSelectedProvider(null);
-    setHasFetchedRates(false);
-    setTrade(null);
-  };
+
+
 
 
   const fetchRates = async () => {
@@ -645,30 +493,12 @@ const Swaps = () => {
 
     setLoadingRates(true);
     setRates([]);
-    setExolixRate(null);
     setSelectedProvider(null);
     setHasFetchedRates(false);
 
     try {
-      if (aggregator === 'exolix') {
-        // Exolix API
-        const { data, error } = await supabase.functions.invoke('exolix-api', {
-          body: {
-            action: 'rate',
-            coinFrom: fromCoin.toUpperCase(),
-            networkFrom: fromNetwork,
-            coinTo: toCoin.toUpperCase(),
-            networkTo: toNetwork,
-            amount: amount,
-            rateType: 'float',
-          },
-        });
+      {
 
-        if (error) throw error;
-        if (data.error) throw new Error(data.error);
-
-        setExolixRate(data);
-      } else {
         // Trocador API
         const { data, error } = await supabase.functions.invoke('trocador-new-rate', {
           body: {
@@ -702,13 +532,8 @@ const Swaps = () => {
   };
 
   const executeTrade = async () => {
-    if (aggregator === 'trocador' && !selectedProvider) {
+    if (!selectedProvider) {
       toast({ title: 'Missing fields', description: 'Please select a provider', variant: 'destructive' });
-      return;
-    }
-    
-    if (aggregator === 'exolix' && !exolixRate) {
-      toast({ title: 'Missing rate', description: 'Please get a rate first', variant: 'destructive' });
       return;
     }
 
@@ -724,59 +549,9 @@ const Swaps = () => {
 
     setExecutingTrade(true);
     try {
-      if (aggregator === 'exolix') {
-        // Exolix trade
-        const { data, error } = await supabase.functions.invoke('exolix-api', {
-          body: {
-            action: 'create_transaction',
-            coinFrom: fromCoin.toUpperCase(),
-            networkFrom: fromNetwork,
-            coinTo: toCoin.toUpperCase(),
-            networkTo: toNetwork,
-            amount: amount,
-            withdrawalAddress: receiveAddress,
-            withdrawalExtraId: addressMemo || '',
-            refundAddress: refundAddress || '',
-            rateType: 'float',
-          },
-        });
+      {
 
-        if (error) throw error;
-        if (data.error) throw new Error(data.error);
 
-        const tradeData: TradeResponse = {
-          trade_id: data.id,
-          address: data.depositAddress,
-          address_memo: data.depositExtraId || undefined,
-          status: data.status,
-          amount_from: String(data.amount),
-          amount_to: String(data.amountTo),
-        };
-
-        setTrade(tradeData);
-
-        // Save to history (only when signed-in; anonymous swaps stay in localStorage)
-        if (user?.id) {
-          await supabase.from('swap_history').insert({
-            trade_id: data.id,
-            from_coin: fromCoin,
-            from_network: fromNetwork,
-            to_coin: toCoin,
-            to_network: toNetwork,
-            amount: amount,
-            receive_address: receiveAddress,
-            provider: 'Exolix',
-            provider_address: data.depositAddress,
-            provider_memo: data.depositExtraId,
-            status: data.status,
-            user_id: user.id,
-          });
-        }
-
-        saveTradeIdToLocal(data.id);
-        fetchSwapHistory();
-        toast({ title: 'Trade created!', description: `Send ${amount} ${fromCoin.toUpperCase()} to the address shown` });
-      } else {
         // Trocador trade
         const { data, error } = await supabase.functions.invoke('trocador-new-trade', {
           body: {
@@ -869,7 +644,6 @@ const Swaps = () => {
           />
 
 
-          {/* Aggregator selection removed — Trocador only */}
 
 
           {/* Fiat Gateway Banner */}
@@ -1192,60 +966,14 @@ const Swaps = () => {
               {/* Rates & Execute */}
               <Card>
                 <CardHeader>
-                  <CardTitle>{aggregator === 'exolix' ? 'Exchange Rate' : 'Available Providers'}</CardTitle>
+                  <CardTitle>Available Providers</CardTitle>
                   <CardDescription>
-                    {aggregator === 'exolix' 
-                      ? (exolixRate ? 'Rate fetched from Exolix' : 'Enter swap details to see rate')
-                      : (rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates')
-                    }
+                    {rates.length > 0 ? `${rates.length} providers found` : 'Enter swap details to see rates'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {aggregator === 'exolix' ? (
-                    // Exolix single rate display
-                    !exolixRate ? (
-                      <div className="text-center text-muted-foreground py-8">
-                        <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                        {hasFetchedRates ? (
-                          <>
-                            <p className="font-medium text-foreground">Rate not available</p>
-                            <p className="text-sm mt-1">{exolixRate === null && hasFetchedRates ? 'This pair may not be supported.' : 'Enter details to get rate.'}</p>
-                          </>
-                        ) : (
-                          <p>No rate yet</p>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        <div className="p-4 rounded-lg border border-primary bg-primary/5">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium">Exolix</span>
-                            <Badge variant="outline" className="text-xs">No KYC</Badge>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">You receive:</span>
-                            <span className="font-semibold text-primary">{exolixRate.toAmount} {toCoin.toUpperCase()}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Rate: 1 {fromCoin.toUpperCase()} = {exolixRate.rate.toFixed(6)} {toCoin.toUpperCase()}
-                          </div>
-                        </div>
-                        <Button
-                          className="w-full"
-                          onClick={executeTrade}
-                          disabled={!receiveAddress || executingTrade}
-                        >
-                          {executingTrade ? (
-                            <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Creating trade...</>
-                          ) : (
-                            <>Execute Swap with Exolix<ExternalLink className="h-4 w-4 ml-2" /></>
-                          )}
-                        </Button>
-                      </>
-                    )
-                  ) : (
-                    // Trocador multi-provider display
-                    rates.length === 0 ? (
+                  {rates.length === 0 ? (
+
                       <div className="text-center text-muted-foreground py-8">
                         <ArrowRightLeft className="h-12 w-12 mx-auto mb-2 opacity-20" />
                         {hasFetchedRates ? (
@@ -1296,8 +1024,8 @@ const Swaps = () => {
                           )}
                         </Button>
                       </>
-                    )
-                  )}
+                    )}
+
                 </CardContent>
               </Card>
             </div>
@@ -1418,10 +1146,8 @@ const Swaps = () => {
           {/* Info Section */}
           <div className="mt-8 space-y-6">
             <div className="text-center text-sm text-muted-foreground">
-              <p>Powered by {aggregator === 'exolix' 
-                ? <a href="https://exolix.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Exolix</a>
-                : <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a>
-              } exchange {aggregator === 'trocador' ? 'aggregator' : ''}</p>
+              <p>Powered by <a href="https://trocador.app/?ref=mkaShKWUZA" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Trocador</a> exchange aggregator</p>
+
               <p className="mt-1">All swaps are non-custodial and anonymous</p>
             </div>
 

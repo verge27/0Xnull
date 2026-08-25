@@ -382,36 +382,6 @@ export type Database = {
         }
         Relationships: []
       }
-      exolix_coins: {
-        Row: {
-          id: string
-          image: string | null
-          memo: boolean | null
-          name: string
-          network: string
-          ticker: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          image?: string | null
-          memo?: boolean | null
-          name: string
-          network: string
-          ticker: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          image?: string | null
-          memo?: boolean | null
-          name?: string
-          network?: string
-          ticker?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       fetch_runs: {
         Row: {
           blocked: number | null
