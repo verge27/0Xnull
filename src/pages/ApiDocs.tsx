@@ -19,7 +19,7 @@ const ApiDocs = () => {
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4">0xNull API Documentation</h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Permissionless prediction markets with Monero settlement
+            TXN-funded prediction markets backed by Monero
           </p>
           
           <div className="flex flex-wrap gap-3">
@@ -29,7 +29,7 @@ const ApiDocs = () => {
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <CircleDollarSign className="w-4 h-4 mr-2" />
-              Settlement: Monero (XMR)
+              Settlement: 0xn_ token ledger
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <Zap className="w-4 h-4 mr-2" />
@@ -37,7 +37,7 @@ const ApiDocs = () => {
             </Badge>
             <Badge variant="outline" className="text-sm py-1 px-3">
               <Shield className="w-4 h-4 mr-2" />
-              Auth: None — permissionless
+              Auth: X-TXN-Token
             </Badge>
           </div>
         </div>
@@ -53,37 +53,28 @@ const ApiDocs = () => {
           <CardContent>
             <CodeBlock
               language="python"
-              code={`import requests
+              code={`import requests, uuid
 
 BASE = "https://0xnull.io/api"
 
-# 1. Get upcoming sports events
-events = requests.get(f"{BASE}/sports/events?sport=premier_league").json()
+# 1. Create or restore one 0xn_ token, then fund it once
+token = requests.post(f"{BASE}/token/create").json()["token"]
 
-# 2. Get odds with best price aggregation
-odds = requests.get(f"{BASE}/sports/odds/premier_league").json()
+# 2. Read the current seeded catalogue
+markets = requests.get(f"{BASE}/predictions/markets").json()["markets"]
 
-# 3. Create a prediction market
-market = requests.post(f"{BASE}/predictions/markets", json={
-    "market_id": "epl_liverpool_win_2024",
-    "title": "Liverpool to win vs Man City",
-    "oracle_type": "sports",
-    "oracle_asset": "event_id_here",
-    "oracle_condition": "Liverpool",
-    "resolution_time": 1703462400
-}).json()
-
-# 4. Place a bet
-bet = requests.post(f"{BASE}/predictions/bet", json={
-    "market_id": "epl_liverpool_win_2024",
+# 3. Reserve a $1 position from that token balance
+bet = requests.post(f"{BASE}/predictions/v2/bets", headers={
+    "X-TXN-Token": token,
+    "Idempotency-Key": str(uuid.uuid4()),
+}, json={
+    "market_id": markets[0]["market_id"],
     "side": "YES",
-    "amount_usd": 100,
-    "payout_address": "4..."  # Your XMR address
+    "amount_cents": 100,
 }).json()
 
-# Returns deposit address — send XMR to confirm bet
-print(bet["deposit_address"])
-print(bet["amount_xmr"])`}
+# No market wallet is created; the stake is already reserved
+print(bet["status"], bet["funding"])`}
             />
           </CardContent>
         </Card>
@@ -98,10 +89,10 @@ print(bet["amount_xmr"])`}
               <h3 className="font-semibold mb-3">How Betting Works</h3>
               <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
                 <li><strong className="text-foreground">Create or find a market</strong> — Markets are prediction questions with YES/NO outcomes</li>
-                <li><strong className="text-foreground">Place a bet</strong> — You get a unique XMR deposit address</li>
-                <li><strong className="text-foreground">Send XMR</strong> — Your bet is confirmed when deposit is received</li>
+                <li><strong className="text-foreground">Fund one token</strong> — Reuse the same 0xn_ balance across markets</li>
+                <li><strong className="text-foreground">Place a bet</strong> — The stake moves from available to reserved immediately</li>
                 <li><strong className="text-foreground">Market resolves</strong> — Oracle determines outcome automatically</li>
-                <li><strong className="text-foreground">Payouts processed</strong> — Winners split losers' pool proportionally</li>
+                <li><strong className="text-foreground">Settlement posts</strong> — Winnings or refunds credit the same token automatically</li>
               </ol>
             </div>
 
@@ -142,9 +133,8 @@ print(bet["amount_xmr"])`}
 
         {/* API Reference */}
         <Tabs defaultValue="predictions" className="mb-8">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="predictions">Predictions</TabsTrigger>
-            <TabsTrigger value="multibets">Multibets</TabsTrigger>
             <TabsTrigger value="sports">Sports</TabsTrigger>
             <TabsTrigger value="esports">Esports</TabsTrigger>
             <TabsTrigger value="jobs">Jobs</TabsTrigger>
@@ -172,19 +162,19 @@ print(bet["amount_xmr"])`}
                     code={`{
   "markets": [
     {
-      "market_id": "btc_100k_dec2024",
-      "title": "BTC above $100k by Dec 31",
-      "description": "Will Bitcoin exceed $100,000 USD?",
-      "oracle_type": "price",
-      "oracle_asset": "BTC",
-      "oracle_condition": "above",
-      "oracle_value": 100000,
-      "resolution_time": 1735689600,
+      "market_id": "sports_event_id",
+      "title": "Home Team wins vs Away Team",
+      "oracle_type": "sports",
+      "odds_sport_key": "soccer_epl",
+      "commence_time": 1787688000,
       "resolved": 0,
       "outcome": null,
-      "yes_pool_xmr": 2.5,
-      "no_pool_xmr": 1.8,
-      "created_at": 1703462400
+      "yes_pool_cents": 315,
+      "no_pool_cents": 185,
+      "treasury_yes_cents": 315,
+      "treasury_no_cents": 185,
+      "bookmaker_count": 8,
+      "funding_model": "txn_balance"
     }
   ]
 }`}
@@ -199,20 +189,13 @@ print(bet["amount_xmr"])`}
                     language="json"
                     className="mt-3"
                     code={`{
-  "market_id": "btc_100k_dec2024",
-  "title": "BTC above $100k by Dec 31",
-  "yes_pool_xmr": 2.5,
-  "no_pool_xmr": 1.8,
-  "pool_address": "4...",
-  "view_key": "...",
-  "bets": [
-    {
-      "side": "YES",
-      "amount_xmr": 0.5,
-      "status": "confirmed",
-      "created_at": 1703462400
-    }
-  ]
+  "market_id": "sports_event_id",
+  "title": "Home Team wins vs Away Team",
+  "yes_pool_cents": 315,
+  "no_pool_cents": 185,
+  "funding_model": "txn_balance",
+  "pool_address": null,
+  "view_key": null
 }`}
                   />
                 </div>
@@ -291,17 +274,17 @@ print(bet["amount_xmr"])`}
                 {/* Place Bet */}
                 <div>
                   <h3 className="font-semibold mb-2">Place Bet</h3>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/bet</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">POST /api/predictions/v2/bets</code>
+                  <p className="mt-2 text-sm text-muted-foreground">Headers: <code className="bg-muted px-1 rounded">X-TXN-Token</code> and <code className="bg-muted px-1 rounded">Idempotency-Key</code></p>
                   <div className="grid md:grid-cols-2 gap-3 mt-3">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Request:</p>
                       <CodeBlock
                         language="json"
                         code={`{
-  "market_id": "btc_100k_dec2024",
+  "market_id": "sports_event_id",
   "side": "YES",
-  "amount_usd": 100,
-  "payout_address": "4..."
+  "amount_cents": 100
 }`}
                       />
                     </div>
@@ -311,16 +294,13 @@ print(bet["amount_xmr"])`}
                         language="json"
                         code={`{
   "bet_id": "bet_a1b2c3d4",
-  "market_id": "btc_100k_dec2024",
+  "market_id": "sports_event_id",
   "side": "YES",
-  "amount_usd": 100,
-  "amount_xmr": 0.625,
-  "xmr_price": 160.0,
-  "deposit_address": "8...",
-  "address_index": 5,
-  "view_key": "...",
-  "expires_at": "2024-12-25T12:00:00Z",
-  "status": "awaiting_deposit"
+  "amount_cents": 100,
+  "amount_usd": 1.0,
+  "payout_cents": null,
+  "status": "reserved",
+  "funding": "txn_balance"
 }`}
                       />
                     </div>
@@ -332,20 +312,20 @@ print(bet["amount_xmr"])`}
                   <h3 className="font-semibold">Other Endpoints</h3>
                   <div className="grid gap-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/bet/{'{bet_id}'}/status</code>
-                      <span className="text-muted-foreground">— Status: awaiting_deposit, confirmed, paid</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/v2/bets</code>
+                      <span className="text-muted-foreground">— Token's positions and reserved balance</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">POST /api/predictions/bet/{'{bet_id}'}/payout-address</code>
-                      <span className="text-muted-foreground">— Update payout address</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/v2/bets/{'{bet_id}'}</code>
+                      <span className="text-muted-foreground">— One token-authorised position</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/pool/{'{market_id}'}</code>
-                      <span className="text-muted-foreground">— Pool balances + view key</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/v2/markets/{'{market_id}'}/pool</code>
+                      <span className="text-muted-foreground">— Dollar liquidity; wallet and view key are null</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/payouts</code>
-                      <span className="text-muted-foreground">— Payout history</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">GET /api/predictions/v2/payouts</code>
+                      <span className="text-muted-foreground">— Public account-free settlement history</span>
                     </div>
                   </div>
                 </div>
@@ -914,9 +894,9 @@ while True:
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-2">Pool Verification</h3>
+              <h3 className="font-semibold mb-2">Market verification</h3>
               <p className="text-muted-foreground text-sm">
-                Every pool exposes its view key. Import address + view key into any Monero wallet to verify deposits independently.
+                v2 markets expose dollar pool totals and retain the bookmaker-count and odds snapshot used for treasury seeding. They do not create a Monero address or view key. Legacy on-chain payouts remain linked from the payout archive.
               </p>
             </div>
             

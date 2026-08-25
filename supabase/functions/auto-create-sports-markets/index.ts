@@ -319,6 +319,10 @@ async function createMarket(event: SportsEvent): Promise<boolean> {
     oracle_condition: 'match_winner', // Resolution tracks home/away winner
     oracle_value: 0,
     resolution_time: resolutionTime,
+    commence_time: event.commence_timestamp,
+    odds_sport_key: event.sport_key,
+    event_home_team: event.home_team,
+    event_away_team: event.away_team,
   };
 
   try {

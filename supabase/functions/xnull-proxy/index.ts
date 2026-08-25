@@ -350,8 +350,6 @@ serve(async (req) => {
       } else {
         const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
         if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
-      if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
-      if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
         if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
         if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
         fetchOptions.headers = reqHeaders;
@@ -365,6 +363,8 @@ serve(async (req) => {
     } else {
       const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
       if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
+      if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
+      if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
       fetchOptions.headers = reqHeaders;
     }
 

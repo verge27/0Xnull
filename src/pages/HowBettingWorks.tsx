@@ -28,8 +28,9 @@ export default function HowBettingWorks() {
   const totalPool = newYesPool + newNoPool;
   const winningPool = selectedSide === 'yes' ? newYesPool : newNoPool;
   
-  const poolAfterFee = totalPool * 0.996;
-  const payout = winningPool > 0 ? (bet / winningPool) * poolAfterFee : 0;
+  const losingPool = selectedSide === 'yes' ? newNoPool : newYesPool;
+  const distributableProfit = losingPool * 0.996;
+  const payout = winningPool > 0 ? bet + (bet / winningPool) * distributableProfit : 0;
   const profit = payout - bet;
   const roi = bet > 0 ? (profit / bet) * 100 : 0;
   const impliedOdds = winningPool > 0 ? totalPool / winningPool : 0;
@@ -70,7 +71,7 @@ export default function HowBettingWorks() {
                 <li>All bets go into a shared pool</li>
                 <li>Odds are determined by the ratio of money on each side</li>
                 <li>Winners split the total pool proportionally to their stake</li>
-                <li>The house takes a flat <strong className="text-foreground">0.4% fee on winnings only</strong> — no fee on losses, refunds or no-contest</li>
+                <li>The 0.4% fee is withheld from distributed winnings only — no fee on losses, draws or refunds</li>
               </ul>
             </CardContent>
           </Card>
@@ -86,15 +87,16 @@ export default function HowBettingWorks() {
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>A market is created: "Will Newcastle United win?"</li>
                   <li>Two pools exist: YES pool and NO pool</li>
-                  <li>Both start at 0</li>
+                  <li>Each eligible market starts with $4 split by the median no-vig probability across current bookmakers</li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">2. Betting Phase</h3>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Users bet XMR on YES or NO</li>
+                  <li>Users reserve dollars already held by their 0xn_ token on YES or NO</li>
                   <li>The pools grow as bets come in</li>
                   <li>Implied odds update in real-time based on pool ratios</li>
+                  <li>No market wallet, deposit address or view key is created</li>
                 </ul>
               </div>
               <div>
@@ -102,7 +104,7 @@ export default function HowBettingWorks() {
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>Oracle checks the result (The Odds API, CoinGecko, etc.)</li>
                   <li>Winning side splits the entire pool</li>
-                  <li>0.4% fee is deducted</li>
+                  <li>Winnings or refunds credit the same 0xn_ token automatically</li>
                 </ul>
               </div>
             </CardContent>
@@ -165,10 +167,10 @@ export default function HowBettingWorks() {
                   <h4 className="font-semibold text-emerald-400 mb-2">Scenario A: Makhachev Wins (YES)</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>Total Pool: $110</li>
-                    <li>Fee (0.4%): $0.44</li>
-                    <li>Pool After Fee: $109.56</li>
-                    <li className="text-emerald-400 font-semibold">Alice's Payout: $109.56</li>
-                    <li className="text-emerald-400">Alice's Profit: +$99.56 (995.6% ROI)</li>
+                    <li>Fee (0.4% of losing pool): $0.40</li>
+                    <li>Distributable profit: $99.60</li>
+                    <li className="text-emerald-400 font-semibold">Alice's Payout: $109.60</li>
+                    <li className="text-emerald-400">Alice's Profit: +$99.60 (996% ROI)</li>
                     <li className="text-red-400">Bob's Loss: -$100</li>
                   </ul>
                 </div>
@@ -176,10 +178,10 @@ export default function HowBettingWorks() {
                   <h4 className="font-semibold text-red-400 mb-2">Scenario B: Makhachev Loses (NO)</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>Total Pool: $110</li>
-                    <li>Fee (0.4%): $0.44</li>
-                    <li>Pool After Fee: $109.56</li>
-                    <li className="text-red-400 font-semibold">Bob's Payout: $109.56</li>
-                    <li className="text-red-400">Bob's Profit: +$9.56 (9.56% ROI)</li>
+                    <li>Fee (0.4% of losing pool): $0.04</li>
+                    <li>Distributable profit: $9.96</li>
+                    <li className="text-red-400 font-semibold">Bob's Payout: $109.96</li>
+                    <li className="text-red-400">Bob's Profit: +$9.96 (9.96% ROI)</li>
                     <li className="text-emerald-400">Alice's Loss: -$10</li>
                   </ul>
                 </div>
@@ -382,7 +384,7 @@ export default function HowBettingWorks() {
                 <TableBody>
                   <TableRow>
                     <TableCell className="text-red-400">House sets odds (10-15% vig)</TableCell>
-                    <TableCell className="text-emerald-400">Market sets odds (0.4% fee)</TableCell>
+                    <TableCell className="text-emerald-400">Book consensus opens; pool flow moves odds</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">House can refuse bets</TableCell>
@@ -390,20 +392,20 @@ export default function HowBettingWorks() {
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">House profits from losers</TableCell>
-                    <TableCell className="text-emerald-400">House only takes flat fee</TableCell>
+                    <TableCell className="text-emerald-400">Treasury seeds both sides; fees stay separate</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">Odds can be manipulated</TableCell>
-                    <TableCell className="text-emerald-400">Odds reflect actual money</TableCell>
+                    <TableCell className="text-emerald-400">Odds and liquidity are visible in dollars</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="text-red-400">KYC required</TableCell>
-                    <TableCell className="text-emerald-400">Anonymous (XMR)</TableCell>
+                    <TableCell className="text-emerald-400">Pseudonymous 0xn_ token</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
               <p className="text-muted-foreground mt-4">
-                <strong className="text-foreground">The house doesn't care who wins.</strong> 0xNull makes 0.4% regardless of outcome. No incentive to manipulate.
+                Treasury positions are opened from a stored bookmaker-consensus snapshot. The fee ledger is separate from treasury trading results.
               </p>
             </CardContent>
           </Card>
@@ -418,14 +420,14 @@ export default function HowBettingWorks() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 font-mono text-center">
-                winner_payout = (winner_stake / total_winning_pool) × (total_pool × 0.996)
+                winner_payout = winner_stake + (winner_share × losing_pool × 0.996)
               </div>
               <p className="text-muted-foreground">Where:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li><strong className="text-foreground">winner_stake</strong> = how much you bet</li>
                 <li><strong className="text-foreground">total_winning_pool</strong> = all bets on the winning side</li>
-                <li><strong className="text-foreground">total_pool</strong> = all bets combined</li>
-                <li><strong className="text-foreground">0.996</strong> = 1 - 0.4% fee</li>
+                <li><strong className="text-foreground">losing_pool</strong> = stakes on the losing side available for distribution</li>
+                <li><strong className="text-foreground">0.996</strong> = losing pool after the 0.4% fee on distributed winnings</li>
               </ul>
             </CardContent>
           </Card>
@@ -524,8 +526,8 @@ export default function HowBettingWorks() {
                     </div>
                     <div className="border-t border-border pt-3 mt-3">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Pool After Fee (0.4%):</span>
-                        <span className="font-mono">${poolAfterFee.toFixed(2)}</span>
+                        <span className="text-muted-foreground">Profit Pool After Fee:</span>
+                        <span className="font-mono">${distributableProfit.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between mt-2">
                         <span className="font-semibold">Your Payout:</span>
@@ -569,7 +571,7 @@ export default function HowBettingWorks() {
                 <TableBody>
                   <TableRow>
                     <TableCell>Fee</TableCell>
-                    <TableCell>0.4% flat</TableCell>
+                    <TableCell>0.4% of distributed winnings</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Odds</TableCell>
@@ -577,7 +579,7 @@ export default function HowBettingWorks() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Settlement</TableCell>
-                    <TableCell>XMR (Monero)</TableCell>
+                    <TableCell>Same 0xn_ token balance</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Resolution</TableCell>
@@ -589,7 +591,7 @@ export default function HowBettingWorks() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Maximum bet</TableCell>
-                    <TableCell>None</TableCell>
+                    <TableCell>$10,000</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>KYC</TableCell>
