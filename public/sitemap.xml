@@ -259,12 +259,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/cs2-skin-gambling-guide</loc>
-    <lastmod>2026-08-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://0xnull.io/blog/flash-loans-explained-guide</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -272,7 +266,13 @@
   </url>
   <url>
     <loc>https://0xnull.io/blog/anonymous-vps-hosting-crypto-guide</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/cs2-skin-gambling-guide</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -307,8 +307,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/crypto-betting-guide</loc>
-    <lastmod>2026-08-24</lastmod>
+    <loc>https://0xnull.io/blog/how-prediction-markets-work</loc>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -319,37 +319,19 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/blog/esports-betting-crypto-guide</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/blog/crypto-sports-betting-anonymous</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://0xnull.io/blog/how-prediction-markets-work</loc>
-    <lastmod>2026-08-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/esports-betting-crypto-guide</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/tor-browser-crypto-guide</loc>
-    <lastmod>2026-08-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/grapheneos-setup-guide</loc>
-    <lastmod>2026-08-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://0xnull.io/blog/polymarket-alternatives-2026</loc>
+    <loc>https://0xnull.io/blog/crypto-betting-guide</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -361,8 +343,26 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://0xnull.io/blog/polymarket-alternatives-2026</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://0xnull.io/blog/how-to-buy-monero-2026</loc>
     <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/grapheneos-setup-guide</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://0xnull.io/blog/tor-browser-crypto-guide</loc>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
