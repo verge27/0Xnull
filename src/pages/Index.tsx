@@ -94,7 +94,7 @@ const Index = () => {
               <Link
                 key={panel.to}
                 to={panel.to}
-                className="group flex aspect-square sm:aspect-[4/3] lg:aspect-[3/2] flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 p-3 text-center backdrop-blur shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.25)] transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-card/80 hover:shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.4)] active:translate-y-0 active:scale-[0.98] md:p-5"
+                className="group flex aspect-square sm:aspect-[4/3] lg:aspect-[2/1] flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 p-3 text-center backdrop-blur shadow-[0_4px_20px_-8px_hsl(var(--primary)/0.25)] transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-card/80 hover:shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.4)] active:translate-y-0 active:scale-[0.98] md:p-5"
               >
                 <div className="shrink-0">{panel.icon}</div>
                 <h2 className="text-sm md:text-base font-semibold leading-tight">{panel.title}</h2>
