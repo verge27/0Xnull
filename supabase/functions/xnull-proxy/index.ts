@@ -29,6 +29,46 @@ const ALLOWED_PATH_PREFIXES = [
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PUT'];
 
+// The upstream API sometimes sends a Content-Length that far exceeds the bytes it
+// actually writes, so Deno aborts with "error reading a body from connection".
+// Read the stream manually and keep whatever arrived: if it parses as JSON it is complete.
+async function readBodyTolerant(res: Response): Promise<string> {
+  if (!res.body) return '';
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  let truncated = false;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        total += value.byteLength;
+      }
+    }
+  } catch (e) {
+    truncated = true;
+    console.warn(`[xnull-proxy] Upstream stream ended early after ${total} bytes: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  const buf = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    buf.set(c, offset);
+    offset += c.byteLength;
+  }
+  const text = new TextDecoder().decode(buf);
+  if (truncated) {
+    // Only usable if the payload is actually complete JSON
+    try {
+      JSON.parse(text);
+    } catch {
+      throw new Error('Upstream connection closed before a complete response was received');
+    }
+  }
+  return text;
+}
+
 const isAllowedPath = (path: string): boolean => {
   if (!path.startsWith('/api/')) return false;
   if (path.includes('..')) return false;
@@ -98,7 +138,7 @@ serve(async (req) => {
           });
         }
 
-        const text = await upstreamRes.text();
+        const text = await readBodyTolerant(upstreamRes);
         try {
           const pool = JSON.parse(text);
           return new Response(JSON.stringify({ exists: true, pool }), {
@@ -355,7 +395,7 @@ serve(async (req) => {
 
     let responseText: string;
     try {
-      responseText = await response.text();
+      responseText = await readBodyTolerant(response);
     } catch (e) {
       // Upstream dropped the connection mid-body
       return unavailableResponse(e instanceof Error ? e.message : String(e));
