@@ -84,6 +84,7 @@ const Work = () => {
   const [payType, setPayType] = useState<string>("all");
   const [sourceId, setSourceId] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [listingType, setListingType] = useState<ListingType>("hiring");
 
   useEffect(() => {
     let cancelled = false;
