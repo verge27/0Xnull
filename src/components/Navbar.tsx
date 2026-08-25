@@ -1,18 +1,17 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel, Landmark, Terminal, Globe, FileText, Briefcase, X, ArrowLeftRight } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrivateKeyAuth } from '@/hooks/usePrivateKeyAuth';
 import { useMultibetSlip } from '@/hooks/useMultibetSlip';
 import { TokenBadge } from '@/components/TokenManager';
-import { NavbarIdentitySection, useNavbarIdentity } from '@/components/NavbarIdentity';
+import { useNavbarIdentity } from '@/components/NavbarIdentity';
 import { TokenStatusWidget } from '@/components/TokenStatusWidget';
 
 import { useState, FormEvent, useEffect } from 'react';
@@ -198,99 +197,14 @@ export const Navbar = () => {
 
             </Sheet>
 
-            {/* Desktop Navigation - Reordered: Predictions, AI, Infra, Marketplace */}
-            
-            {/* Predictions Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="hidden md:inline">Predictions</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Esports</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/esports-predictions" className="cursor-pointer">All Esports</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Sports</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/sports-predictions" className="cursor-pointer">All Sports</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/predictions/sports/combat" className="cursor-pointer">Combat</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-muted-foreground">Crypto</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link to="/predictions" className="cursor-pointer">Crypto Markets</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/flash" className="cursor-pointer flex items-center gap-2">
-                  <Zap className="w-3 h-3 text-purple-500" />
-                  Flash (5min)
-                  <span className="text-[10px] bg-purple-500/20 text-purple-400 font-medium px-1.5 py-0.5 rounded ml-auto">NEW</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-muted-foreground">Governance</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link to="/governance-predictions" className="cursor-pointer flex items-center gap-2">
-                  <Gavel className="w-3 h-3 text-amber-500" />
-                  All Governance
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/my-slips" className="cursor-pointer">My Slips</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/payouts" className="cursor-pointer">Payout History</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-            {/* Lending Link */}
+            {/* Desktop Navigation — only destinations not already shown in the homepage panels. */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/lending">
-                <Landmark className="w-4 h-4" />
-                <span className="hidden md:inline">Lending</span>
+              <Link to="/work">
+                <Briefcase className="w-4 h-4" />
+                <span className="hidden md:inline">Work</span>
               </Link>
             </Button>
 
-            {/* Swaps Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <RefreshCw className="w-4 h-4" />
-                  <span className="hidden md:inline">Swaps</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-popover border-border z-50">
-                <DropdownMenuItem asChild>
-                  <Link to="/buy" className="cursor-pointer">Buy (no KYC)</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/swaps" className="cursor-pointer">Swap</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/cashout" className="cursor-pointer">Cash out</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Blog Link */}
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/blog">
-                <BookOpen className="w-4 h-4" />
-                <span className="hidden md:inline">Blog</span>
-              </Link>
-            </Button>
-
-            {/* Docs Link */}
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
               <Link to="/docs">
                 <FileText className="w-4 h-4" />
@@ -298,119 +212,6 @@ export const Navbar = () => {
               </Link>
             </Button>
 
-
-            {/* Free Software Link */}
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/free-software">
-                <Terminal className="w-4 h-4" />
-                <span className="hidden md:inline">Free Software</span>
-              </Link>
-            </Button>
-
-            {/* Companions Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden md:inline">Companions</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuItem asChild>
-                  <Link to="/creators" className="cursor-pointer flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    Browse Creators
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/creator/register" className="cursor-pointer">Become a Creator</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/fan/dashboard" className="cursor-pointer">Fan Dashboard</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Infra Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <Server className="w-4 h-4" />
-                  <span className="hidden md:inline">Infra</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuItem asChild>
-                  <Link to="/ai" className="cursor-pointer">AI Hub</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/voice" className="cursor-pointer">Voice Cloning</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/infra" className="cursor-pointer">Infrastructure Hub</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/vps" className="cursor-pointer">Anonymous VPS</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/phone" className="cursor-pointer">eSIM & Phone</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/work" className="cursor-pointer flex items-center gap-2">
-                    <Briefcase className="w-3 h-3 text-primary" />
-                    Work Paid in XMR
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/external-links" className="cursor-pointer flex items-center gap-2">
-                    <Globe className="w-3 h-3 text-primary" />
-                    External Links
-                  </Link>
-                </DropdownMenuItem>
-                <NavbarIdentitySection 
-                  keys={identity.keys}
-                  onGenerate={identity.generate}
-                  onLogin={identity.login}
-                  onLogout={identity.logout}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Marketplace Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 hidden sm:inline-flex">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span className="hidden md:inline">Marketplace</span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover">
-                <DropdownMenuItem asChild>
-                  <Link to="/browse" className="cursor-pointer">Browse Listings</Link>
-                </DropdownMenuItem>
-                {isAuthenticated && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/sell" className="cursor-pointer">Sell</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/orders" className="cursor-pointer">My Orders</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <NavbarIdentitySection 
-                  keys={identity.keys}
-                  onGenerate={identity.generate}
-                  onLogin={identity.login}
-                  onLogout={identity.logout}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
 
 
             {/* Token Dashboard + Badge */}
