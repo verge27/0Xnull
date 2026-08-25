@@ -14,7 +14,14 @@ export interface StreamInfo {
   viewerCount?: number;
   gameName?: string;
   thumbnailUrl?: string;
+  unavailable?: boolean;
+  reason?: string;
 }
+
+// Channel used when Twitch metadata cannot be fetched (auth/API failure).
+// The player itself still works without our API credentials.
+const FALLBACK_CHANNEL = 'awfdota';
+
 
 interface TwitchStreamEmbedProps {
   selectedGame: string;
