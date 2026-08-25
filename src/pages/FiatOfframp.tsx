@@ -67,6 +67,7 @@ const FiatOfframp = () => {
   const [creatingExchange, setCreatingExchange] = useState(false);
   const [copied, setCopied] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
+  const [payoutError, setPayoutError] = useState<{ title: string; description: string; raw: string } | null>(null);
 
   const getSelectedCryptoDetails = (value: string) => {
     const [ticker, network] = value.split('-');
