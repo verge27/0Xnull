@@ -1,5 +1,4 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, TrendingUp, Bot, Server, ChevronDown, Gamepad2, Trophy, Bitcoin, RefreshCw, Smartphone, Mic, Rocket, Receipt, Wallet, Zap, Sparkles, BookOpen, Gavel, Landmark, Terminal, Globe, FileText, Briefcase, X, ArrowLeftRight } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
