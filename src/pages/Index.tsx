@@ -91,7 +91,7 @@ const Index = () => {
         {/* Header */}
         <section className="container mx-auto px-4 pt-8 pb-5 md:pt-14 md:pb-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">0xNull</h1>
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">0xNull — anonymous services funded in Monero</h1>
             <p className="text-sm md:text-lg text-muted-foreground">
               Anonymous Services, funded in Monero. No accounts, no signup.
             </p>
