@@ -30,6 +30,7 @@ import {
   type QuoteResult,
   type RampSide,
 } from '@/lib/rampRouting';
+import { formatBlockerReasons, logRampEvent } from '@/lib/rampAnalytics';
 
 const HodlHodlSafetyPanel = () => (
   <Card className="bg-card/40 border-border/50">
@@ -51,7 +52,15 @@ const HodlHodlSafetyPanel = () => (
   </Card>
 );
 
-const HodlHodlCard = ({ primary, asset }: { primary: boolean; asset: string }) => (
+const HodlHodlCard = ({
+  primary,
+  asset,
+  onRedirect,
+}: {
+  primary: boolean;
+  asset: string;
+  onRedirect: (target: string) => void;
+}) => (
   <Card className={primary ? 'border-primary/50 bg-card/60' : 'bg-card/40 border-border/50'}>
     <CardHeader>
       <div className="flex flex-wrap items-center gap-2">
@@ -75,12 +84,12 @@ const HodlHodlCard = ({ primary, asset }: { primary: boolean; asset: string }) =
       <HodlHodlSafetyPanel />
       <div className="flex flex-wrap gap-3">
         <Button asChild variant={primary ? 'default' : 'outline'}>
-          <a href={HODL_HODL_URL} target="_blank" rel="noopener noreferrer">
+          <a href={HODL_HODL_URL} target="_blank" rel="noopener noreferrer" onClick={() => onRedirect(HODL_HODL_URL)}>
             {primary ? 'Explore Hodl Hodl' : 'View Hodl Hodl offers'} <ExternalLink className="ml-2 h-4 w-4" />
           </a>
         </Button>
         <Button asChild variant="ghost">
-          <Link to="/buy">See live offers on our buy page</Link>
+          <Link to="/buy" onClick={() => onRedirect('/buy')}>See live offers on our buy page</Link>
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
@@ -123,6 +132,15 @@ const Ramp = () => {
     if (!config || !countryCode) return;
     setChecking(true);
     setResult(null);
+    logRampEvent({
+      event_type: 'route_check',
+      side,
+      country_code: countryCode,
+      asset,
+      fiat,
+      payment_method: method,
+      amount: Number(amount) > 0 ? Number(amount) : undefined,
+    });
     const country = findCountry(config, countryCode);
     const decision = evaluateDirectRoute(country, providerName);
     let quote: QuoteResult | null = null;
@@ -132,7 +150,52 @@ const Ramp = () => {
     }
     setResult({ country, quote });
     setChecking(false);
+
+    const numericAmount = Number(amount);
+    const hodlAllowedNow = isHodlHodlAllowed(country);
+    const directOk = decision.jurisdictionAllowed && Boolean(quote?.ok);
+    const blockerReason = formatBlockerReasons(decision.blockers);
+    const quoteReason = !decision.jurisdictionAllowed
+      ? ''
+      : quote && !quote.ok
+        ? `Quote: ${quote.error}`
+        : '';
+    const shownReason = directOk
+      ? 'Recommended for your location'
+      : [blockerReason, quoteReason].filter(Boolean).join(' | ') ||
+        (hodlAllowedNow ? 'Direct ramp unavailable' : `Hodl Hodl: ${country.hodlhodl.reason}`);
+
+    logRampEvent({
+      event_type: 'route_decision',
+      side,
+      country_code: country.code,
+      asset,
+      fiat,
+      payment_method: method,
+      amount: Number.isFinite(numericAmount) && numericAmount > 0 ? numericAmount : undefined,
+      decision: directOk ? 'direct' : hodlAllowedNow ? 'hodlhodl' : 'none',
+      direct_allowed: decision.jurisdictionAllowed,
+      hodlhodl_allowed: hodlAllowedNow,
+      quote_ok: quote ? quote.ok : undefined,
+      provider: providerName,
+      reason: shownReason,
+      error_message: quote && !quote.ok ? quote.error : undefined,
+    });
   };
+
+  const logRedirect = (target: string, chosen: 'direct' | 'hodlhodl') =>
+    logRampEvent({
+      event_type: 'redirect',
+      side,
+      country_code: countryCode,
+      asset,
+      fiat,
+      payment_method: method,
+      decision: chosen,
+      target_url: target,
+      reason: chosen === 'direct' ? 'Recommended for your location' : 'Peer-to-peer Bitcoin route',
+      provider: chosen === 'direct' ? providerName : 'Hodl Hodl',
+    });
 
   const decision = result && config ? evaluateDirectRoute(result.country, providerName) : null;
   const directWorks = Boolean(decision?.jurisdictionAllowed && result?.quote?.ok);
@@ -283,7 +346,12 @@ const Ramp = () => {
                     {side === 'buy' ? asset : fiat}
                   </p>
                   <Button asChild size="lg">
-                    <Link to={side === 'buy' ? '/buy' : '/cashout'}>Continue with ramp provider</Link>
+                    <Link
+                      to={side === 'buy' ? '/buy' : '/cashout'}
+                      onClick={() => logRedirect(side === 'buy' ? '/buy' : '/cashout', 'direct')}
+                    >
+                      Continue with ramp provider
+                    </Link>
                   </Button>
                   <p className="text-xs text-muted-foreground">
                     The provider is {providerName} via SimpleSwap. Checkout happens on their site, in a new tab, and
@@ -319,7 +387,11 @@ const Ramp = () => {
             )}
 
             {hodlAllowed ? (
-              <HodlHodlCard primary={!directWorks} asset={asset} />
+              <HodlHodlCard
+                primary={!directWorks}
+                asset={asset}
+                onRedirect={(target) => logRedirect(target, 'hodlhodl')}
+              />
             ) : (
               <Card className="border-destructive/50">
                 <CardHeader>
