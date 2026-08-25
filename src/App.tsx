@@ -43,6 +43,7 @@ const GrapheneOS = lazy(() => import("./pages/GrapheneOS"));
 const FiatOfframp = lazy(() => import("./pages/FiatOfframp"));
 
 const BuyNoKyc = lazy(() => import("./pages/BuyNoKyc"));
+const Ramp = lazy(() => import("./pages/Ramp"));
 const ApiAnalytics = lazy(() => import("./pages/ApiAnalytics"));
 const Voice = lazy(() => import("./pages/Voice"));
 const Verify = lazy(() => import("./pages/Verify"));
