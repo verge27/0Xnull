@@ -221,12 +221,37 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting check
+  const clientIP = getClientIP(req);
+  if (!checkRateLimit(clientIP)) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), {
+      status: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' },
+    });
+  }
+
   try {
     const { message, conversationHistory = [] } = await req.json();
     
     if (!message || typeof message !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Invalid message' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Bound input size to prevent abuse of paid AI credits
+    if (message.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: 'Message exceeds maximum length of 2000 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!Array.isArray(conversationHistory) || conversationHistory.length > 20) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid conversation history' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
