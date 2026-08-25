@@ -207,10 +207,38 @@ const Work = () => {
               Every XMR job we can find, in one place. Aggregated from public boards, refreshed every 30 minutes.
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-sm">
-              <Badge variant="outline">{jobs.length} open listings</Badge>
+              <Badge variant="outline">{typeCounts.hiring} jobs on offer</Badge>
+              <Badge variant="outline">{typeCounts.offering} freelancers available</Badge>
               <Badge variant="outline">{liveSources.length} live sources</Badge>
               <Badge variant="outline">No account needed</Badge>
             </div>
+          </div>
+
+          {/* Listing type */}
+          <div
+            role="tablist"
+            aria-label="Listing type"
+            className="grid gap-2 sm:grid-cols-3 mb-6"
+          >
+            {LISTING_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={listingType === tab.value}
+                onClick={() => setListingType(tab.value)}
+                className={`rounded-lg border px-4 py-3 text-left transition-colors ${
+                  listingType === tab.value
+                    ? "border-primary bg-primary/10"
+                    : "border-border/50 hover:border-primary/50"
+                }`}
+              >
+                <span className="block text-sm font-medium">
+                  {tab.label} <span className="text-muted-foreground">({countForTab(tab.value)})</span>
+                </span>
+                <span className="block text-xs text-muted-foreground">{tab.hint}</span>
+              </button>
+            ))}
           </div>
 
           {/* Filters */}
