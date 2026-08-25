@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Server, Plus, Trash2, RefreshCw, Copy, ExternalLink, Shield, AlertTriangle, Check, Wallet } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Navbar } from '@/components/Navbar';
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { SEORichText } from '@/components/SEORichText';
@@ -396,6 +397,7 @@ const VPS = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
       
       <Navbar />
+      <SubsiteLayout section={"VPS"} sectionPath="/vps" />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">

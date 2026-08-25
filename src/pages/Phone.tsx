@@ -1,5 +1,6 @@
 import { Phone as PhoneIcon, MessageSquare, Wifi, Shield, ExternalLink, Zap, AlertTriangle, Lightbulb, CheckCircle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from '@/components/Footer';
 import { SEORichText } from '@/components/SEORichText';
 import { Link } from 'react-router-dom';
@@ -84,6 +85,7 @@ const Phone = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-background/40 via-background/50 to-background/70" style={{ zIndex: -1 }} />
       
       <Navbar />
+      <SubsiteLayout section={"Phone & eSIM"} sectionPath="/phone" links={[{ label: 'Numbers', to: '#numbers' }, { label: 'eSIM', to: '#esim' }, { label: 'VPN', to: '#vpn' }]} />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">

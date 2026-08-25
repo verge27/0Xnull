@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRightLeft, RefreshCw, Copy, ExternalLink, Check, History, Clock, Trash2, Banknote } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
@@ -846,6 +847,7 @@ const Swaps = () => {
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
       
       <Navbar />
+      <SubsiteLayout section={"Swaps"} sectionPath="/swaps" />
       
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-4xl mx-auto">

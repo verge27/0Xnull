@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, ExternalLink, Search, AlertTriangle, RefreshCw, Clock, Coins } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -169,6 +170,7 @@ const Work = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <SubsiteLayout section={"Work"} sectionPath="/work" />
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">

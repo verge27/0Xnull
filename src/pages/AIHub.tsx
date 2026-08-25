@@ -1,6 +1,7 @@
 import { Bot, Mic, MessageCircle, Lock, Zap, DollarSign, ExternalLink, Brain, Shield, Server, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
+import { SubsiteLayout } from '@/components/SubsiteLayout';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +53,7 @@ export default function AIHub() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <SubsiteLayout section={"AI & Voice"} sectionPath="/ai" />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">

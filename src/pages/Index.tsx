@@ -16,37 +16,37 @@ interface Panel {
 const panels: Panel[] = [
   {
     to: '/phone',
-    icon: <Smartphone className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <Smartphone className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Phone & eSIM',
     description: 'Anonymous numbers and data eSIMs. No KYC.',
   },
   {
     to: '/swaps',
-    icon: <ArrowLeftRight className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <ArrowLeftRight className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Swaps',
     description: 'Non-custodial crypto swaps, settled in XMR.',
   },
   {
     to: '/onramp',
-    icon: <Wallet className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <Wallet className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Fiat On-ramp',
     description: 'Cash to XMR, no exchange account.',
   },
   {
     to: '/work',
-    icon: <Briefcase className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <Briefcase className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Work',
     description: 'XMR-paying jobs, aggregated from every board.',
   },
   {
     to: '/vps',
-    icon: <Server className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'VPS',
     description: 'Anonymous servers, paid in crypto.',
   },
   {
     to: '/ai',
-    icon: <Bot className="w-8 h-8 text-primary" aria-hidden="true" />,
+    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'AI & Voice',
     description: 'Private AI chat and voice tools. No account.',
   },
