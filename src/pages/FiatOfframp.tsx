@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp, Globe, ShieldAlert } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Copy, Check, RefreshCw, ExternalLink, Banknote, ArrowDownUp, Globe, AlertTriangle } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
+import { PayoutEligibilityChecklist } from '@/components/PayoutEligibilityChecklist';
+import { PAYOUT_CAVEATS, describePayoutFailure } from '@/lib/payoutEligibility';
 import { useSEO } from '@/hooks/useSEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
