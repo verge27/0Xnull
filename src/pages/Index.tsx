@@ -93,10 +93,11 @@ const Index = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">0xNull</h1>
             <p className="text-sm md:text-lg text-muted-foreground">
-              One anonymous credential, funded in Monero and spent across every service. No accounts, no signup.
+              Anonymous Services, funded in Monero. No accounts, no signup.
             </p>
           </div>
         </section>
+
 
         {/* Primary panel grid */}
         <section className="container mx-auto px-4 pb-12">
