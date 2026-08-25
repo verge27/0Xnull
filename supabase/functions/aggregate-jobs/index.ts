@@ -317,11 +317,14 @@ serve(async (req) => {
 
   const jobsSecret = Deno.env.get('JOBS_CRON_SECRET');
   const cronSecret = Deno.env.get('CRON_SECRET');
+  const ingestSecret = Deno.env.get('JOBS_INGEST_SECRET');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const authHeader = req.headers.get('authorization') ?? '';
   const presented = req.headers.get('x-cron-secret') ?? authHeader.replace(/^Bearer\s+/i, '');
 
-  const accepted = [jobsSecret, cronSecret, serviceKey].filter((v): v is string => Boolean(v));
+  const accepted = [jobsSecret, cronSecret, ingestSecret, serviceKey].filter(
+    (v): v is string => typeof v === 'string' && v.trim().length > 0,
+  );
   const authorised = Boolean(presented) && accepted.includes(presented);
   if (!authorised) {
     console.error('[aggregate-jobs] unauthorised request');
@@ -350,8 +353,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    if (!serviceKey || presented !== serviceKey) {
-      console.error('[aggregate-jobs] ingest requires the service role key');
+    // Gate 2: prefer the dedicated ingest secret; the service role key stays
+    // accepted for backward compatibility with existing callers.
+    const ingestOk =
+      (typeof ingestSecret === 'string' && ingestSecret.trim().length > 0 && presented === ingestSecret) ||
+      (serviceKey.trim().length > 0 && presented === serviceKey);
+    if (!ingestOk) {
+      console.error('[aggregate-jobs] ingest requires JOBS_INGEST_SECRET');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
