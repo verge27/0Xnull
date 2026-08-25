@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -463,6 +464,7 @@ export default function CombatSports() {
       />
       <div className="relative z-10">
         <Navbar />
+        <PredictionsSubsiteNav />
       </div>
       
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">

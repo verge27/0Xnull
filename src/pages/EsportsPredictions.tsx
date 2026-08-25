@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { BetDepositModal } from '@/components/BetDepositModal';
 import { BetSlipPanel } from '@/components/BetSlipPanel';
@@ -638,6 +639,7 @@ export default function EsportsPredictions() {
       
       <div className="relative z-10">
         <Navbar />
+        <PredictionsSubsiteNav />
       
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">

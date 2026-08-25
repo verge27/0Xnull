@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,7 @@ export default function HowBettingWorks() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-8">

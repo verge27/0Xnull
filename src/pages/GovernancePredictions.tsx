@@ -10,6 +10,7 @@ import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { BETTING_CONFIG, validateBetAmount, formatMinimumBet } from '@/lib/bettingConfig';
 
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { GovernanceMarketCard } from '@/components/GovernanceMarketCard';
 import { BetDepositModal } from '@/components/BetDepositModal';
@@ -220,6 +221,7 @@ export default function GovernancePredictions() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <PredictionsSubsiteNav />
       
       <main className="flex-1">
         {/* Hero Section */}

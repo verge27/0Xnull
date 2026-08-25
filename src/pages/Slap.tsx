@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
+import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { useSEO, useEventListSEO } from '@/hooks/useSEO';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -97,6 +98,7 @@ const Slap = () => {
       
       <div className="relative z-10">
         <Navbar />
+        <PredictionsSubsiteNav />
         
         {/* Back to Combat Navigation */}
         <div className="container pt-6">
