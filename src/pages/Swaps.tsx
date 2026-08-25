@@ -721,6 +721,7 @@ const Swaps = () => {
     try {
       {
 
+
         // Trocador trade
         const { data, error } = await supabase.functions.invoke('trocador-new-trade', {
           body: {
