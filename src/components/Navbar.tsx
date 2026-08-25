@@ -198,26 +198,34 @@ export const Navbar = () => {
             </Sheet>
 
             {/* Desktop Navigation — only destinations not already shown in the homepage panels. */}
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/work">
-                <Briefcase className="w-4 h-4" />
-                <span className="hidden md:inline">Work</span>
-              </Link>
-            </Button>
+            {[
+              { to: '/work', label: 'Work', icon: Briefcase },
+              { to: '/predictions', label: 'Predictions', icon: TrendingUp },
+              { to: '/docs', label: 'Docs', icon: FileText },
+            ].map((item) => {
+              const active =
+                item.to === '/'
+                  ? location.pathname === '/'
+                  : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+              return (
+                <Button
+                  key={item.to}
+                  variant="ghost"
+                  className={`gap-1 hidden sm:inline-flex ${
+                    active
+                      ? 'bg-primary/10 border border-primary/40 text-foreground'
+                      : 'border border-transparent hover:bg-secondary/50 text-foreground/90'
+                  }`}
+                  asChild
+                >
+                  <Link to={item.to} aria-current={active ? 'page' : undefined}>
+                    <item.icon className="w-4 h-4" aria-hidden="true" />
+                    <span className="hidden md:inline">{item.label}</span>
+                  </Link>
+                </Button>
+              );
+            })}
 
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/predictions">
-                <TrendingUp className="w-4 h-4" />
-                <span className="hidden md:inline">Predictions</span>
-              </Link>
-            </Button>
-
-            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
-              <Link to="/docs">
-                <FileText className="w-4 h-4" />
-                <span className="hidden md:inline">Docs</span>
-              </Link>
-            </Button>
 
 
 
