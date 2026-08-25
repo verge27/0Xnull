@@ -291,6 +291,34 @@ const ADAPTERS: Adapter[] = [
   monericaAdapter('monerica-jobs', 'https://monerica.com/jobs'),
 ];
 
+// ---------- quality gate ----------
+
+// Chat sources (Telegram) carry a lot of conversational noise. Entries must
+// look like an actual offer or request for paid work before they go live.
+const CHAT_SOURCES = new Set(['tg-monerojobs']);
+
+const HIRE_SIGNALS =
+  /\b(hiring|we are looking|looking for|need(ed|s)?\s+(a|an|some)|wanted|seeking|job offer|offering|available for|for hire|freelance|freelancer|contract|position|vacancy|apply|commission(s|ing)?|task|gig|work(ing)? on|deliverable|project)\b/i;
+const PAY_SIGNALS =
+  /(\bxmr\b|\bmonero\b|\busd\b|\beur\b|\$\s?\d|\d+\s?(usd|eur|xmr)|\bbudget\b|\bpaid\b|\bpay(ment|ing|s)?\b|\brate\b|per\s+(hour|hr|word|day|month)|\bsalary\b)/i;
+const SCOPE_SIGNALS =
+  /\b(dev(eloper|elopment)?|engineer|program(mer|ming)|code|website|web\s?app|frontend|backend|full\s?stack|design(er)?|graphic|logo|writ(er|ing)|content|translat(e|or|ion)|marketing|seo|video|edit(or|ing)|audio|bot|script|scraper|sysadmin|devops|security|pentest|support|moderat(or|ion)|sales|research|data)\b/i;
+
+function assessQuality(title: string, body: string): string | null {
+  const text = `${title}\n${body}`.trim();
+  const words = text.split(/\s+/).filter(Boolean);
+
+  if (text.length < 60 || words.length < 12) return 'quality: too short to be a job post';
+
+  let score = 0;
+  if (HIRE_SIGNALS.test(text)) score++;
+  if (PAY_SIGNALS.test(text)) score++;
+  if (SCOPE_SIGNALS.test(text)) score++;
+
+  if (score < 2) return 'quality: no clear job signal';
+  return null;
+}
+
 // ---------- persistence ----------
 
 type Blocklist = { pattern: string; is_regex: boolean }[];
@@ -309,6 +337,7 @@ function matchBlocklist(text: string, blocklist: Blocklist): string | null {
   }
   return null;
 }
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
