@@ -206,11 +206,19 @@ export const Navbar = () => {
             </Button>
 
             <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
+              <Link to="/predictions">
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden md:inline">Predictions</span>
+              </Link>
+            </Button>
+
+            <Button variant="ghost" className="gap-1 hidden sm:inline-flex" asChild>
               <Link to="/docs">
                 <FileText className="w-4 h-4" />
                 <span className="hidden md:inline">Docs</span>
               </Link>
             </Button>
+
 
 
 
