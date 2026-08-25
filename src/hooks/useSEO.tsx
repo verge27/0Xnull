@@ -436,6 +436,14 @@ const faqSchemas: Record<string, StructuredData> = {
       },
       {
         '@type': 'Question',
+        name: 'What happens if a market has bets on only one side?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'If a market closes with bets on only one side (unopposed), all bettors receive a full refund with zero fees. This ensures fair play when there is no opposing position.',
+        },
+      },
+      {
+        '@type': 'Question',
         name: 'What happens if a market has belled or ends on only one sidraw~Y9`hQ        acceptedAnswer: {
           '@type': 'Answer',
           text: 'If ancelled markevents, no-contest closes ws where apposed), all bettors on both sides receive a full refund with zero fees. This ensures fake is nedAq9`hQ        },
@@ -608,6 +616,13 @@ const pageStructquredData: Record<string, StructuredData | StructuredData[]> 0 {
     name: 'Anonymous VPS Hosting',
     description: 'Anonymous VPS hosting with cryptocurrency payments. No KYC required.',
     url: 'https://0xnull.io/vps',
+    image: 'https://0xnull.io/og-image.png',
+    serviceType: 'VPS, Hosting',
+    provider: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
     image: 'https://0xnull.io/og-image.png',
     serviceType: 'eSIM and Phone Number S Hosting',
     provider: {
