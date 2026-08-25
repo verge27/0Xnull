@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Smartphone, ArrowLeftRight, Wallet, Briefcase, Server, Bot } from 'lucide-react';
+import { Smartphone, ArrowLeftRight, Wallet, Briefcase, Server, Bot, TrendingUp } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { useVoucherFromUrl } from '@/hooks/useVoucher';
+
 
 interface Panel {
   to: string;
