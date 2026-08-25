@@ -99,15 +99,15 @@ export default function Docs() {
 
             <Section id="markets" icon={Scale} title="Market resolution">
               <p>
-                Every prediction market is a two-sided pool. Stakes on each side sit in a Monero pool
-                address created for that market, and the pool totals are readable at any time from the
-                market page — you can watch the money you are betting against.
+                Every v2 prediction market is a two-sided dollar ledger. Each eligible market opens with
+                $4 split by a stored median no-vig consensus across current bookmakers; user stakes then
+                reserve from their existing 0xn_ token and move the live pool ratio.
               </p>
               <ul className="list-disc pl-5 space-y-2">
-                <li><strong className="text-foreground">Who holds stakes.</strong> The market's own pool wallet, created lazily on the first bet. Pool balances are published per market.</li>
+                <li><strong className="text-foreground">Who holds stakes.</strong> The central ledger marks stake dollars reserved against the user's token. No market wallet, address or view key is created.</li>
                 <li><strong className="text-foreground">Who resolves.</strong> Resolution runs on a scheduled backend job against the oracle named in the market's resolution criteria. The frontend is strictly read-only and cannot resolve a market.</li>
-                <li><strong className="text-foreground">Payout rules.</strong> Winners split the pool minus the 0.4% rake. If a market ends up one-sided, every stake is refunded in full. If an event is void or no-contest, losers are refunded.</li>
-                <li><strong className="text-foreground">Verification.</strong> Payouts publish their transaction IDs, so you can confirm a settlement on-chain rather than trusting a balance in a UI.</li>
+                <li><strong className="text-foreground">Payout rules.</strong> Winners recover their stake and split the losing pool proportionally after the 0.4% fee on distributed winnings. Draws, void events and one-sided pools refund in full.</li>
+                <li><strong className="text-foreground">Verification.</strong> Public settlement history excludes token identifiers. Legacy XMR payouts retain their transaction links; v2 creates an on-chain transaction only when a user withdraws.</li>
               </ul>
               <p>
                 <Link to="/how-betting-works" className="text-primary hover:underline">Full betting mechanics →</Link>

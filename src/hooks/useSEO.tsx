@@ -213,8 +213,8 @@ const pageMeta: Record<string, SEOProps> = {
     description: 'View and track your betting slips. Check multibet status and potential payouts.',
   },
   '/payouts': {
-    title: 'Payouts - 0xNull',
-    description: 'View and manage your prediction market payouts. Track winning bets and withdrawals.',
+    title: 'Prediction Settlement Ledger - 0xNull',
+    description: 'See TXN-funded prediction settlements and the read-only archive of legacy Monero payouts.',
   },
   '/auth': {
     title: 'Login - 0xNull',

@@ -251,34 +251,6 @@ export interface PredictionBetStatus {
   resolved_at: number | null;
 }
 
-export interface PredictionMarket {
-  market_id: string;
-  title: string;
-  description: string;
-  oracle_type: string;
-  oracle_asset: string;
-  oracle_condition: string;
-  oracle_value: number;
-  resolution_time: number;
-  resolved: number;
-  outcome: 'YES' | 'NO' | null;
-  yes_pool_xmr: number;
-  no_pool_xmr: number;
-  created_at: number;
-  pool_address?: string;
-  view_key?: string;
-  // Betting cutoff fields
-  commence_time?: number;
-  betting_closes_at?: number;
-  betting_open?: boolean;
-  // Prediction v2 ledger fields (cents)
-  odds_sport_key?: string;
-  yes_pool_cents?: number;
-  no_pool_cents?: number;
-  treasury_yes_cents?: number;
-  treasury_no_cents?: number;
-}
-
 export interface PredictionV2BetRequest {
   market_id: string;
   side: 'YES' | 'NO';
@@ -318,13 +290,47 @@ export interface PredictionV2Payout {
   bet_id: string;
   market_id: string;
   title: string;
+  description: string;
   side: 'YES' | 'NO';
-  outcome: 'YES' | 'NO' | 'DRAW' | null;
+  outcome: 'YES' | 'NO' | 'DRAW';
   stake_cents: number;
-  amount_cents: number;
   payout_cents: number;
   status: 'won' | 'lost' | 'refunded';
   resolved_at: number;
+  funding: 'txn_balance';
+}
+
+export interface PredictionMarket {
+  market_id: string;
+  title: string;
+  description: string;
+  oracle_type: string;
+  oracle_asset: string;
+  oracle_condition: string;
+  oracle_value: number;
+  resolution_time: number;
+  resolved: number;
+  outcome: 'YES' | 'NO' | 'DRAW' | null;
+  yes_pool_xmr: number;
+  no_pool_xmr: number;
+  yes_pool_cents?: number;
+  no_pool_cents?: number;
+  treasury_yes_cents?: number;
+  treasury_no_cents?: number;
+  v2_bet_count?: number;
+  bookmaker_count?: number;
+  odds_observed_at?: number;
+  funding_model?: 'txn_balance' | 'legacy_xmr';
+  created_at: number;
+  pool_address?: string;
+  view_key?: string;
+  odds_sport_key?: string;
+  event_home_team?: string;
+  event_away_team?: string;
+  // Betting cutoff fields
+  commence_time?: number;
+  betting_closes_at?: number;
+  betting_open?: boolean;
 }
 
 export interface PoolInfo {
@@ -515,6 +521,65 @@ export const api = {
     return proxyRequest<PredictionBetStatus>(`/api/predictions/bet/${betId}/status`);
   },
 
+  async placePredictionBetV2(
+    token: string,
+    request: PredictionV2BetRequest,
+    idempotencyKey = crypto.randomUUID(),
+  ): Promise<PredictionV2Bet> {
+    return proxyRequest<PredictionV2Bet>('/api/predictions/v2/bets', {
+      method: 'POST',
+      headers: {
+        'X-TXN-Token': token,
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: JSON.stringify(request),
+    });
+  },
+
+  async listPredictionBetsV2(token: string): Promise<{
+    bets: PredictionV2Bet[];
+    balance_cents: number;
+    reserved_cents: number;
+  }> {
+    return proxyRequest('/api/predictions/v2/bets', {
+      headers: { 'X-TXN-Token': token },
+    });
+  },
+
+  async getPredictionBetV2(token: string, betId: string): Promise<PredictionV2Bet> {
+    return proxyRequest<PredictionV2Bet>(`/api/predictions/v2/bets/${encodeURIComponent(betId)}`, {
+      headers: { 'X-TXN-Token': token },
+    });
+  },
+
+  async getPredictionPoolV2(marketId: string): Promise<PredictionV2Pool> {
+    return proxyRequest<PredictionV2Pool>(
+      `/api/predictions/v2/markets/${encodeURIComponent(marketId)}/pool`,
+    );
+  },
+
+  async getPredictionPayoutsV2(): Promise<{ payouts: PredictionV2Payout[]; total: number }> {
+    return proxyRequest<{ payouts: PredictionV2Payout[]; total: number }>(
+      '/api/predictions/v2/payouts',
+    );
+  },
+
+  async queueTokenWithdrawal(
+    token: string,
+    address: string,
+    amountCents: number,
+    idempotencyKey = crypto.randomUUID(),
+  ): Promise<{ withdrawal_id: string; status: 'pending'; amount_xmr: number; amount_usd: number }> {
+    return proxyRequest('/api/token/withdraw-v2', {
+      method: 'POST',
+      headers: {
+        'X-TXN-Token': token,
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: JSON.stringify({ address, amount_cents: amountCents }),
+    });
+  },
+
   async submitPredictionPayoutAddress(betId: string, payoutAddress: string): Promise<{ success: boolean }> {
     return proxyRequest<{ success: boolean }>(`/api/predictions/bet/${betId}/payout-address`, {
       method: 'POST',
@@ -617,59 +682,6 @@ export const api = {
         voucher_code: voucherCode,
       }),
     }, 90000);
-  },
-
-  async queueTokenWithdrawal(
-    token: string,
-    address: string,
-    amountCents: number,
-  ): Promise<{ withdrawal_id: string; status: 'pending'; amount_xmr: number; amount_usd: number }> {
-    return proxyRequest('/api/token/withdraw-v2', {
-      method: 'POST',
-      headers: { 'X-TXN-Token': token },
-      body: JSON.stringify({ address, amount_cents: amountCents }),
-    });
-  },
-
-  async placePredictionBetV2(
-    token: string,
-    request: PredictionV2BetRequest,
-    idempotencyKey = crypto.randomUUID(),
-  ): Promise<PredictionV2Bet> {
-    return proxyRequest<PredictionV2Bet>('/api/predictions/v2/bets', {
-      method: 'POST',
-      headers: {
-        'X-TXN-Token': token,
-        'Idempotency-Key': idempotencyKey,
-      },
-      body: JSON.stringify(request),
-    });
-  },
-
-  async listPredictionBetsV2(token: string): Promise<{
-    bets: PredictionV2Bet[];
-    balance_cents: number;
-    reserved_cents: number;
-  }> {
-    return proxyRequest('/api/predictions/v2/bets', {
-      headers: { 'X-TXN-Token': token },
-    });
-  },
-
-  async getPredictionBetV2(token: string, betId: string): Promise<PredictionV2Bet> {
-    return proxyRequest<PredictionV2Bet>(`/api/predictions/v2/bets/${encodeURIComponent(betId)}`, {
-      headers: { 'X-TXN-Token': token },
-    });
-  },
-
-  async getPredictionPoolV2(marketId: string): Promise<PredictionV2Pool> {
-    return proxyRequest<PredictionV2Pool>(
-      `/api/predictions/v2/markets/${encodeURIComponent(marketId)}/pool`,
-    );
-  },
-
-  async getPredictionPayoutsV2(): Promise<{ payouts: PredictionV2Payout[]; total: number }> {
-    return proxyRequest('/api/predictions/v2/payouts');
   },
 
   async getMultibetSlip(slipId: string): Promise<MultibetSlip> {

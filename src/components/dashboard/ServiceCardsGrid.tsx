@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { HealthFactorBadge } from '@/components/lending/HealthFactorBadge';
 import { formatUsd, parseAmount } from '@/lib/lending';
-import { TrendingUp, Zap, Bot, ArrowLeftRight, ShoppingBag, Landmark, ArrowRight, ExternalLink } from 'lucide-react';
+import { TrendingUp, Bot, ArrowLeftRight, ShoppingBag, Landmark, ArrowRight, ExternalLink } from 'lucide-react';
 import type { Portfolio } from '@/lib/lending';
 
 interface ServiceCardsGridProps {
@@ -19,12 +19,6 @@ interface ServiceCardsGridProps {
 const TokenBadge = () => (
   <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/40 text-emerald-400 bg-emerald-500/10 px-1.5 py-0">
     TOKEN BALANCE
-  </Badge>
-);
-
-const StandaloneBadge = () => (
-  <Badge variant="outline" className="text-[10px] font-medium border-blue-500/40 text-blue-400 bg-blue-500/10 px-1.5 py-0">
-    STANDALONE XMR
   </Badge>
 );
 
@@ -107,21 +101,21 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
             </CardContent>
           </Card>
 
-          {/* Flash Markets */}
+          {/* Prediction Markets */}
           <Card className="border-l-[3px] border-l-emerald-500 hover:border-l-emerald-400 transition-colors">
             <CardContent className="py-5 space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-yellow-400" />
+                  <TrendingUp className="w-4 h-4 text-blue-400" />
                 </div>
-                <span className="font-semibold">Flash Markets</span>
+                <span className="font-semibold">Predictions</span>
                 <TokenBadge />
               </div>
               <p className="text-xs text-muted-foreground">
-                Quick-resolution crypto price predictions. 5-minute markets powered by your token balance.
+                Stakes reserve from this token balance. Wins and refunds return here automatically.
               </p>
               <Button size="sm" variant="outline" asChild className="w-full gap-1">
-                <Link to="/flash">View Flash <ArrowRight className="w-3 h-3" /></Link>
+                <Link to="/predict">View Markets <ArrowRight className="w-3 h-3" /></Link>
               </Button>
             </CardContent>
           </Card>
@@ -172,25 +166,6 @@ export const ServiceCardsGrid = ({ lendingPortfolio, lendingPrices, lendingError
         <p className="text-xs text-muted-foreground mb-4">Independent services with separate funding</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Predictions — Standalone */}
-          <Card className="border-l-[3px] border-l-blue-500 hover:border-l-blue-400 transition-colors">
-            <CardContent className="py-5 space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-blue-400" />
-                </div>
-                <span className="font-semibold">Predictions</span>
-                <StandaloneBadge />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Each bet generates its own XMR deposit address. Winnings are paid out to your payout address. Not linked to your token balance.
-              </p>
-              <Button size="sm" variant="outline" asChild className="w-full gap-1">
-                <Link to="/predict">View Markets <ArrowRight className="w-3 h-3" /></Link>
-              </Button>
-            </CardContent>
-          </Card>
-
           {/* Swaps — External */}
           <Card className="border-l-[3px] border-l-muted-foreground/40 hover:border-l-muted-foreground/60 transition-colors bg-card/80">
             <CardContent className="py-5 space-y-3">

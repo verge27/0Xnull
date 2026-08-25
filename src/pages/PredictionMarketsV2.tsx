@@ -213,7 +213,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
           <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <Badge className="mb-3 border-primary/30 bg-primary/10 text-primary" variant="outline">
-                Prediction v2 — live ledger funding
+                Prediction v2 · live ledger funding
               </Badge>
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{copy.title}</h1>
               <p className="mt-2 max-w-2xl text-muted-foreground">{copy.description}</p>
@@ -224,7 +224,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                   <WalletCards className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Available on this token</p>
-                    <p className="font-mono font-semibold">{tokenLoading ? '…' : `$${balance.toFixed(2)}`}</p>
+                    <p className="font-mono font-semibold">{tokenLoading ? '—' : `$${balance.toFixed(2)}`}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -237,7 +237,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             {[
               { icon: BarChart3, title: '$4 opening liquidity', body: 'Every eligible market starts with $4 split to the bookmaker consensus.' },
-              { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token — no market wallet or view key.' },
+              { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },
               { icon: CheckCircle2, title: 'Automatic settlement', body: 'Wins and refunds return to the same token balance when the oracle resolves.' },
             ].map(({ icon: Icon, title, body }) => (
               <Card key={title} className="bg-card/50">
@@ -313,11 +313,16 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
                       <div className="mt-5 grid grid-cols-2 gap-2">
                         <Button className="h-auto bg-emerald-600 py-3 text-white hover:bg-emerald-700" onClick={() => openBet(market, 'YES')}>
-                          Back YES
+                          <span><span className="block">YES</span><span className="text-xs opacity-80">{yes ? (totalPool / yes).toFixed(2) : '—'}×</span></span>
                         </Button>
-                        <Button className="h-auto bg-red-600 py-3 text-white hover:bg-red-700" onClick={() => openBet(market, 'NO')}>
-                          Back NO
+                        <Button className="h-auto border-red-500/40 py-3 text-red-400 hover:bg-red-500/10" variant="outline" onClick={() => openBet(market, 'NO')}>
+                          <span><span className="block">NO</span><span className="text-xs opacity-80">{no ? (totalPool / no).toFixed(2) : '—'}×</span></span>
                         </Button>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                        <span>{money(totalPool)} total liquidity</span>
+                        <span>{market.bookmaker_count || 0} books · median no-vig</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -325,83 +330,62 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               })}
             </div>
           )}
+
+          <div className="mt-8 flex items-center justify-between rounded-lg border border-border/70 bg-card/40 px-4 py-3 text-sm">
+            <span className="flex items-center gap-2 text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-primary" /> No new keypair is created when you bet.
+            </span>
+            <Link className="text-primary hover:underline" to="/payouts">Payout model <ArrowRight className="ml-1 inline h-3.5 w-3.5" /></Link>
+          </div>
         </section>
       </main>
 
-      <Dialog open={!!selectedMarket} onOpenChange={(open) => { if (!open) setSelectedMarket(null); }}>
-        <DialogContent>
+      <Footer />
+
+      <Dialog open={!!selectedMarket} onOpenChange={(open) => !open && setSelectedMarket(null)}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{selectedMarket?.title}</DialogTitle>
-            <DialogDescription>
-              Funded directly from your 0xn_ token balance. No new deposit address is created.
-            </DialogDescription>
+            <DialogTitle>Bet {side}</DialogTitle>
+            <DialogDescription>{selectedMarket?.title}</DialogDescription>
           </DialogHeader>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant={side === 'YES' ? 'default' : 'outline'}
-              className={side === 'YES' ? 'bg-emerald-600 text-white hover:bg-emerald-700' : ''}
-              onClick={() => setSide('YES')}
-            >
-              YES
-            </Button>
-            <Button
-              variant={side === 'NO' ? 'default' : 'outline'}
-              className={side === 'NO' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
-              onClick={() => setSide('NO')}
-            >
-              NO
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="v2-bet-amount">Stake (USD)</Label>
-            <Input
-              id="v2-bet-amount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-            />
-            {!validation.valid && (
-              <p className="text-xs text-destructive">{validation.error}</p>
-            )}
-            {insufficient && (
-              <p className="text-xs text-destructive">Stake exceeds your available token balance.</p>
-            )}
-          </div>
-
-          {preview && (
-            <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Potential return</span>
-                <span className="font-mono font-medium">{money(preview.gross)}</span>
-              </div>
-              <div className="mt-1 flex justify-between">
-                <span className="text-muted-foreground">Potential profit</span>
-                <span className="font-mono font-medium text-emerald-400">{money(preview.profit)}</span>
-              </div>
+          <div className="space-y-5 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button className={side === 'YES' ? 'bg-emerald-600 hover:bg-emerald-700' : ''} variant={side === 'YES' ? 'default' : 'outline'} onClick={() => setSide('YES')}>YES</Button>
+              <Button className={side === 'NO' ? 'bg-red-600 hover:bg-red-700' : ''} variant={side === 'NO' ? 'default' : 'outline'} onClick={() => setSide('NO')}>NO</Button>
             </div>
-          )}
 
-          <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            Unopposed markets are refunded in full and there is no fee on losses or refunds.
+            <div className="space-y-2">
+              <Label htmlFor="prediction-v2-amount">Stake from token balance</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input id="prediction-v2-amount" className="pl-7 font-mono" type="number" min={BETTING_CONFIG.MINIMUM_BET_USD} step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} />
+              </div>
+              {!validation.valid && amount && <p className="text-xs text-destructive">{validation.error}</p>}
+              {insufficient && <p className="text-xs text-destructive">This token has ${balance.toFixed(2)} available.</p>}
+            </div>
+
+            <Card className="bg-primary/5">
+              <CardContent className="space-y-2 p-4 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Available</span><span className="font-mono">${balance.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Reserved now</span><span className="font-mono">{money(Number.isFinite(amountCents) ? amountCents : 0)}</span></div>
+                {preview && <div className="flex justify-between border-t border-border/60 pt-2"><span className="text-muted-foreground">Approx. return if correct</span><span className="font-mono text-emerald-400">{money(preview.gross)}</span></div>}
+              </CardContent>
+            </Card>
+
+            <p className="text-xs text-muted-foreground">
+              The stake is reserved immediately from this 0xn_ token. Settlement credits the same balance automatically. Draws, cancellations and one-sided pools refund the stake; the 0.4% fee applies to winnings only.
+            </p>
+
+            {!token || balance <= 0 ? (
+              <Button asChild className="w-full"><Link to="/dashboard">Add funds to this token <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            ) : (
+              <Button className="w-full" onClick={() => void submitBet()} disabled={placing || !validation.valid || insufficient}>
+                {placing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reserving stake…</> : `Confirm ${side} · ${money(amountCents)}`}
+              </Button>
+            )}
           </div>
-
-          <Button
-            className="w-full"
-            disabled={!token || !validation.valid || insufficient || placing}
-            onClick={() => void submitBet()}
-          >
-            {placing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {token ? `Reserve ${money(amountCents)} on ${side}` : 'Create or load a 0xn_ token to bet'}
-          </Button>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 }
