@@ -116,6 +116,8 @@ const Ramp = () => {
 
   const countries = useMemo(() => config?.countries ?? [], [config]);
   const providerName = config?.fiatProviderName ?? 'our fiat partner';
+  const selectedCountryName =
+    countries.find((c) => c.code === countryCode)?.name ?? 'the country selected above';
 
   const runCheck = async () => {
     if (!config || !countryCode) return;
@@ -243,7 +245,7 @@ const Ramp = () => {
               <Label htmlFor="ramp-confirm" className="text-sm font-normal leading-relaxed text-muted-foreground">
                 I confirm I am located in{' '}
                 <span className="text-foreground font-medium">
-                  {countryCode ? findCountry(config ?? { countries: [], defaults: {} as never, version: '', generatedAt: '', fiatProviderName: '' }, countryCode).name : 'the country selected above'}
+                  {selectedCountryName}
                 </span>{' '}
                 and that I will follow the law that applies there.
               </Label>
