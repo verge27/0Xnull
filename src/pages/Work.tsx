@@ -391,6 +391,16 @@ const Work = () => {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <Badge
+                          variant="outline"
+                          className={
+                            (job.listing_type ?? "hiring") === "offering"
+                              ? "border-blue-500/50 text-blue-400"
+                              : "border-primary/50 text-primary"
+                          }
+                        >
+                          {(job.listing_type ?? "hiring") === "offering" ? "Offering services" : "Hiring"}
+                        </Badge>
                         {source && <Badge variant="secondary">{source.name}</Badge>}
                         <Badge variant="outline">{PAY_TYPE_LABELS[job.pay_type] ?? job.pay_type}</Badge>
                         {source?.escrow && (
