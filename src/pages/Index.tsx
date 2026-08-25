@@ -15,6 +15,12 @@ interface Panel {
 
 const panels: Panel[] = [
   {
+    to: '/ai',
+    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
+    title: 'AI & Voice',
+    description: 'Private AI chat and voice tools. No account.',
+  },
+  {
     to: '/phone',
     icon: <Smartphone className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'Phone & eSIM',
@@ -43,12 +49,6 @@ const panels: Panel[] = [
     icon: <Server className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
     title: 'VPS',
     description: 'Anonymous servers, paid in crypto.',
-  },
-  {
-    to: '/ai',
-    icon: <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary" aria-hidden="true" />,
-    title: 'AI & Voice',
-    description: 'Private AI chat and voice tools. No account.',
   },
 ];
 
