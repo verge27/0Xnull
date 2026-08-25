@@ -42,7 +42,6 @@ import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { RegionCollapsible, ExpandCollapseButtons } from '@/components/RegionCollapsible';
 import { toast } from 'sonner';
 import { TrendingUp, Clock, CheckCircle, XCircle, RefreshCw, Trophy, Calendar, ArrowRight, Filter, HelpCircle, Tv, ExternalLink, Info, ShoppingCart, Flame, Radio, Lock, Wallet, ChevronDown, ChevronsUpDown, ChevronsDownUp } from 'lucide-react';
-import ExolixWidget from '@/components/ExolixWidget';
 import { VoucherBadge } from '@/components/VoucherBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SportsMarketCard } from '@/components/SportsMarketCard';
@@ -613,21 +612,6 @@ export default function SportsPredictions() {
               </Link>
             </div>
 
-            {/* Exolix Swap Widget */}
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full justify-between">
-                  <span className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4" />
-                    Swap to XMR instantly
-                  </span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-3">
-                <ExolixWidget fromCoin="BTC" toCoin="XMR" />
-              </CollapsibleContent>
-            </Collapsible>
           </div>
 
           {/* League Filter - Always visible */}

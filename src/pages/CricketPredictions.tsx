@@ -34,7 +34,6 @@ import { ClosedMarketsSection } from '@/components/ClosedMarketsSection';
 import { ResolvedMarketsSection } from '@/components/ResolvedMarketsSection';
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, RefreshCw, Calendar, Users, Trophy, Gamepad2, ArrowRight, HelpCircle, Info, Lock, Wallet, ChevronDown } from 'lucide-react';
-import ExolixWidget from '@/components/ExolixWidget';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Radio } from 'lucide-react';
@@ -423,21 +422,6 @@ export default function CricketPredictions() {
             </Link>
           </div>
 
-          {/* Exolix Swap Widget */}
-          <Collapsible className="mb-6">
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full justify-between">
-                <span className="flex items-center gap-2">
-                  <Wallet className="w-4 h-4" />
-                  Swap to XMR instantly
-                </span>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <ExolixWidget fromCoin="BTC" toCoin="XMR" />
-            </CollapsibleContent>
-          </Collapsible>
 
           {liveMatches.length > 0 && (
             <div className="mb-6">
