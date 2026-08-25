@@ -14,6 +14,12 @@ const esimBackground = '/images/backgrounds/esim-background.webp';
 const AFFILIATE_BASE = "https://nadanada.me";
 const REF = "?ref=syndicate";
 
+const PHONE_SECTION_IDS: Record<string, string | undefined> = {
+  "Disposable Numbers": "numbers",
+  "Data eSIM": "esim",
+  "No-Log VPN": "vpn",
+};
+
 const features = [
   { icon: "🔒", title: "No KYC", description: "No identity verification. No email. No account. Just pay and use." },
   { icon: "⚡", title: "Instant Activation", description: "Services activate immediately after payment confirmation" },
@@ -143,7 +149,11 @@ const Phone = () => {
               {services.map((service, idx) => {
                 const Icon = service.icon;
                 return (
-                  <Card key={idx} className="hover:border-primary/50 transition-colors">
+                  <Card
+                    key={idx}
+                    id={PHONE_SECTION_IDS[service.title]}
+                    className="scroll-mt-24 hover:border-primary/50 transition-colors"
+                  >
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
