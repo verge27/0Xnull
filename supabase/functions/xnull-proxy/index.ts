@@ -304,9 +304,32 @@ serve(async (req) => {
       });
     };
 
+    // Transient upstream hiccups on idempotent reads: retry twice with a short backoff
+    const upstreamAttempts = req.method === 'GET' ? 3 : 1;
     let response: Response;
     try {
-      response = await fetch(targetUrl.toString(), { ...fetchOptions, signal: controller.signal });
+      let lastErr: unknown = null;
+      let ok = false;
+      response = undefined as unknown as Response;
+      for (let attempt = 1; attempt <= upstreamAttempts; attempt++) {
+        try {
+          response = await fetch(targetUrl.toString(), { ...fetchOptions, signal: controller.signal });
+          if (response.status >= 500 && attempt < upstreamAttempts) {
+            console.warn(`[xnull-proxy] Upstream ${response.status} on ${targetPath}, retry ${attempt}/${upstreamAttempts}`);
+            await new Promise((r) => setTimeout(r, 400 * attempt));
+            continue;
+          }
+          ok = true;
+          break;
+        } catch (err) {
+          lastErr = err;
+          if (err instanceof Error && err.name === 'AbortError') throw err;
+          if (attempt >= upstreamAttempts) throw err;
+          console.warn(`[xnull-proxy] Upstream fetch failed on ${targetPath}, retry ${attempt}/${upstreamAttempts}`);
+          await new Promise((r) => setTimeout(r, 400 * attempt));
+        }
+      }
+      if (!ok && !response) throw lastErr instanceof Error ? lastErr : new Error('Upstream fetch failed');
     } catch (e) {
       clearTimeout(timeoutId);
       if (e instanceof Error && e.name === 'AbortError') {

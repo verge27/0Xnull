@@ -94,7 +94,8 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
       lastError = e instanceof Error ? e : new Error(String(e));
       
       // Only retry if it's a retryable error and we have retries left
-      if (attempt < maxRetries && isRetryableError(lastError)) {
+      const retryable = isRetryableError(lastError) || (isIdempotentRead && lastError.message.toLowerCase().includes('timed out'));
+      if (attempt < maxRetries && retryable) {
         const delay = isWalletOp ? retryDelayMs : retryDelayMs * attempt; // linear backoff for reads
         console.log(`Request to ${path} failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
         await sleep(delay);
