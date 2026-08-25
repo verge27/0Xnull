@@ -619,14 +619,15 @@ export const api = {
     }, 90000);
   },
 
-  async getMultibetSlip(slipId: string): Promise<MultibetSlip> {
-    return proxyRequest<MultibetSlip>(`/api/multibets/${slipId}`);
-  },
-
-  async updateMultibetPayoutAddress(slipId: string, payoutAddress: string): Promise<{ status: string; payout_address: string }> {
-    return proxyRequest<{ status: string; payout_address: string }>(`/api/multibets/${slipId}/payout-address`, {
+  async queueTokenWithdrawal(
+    token: string,
+    address: string,
+    amountCents: number,
+  ): Promise<{ withdrawal_id: string; status: 'pending'; amount_xmr: number; amount_usd: number }> {
+    return proxyRequest('/api/token/withdraw-v2', {
       method: 'POST',
-      body: JSON.stringify({ payout_address: payoutAddress }),
+      headers: { 'X-TXN-Token': token },
+      body: JSON.stringify({ address, amount_cents: amountCents }),
     });
   },
 
