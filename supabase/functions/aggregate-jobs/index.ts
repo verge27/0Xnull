@@ -353,8 +353,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    if (!serviceKey || presented !== serviceKey) {
-      console.error('[aggregate-jobs] ingest requires the service role key');
+    // Gate 2: prefer the dedicated ingest secret; the service role key stays
+    // accepted for backward compatibility with existing callers.
+    const ingestOk =
+      (typeof ingestSecret === 'string' && ingestSecret.trim().length > 0 && presented === ingestSecret) ||
+      (serviceKey.trim().length > 0 && presented === serviceKey);
+    if (!ingestOk) {
+      console.error('[aggregate-jobs] ingest requires JOBS_INGEST_SECRET');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
