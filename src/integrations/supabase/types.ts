@@ -436,6 +436,7 @@ export type Database = {
           hidden_reason: string | null
           id: string
           last_seen_at: string
+          listing_type: string
           pay_type: string
           pay_xmr: number | null
           posted_at: string | null
@@ -453,6 +454,7 @@ export type Database = {
           hidden_reason?: string | null
           id: string
           last_seen_at?: string
+          listing_type?: string
           pay_type?: string
           pay_xmr?: number | null
           posted_at?: string | null
@@ -470,6 +472,7 @@ export type Database = {
           hidden_reason?: string | null
           id?: string
           last_seen_at?: string
+          listing_type?: string
           pay_type?: string
           pay_xmr?: number | null
           posted_at?: string | null
