@@ -317,11 +317,14 @@ serve(async (req) => {
 
   const jobsSecret = Deno.env.get('JOBS_CRON_SECRET');
   const cronSecret = Deno.env.get('CRON_SECRET');
+  const ingestSecret = Deno.env.get('JOBS_INGEST_SECRET');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const authHeader = req.headers.get('authorization') ?? '';
   const presented = req.headers.get('x-cron-secret') ?? authHeader.replace(/^Bearer\s+/i, '');
 
-  const accepted = [jobsSecret, cronSecret, serviceKey].filter((v): v is string => Boolean(v));
+  const accepted = [jobsSecret, cronSecret, ingestSecret, serviceKey].filter(
+    (v): v is string => typeof v === 'string' && v.trim().length > 0,
+  );
   const authorised = Boolean(presented) && accepted.includes(presented);
   if (!authorised) {
     console.error('[aggregate-jobs] unauthorised request');
