@@ -170,18 +170,13 @@ export const Navbar = () => {
                 </SheetHeader>
 
                 <nav className="flex-1 overflow-y-auto px-3 py-3">
-                  {MOBILE_NAV.map((item, index) => {
+                  {MOBILE_NAV.map((item) => {
                     const active =
                       item.to === '/'
                         ? location.pathname === '/'
                         : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
                     return (
                       <div key={item.to}>
-                        {index === 1 && (
-                          <div className="px-3 pt-4 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            Services
-                          </div>
-                        )}
                         <Link
                           to={item.to}
                           onClick={() => setMobileMenuOpen(false)}
