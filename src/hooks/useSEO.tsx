@@ -152,6 +152,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Tor Access Guide - 0xNull',
     description: 'Access 0xNull via Tor for maximum privacy. Step-by-step guide to anonymous browsing.',
   },
+  '/i2p-guide': {
+    title: 'I2P Access Guide - 0xNull',
+    description: 'Reach 0xNull over I2P. Install an I2P or i2pd router, let it bootstrap, set a browser to the local proxy and open our .i2p address.',
+  },
   '/grapheneos': {
     title: 'GrapheneOS Phones - 0xNull',
     description: 'Privacy-focused GrapheneOS phones. Maximum mobile security with crypto payments.',
