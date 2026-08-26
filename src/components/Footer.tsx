@@ -42,7 +42,7 @@ export const Footer = () => {
           </div>
 
           {/* Predictions */}
-          {!isOnion && (
+          {!isPrivate && (
           <div>
             <h3 className="font-semibold mb-3 text-sm">Predictions</h3>
             <ul className="space-y-2 text-sm">
