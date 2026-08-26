@@ -287,9 +287,9 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                 body: view === 'esports'
                   ? 'Markets open on model odds from recent PandaScore results, or at even odds when no model price exists, with the treasury rotating back as markets settle.'
                   : view === 'crypto'
-                    ? 'Every Flash round opens with $4 at even odds, with the treasury rotating back as each ten-minute market settles.'
+                    ? 'Every Flash round opens at even odds, with the treasury rotating back as each ten-minute market settles.'
                     : view === 'governance'
-                      ? 'Governance markets open with a $4 even-odds seed, with the treasury rotating back as each market settles.'
+                      ? 'Governance markets open at even odds, with the treasury rotating back as each market settles.'
                       : 'Markets open from combined bookmaker odds, or at even odds when no adapter price exists, with the treasury rotating back as markets settle.',
               },
               { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },

@@ -358,7 +358,7 @@ export default function FlashMarkets() {
               <VoucherBadge />
             </div>
             <p className="text-muted-foreground mt-1">Five-minute entry · ten-minute result</p>
-            <p className="text-xs text-emerald-400 mt-2">TXN-funded · $4 even treasury seed each round</p>
+            <p className="text-xs text-emerald-400 mt-2">TXN-funded · even treasury seed each round</p>
           </div>
 
           <div className="flex gap-2 justify-center">
@@ -569,7 +569,7 @@ export default function FlashMarkets() {
       <SEORichText
         title="Flash Markets: TXN-funded Bull vs Bear"
         content={`
-          <p>Flash Markets are ten-minute BTC, ETH and XMR direction markets with a five-minute entry window. Each round opens with an even $4 treasury seed.</p>
+          <p>Flash Markets are ten-minute BTC, ETH and XMR direction markets with a five-minute entry window. Each round opens with an even treasury seed.</p>
           <p>Positions reserve value from the same reusable TXN token used elsewhere on 0xNull. Settlement returns winnings or refunds to that token balance; no per-round wallet, deposit address, payout address or view key is created.</p>
           <p>The outcome is determined from the asset price at the start and end of the round. Winners split the losing pool, while a draw returns every stake.</p>
         `}
