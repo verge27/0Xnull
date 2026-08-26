@@ -384,12 +384,18 @@ export default function FlashMarkets() {
                     maximumFractionDigits: 2,
                   }) || '---'}
                 </p>
-                {priceHistory[asset]?.length >= 2 && (
-                  <p className={`text-xs mt-1 ${priceHistory[asset].at(-1)! >= priceHistory[asset][0] ? 'text-green-500' : 'text-red-500'}`}>
-                    {priceHistory[asset].at(-1)! >= priceHistory[asset][0] ? '▲' : '▼'}{' '}
-                    {Math.abs(((priceHistory[asset].at(-1)! - priceHistory[asset][0]) / priceHistory[asset][0]) * 100).toFixed(3)}% (1m)
-                  </p>
-                )}
+                {(() => {
+                  const history = priceHistory[asset];
+                  if (!history || history.length < 2) return null;
+                  const last = history[history.length - 1];
+                  const first = history[0];
+                  const up = last >= first;
+                  return (
+                    <p className={`text-xs mt-1 ${up ? 'text-green-500' : 'text-red-500'}`}>
+                      {up ? '▲' : '▼'} {Math.abs(((last - first) / first) * 100).toFixed(3)}% (1m)
+                    </p>
+                  );
+                })()}
               </div>
               <div className="flex flex-col items-end gap-1">
                 <Sparkline data={priceHistory[asset] || []} width={100} height={40} />
