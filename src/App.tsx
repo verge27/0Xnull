@@ -50,6 +50,7 @@ const Voice = lazy(() => import("./pages/Voice"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
+const I2pGuide = lazy(() => import("./pages/I2pGuide"));
 const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
 const Work = lazy(() => import("./pages/Work"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
@@ -208,6 +209,7 @@ const App = () => (
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/tor-guide" element={<TorGuide />} />
+                  <Route path="/i2p-guide" element={<I2pGuide />} />
                   <Route path="/external-links" element={<ExternalLinks />} />
                   <Route path="/work" element={<Work />} />
                   <Route path="/get-started" element={<GetStarted />} />

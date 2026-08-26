@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { TOR_URL, I2P_URL } from '@/lib/privateNetworks';
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -900,14 +901,18 @@ while True:
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               <div>
                 <h4 className="font-medium mb-1">Clearnet</h4>
                 <code className="text-xs bg-muted px-2 py-1 rounded">https://0xnull.io</code>
               </div>
               <div>
                 <h4 className="font-medium mb-1">Tor</h4>
-                <code className="text-xs bg-muted px-2 py-1 rounded break-all">http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion</code>
+                <code className="text-xs bg-muted px-2 py-1 rounded break-all">{TOR_URL}</code>
+              </div>
+              <div>
+                <h4 className="font-medium mb-1">I2P</h4>
+                <code className="text-xs bg-muted px-2 py-1 rounded break-all">{I2P_URL}</code>
               </div>
               <div>
                 <h4 className="font-medium mb-1">Health Check</h4>

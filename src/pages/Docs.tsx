@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Key, Coins, ShieldCheck, Globe, FileSignature, Github, Scale, Lock, Copy } from 'lucide-react';
+import { Key, Coins, ShieldCheck, Globe, FileSignature, Github, Scale, Lock } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { TOR_ADDRESS } from '@/components/TrustGrid';
-import { toast } from 'sonner';
+import { PrivateAccessAddresses } from '@/components/PrivateAccessAddresses';
 
 const Section = ({ id, icon: Icon, title, children }: { id: string; icon: typeof Key; title: string; children: React.ReactNode }) => (
   <section id={id} className="scroll-mt-24 border-t border-border/40 pt-10">
@@ -23,13 +21,8 @@ const Section = ({ id, icon: Icon, title, children }: { id: string; icon: typeof
 export default function Docs() {
   useSEO({
     title: 'Docs | Token mechanics, escrow and trust — 0xNull',
-    description: 'How the 0xn_ token works, how prediction market stakes resolve, how marketplace escrow is anchored, plus the warrant canary, onion mirror and open-source components.',
+    description: 'How the 0xn_ token works, how prediction market stakes resolve, how marketplace escrow is anchored, plus the warrant canary, Tor and I2P mirrors and open-source components.',
   });
-
-  const copyOnion = () => {
-    navigator.clipboard.writeText(TOR_ADDRESS);
-    toast.success('Onion address copied');
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -141,22 +134,21 @@ export default function Docs() {
               </p>
             </Section>
 
-            <Section id="onion" icon={Globe} title="Onion mirror">
+            <Section id="onion" icon={Globe} title="Private-network mirrors">
               <p>
-                The full platform runs as a Tor hidden service. Same tokens, same balances, same markets —
-                no clearnet hop and no exit node in the path.
+                0xNull is reachable as a Tor onion service and as an I2P service. Same tokens, same
+                balances, with no clearnet hop in the path. A .i2p address needs a running I2P
+                router, and a .onion address needs Tor.
               </p>
-              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-secondary/40 p-3">
-                <code className="font-mono text-xs break-all text-foreground">{TOR_ADDRESS}</code>
-                <Button size="sm" variant="ghost" onClick={copyOnion} className="gap-1.5">
-                  <Copy className="w-3.5 h-3.5" /> Copy
-                </Button>
-              </div>
               <p>
-                New to this? The <Link to="/tor-guide" className="text-primary hover:underline">Tor guide</Link>{' '}
-                walks through opening an onion address safely.
+                Predictions is not available over the Tor onion service.
               </p>
+              <p>
+                Predictions is not available over the I2P service.
+              </p>
+              <PrivateAccessAddresses />
             </Section>
+
 
             <Section id="crypto" icon={Lock} title="Client-side encryption">
               <p>

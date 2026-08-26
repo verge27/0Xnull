@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom';
 import { Shield, ExternalLink, Github, MessageSquare } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { isPrivateNetwork } from '@/lib/privateNetworks';
+import { PrivateAccessAddresses } from '@/components/PrivateAccessAddresses';
 
 const SIMPLEX_LINK = 'https://smp18.simplex.im/g#o0awCwkgXWzbKUyPb5Z-hOOWZAoghJl2SfyzOHv4Uas';
-const TOR_ADDRESS = 'onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion';
 
 export const Footer = () => {
-  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
+  const isPrivate = isPrivateNetwork();
 
   return (
     <footer className="border-t border-border bg-card/30 mt-auto">
       <div className="container mx-auto px-4 py-8">
-        <div className={`grid grid-cols-2 gap-8 ${isOnion ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
+        <div className={`grid grid-cols-2 gap-8 ${isPrivate ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-3">
@@ -41,7 +42,7 @@ export const Footer = () => {
           </div>
 
           {/* Predictions */}
-          {!isOnion && (
+          {!isPrivate && (
           <div>
             <h3 className="font-semibold mb-3 text-sm">Predictions</h3>
             <ul className="space-y-2 text-sm">
@@ -142,21 +143,12 @@ export const Footer = () => {
             End-to-end encrypted. No email. Privacy by default.
           </p>
           
-          {/* Tor Address */}
-          <div className="text-sm text-muted-foreground">
-            <span className="text-foreground font-medium">Tor:</span>{' '}
-            <a 
-              href={`http://${TOR_ADDRESS}`}
-              className="font-mono text-xs hover:text-foreground transition-colors break-all"
-            >
-              {TOR_ADDRESS}
-            </a>
-            <div className="mt-2">
-              <Link to="/tor-guide" className="text-primary hover:text-foreground transition-colors text-xs">
-                How to use Tor →
-              </Link>
-            </div>
+          {/* Private access */}
+          <div className="w-full max-w-md text-left">
+            <h3 className="font-semibold text-sm mb-3 text-center">Private access</h3>
+            <PrivateAccessAddresses compact />
           </div>
+
         </div>
 
         <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">

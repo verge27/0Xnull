@@ -152,6 +152,10 @@ const pageMeta: Record<string, SEOProps> = {
     title: 'Tor Access Guide - 0xNull',
     description: 'Access 0xNull via Tor for maximum privacy. Step-by-step guide to anonymous browsing.',
   },
+  '/i2p-guide': {
+    title: 'I2P Access Guide - 0xNull',
+    description: 'Reach 0xNull over I2P. Install an I2P or i2pd router, let it bootstrap, set a browser to the local proxy and open our .i2p address.',
+  },
   '/grapheneos': {
     title: 'GrapheneOS Phones - 0xNull',
     description: 'Privacy-focused GrapheneOS phones. Maximum mobile security with crypto payments.',
@@ -340,6 +344,10 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
   '/tor-guide': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Tor Guide', url: 'https://0xnull.io/tor-guide' },
+  ],
+  '/i2p-guide': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'I2P Guide', url: 'https://0xnull.io/i2p-guide' },
   ],
   '/grapheneos': [
     { name: 'Home', url: 'https://0xnull.io/' },
@@ -905,6 +913,29 @@ const articleSchemas: Record<string, StructuredData> = {
     url: 'https://0xnull.io/tor-guide',
     datePublished: '2024-01-01',
     dateModified: '2025-01-02',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon-512.png',
+      },
+    },
+    proficiencyLevel: 'Beginner',
+  },
+  '/i2p-guide': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'How to Access 0xNull over I2P',
+    description: 'Install an I2P or i2pd router, let it bootstrap, configure a browser profile for the local HTTP proxy on 127.0.0.1:4444 and open the 0xNull .i2p address.',
+    url: 'https://0xnull.io/i2p-guide',
+    datePublished: '2026-08-26',
+    dateModified: '2026-08-26',
     author: {
       '@type': 'Organization',
       name: '0xNull',
