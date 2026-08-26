@@ -332,8 +332,8 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
                       <div className="mt-5 space-y-2">
                         <div className="flex justify-between text-xs font-medium">
-                          <span className="text-emerald-400">YES {yesPercent}%</span>
-                          <span className="text-red-400">NO {noPercent}%</span>
+                          <span className="text-emerald-400">{money(yes)} YES · {yesPercent}%</span>
+                          <span className="text-red-400">{money(no)} NO · {noPercent}%</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-red-500/30">
                           <div className="h-full bg-emerald-500" style={{ width: `${yesPercent}%` }} />
@@ -349,10 +349,11 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                         </Button>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
-                        <span>{money(totalPool)} total liquidity</span>
-                        <span>{market.bookmaker_count || 0} books · median no-vig</span>
+                      <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                        <span>{money(totalPool)} total</span>
+                        <span className="text-right">{pricingLabel(market)}</span>
                       </div>
+
                     </CardContent>
                   </Card>
                 );
