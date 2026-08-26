@@ -58,7 +58,7 @@ export default function PredictionsHub() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'External opening odds', body: 'At least two fresh books; median no-vig consensus is stored with the seed.' },
+              { icon: BarChart3, title: 'Opening odds', body: 'Adapter prices are stored with the seed. Markets without an adapter price open at even odds.' },
               { icon: WalletCards, title: 'TXN-ledger funding', body: 'The stake moves from available to reserved on the same 0xn_ token.' },
               { icon: ShieldCheck, title: 'Automatic return', body: 'Wins and refunds credit the same balance. Withdraw only when you choose.' },
             ].map(({ icon: Icon, title, body }) => (
