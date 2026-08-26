@@ -345,6 +345,10 @@ const breadcrumbConfig: Record<string, Array<{ name: string; url: string }>> = {
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Tor Guide', url: 'https://0xnull.io/tor-guide' },
   ],
+  '/i2p-guide': [
+    { name: 'Home', url: 'https://0xnull.io/' },
+    { name: 'I2P Guide', url: 'https://0xnull.io/i2p-guide' },
+  ],
   '/grapheneos': [
     { name: 'Home', url: 'https://0xnull.io/' },
     { name: 'Infrastructure', url: 'https://0xnull.io/infra' },
