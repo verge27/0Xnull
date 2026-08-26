@@ -320,6 +320,8 @@ export interface PredictionMarket {
   v2_bet_count?: number;
   bookmaker_count?: number;
   odds_observed_at?: number;
+  pricing_method?: 'model' | 'bookmaker' | string;
+  odds_source?: string;
   funding_model?: 'txn_balance' | 'legacy_xmr';
   created_at: number;
   pool_address?: string;
