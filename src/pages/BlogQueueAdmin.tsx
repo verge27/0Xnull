@@ -207,7 +207,33 @@ export default function BlogQueueAdmin() {
           ))}
         </div>
       </main>
+
+      <AlertDialog open={!!confirmRow} onOpenChange={(open) => !open && setConfirmRow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Day {confirmRow?.day_index} is already published</AlertDialogTitle>
+            <AlertDialogDescription>
+              Regenerating will not touch the live post. It creates a new draft post you can review
+              and publish yourself.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const row = confirmRow;
+                setConfirmRow(null);
+                if (row) runGeneration(row, true);
+              }}
+            >
+              Create new draft
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Footer />
+
     </div>
   );
 }
