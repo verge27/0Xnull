@@ -88,7 +88,7 @@ export default function BlogQueueAdmin() {
     }
   };
 
-  const regenerate = async (row: QueueRow) => {
+  const runGeneration = async (row: QueueRow, asDraft: boolean) => {
     setBusy(row.id);
     const reset = await supabase
       .from('blog_queue')
@@ -102,13 +102,24 @@ export default function BlogQueueAdmin() {
     }
 
     const { data, error } = await supabase.functions.invoke('generate-daily-post', {
-      body: { day_index: row.day_index, force: true },
+      body: { day_index: row.day_index, force: true, as_draft: asDraft },
     });
     setBusy(null);
 
     if (error) toast.error(`Generation failed: ${error.message}`);
-    else toast.success(`Day ${row.day_index}: ${(data as { status?: string })?.status ?? 'done'}`);
+    else
+      toast.success(
+        `Day ${row.day_index}: ${(data as { status?: string })?.status ?? 'done'}${asDraft ? ' (new draft)' : ''}`,
+      );
     load();
+  };
+
+  const regenerate = (row: QueueRow) => {
+    if (row.status === 'published') {
+      setConfirmRow(row);
+      return;
+    }
+    runGeneration(row, false);
   };
 
   const togglePublishMode = async (checked: boolean) => {
