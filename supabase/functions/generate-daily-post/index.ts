@@ -51,7 +51,7 @@ function validate(body: string, dayIndex: number): string | null {
   if (words < 350) return `body too short (${words} words)`;
   if (words > 800) return `body too long (${words} words)`;
   if (body.includes("!")) return "contains an exclamation mark";
-  if (/\w+, \w+, and \w+/.test(body)) return "contains an Oxford comma";
+  if (/\w+, \w+ and \w+/.test(body)) return "contains an Oxford comma";
   if (EMOJI.test(body)) return "contains an emoji";
   if (/^#\s*\w/m.test(body)) return "contains a markdown hashtag heading";
   for (const w of BANNED) {
