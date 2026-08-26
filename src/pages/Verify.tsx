@@ -120,23 +120,23 @@ const Verify = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Tor/Onion Address */}
+          {/* Private access */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                Tor / Onion Address
+                Private access
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <code className="block bg-muted p-3 rounded-md text-sm break-all font-mono">
-                http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion
-              </code>
-              <p className="text-sm text-muted-foreground mt-2">
-                Access 0xNull securely over the Tor network for enhanced privacy.
+              <PrivateAccessAddresses showPredictionsNotice />
+              <p className="text-sm text-muted-foreground mt-3">
+                Reach 0xNull over the Tor onion service or the I2P service. Each address needs the
+                matching network client, and each guide explains the setup.
               </p>
             </CardContent>
           </Card>
+
 
           {/* PGP Fingerprint */}
           <Card>
