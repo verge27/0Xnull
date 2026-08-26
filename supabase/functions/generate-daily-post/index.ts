@@ -84,7 +84,7 @@ serve(async (req) => {
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
   // --- Auth: cron secret, or an admin's JWT (manual regenerate from /admin/blog-queue)
-  const cronSecret = Deno.env.get("CRON_SECRET");
+  const cronSecret = Deno.env.get("BLOG_CRON_SECRET") || Deno.env.get("CRON_SECRET");
   const authHeader = req.headers.get("authorization") || "";
   const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
   const requestSecret = req.headers.get("x-cron-secret") || bearer;
