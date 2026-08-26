@@ -256,15 +256,33 @@ const TokenCashout = () => {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-border bg-secondary/40 p-4 space-y-1 text-sm">
+              <div className="rounded-lg border border-border bg-secondary/40 p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Estimated XMR received</span>
-                  <span className="font-mono">
-                    {estimatedXmr ? `${estimatedXmr} XMR` : '—'}
+                  <span className="text-muted-foreground">Withdrawal amount</span>
+                  <span className="font-mono">{breakdown ? `$${breakdown.gross.toFixed(2)}` : '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">0.5% deduction</span>
+                  <span className="font-mono text-destructive">
+                    {breakdown ? `-$${breakdown.fee.toFixed(2)}` : '—'}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Converted at the live XMR price when the withdrawal is processed, minus the standard 0.5% deduction.
+                <div className="flex justify-between border-t border-border pt-2">
+                  <span className="text-muted-foreground">Net after deduction</span>
+                  <span className="font-mono">{breakdown ? `$${breakdown.net.toFixed(2)}` : '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Live XMR/USD rate</span>
+                  <span className="font-mono">{breakdown ? `$${breakdown.rate.toFixed(2)}` : '—'}</span>
+                </div>
+                <div className="flex justify-between border-t border-border pt-2">
+                  <span className="font-medium">Estimated XMR received</span>
+                  <span className="font-mono font-medium">
+                    {breakdown ? `${breakdown.xmr} XMR` : '—'}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Net TXN/USD is converted at the live XMR price when the withdrawal is processed.
                 </p>
               </div>
 
