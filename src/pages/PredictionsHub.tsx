@@ -15,7 +15,7 @@ const categories = [
   { title: 'Sports', description: 'All bookmaker-priced events', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
   { title: 'Cricket', description: 'Cricket-only event filter', href: '/cricket-predictions', icon: Trophy, color: 'text-cyan-400', live: true },
   { title: 'Combat', description: 'MMA and boxing events', href: '/predictions/sports/combat', icon: Trophy, color: 'text-red-400', live: true },
-  { title: 'Esports', description: 'Awaiting a v2 odds source', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: false },
+  { title: 'Esports', description: 'Model odds · PandaScore results', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
   { title: 'Crypto', description: 'Awaiting a v2 odds adapter', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: false },
   { title: 'Governance', description: 'Awaiting a v2 odds adapter', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: false },
 ];
