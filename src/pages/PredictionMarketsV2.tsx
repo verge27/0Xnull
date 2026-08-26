@@ -136,10 +136,12 @@ function money(cents: number) {
 }
 
 function pricingLabel(market: PredictionMarket) {
+  if (market.pricing_method === 'even_fallback') return 'Even odds · adapter fallback';
   if (market.pricing_method === 'model') return 'Model odds · PandaScore results';
   const books = market.bookmaker_count || 0;
-  return books > 0 ? `${books} books · median no-vig` : 'Externally priced';
+  return books > 0 ? `${books} books · median no-vig` : 'Even odds · adapter fallback';
 }
+
 
 
 export default function PredictionMarketsV2({ view = 'sports' }: { view?: PredictionMarketView }) {
