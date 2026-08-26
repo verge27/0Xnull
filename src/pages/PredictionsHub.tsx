@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, ShieldCheck, Trophy, WalletCards } from 'lucide-react';
+import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, Info, ShieldCheck, Trophy, WalletCards } from 'lucide-react';
+
 
 import { Navbar } from '@/components/Navbar';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
@@ -9,7 +10,9 @@ import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSEO } from '@/hooks/useSEO';
+
 
 const categories = [
   { title: 'Sports', description: 'All bookmaker-priced events', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
@@ -27,7 +30,8 @@ export default function PredictionsHub() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <TooltipProvider>
+      <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <PredictionsSubsiteNav />
 
@@ -86,12 +90,27 @@ export default function PredictionsHub() {
                           {live ? 'Live' : 'Next adapter'}
                         </Badge>
                       </div>
-                      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+                      <div className="mt-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{title}</h3>
+                        {title === 'Esports' && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex cursor-help text-muted-foreground hover:text-primary" aria-label="Esports odds source">
+                                <Info className="h-4 w-4" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p>Odds are derived from PandaScore performance history.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
+
             </div>
           </div>
 
@@ -101,5 +120,6 @@ export default function PredictionsHub() {
 
       <Footer />
     </div>
+    </TooltipProvider>
   );
 }
