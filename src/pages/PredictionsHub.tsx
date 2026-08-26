@@ -30,7 +30,8 @@ export default function PredictionsHub() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <TooltipProvider>
+      <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <PredictionsSubsiteNav />
 
