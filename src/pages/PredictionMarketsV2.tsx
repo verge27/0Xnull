@@ -268,9 +268,13 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
             <Card className="border-dashed bg-card/40">
               <CardContent className="py-14 text-center">
                 <Trophy className="mx-auto h-10 w-10 text-muted-foreground" />
-                <h2 className="mt-4 text-xl font-semibold">No externally priced markets in this section</h2>
+                <h2 className="mt-4 text-xl font-semibold">
+                  {view === 'governance' ? 'No open governance markets' : 'No externally priced markets in this section'}
+                </h2>
                 <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-                  v2 only opens a market when at least two current bookmakers agree on both sides. The catalogue refreshes every 30 minutes.
+                  {view === 'governance'
+                    ? 'Governance markets are long-horizon questions resolved by the 0xNull admin team. New markets appear here when they open.'
+                    : 'v2 only opens a market when at least two current bookmakers agree on both sides. The catalogue refreshes every 30 minutes.'}
                 </p>
                 {view !== 'sports' && (
                   <Button asChild className="mt-5" variant="outline">
@@ -292,10 +296,12 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                   <Card key={market.market_id} className="overflow-hidden border-border/70 bg-card/70 transition-colors hover:border-primary/40">
                     <CardContent className="p-5">
                       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                        <Badge variant="outline">{sportLabel(market.odds_sport_key)}</Badge>
-                        <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400" variant="outline">
-                          {money(seedTotal)} seeded
-                        </Badge>
+                        <Badge variant="outline">{view === 'governance' ? 'Governance' : sportLabel(market.odds_sport_key)}</Badge>
+                        {seedTotal > 0 && (
+                          <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400" variant="outline">
+                            {money(seedTotal)} seeded
+                          </Badge>
+                        )}
                       </div>
                       <h2 className="min-h-12 text-lg font-semibold leading-snug">{market.title}</h2>
                       <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
