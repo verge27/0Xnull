@@ -141,22 +141,21 @@ export default function Docs() {
               </p>
             </Section>
 
-            <Section id="onion" icon={Globe} title="Onion mirror">
+            <Section id="onion" icon={Globe} title="Private-network mirrors">
               <p>
-                The full platform runs as a Tor hidden service. Same tokens, same balances, same markets —
-                no clearnet hop and no exit node in the path.
+                0xNull is reachable as a Tor onion service and as an I2P service. Same tokens, same
+                balances, with no clearnet hop in the path. A .i2p address needs a running I2P
+                router, and a .onion address needs Tor.
               </p>
-              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-secondary/40 p-3">
-                <code className="font-mono text-xs break-all text-foreground">{TOR_ADDRESS}</code>
-                <Button size="sm" variant="ghost" onClick={copyOnion} className="gap-1.5">
-                  <Copy className="w-3.5 h-3.5" /> Copy
-                </Button>
-              </div>
               <p>
-                New to this? The <Link to="/tor-guide" className="text-primary hover:underline">Tor guide</Link>{' '}
-                walks through opening an onion address safely.
+                Predictions is not available over the Tor onion service.
               </p>
+              <p>
+                Predictions is not available over the I2P service.
+              </p>
+              <PrivateAccessAddresses />
             </Section>
+
 
             <Section id="crypto" icon={Lock} title="Client-side encryption">
               <p>
