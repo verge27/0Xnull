@@ -48,9 +48,10 @@ function StatCard({ label, value, icon, highlight, subtext }: StatCardProps) {
 
 interface ShareableLinkProps {
   code: string;
+  discount: string;
 }
 
-function ShareableLinks({ code }: ShareableLinkProps) {
+function ShareableLinks({ code, discount }: ShareableLinkProps) {
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   
   const baseUrl = window.location.origin;
@@ -72,12 +73,12 @@ function ShareableLinks({ code }: ShareableLinkProps) {
       <CardHeader>
         <CardTitle className="text-lg">Your Referral Links</CardTitle>
         <CardDescription>
-          Share these links with your audience - they'll automatically get your 17% fee discount
+          Share these links with your audience — their token is permanently linked to your {discount} fee discount
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {links.map((link) => {
-          const fullUrl = `${baseUrl}${link.path}?voucher=${code}`;
+          const fullUrl = `${baseUrl}${link.path}?ref=${code}`;
           const isCopied = copiedUrl === fullUrl;
           
           return (
@@ -280,6 +281,12 @@ export default function InfluencerDashboard() {
     );
   }
 
+  const discount = stats.terms?.user_discount || 'discounted';
+  const v2Users = stats.stats.v2_unique_users ?? stats.stats.unique_users;
+  const v2Bets = stats.stats.v2_total_bets ?? stats.stats.total_bets;
+  const v2Volume = stats.stats.v2_total_volume_usd ?? 0;
+  const v2Balance = stats.stats.v2_pending_balance_usd ?? 0;
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -313,7 +320,7 @@ export default function InfluencerDashboard() {
             </div>
           </div>
           <p className="text-muted-foreground text-sm md:text-right">
-            Share this code for 17% fee savings
+            Share this code for {discount} fee savings
           </p>
         </div>
 
@@ -321,46 +328,54 @@ export default function InfluencerDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             label="Unique Users"
-            value={stats.stats.unique_users}
+            value={v2Users}
             icon={<Users className="h-4 w-4" />}
           />
           <StatCard
             label="Total Bets"
-            value={stats.stats.total_bets}
+            value={v2Bets}
             icon={<TrendingUp className="h-4 w-4" />}
           />
           <StatCard
-            label="Volume (XMR)"
-            value={stats.stats.total_volume_xmr.toFixed(4)}
+            label="V2 Volume"
+            value={`$${v2Volume.toFixed(2)}`}
             icon={<Coins className="h-4 w-4" />}
           />
           <StatCard
-            label="Your Earnings"
-            value={`${stats.stats.total_influencer_earnings.toFixed(6)} XMR`}
+            label="Your Balance"
+            value={`$${v2Balance.toFixed(2)}`}
             icon={<Wallet className="h-4 w-4 text-green-500" />}
             highlight
-            subtext={stats.stats.pending_payout > 0 ? `${stats.stats.pending_payout.toFixed(6)} XMR pending` : undefined}
+            subtext={stats.terms?.referrer_share}
           />
         </div>
 
-        {/* Additional Stats Row */}
+        {/* Referral terms */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="border-border/50 bg-card/80">
             <CardContent className="pt-6">
-              <div className="text-muted-foreground text-sm mb-1">Total Wins (XMR)</div>
-              <div className="text-xl font-bold">{stats.stats.total_wins_xmr.toFixed(4)}</div>
+              <div className="text-muted-foreground text-sm mb-1">User Fee</div>
+              <div className="text-xl font-bold text-green-500">
+                {stats.terms?.effective_fee || 'Discounted'}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {discount} below the {stats.terms?.standard_fee || '0.4%'} standard fee
+              </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/80">
             <CardContent className="pt-6">
-              <div className="text-muted-foreground text-sm mb-1">User Rebates Given</div>
-              <div className="text-xl font-bold text-green-500">{stats.stats.total_user_rebates.toFixed(6)} XMR</div>
+              <div className="text-muted-foreground text-sm mb-1">Your Share</div>
+              <div className="text-xl font-bold text-green-500">
+                {stats.terms?.referrer_share || 'Referral share'}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">Accrued when referred users win</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Shareable Links */}
-        <ShareableLinks code={stats.code} />
+        <ShareableLinks code={stats.code} discount={discount} />
 
         {/* Leaderboard */}
         <Leaderboard highlightCode={stats.code} />

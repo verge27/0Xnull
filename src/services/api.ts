@@ -184,6 +184,11 @@ export interface VoucherValidationResponse {
   influencer?: string;
   user_benefit?: string;
   effective_fee?: string;
+  terms?: {
+    user_discount: string;
+    effective_fee: string;
+    referrer_share: string;
+  };
 }
 
 export interface VoucherStats {
@@ -199,6 +204,20 @@ export interface VoucherStats {
     total_influencer_earnings: number;
     total_user_rebates: number;
     pending_payout: number;
+    v2_unique_users?: number;
+    v2_total_bets?: number;
+    v2_total_volume_usd?: number;
+    v2_earning_events?: number;
+    v2_attributed_fee_usd?: number;
+    v2_total_earnings_usd?: number;
+    v2_pending_balance_usd?: number;
+  };
+  terms?: {
+    user_discount: string;
+    effective_fee: string;
+    standard_fee: string;
+    referrer_share: string;
+    permanent: boolean;
   };
 }
 
@@ -255,6 +274,7 @@ export interface PredictionV2BetRequest {
   market_id: string;
   side: 'YES' | 'NO';
   amount_cents: number;
+  voucher_code?: string;
 }
 
 export interface PredictionV2Bet {
@@ -269,6 +289,7 @@ export interface PredictionV2Bet {
   created_at: number;
   resolved_at: number | null;
   funding: 'txn_balance';
+  referral_code?: string | null;
 }
 
 export interface PredictionV2Pool {
@@ -665,6 +686,23 @@ export const api = {
   // Voucher APIs
   async validateVoucher(code: string): Promise<VoucherValidationResponse> {
     return proxyRequest<VoucherValidationResponse>(`/api/vouchers/validate/${encodeURIComponent(code.toUpperCase())}`);
+  },
+
+  async bindVoucher(token: string, code: string): Promise<{
+    code: string;
+    influencer: string;
+    bound: boolean;
+    applied: boolean;
+    permanent: boolean;
+    user_discount_percent: number;
+    effective_fee_bps: number;
+    referrer_share_bps: number;
+  }> {
+    return proxyRequest('/api/vouchers/bind', {
+      method: 'POST',
+      headers: { 'X-TXN-Token': token },
+      body: JSON.stringify({ code }),
+    });
   },
 
   async getVoucherStats(code: string): Promise<VoucherStats> {

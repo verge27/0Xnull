@@ -4,6 +4,28 @@ import { toast } from 'sonner';
 
 const VOUCHER_KEY = '0xnull_voucher';
 const VOUCHER_INFO_KEY = '0xnull_voucher_info';
+const VOUCHER_CHANGE_EVENT = '0xnull:voucher-change';
+
+function readStoredVoucher() {
+  try {
+    return localStorage.getItem(VOUCHER_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function readStoredVoucherInfo(): VoucherInfo | null {
+  try {
+    const stored = localStorage.getItem(VOUCHER_INFO_KEY);
+    if (!stored) return null;
+    const info = JSON.parse(stored) as VoucherInfo;
+    return info.validatedAt && Date.now() - info.validatedAt < 7 * 24 * 60 * 60 * 1000
+      ? info
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 export interface VoucherInfo {
   code: string;
@@ -24,29 +46,21 @@ export interface VoucherState {
 }
 
 export function useVoucher() {
-  const [voucher, setVoucher] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(VOUCHER_KEY);
-    } catch {
-      return null;
-    }
-  });
+  const [voucher, setVoucher] = useState<string | null>(readStoredVoucher);
+  const [voucherInfo, setVoucherInfo] = useState<VoucherInfo | null>(readStoredVoucherInfo);
 
-  const [voucherInfo, setVoucherInfo] = useState<VoucherInfo | null>(() => {
-    try {
-      const stored = localStorage.getItem(VOUCHER_INFO_KEY);
-      if (stored) {
-        const info = JSON.parse(stored);
-        // Expire after 7 days
-        if (info.validatedAt && Date.now() - info.validatedAt < 7 * 24 * 60 * 60 * 1000) {
-          return info;
-        }
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  });
+  useEffect(() => {
+    const syncVoucher = () => {
+      setVoucher(readStoredVoucher());
+      setVoucherInfo(readStoredVoucherInfo());
+    };
+    window.addEventListener(VOUCHER_CHANGE_EVENT, syncVoucher);
+    window.addEventListener('storage', syncVoucher);
+    return () => {
+      window.removeEventListener(VOUCHER_CHANGE_EVENT, syncVoucher);
+      window.removeEventListener('storage', syncVoucher);
+    };
+  }, []);
 
   const saveVoucher = useCallback((code: string | null, info?: VoucherInfo | null) => {
     try {
@@ -62,6 +76,7 @@ export function useVoucher() {
         setVoucherInfo(null);
       }
       setVoucher(code);
+      window.dispatchEvent(new Event(VOUCHER_CHANGE_EVENT));
     } catch {
       // localStorage might be unavailable
     }
@@ -76,6 +91,7 @@ export function useVoucher() {
     }
     setVoucher(null);
     setVoucherInfo(null);
+    window.dispatchEvent(new Event(VOUCHER_CHANGE_EVENT));
   }, []);
 
   const validateVoucher = useCallback(async (code: string): Promise<VoucherInfo | null> => {
@@ -131,7 +147,7 @@ export function useVoucher() {
 // Hook to read voucher from URL params
 // Supports both ?voucher= and ?ref= parameters for flexibility
 export function useVoucherFromUrl() {
-  const { saveVoucher, validateVoucher, voucher: existingVoucher } = useVoucher();
+  const { saveVoucher, validateVoucher, voucher: existingVoucher, voucherInfo } = useVoucher();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -184,4 +200,6 @@ export function useVoucherFromUrl() {
       });
     }
   }, [saveVoucher, validateVoucher, existingVoucher]);
+
+  return { voucher: existingVoucher, voucherInfo };
 }

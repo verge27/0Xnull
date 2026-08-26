@@ -237,7 +237,11 @@ interface FeeComparisonProps {
 }
 
 export function FeeComparison({ voucherApplied, className }: FeeComparisonProps) {
+  const { voucherInfo } = useVoucher();
   if (!voucherApplied) return null;
+
+  const effectiveFee = voucherInfo?.effectiveFee?.split(' ')[0] || 'discounted fee';
+  const savings = voucherInfo?.userBenefit?.match(/\d+(?:\.\d+)?%/)?.[0];
 
   return (
     <div className={cn(
@@ -248,8 +252,8 @@ export function FeeComparison({ voucherApplied, className }: FeeComparisonProps)
       <Percent className="w-3.5 h-3.5 text-emerald-500" />
       <span className="text-sm">
         <span className="line-through text-muted-foreground">0.4% fee</span>
-        <span className="text-emerald-500 font-medium ml-2">0.333% fee</span>
-        <span className="text-emerald-500/80 text-xs ml-1">(17% savings)</span>
+        <span className="text-emerald-500 font-medium ml-2">{effectiveFee} fee</span>
+        {savings && <span className="text-emerald-500/80 text-xs ml-1">({savings} savings)</span>}
       </span>
     </div>
   );

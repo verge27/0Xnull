@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 
 import { Navbar } from '@/components/Navbar';
+import { VoucherBadge } from '@/components/VoucherBadge';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
 import { Footer } from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ import { Label } from '@/components/ui/label';
 import { usePredictionBetsV2 } from '@/hooks/usePredictionBetsV2';
 import { useToken } from '@/hooks/useToken';
 import { useSEO } from '@/hooks/useSEO';
+import { useVoucher, useVoucherFromUrl } from '@/hooks/useVoucher';
 import { api, type PredictionMarket } from '@/services/api';
 import { BETTING_CONFIG, validateBetAmount } from '@/lib/bettingConfig';
 
@@ -163,7 +165,10 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
     description: copy.description,
   });
   const { token, balance, loading: tokenLoading } = useToken();
+  const { voucher: referralCode, voucherInfo } = useVoucherFromUrl();
+  const { saveVoucher } = useVoucher();
   const { placeBet } = usePredictionBetsV2();
+  const boundReferral = useRef<string | null>(null);
   const [markets, setMarkets] = useState<PredictionMarket[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -192,6 +197,28 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
     const interval = window.setInterval(() => void fetchMarkets(), 60_000);
     return () => window.clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!token || !referralCode) return;
+    const bindingKey = `${token}:${referralCode}`;
+    if (boundReferral.current === bindingKey) return;
+    boundReferral.current = bindingKey;
+    void api.bindVoucher(token, referralCode).then((result) => {
+      if (!result.applied && result.code !== referralCode) {
+        saveVoucher(result.code, {
+          code: result.code,
+          influencer: result.influencer,
+          userBenefit: `${result.user_discount_percent}% off prediction fees, permanently on this token`,
+          effectiveFee: `${result.effective_fee_bps / 100}% (vs 0.4% standard)`,
+          validatedAt: Date.now(),
+        });
+        toast.info(`This token is already permanently linked to ${result.code}.`);
+      }
+    }).catch((cause) => {
+      boundReferral.current = null;
+      toast.error(cause instanceof Error ? cause.message : 'Unable to attach referral');
+    });
+  }, [referralCode, saveVoucher, token]);
 
   const visibleMarkets = useMemo(() => {
     const now = Date.now() / 1000;
@@ -234,6 +261,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
         market_id: selectedMarket.market_id,
         side,
         amount_cents: amountCents,
+        voucher_code: referralCode || undefined,
       });
       toast.success(`${money(amountCents)} reserved on ${side}`, {
         description: 'The position is attached to this 0xn_ token. No second deposit is required.',
@@ -262,6 +290,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               </Badge>
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{copy.title}</h1>
               <p className="mt-2 max-w-2xl text-muted-foreground">{copy.description}</p>
+              <VoucherBadge className="mt-3" showClear={false} />
             </div>
             <div className="flex items-center gap-3">
               <Card className="border-primary/30 bg-primary/5">
@@ -453,7 +482,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
             </Card>
 
             <p className="text-xs text-muted-foreground">
-              The stake is reserved immediately from this 0xn_ token. Settlement credits the same balance automatically. Draws, cancellations and one-sided pools refund the stake; the 0.4% fee applies to winnings only.
+              The stake is reserved immediately from this 0xn_ token. Settlement credits the same balance automatically. Draws, cancellations and one-sided pools refund the stake; the {voucherInfo?.effectiveFee?.split(' ')[0] || '0.4%'} fee applies to winnings only.
             </p>
 
             {!token || balance <= 0 ? (
