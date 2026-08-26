@@ -134,6 +134,13 @@ function money(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
+function pricingLabel(market: PredictionMarket) {
+  if (market.pricing_method === 'model') return 'Model odds · PandaScore results';
+  const books = market.bookmaker_count || 0;
+  return books > 0 ? `${books} books · median no-vig` : 'Externally priced';
+}
+
+
 export default function PredictionMarketsV2({ view = 'sports' }: { view?: PredictionMarketView }) {
   const copy = VIEW_COPY[view];
   useSEO({
