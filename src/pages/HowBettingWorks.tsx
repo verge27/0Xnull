@@ -87,7 +87,7 @@ export default function HowBettingWorks() {
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>A market is created: "Will Newcastle United win?"</li>
                   <li>Two pools exist: YES pool and NO pool</li>
-                  <li>Treasury liquidity seeds every eligible market from combined bookmaker odds and rotates back as markets settle</li>
+                  <li>Treasury liquidity seeds every eligible market from combined bookmaker odds where an adapter price exists, at even odds otherwise, and rotates back as markets settle</li>
                 </ul>
               </div>
               <div>
@@ -405,7 +405,7 @@ export default function HowBettingWorks() {
                 </TableBody>
               </Table>
               <p className="text-muted-foreground mt-4">
-                Treasury positions are opened from a stored bookmaker-consensus snapshot. The fee ledger is separate from treasury trading results.
+                Treasury positions are opened from a stored bookmaker-consensus snapshot, or split evenly when no adapter price is available. The fee ledger is separate from treasury trading results.
               </p>
             </CardContent>
           </Card>

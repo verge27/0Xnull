@@ -42,36 +42,37 @@ export type PredictionMarketView =
 const VIEW_COPY: Record<PredictionMarketView, { title: string; description: string }> = {
   all: {
     title: 'Prediction Markets',
-    description: 'Externally priced markets funded from one reusable 0xn_ token.',
+    description: 'Markets funded from one reusable 0xn_ token, priced by adapter odds or an even-odds seed.',
   },
   sports: {
     title: 'Sports Predictions',
-    description: 'Near-term events priced from aggregated bookmaker odds.',
+    description: 'Bookmaker odds when available, even odds otherwise.',
   },
   cricket: {
     title: 'Cricket Predictions',
-    description: 'Cricket markets priced from aggregated bookmaker odds.',
+    description: 'Cricket markets use bookmaker odds when available and even odds otherwise.',
   },
   combat: {
     title: 'Combat Predictions',
-    description: 'MMA and boxing markets priced from aggregated bookmaker odds.',
+    description: 'MMA and boxing markets use bookmaker odds when available and even odds otherwise.',
   },
   esports: {
     title: 'Esports Predictions',
-    description: 'Esports markets priced by the 0xNull model from recent PandaScore results, funded from your 0xn_ token.',
+    description: 'Esports markets use 0xNull model odds from recent PandaScore results when available and even odds otherwise, funded from your 0xn_ token.',
   },
   crypto: {
     title: 'Crypto Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'Crypto markets open on an even-odds treasury seed and accept V2 stakes.',
   },
   governance: {
     title: 'Governance Predictions',
-    description: 'Long-horizon admin-resolved markets funded from your 0xn_ token balance.',
+    description: 'Long-horizon admin-resolved markets on an even-odds treasury seed, funded from your 0xn_ token balance.',
   },
   starcraft: {
     title: 'StarCraft Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'StarCraft markets use model odds when available and even odds otherwise.',
   },
+
 };
 
 function marketMatchesView(market: PredictionMarket, view: PredictionMarketView) {
@@ -135,10 +136,12 @@ function money(cents: number) {
 }
 
 function pricingLabel(market: PredictionMarket) {
+  if (market.pricing_method === 'even_fallback') return 'Even odds · adapter fallback';
   if (market.pricing_method === 'model') return 'Model odds · PandaScore results';
   const books = market.bookmaker_count || 0;
-  return books > 0 ? `${books} books · median no-vig` : 'Externally priced';
+  return books > 0 ? `${books} books · median no-vig` : 'Even odds · adapter fallback';
 }
+
 
 
 export default function PredictionMarketsV2({ view = 'sports' }: { view?: PredictionMarketView }) {
@@ -266,7 +269,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: view === 'esports' ? 'Every market opens on model odds from recent PandaScore results, with the treasury rotating back as markets settle.' : 'Every market opens from combined bookmaker odds, with the treasury rotating back as markets settle.' },
+              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: view === 'esports' ? 'Markets open on model odds from recent PandaScore results, or at even odds when no model price exists, with the treasury rotating back as markets settle.' : 'Markets open from combined bookmaker odds, or at even odds when no adapter price exists, with the treasury rotating back as markets settle.' },
               { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },
               { icon: CheckCircle2, title: 'Automatic settlement', body: 'Wins and refunds return to the same token balance when the oracle resolves.' },
             ].map(({ icon: Icon, title, body }) => (
@@ -298,13 +301,14 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               <CardContent className="py-14 text-center">
                 <Trophy className="mx-auto h-10 w-10 text-muted-foreground" />
                 <h2 className="mt-4 text-xl font-semibold">
-                  {view === 'governance' ? 'No open governance markets' : 'No externally priced markets in this section'}
+                  {view === 'governance' ? 'No open governance markets' : 'No open markets in this section'}
                 </h2>
                 <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
                   {view === 'governance'
                     ? 'Governance markets are long-horizon questions resolved by the 0xNull admin team. New markets appear here when they open.'
-                    : 'v2 only opens a market when at least two current bookmakers agree on both sides. The catalogue refreshes every 30 minutes.'}
+                    : 'New markets appear here as the treasury seeds them, priced from an adapter where one exists and at even odds otherwise. The catalogue refreshes every 30 minutes.'}
                 </p>
+
                 {view !== 'sports' && (
                   <Button asChild className="mt-5" variant="outline">
                     <Link to="/sports-predictions">See all live markets <ArrowRight className="ml-2 h-4 w-4" /></Link>

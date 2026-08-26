@@ -15,19 +15,20 @@ import { useSEO } from '@/hooks/useSEO';
 
 
 const categories = [
-  { title: 'Sports', description: 'All bookmaker-priced events', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
-  { title: 'Cricket', description: 'Cricket-only event filter', href: '/cricket-predictions', icon: Trophy, color: 'text-cyan-400', live: true },
-  { title: 'Combat', description: 'MMA and boxing events', href: '/predictions/sports/combat', icon: Trophy, color: 'text-red-400', live: true },
-  { title: 'Esports', description: 'Model odds · PandaScore results', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
-  { title: 'Crypto', description: 'Awaiting a v2 odds adapter', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: false },
-  { title: 'Governance', description: 'Awaiting a v2 odds adapter', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: false },
+  { title: 'Sports', description: 'Bookmaker odds when available, even odds otherwise', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
+  { title: 'Cricket', description: 'Bookmaker odds when available, even odds otherwise', href: '/cricket-predictions', icon: Trophy, color: 'text-cyan-400', live: true },
+  { title: 'Combat', description: 'Bookmaker odds when available, even odds otherwise', href: '/predictions/sports/combat', icon: Trophy, color: 'text-red-400', live: true },
+  { title: 'Esports', description: 'Model odds when available, even odds otherwise', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
+  { title: 'Crypto', description: 'Even-odds treasury seed', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: true },
+  { title: 'Governance', description: 'Even-odds treasury seed', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: true },
 ];
 
 export default function PredictionsHub() {
   useSEO({
     title: 'Prediction Markets | 0xNull',
-    description: 'Token-funded prediction markets with bookmaker-priced treasury liquidity and automatic settlement.',
+    description: 'Token-funded prediction markets with treasury-seeded liquidity and automatic settlement.',
   });
+
 
   return (
     <TooltipProvider>
@@ -52,12 +53,12 @@ export default function PredictionsHub() {
             className="mt-9"
             price="0.4% of winnings"
             tokenMetered
-            trust={<>Treasury liquidity seeds every market from combined bookmaker odds and rotates back into the pool as markets settle.</>}
+            trust={<>Treasury liquidity seeds every market from combined bookmaker odds where an adapter price exists, at even odds otherwise, and rotates back into the pool as markets settle.</>}
           />
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'External opening odds', body: 'At least two fresh books; median no-vig consensus is stored with the seed.' },
+              { icon: BarChart3, title: 'Opening odds', body: 'Adapter prices are stored with the seed. Markets without an adapter price open at even odds.' },
               { icon: WalletCards, title: 'TXN-ledger funding', body: 'The stake moves from available to reserved on the same 0xn_ token.' },
               { icon: ShieldCheck, title: 'Automatic return', body: 'Wins and refunds credit the same balance. Withdraw only when you choose.' },
             ].map(({ icon: Icon, title, body }) => (
@@ -75,7 +76,7 @@ export default function PredictionsHub() {
             <div className="mb-4 flex items-end justify-between">
               <div>
                 <h2 className="text-2xl font-semibold">Market coverage</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Only externally priced sections accept v2 stakes.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Every open section accepts V2 stakes. Markets without an adapter price start at even odds.</p>
               </div>
               <Link className="text-sm text-primary hover:underline" to="/payouts">Payout model →</Link>
             </div>
@@ -87,8 +88,9 @@ export default function PredictionsHub() {
                       <div className="flex items-center justify-between">
                         <Icon className={`h-6 w-6 ${color}`} />
                         <Badge variant="outline" className={live ? 'border-emerald-500/30 text-emerald-400' : 'text-muted-foreground'}>
-                          {live ? 'Live' : 'Next adapter'}
+                          Live
                         </Badge>
+
                       </div>
                       <div className="mt-4 flex items-center gap-2">
                         <h3 className="text-lg font-semibold">{title}</h3>

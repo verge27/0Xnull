@@ -176,7 +176,7 @@ export default function Payouts() {
           </Card>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <Card><CardContent className="p-5"><p className="text-xs uppercase tracking-wide text-muted-foreground">Opening liquidity</p><p className="mt-1 text-2xl font-mono font-semibold">Rotated</p><p className="mt-1 text-xs text-muted-foreground">Treasury seeds every market from combined bookmaker odds and returns to the pool on settlement.</p></CardContent></Card>
+            <Card><CardContent className="p-5"><p className="text-xs uppercase tracking-wide text-muted-foreground">Opening liquidity</p><p className="mt-1 text-2xl font-mono font-semibold">Rotated</p><p className="mt-1 text-xs text-muted-foreground">Treasury seeds every market from combined bookmaker odds where an adapter price exists, at even odds otherwise, and returns to the pool on settlement.</p></CardContent></Card>
             <Card><CardContent className="p-5"><p className="text-xs uppercase tracking-wide text-muted-foreground">Settlement fee</p><p className="mt-1 text-2xl font-mono font-semibold">0.4%</p><p className="mt-1 text-xs text-muted-foreground">Applied to distributed winnings only; not losses, draws or refunds.</p></CardContent></Card>
             <Card><CardContent className="p-5"><p className="text-xs uppercase tracking-wide text-muted-foreground">Withdrawals</p><p className="mt-1 text-2xl font-semibold">User controlled</p><p className="mt-1 text-xs text-muted-foreground">Settlement is internal; an XMR transaction occurs when you withdraw the token balance.</p></CardContent></Card>
           </div>
