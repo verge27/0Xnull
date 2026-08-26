@@ -70,7 +70,8 @@ const moreLinks = [
   { label: 'Philosophy', to: '/philosophy' },
   { label: 'Docs', to: '/docs' },
   { label: 'Buy', to: '/buy' },
-  { label: 'Cash out', to: '/cashout' },
+  { label: 'Fiat cash out', to: '/cashout' },
+  { label: 'Withdraw XMR', to: '/token/cashout' },
   { label: 'Get Started', to: '/get-started' },
 ];
 

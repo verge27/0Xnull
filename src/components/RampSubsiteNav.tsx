@@ -3,7 +3,7 @@ import { SubsiteLayout, SubsiteNavLink } from '@/components/SubsiteLayout';
 export const RAMP_SUBSITE_LINKS: SubsiteNavLink[] = [
   { label: 'Route finder', to: '/ramp' },
   { label: 'Buy', to: '/buy' },
-  { label: 'Cash out', to: '/cashout' },
+  { label: 'Fiat cash out', to: '/cashout' },
   { label: 'Swaps', to: '/swaps' },
 ];
 
