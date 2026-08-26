@@ -53,9 +53,6 @@ function validate(body: string, dayIndex: number): string | null {
   if (body.includes("!")) return "contains an exclamation mark";
   if (/\w+, \w+, and \w+/.test(body)) return "contains an Oxford comma";
   if (EMOJI.test(body)) return "contains an emoji";
-  if (/^#+\s*\w/m.test(body.split("\n").slice(1).join("\n")) === false) {
-    // no-op: heading check handled below
-  }
   if (/^#\s*\w/m.test(body)) return "contains a markdown hashtag heading";
   for (const w of BANNED) {
     if (body.toLowerCase().includes(w.toLowerCase())) return `contains banned phrase "${w}"`;
