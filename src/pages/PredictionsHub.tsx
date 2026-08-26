@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, ShieldCheck, Trophy, WalletCards } from 'lucide-react';
+import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, Info, ShieldCheck, Trophy, WalletCards } from 'lucide-react';
+
 
 import { Navbar } from '@/components/Navbar';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
@@ -9,7 +10,9 @@ import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSEO } from '@/hooks/useSEO';
+
 
 const categories = [
   { title: 'Sports', description: 'All bookmaker-priced events', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
