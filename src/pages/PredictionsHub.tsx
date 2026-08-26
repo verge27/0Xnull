@@ -89,12 +89,27 @@ export default function PredictionsHub() {
                           {live ? 'Live' : 'Next adapter'}
                         </Badge>
                       </div>
-                      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+                      <div className="mt-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{title}</h3>
+                        {title === 'Esports' && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex cursor-help text-muted-foreground hover:text-primary" aria-label="Esports odds source">
+                                <Info className="h-4 w-4" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p>Odds are derived from PandaScore performance history.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
+
             </div>
           </div>
 
