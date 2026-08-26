@@ -71,10 +71,18 @@ const TokenCashout = () => {
   const amountNum = parseFloat(amount);
   const addrError = addressError('XMR', address.trim());
   const rate = xmrUsdRate || 0;
-  const estimatedXmr = useMemo(() => {
-    if (!amountNum || !rate) return null;
-    return roundUpXmr(amountNum / rate, 10);
+  const feeRate = 0.005;
+
+  const breakdown = useMemo(() => {
+    if (!amountNum || Number.isNaN(amountNum) || amountNum <= 0 || !rate) return null;
+    const gross = amountNum;
+    const fee = gross * feeRate;
+    const net = gross - fee;
+    const xmr = roundUpXmr(net / rate, 10);
+    return { gross, fee, net, rate, xmr };
   }, [amountNum, rate]);
+
+  const estimatedXmr = breakdown ? breakdown.xmr : null;
 
   const amountError = !amount
     ? null
@@ -130,6 +138,7 @@ const TokenCashout = () => {
       setQueued(res);
       recordWithdrawal({
         ...res,
+        amount_usd: res.amount_usd ?? amountNum,
         address: address.trim(),
         created_at: new Date().toISOString(),
       });
