@@ -66,7 +66,7 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
   },
   governance: {
     title: 'Governance Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'Long-horizon admin-resolved markets funded from your 0xn_ token balance.',
   },
   starcraft: {
     title: 'StarCraft Predictions',
