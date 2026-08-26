@@ -301,13 +301,14 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               <CardContent className="py-14 text-center">
                 <Trophy className="mx-auto h-10 w-10 text-muted-foreground" />
                 <h2 className="mt-4 text-xl font-semibold">
-                  {view === 'governance' ? 'No open governance markets' : 'No externally priced markets in this section'}
+                  {view === 'governance' ? 'No open governance markets' : 'No open markets in this section'}
                 </h2>
                 <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
                   {view === 'governance'
                     ? 'Governance markets are long-horizon questions resolved by the 0xNull admin team. New markets appear here when they open.'
-                    : 'v2 only opens a market when at least two current bookmakers agree on both sides. The catalogue refreshes every 30 minutes.'}
+                    : 'New markets appear here as the treasury seeds them, priced from an adapter where one exists and at even odds otherwise. The catalogue refreshes every 30 minutes.'}
                 </p>
+
                 {view !== 'sports' && (
                   <Button asChild className="mt-5" variant="outline">
                     <Link to="/sports-predictions">See all live markets <ArrowRight className="ml-2 h-4 w-4" /></Link>
