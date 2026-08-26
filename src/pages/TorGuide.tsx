@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Globe, Lock, Eye, ExternalLink, Download, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { TOR_URL, PRIVATE_NETWORK_MIRRORS } from '@/lib/privateNetworks';
+
+const torMirror = PRIVATE_NETWORK_MIRRORS.find((m) => m.network === 'tor')!;
 
 const TorGuide = () => {
   useSEO();
@@ -21,7 +24,7 @@ const TorGuide = () => {
           </Badge>
           <h1 className="text-4xl font-bold mb-4">Accessing 0xNull Privately</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Protect your browsing with Tor for complete anonymity
+            Tor routes your request through several relays before it reaches our onion service, so no single hop sees both who you are and what you asked for.
           </p>
         </div>
 
@@ -53,10 +56,15 @@ const TorGuide = () => {
             </ol>
             
             <div className="bg-muted/50 border border-border rounded-lg p-4 font-mono text-sm break-all">
-              http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion
+              {TOR_URL}
             </div>
             
             <p className="text-muted-foreground">Bookmark it - you're done!</p>
+            <p className="text-sm text-muted-foreground">{torMirror.predictionsNotice}</p>
+            <p className="text-sm text-muted-foreground">
+              We also run an I2P service.{' '}
+              <Link to="/i2p-guide" className="text-primary hover:underline">Read the I2P guide →</Link>
+            </p>
           </CardContent>
         </Card>
 
@@ -139,11 +147,11 @@ const TorGuide = () => {
               </li>
               <li className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <span>No IP address logged on our end</span>
+                <span>Requests arrive over the onion service rather than from your own IP address</span>
               </li>
               <li className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <span>Combined with XMR payments = complete financial privacy</span>
+                <span>Paying in XMR keeps the payment leg off a public, address-linked ledger</span>
               </li>
             </ul>
           </CardContent>
@@ -170,7 +178,7 @@ const TorGuide = () => {
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">•</span>
                 <span className="font-medium text-foreground">
-                  For maximum privacy: Tor + XMR + no account = untraceable
+                  Tor, XMR and no account each remove a different link. Your own operational habits still matter.
                 </span>
               </li>
             </ul>
