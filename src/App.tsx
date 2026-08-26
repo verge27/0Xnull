@@ -50,6 +50,7 @@ const Voice = lazy(() => import("./pages/Voice"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Support = lazy(() => import("./pages/Support"));
 const TorGuide = lazy(() => import("./pages/TorGuide"));
+const I2pGuide = lazy(() => import("./pages/I2pGuide"));
 const ExternalLinks = lazy(() => import("./pages/ExternalLinks"));
 const Work = lazy(() => import("./pages/Work"));
 const HowBettingWorks = lazy(() => import("./pages/HowBettingWorks"));
