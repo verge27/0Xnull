@@ -896,7 +896,7 @@ while True:
             <div>
               <h3 className="font-semibold mb-2">Market verification</h3>
               <p className="text-muted-foreground text-sm">
-                v2 markets expose dollar pool totals and retain the bookmaker-count and odds snapshot used for treasury seeding. They do not create a Monero address or view key. Legacy on-chain payouts remain linked from the payout archive.
+                v2 markets expose dollar pool totals and retain the pricing method and odds snapshot used for treasury seeding. Markets without an adapter price are seeded at even odds with pricing_method "even_fallback". They do not create a Monero address or view key. Legacy on-chain payouts remain linked from the payout archive.
               </p>
             </div>
             
