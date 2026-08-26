@@ -62,7 +62,7 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
   },
   crypto: {
     title: 'Crypto Predictions',
-    description: 'Crypto markets open on an even-odds treasury seed and accept V2 stakes.',
+    description: 'Crypto markets include ten-minute BTC, ETH and XMR Flash rounds, each opened with an even-odds treasury seed.',
   },
   governance: {
     title: 'Governance Predictions',
@@ -75,6 +75,12 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
 
 };
 
+function isFlashMarket(market: PredictionMarket) {
+  const oracleType = (market.oracle_type || '').toLowerCase();
+  const category = (market.category || '').toLowerCase();
+  return oracleType === 'flash' || category === 'flash' || market.market_id.startsWith('flash_');
+}
+
 function marketMatchesView(market: PredictionMarket, view: PredictionMarketView) {
   const sportKey = (market.odds_sport_key || '').toLowerCase();
   const oracleType = (market.oracle_type || '').toLowerCase();
@@ -86,7 +92,7 @@ function marketMatchesView(market: PredictionMarket, view: PredictionMarketView)
   if (view === 'combat') return sportKey.startsWith('mma_') || sportKey.startsWith('boxing_') || text.includes('mma') || text.includes('boxing');
   if (view === 'esports') return oracleType === 'esports';
   if (view === 'starcraft') return text.includes('starcraft');
-  if (view === 'crypto') return oracleType.includes('crypto') || text.includes('crypto');
+  if (view === 'crypto') return isFlashMarket(market) || oracleType.includes('crypto') || text.includes('crypto');
   return category === 'governance' || oracleType.includes('governance') || text.includes('governance');
 }
 
@@ -136,10 +142,16 @@ function money(cents: number) {
 }
 
 function pricingLabel(market: PredictionMarket) {
+  if (isFlashMarket(market)) return 'Even odds · 10-minute Flash';
   if (market.pricing_method === 'even_fallback') return 'Even odds · adapter fallback';
   if (market.pricing_method === 'model') return 'Model odds · PandaScore results';
   const books = market.bookmaker_count || 0;
   return books > 0 ? `${books} books · median no-vig` : 'Even odds · adapter fallback';
+}
+
+function sideLabel(market: PredictionMarket, side: 'YES' | 'NO') {
+  if (!isFlashMarket(market)) return side;
+  return side === 'YES' ? 'UP' : 'DOWN';
 }
 
 
@@ -269,7 +281,17 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: view === 'esports' ? 'Markets open on model odds from recent PandaScore results, or at even odds when no model price exists, with the treasury rotating back as markets settle.' : 'Markets open from combined bookmaker odds, or at even odds when no adapter price exists, with the treasury rotating back as markets settle.' },
+              {
+                icon: BarChart3,
+                title: 'Treasury-rotated liquidity',
+                body: view === 'esports'
+                  ? 'Markets open on model odds from recent PandaScore results, or at even odds when no model price exists, with the treasury rotating back as markets settle.'
+                  : view === 'crypto'
+                    ? 'Every Flash round opens with $4 at even odds, with the treasury rotating back as each ten-minute market settles.'
+                    : view === 'governance'
+                      ? 'Governance markets open with a $4 even-odds seed, with the treasury rotating back as each market settles.'
+                      : 'Markets open from combined bookmaker odds, or at even odds when no adapter price exists, with the treasury rotating back as markets settle.',
+              },
               { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },
               { icon: CheckCircle2, title: 'Automatic settlement', body: 'Wins and refunds return to the same token balance when the oracle resolves.' },
             ].map(({ icon: Icon, title, body }) => (
@@ -306,7 +328,9 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                 <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
                   {view === 'governance'
                     ? 'Governance markets are long-horizon questions resolved by the 0xNull admin team. New markets appear here when they open.'
-                    : 'New markets appear here as the treasury seeds them, priced from an adapter where one exists and at even odds otherwise. The catalogue refreshes every 30 minutes.'}
+                    : view === 'crypto'
+                      ? 'Flash rounds are created every ten minutes and appear here alongside longer-horizon crypto markets.'
+                      : 'New markets appear here as the treasury seeds them, priced from an adapter where one exists and at even odds otherwise. The catalogue refreshes every 30 minutes.'}
                 </p>
 
                 {view !== 'sports' && (
@@ -318,9 +342,19 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
             </Card>
           ) : (
             <>
-            <h2 className="mb-4 text-lg font-semibold">Active Markets ({visibleMarkets.length})</h2>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">
+                {view === 'crypto' ? 'Active Crypto Markets' : 'Active Markets'} ({visibleMarkets.length})
+              </h2>
+              {view === 'crypto' && (
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/flash">Open full Flash board <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+              )}
+            </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visibleMarkets.map((market) => {
+                const flashMarket = isFlashMarket(market);
                 const yes = market.yes_pool_cents || 0;
                 const no = market.no_pool_cents || 0;
                 const totalPool = yes + no;
@@ -331,7 +365,9 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                   <Card key={market.market_id} className="overflow-hidden border-border/70 bg-card/70 transition-colors hover:border-primary/40">
                     <CardContent className="p-5">
                       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                        <Badge variant="outline">{view === 'governance' ? 'Governance' : sportLabel(market.odds_sport_key)}</Badge>
+                        <Badge variant="outline">
+                          {flashMarket ? `Flash · ${market.oracle_asset}` : view === 'governance' ? 'Governance' : sportLabel(market.odds_sport_key)}
+                        </Badge>
                         {seedTotal > 0 && (
                           <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400" variant="outline">
                             Treasury seeded
@@ -355,10 +391,10 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
                       <div className="mt-5 grid grid-cols-2 gap-2">
                         <Button className="h-auto bg-emerald-600 py-3 text-white hover:bg-emerald-700" onClick={() => openBet(market, 'YES')}>
-                          <span><span className="block">YES</span><span className="text-xs opacity-80">{yes ? (totalPool / yes).toFixed(2) : '—'}×</span></span>
+                          <span><span className="block">{flashMarket ? 'UP' : 'YES'}</span><span className="text-xs opacity-80">{yes ? (totalPool / yes).toFixed(2) : '—'}×</span></span>
                         </Button>
                         <Button className="h-auto border-red-500/40 py-3 text-red-400 hover:bg-red-500/10" variant="outline" onClick={() => openBet(market, 'NO')}>
-                          <span><span className="block">NO</span><span className="text-xs opacity-80">{no ? (totalPool / no).toFixed(2) : '—'}×</span></span>
+                          <span><span className="block">{flashMarket ? 'DOWN' : 'NO'}</span><span className="text-xs opacity-80">{no ? (totalPool / no).toFixed(2) : '—'}×</span></span>
                         </Button>
                       </div>
 
@@ -389,13 +425,13 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
       <Dialog open={!!selectedMarket} onOpenChange={(open) => !open && setSelectedMarket(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Bet {side}</DialogTitle>
+            <DialogTitle>Bet {selectedMarket ? sideLabel(selectedMarket, side) : side}</DialogTitle>
             <DialogDescription>{selectedMarket?.title}</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-2">
             <div className="grid grid-cols-2 gap-2">
-              <Button className={side === 'YES' ? 'bg-emerald-600 hover:bg-emerald-700' : ''} variant={side === 'YES' ? 'default' : 'outline'} onClick={() => setSide('YES')}>YES</Button>
-              <Button className={side === 'NO' ? 'bg-red-600 hover:bg-red-700' : ''} variant={side === 'NO' ? 'default' : 'outline'} onClick={() => setSide('NO')}>NO</Button>
+              <Button className={side === 'YES' ? 'bg-emerald-600 hover:bg-emerald-700' : ''} variant={side === 'YES' ? 'default' : 'outline'} onClick={() => setSide('YES')}>{selectedMarket && isFlashMarket(selectedMarket) ? 'UP' : 'YES'}</Button>
+              <Button className={side === 'NO' ? 'bg-red-600 hover:bg-red-700' : ''} variant={side === 'NO' ? 'default' : 'outline'} onClick={() => setSide('NO')}>{selectedMarket && isFlashMarket(selectedMarket) ? 'DOWN' : 'NO'}</Button>
             </div>
 
             <div className="space-y-2">
@@ -424,7 +460,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               <Button asChild className="w-full"><Link to="/dashboard">Add funds to this token <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
             ) : (
               <Button className="w-full" onClick={() => void submitBet()} disabled={placing || !validation.valid || insufficient}>
-                {placing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reserving stake…</> : `Confirm ${side} · ${money(amountCents)}`}
+                {placing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reserving stake…</> : `Confirm ${selectedMarket ? sideLabel(selectedMarket, side) : side} · ${money(amountCents)}`}
               </Button>
             )}
           </div>

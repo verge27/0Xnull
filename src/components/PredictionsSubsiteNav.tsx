@@ -9,7 +9,6 @@ export const PREDICTIONS_SUBSITE_LINKS: SubsiteNavLink[] = [
   { label: 'StarCraft', to: '/starcraft' },
   { label: 'Cricket', to: '/cricket-predictions' },
   { label: 'Governance', to: '/governance-predictions' },
-  { label: 'Flash', to: '/flash' },
   { label: 'Payouts', to: '/payouts' },
   { label: 'How it works', to: '/how-betting-works' },
 ];
