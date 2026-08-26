@@ -46,32 +46,33 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
   },
   sports: {
     title: 'Sports Predictions',
-    description: 'Near-term events priced from aggregated bookmaker odds.',
+    description: 'Bookmaker odds when available, even odds otherwise.',
   },
   cricket: {
     title: 'Cricket Predictions',
-    description: 'Cricket markets priced from aggregated bookmaker odds.',
+    description: 'Cricket markets use bookmaker odds when available and even odds otherwise.',
   },
   combat: {
     title: 'Combat Predictions',
-    description: 'MMA and boxing markets priced from aggregated bookmaker odds.',
+    description: 'MMA and boxing markets use bookmaker odds when available and even odds otherwise.',
   },
   esports: {
     title: 'Esports Predictions',
-    description: 'Esports markets priced by the 0xNull model from recent PandaScore results, funded from your 0xn_ token.',
+    description: 'Esports markets use 0xNull model odds from recent PandaScore results when available and even odds otherwise, funded from your 0xn_ token.',
   },
   crypto: {
     title: 'Crypto Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'Crypto markets open on an even-odds treasury seed and accept V2 stakes.',
   },
   governance: {
     title: 'Governance Predictions',
-    description: 'Long-horizon admin-resolved markets funded from your 0xn_ token balance.',
+    description: 'Long-horizon admin-resolved markets on an even-odds treasury seed, funded from your 0xn_ token balance.',
   },
   starcraft: {
     title: 'StarCraft Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'StarCraft markets use model odds when available and even odds otherwise.',
   },
+
 };
 
 function marketMatchesView(market: PredictionMarket, view: PredictionMarketView) {
