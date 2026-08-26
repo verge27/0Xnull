@@ -77,6 +77,7 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
 function marketMatchesView(market: PredictionMarket, view: PredictionMarketView) {
   const sportKey = (market.odds_sport_key || '').toLowerCase();
   const oracleType = (market.oracle_type || '').toLowerCase();
+  const category = (market.category || '').toLowerCase();
   const text = `${market.market_id} ${market.title} ${market.description}`.toLowerCase();
 
   if (view === 'all' || view === 'sports') return oracleType === 'sports';
@@ -85,7 +86,7 @@ function marketMatchesView(market: PredictionMarket, view: PredictionMarketView)
   if (view === 'esports') return oracleType.includes('esport') || text.includes('esport');
   if (view === 'starcraft') return text.includes('starcraft');
   if (view === 'crypto') return oracleType.includes('crypto') || text.includes('crypto');
-  return oracleType.includes('governance') || text.includes('governance');
+  return category === 'governance' || oracleType.includes('governance') || text.includes('governance');
 }
 
 function sportLabel(key?: string) {
