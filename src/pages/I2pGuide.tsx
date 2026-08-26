@@ -195,7 +195,7 @@ const I2pGuide = () => {
                 <span className="text-primary font-bold" aria-hidden="true">•</span>
                 <span>
                   I2P is peer-to-peer: your router carries traffic for other participants as well as
-                  your own, and addressing is internal to the network.
+                  your own and addressing is internal to the network.
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -208,7 +208,7 @@ const I2pGuide = () => {
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold" aria-hidden="true">•</span>
                 <span>
-                  The two networks are separate. A .i2p address will not open over Tor, and a .onion
+                  The two networks are separate. A .i2p address will not open over Tor and a .onion
                   address will not open through the I2P proxy.
                 </span>
               </li>
@@ -247,7 +247,7 @@ const I2pGuide = () => {
               <h2 className="font-semibold text-foreground text-base">Can I use Tor Browser for I2P?</h2>
               <p className="text-sm text-muted-foreground">
                 Not by default. Tor Browser routes traffic through Tor, which does not carry I2P
-                addressing. Use a separate browser profile configured for the I2P proxy, and keep it
+                addressing. Use a separate browser profile configured for the I2P proxy and keep it
                 distinct from your Tor Browser usage.
               </p>
             </div>
