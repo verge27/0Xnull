@@ -29,6 +29,70 @@ const ALLOWED_PATH_PREFIXES = [
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PUT'];
 
+const GB_PREDICTIONS_NOTICE =
+  'Predictions is not available to residents of Great Britain. Access from GB is blocked.';
+
+const isPredictionMoneyAction = (method: string, path: string): boolean => {
+  const pathname = path.split('?', 1)[0].replace(/\/+$/, '');
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return false;
+
+  if (pathname.startsWith('/api/predictions/')) return true;
+  if (method === 'POST' && pathname === '/api/multibets/create') return true;
+  if (method === 'POST' && /^\/api\/multibets\/[^/]+\/payout-address$/.test(pathname)) return true;
+  if (method === 'POST' && pathname === '/api/flash/bet') return true;
+  return false;
+};
+
+const predictionGeoUnavailable = () => new Response(JSON.stringify({
+  error: 'Prediction action geolocation is temporarily unavailable.',
+  detail: 'Prediction action geolocation is temporarily unavailable.',
+  code: 'PREDICTIONS_GEOLOCATION_UNAVAILABLE',
+}), {
+  status: 503,
+  headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+});
+
+const predictionGbBlocked = () => new Response(JSON.stringify({
+  error: GB_PREDICTIONS_NOTICE,
+  detail: GB_PREDICTIONS_NOTICE,
+  code: 'GB_PREDICTIONS_BLOCKED',
+}), {
+  status: 451,
+  headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+});
+
+async function enforcePredictionCountry(req: Request): Promise<Response | null> {
+  // Supabase's gateway supplies this header; its first address is the caller.
+  // The address is sent only in the POST body to Cache for an in-memory MMDB
+  // lookup. It is never put in a URL or compliance log.
+  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  if (!clientIp) return predictionGeoUnavailable();
+
+  let check: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    check = await fetch(`${API_BASE}/api/compliance/predictions-check`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip: clientIp }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+  } catch {
+    return predictionGeoUnavailable();
+  }
+
+  if (check.status === 451) {
+    console.warn(`[xnull-proxy] prediction_gb_block count=1 timestamp=${new Date().toISOString()} channel=clearnet_edge`);
+    return predictionGbBlocked();
+  }
+  if (!check.ok) return predictionGeoUnavailable();
+
+  const result = await check.json().catch(() => null);
+  return result?.allowed === true ? null : predictionGeoUnavailable();
+}
+
 // The upstream API sometimes sends a Content-Length that far exceeds the bytes it
 // actually writes, so Deno aborts with "error reading a body from connection".
 // Read the stream manually and keep whatever arrived: if it parses as JSON it is complete.
@@ -150,6 +214,11 @@ serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    if (isPredictionMoneyAction(req.method, targetPath)) {
+      const blocked = await enforcePredictionCountry(req);
+      if (blocked) return blocked;
     }
 
 
