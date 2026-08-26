@@ -77,6 +77,7 @@ const moreLinks = [
 
 
 const Index = () => {
+  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
   useSEO({
     title: '0xNull | One token, every private service, no accounts',
     description: 'One anonymous token unlocks AI, a Monero marketplace, swaps, lending and prediction markets. No KYC, no accounts, priced per use.',
@@ -118,6 +119,7 @@ const Index = () => {
         </section>
 
         {/* Updated / announcement panel */}
+        {!isOnion && (
         <section className="container mx-auto px-4 pb-12">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Updated</h2>
           <Link
@@ -133,6 +135,7 @@ const Index = () => {
             </div>
           </Link>
         </section>
+        )}
 
         {/* New / below-the-fold panel */}
         <section className="container mx-auto px-4 pb-12">
@@ -155,7 +158,7 @@ const Index = () => {
           <div className="border-t border-border/30 pt-8">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">More</h2>
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              {moreLinks.map((link) => (
+              {moreLinks.filter((link) => !isOnion || link.to !== '/predict').map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
