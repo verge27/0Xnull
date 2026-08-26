@@ -76,8 +76,11 @@ const TokenCashout = () => {
       setQueued(res as QueuedWithdrawal);
       idempotencyKey.current = null;
       await refreshBalance();
+      toast.success(`Withdrawal ${(res as QueuedWithdrawal).withdrawal_id} is ${(res as QueuedWithdrawal).status ?? 'queued'}`, {
+        description: 'Your balance has been refreshed.',
+      });
     } catch (e) {
-      // Backend validation messages are shown verbatim.
+      toast.error(e instanceof Error ? e.message : 'Withdrawal could not be queued');
       setError(e instanceof Error ? e.message : 'Withdrawal could not be queued');
     } finally {
       setSubmitting(false);
