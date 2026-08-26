@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Key, Coins, ShieldCheck, Globe, FileSignature, Github, Scale, Lock, Copy } from 'lucide-react';
+import { Key, Coins, ShieldCheck, Globe, FileSignature, Github, Scale, Lock } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { TOR_ADDRESS } from '@/components/TrustGrid';
-import { toast } from 'sonner';
+import { PrivateAccessAddresses } from '@/components/PrivateAccessAddresses';
 
 const Section = ({ id, icon: Icon, title, children }: { id: string; icon: typeof Key; title: string; children: React.ReactNode }) => (
   <section id={id} className="scroll-mt-24 border-t border-border/40 pt-10">
@@ -23,13 +21,8 @@ const Section = ({ id, icon: Icon, title, children }: { id: string; icon: typeof
 export default function Docs() {
   useSEO({
     title: 'Docs | Token mechanics, escrow and trust — 0xNull',
-    description: 'How the 0xn_ token works, how prediction market stakes resolve, how marketplace escrow is anchored, plus the warrant canary, onion mirror and open-source components.',
+    description: 'How the 0xn_ token works, how prediction market stakes resolve, how marketplace escrow is anchored, plus the warrant canary, Tor and I2P mirrors and open-source components.',
   });
-
-  const copyOnion = () => {
-    navigator.clipboard.writeText(TOR_ADDRESS);
-    toast.success('Onion address copied');
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
