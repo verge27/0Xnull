@@ -8,6 +8,16 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ArrowLeft, Loader2, RefreshCw, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
