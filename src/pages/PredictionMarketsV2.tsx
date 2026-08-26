@@ -313,6 +313,8 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               </CardContent>
             </Card>
           ) : (
+            <>
+            <h2 className="mb-4 text-lg font-semibold">Active Markets ({visibleMarkets.length})</h2>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visibleMarkets.map((market) => {
                 const yes = market.yes_pool_cents || 0;
