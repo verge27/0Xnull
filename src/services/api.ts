@@ -1,18 +1,21 @@
-// 0xNull API Client - Adapts for clearnet (via proxy) and Tor (direct)
+// 0xNull API Client - Adapts for clearnet (via proxy) and private networks (same-origin)
+
+import { isPrivateNetwork, isTorHost, privateApiUrl } from '@/lib/privateNetworks';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/xnull-proxy`;
-const ONION_API = 'http://onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion/api';
 
 // Detect if we're running on Tor (.onion)
-export const isTorBrowser = (): boolean => {
-  return typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
-};
+export const isTorBrowser = (): boolean => isTorHost();
 
-// Get the appropriate API base URL
+// Detect if we're running on either private network (.onion or .i2p)
+export const isPrivateTransport = (): boolean => isPrivateNetwork();
+
+// Get the appropriate API base URL. On a private-network host, API traffic
+// stays same-origin so it never leaves the transport.
 export const getApiBaseUrl = (): string => {
-  if (isTorBrowser()) {
-    return ONION_API;
+  if (isPrivateNetwork()) {
+    return '/api';
   }
   return PROXY_URL;
 };
@@ -114,12 +117,12 @@ async function proxyRequest<T>(path: string, options: RequestInit = {}, timeoutM
 
 // Core request implementation
 async function doProxyRequest<T>(path: string, options: RequestInit = {}, timeoutMs = 8000): Promise<T> {
-  const isOnion = isTorBrowser();
+  const onPrivateNetwork = isPrivateNetwork();
 
   let url: string;
-  if (isOnion) {
-    // Direct API call on Tor
-    url = `${ONION_API}${path}`;
+  if (onPrivateNetwork) {
+    // Same-origin API call on Tor or I2P
+    url = privateApiUrl(path);
   } else {
     // Use Supabase proxy on clearnet
     const proxyUrl = new URL(PROXY_URL);
@@ -499,11 +502,11 @@ export const api = {
   },
 
   async createClone(token: string, name: string, audioFile: File): Promise<{ clone_id: string; name: string }> {
-    const isOnion = isTorBrowser();
+    const onPrivateNetwork = isPrivateNetwork();
     
     let url: string;
-    if (isOnion) {
-      url = `${ONION_API}/voice/clone`;
+    if (onPrivateNetwork) {
+      url = privateApiUrl('/api/voice/clone');
     } else {
       const proxyUrl = new URL(PROXY_URL);
       proxyUrl.searchParams.set('path', '/api/voice/clone');
@@ -657,11 +660,11 @@ export const api = {
   // Soft pool existence check: never throws / never propagates 5xx.
   // Uses the proxy's `soft_pool=1` mode to avoid surfacing upstream timeouts as runtime errors.
   async checkPool(marketId: string): Promise<PoolInfo> {
-    const isOnion = isTorBrowser();
+    const onPrivateNetwork = isPrivateNetwork();
 
     let url: string;
-    if (isOnion) {
-      url = `${ONION_API}/predictions/pool/${marketId}`;
+    if (onPrivateNetwork) {
+      url = privateApiUrl(`/api/predictions/pool/${marketId}`);
     } else {
       const proxyUrl = new URL(PROXY_URL);
       proxyUrl.searchParams.set('path', `/api/predictions/pool/${marketId}`);
