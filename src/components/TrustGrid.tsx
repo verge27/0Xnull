@@ -1,7 +1,9 @@
 import { Key, ShieldCheck, Globe, FileSignature, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export const TOR_ADDRESS = 'onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion';
+import { TOR_ADDRESS } from '@/lib/privateNetworks';
+
+export { TOR_ADDRESS };
 
 const items = [
   {
@@ -24,8 +26,8 @@ const items = [
   },
   {
     icon: Globe,
-    title: '.onion mirror',
-    body: 'The whole platform is reachable as a hidden service. Same tokens, same balances, no clearnet hop.',
+    title: 'Tor and I2P mirrors',
+    body: 'Reachable as a Tor onion service and as an I2P service. Same tokens, same balances. Predictions is not available over either private transport.',
     to: '/tor-guide',
   },
   {

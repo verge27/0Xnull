@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { SiteAssistant } from '@/components/SiteAssistant';
 import { useSEO } from '@/hooks/useSEO';
 import { useVoucherFromUrl } from '@/hooks/useVoucher';
+import { isPrivateNetwork } from '@/lib/privateNetworks';
 
 
 interface Panel {
@@ -77,7 +78,7 @@ const moreLinks = [
 
 
 const Index = () => {
-  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
+  const isOnion = isPrivateNetwork();
   useSEO({
     title: '0xNull | One token, every private service, no accounts',
     description: 'One anonymous token unlocks AI, a Monero marketplace, swaps, lending and prediction markets. No KYC, no accounts, priced per use.',

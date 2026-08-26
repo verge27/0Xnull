@@ -1,3 +1,4 @@
+import { isPrivateNetwork } from '@/lib/privateNetworks';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText, TrendingUp, Landmark, Newspaper } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
@@ -74,7 +75,7 @@ export const Navbar = () => {
   const betSlip = useMultibetSlip();
   const navigate = useNavigate();
   const location = useLocation();
-  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
+  const isOnion = isPrivateNetwork();
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
