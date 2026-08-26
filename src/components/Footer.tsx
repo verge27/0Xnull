@@ -143,21 +143,12 @@ export const Footer = () => {
             End-to-end encrypted. No email. Privacy by default.
           </p>
           
-          {/* Tor Address */}
-          <div className="text-sm text-muted-foreground">
-            <span className="text-foreground font-medium">Tor:</span>{' '}
-            <a 
-              href={`http://${TOR_ADDRESS}`}
-              className="font-mono text-xs hover:text-foreground transition-colors break-all"
-            >
-              {TOR_ADDRESS}
-            </a>
-            <div className="mt-2">
-              <Link to="/tor-guide" className="text-primary hover:text-foreground transition-colors text-xs">
-                How to use Tor →
-              </Link>
-            </div>
+          {/* Private access */}
+          <div className="w-full max-w-md text-left">
+            <h3 className="font-semibold text-sm mb-3 text-center">Private access</h3>
+            <PrivateAccessAddresses compact />
           </div>
+
         </div>
 
         <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
