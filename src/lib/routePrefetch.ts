@@ -52,6 +52,7 @@ const routeImports: Record<string, ImportFn> = {
   '/philosophy': () => import('@/pages/Philosophy'),
   '/grapheneos': () => import('@/pages/GrapheneOS'),
   '/cashout': () => import('@/pages/FiatOfframp'),
+  '/token/cashout': () => import('@/pages/TokenCashout'),
   '/buy': () => import('@/pages/BuyNoKyc'),
   
   '/verify': () => import('@/pages/Verify'),

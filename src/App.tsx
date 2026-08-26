@@ -41,6 +41,7 @@ const VpnResources = lazy(() => import("./pages/VpnResources"));
 const Philosophy = lazy(() => import("./pages/Philosophy"));
 const GrapheneOS = lazy(() => import("./pages/GrapheneOS"));
 const FiatOfframp = lazy(() => import("./pages/FiatOfframp"));
+const TokenCashout = lazy(() => import("./pages/TokenCashout"));
 
 const BuyNoKyc = lazy(() => import("./pages/BuyNoKyc"));
 const Ramp = lazy(() => import("./pages/Ramp"));
@@ -198,6 +199,7 @@ const App = () => (
                   <Route path="/philosophy" element={<Philosophy />} />
                   <Route path="/grapheneos" element={<GrapheneOS />} />
                   <Route path="/cashout" element={<FiatOfframp />} />
+                  <Route path="/token/cashout" element={<TokenCashout />} />
                   <Route path="/buy" element={<BuyNoKyc />} />
                   <Route path="/ramp" element={<Ramp />} />
                   <Route path="/onramp" element={<Navigate to="/ramp" replace />} />
