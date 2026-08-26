@@ -6,10 +6,12 @@ const SIMPLEX_LINK = 'https://smp18.simplex.im/g#o0awCwkgXWzbKUyPb5Z-hOOWZAoghJl
 const TOR_ADDRESS = 'onullluix4iaj77wbqf52dhdiey4kaucdoqfkaoolcwxvcdxz5j6duid.onion';
 
 export const Footer = () => {
+  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
+
   return (
     <footer className="border-t border-border bg-card/30 mt-auto">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className={`grid grid-cols-2 gap-8 ${isOnion ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-3">
@@ -39,6 +41,7 @@ export const Footer = () => {
           </div>
 
           {/* Predictions */}
+          {!isOnion && (
           <div>
             <h3 className="font-semibold mb-3 text-sm">Predictions</h3>
             <ul className="space-y-2 text-sm">
@@ -69,6 +72,7 @@ export const Footer = () => {
               </li>
             </ul>
           </div>
+          )}
 
           {/* AI */}
           <div>
