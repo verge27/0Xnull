@@ -260,9 +260,18 @@ Write the post. Return JSON only.`;
   const failure = validate(body, row.day_index);
   if (failure) return await markFailed(failure, raw);
 
-  const publishNow = settings.publish_mode === "auto";
+  const publishNow = settings.publish_mode === "auto" && !payload.as_draft;
   const nowIso = new Date().toISOString();
-  const slug = slugify(parsed.slug || title);
+  const baseSlug = slugify(parsed.slug || title);
+  let slug = baseSlug;
+  {
+    const { data: clash } = await admin
+      .from("blog_posts")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (clash) slug = `${baseSlug.slice(0, 68)}-${Date.now().toString(36)}`;
+  }
 
   const { data: post, error: insertError } = await admin
     .from("blog_posts")
