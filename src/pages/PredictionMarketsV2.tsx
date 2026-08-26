@@ -330,7 +330,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                         <Badge variant="outline">{view === 'governance' ? 'Governance' : sportLabel(market.odds_sport_key)}</Badge>
                         {seedTotal > 0 && (
                           <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400" variant="outline">
-                            {money(seedTotal)} seeded
+                            Treasury seeded
                           </Badge>
                         )}
                       </div>
