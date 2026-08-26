@@ -189,6 +189,113 @@ export type Database = {
           },
         ]
       }
+      blog_queue: {
+        Row: {
+          constraint: string | null
+          created_at: string
+          day_index: number
+          error: string | null
+          facts: string
+          generated_at: string | null
+          id: string
+          page_url: string
+          post_id: string | null
+          product_key: string
+          published_at: string | null
+          raw_response: string | null
+          reader: string
+          status: Database["public"]["Enums"]["blog_queue_status"]
+          title_hint: string
+          updated_at: string
+        }
+        Insert: {
+          constraint?: string | null
+          created_at?: string
+          day_index: number
+          error?: string | null
+          facts: string
+          generated_at?: string | null
+          id?: string
+          page_url: string
+          post_id?: string | null
+          product_key: string
+          published_at?: string | null
+          raw_response?: string | null
+          reader: string
+          status?: Database["public"]["Enums"]["blog_queue_status"]
+          title_hint: string
+          updated_at?: string
+        }
+        Update: {
+          constraint?: string | null
+          created_at?: string
+          day_index?: number
+          error?: string | null
+          facts?: string
+          generated_at?: string | null
+          id?: string
+          page_url?: string
+          post_id?: string | null
+          product_key?: string
+          published_at?: string | null
+          raw_response?: string | null
+          reader?: string
+          status?: Database["public"]["Enums"]["blog_queue_status"]
+          title_hint?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_queue_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_settings: {
+        Row: {
+          enabled: boolean
+          id: string
+          publish_mode: Database["public"]["Enums"]["blog_publish_mode"]
+          run_hour_london: number
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          publish_mode?: Database["public"]["Enums"]["blog_publish_mode"]
+          run_hour_london?: number
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          publish_mode?: Database["public"]["Enums"]["blog_publish_mode"]
+          run_hour_london?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_voice: {
+        Row: {
+          id: string
+          spec: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          spec: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          spec?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coins: {
         Row: {
           id: string
@@ -1766,6 +1873,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      blog_publish_mode: "auto" | "draft"
+      blog_queue_status:
+        | "pending"
+        | "generated"
+        | "published"
+        | "skipped"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1894,6 +2008,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      blog_publish_mode: ["auto", "draft"],
+      blog_queue_status: [
+        "pending",
+        "generated",
+        "published",
+        "skipped",
+        "failed",
+      ],
     },
   },
 } as const

@@ -76,6 +76,7 @@ const ThreeDSScanner = lazy(() => import("./pages/ThreeDSScanner"));
 const VoucherAnalytics = lazy(() => import("./pages/VoucherAnalytics"));
 const SeoCoverage = lazy(() => import("./pages/SeoCoverage"));
 const JobsAdmin = lazy(() => import("./pages/JobsAdmin"));
+const BlogQueueAdmin = lazy(() => import("./pages/BlogQueueAdmin"));
 
 const FanDashboard = lazy(() => import("./pages/FanDashboard"));
 
@@ -227,6 +228,7 @@ const App = () => (
                   <Route path="/admin/analytics" element={<VoucherAnalytics />} />
                   <Route path="/admin/seo-coverage" element={<SeoCoverage />} />
                   <Route path="/admin/jobs" element={<JobsAdmin />} />
+                  <Route path="/admin/blog-queue" element={<BlogQueueAdmin />} />
 
                   
                   {/* Blog */}
