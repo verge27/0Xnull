@@ -368,6 +368,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                 );
               })}
             </div>
+            </>
           )}
 
           <div className="mt-8 flex items-center justify-between rounded-lg border border-border/70 bg-card/40 px-4 py-3 text-sm">
