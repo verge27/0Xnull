@@ -76,7 +76,7 @@ export default function PredictionsHub() {
             <div className="mb-4 flex items-end justify-between">
               <div>
                 <h2 className="text-2xl font-semibold">Market coverage</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Only externally priced sections accept v2 stakes.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Every open section accepts V2 stakes. Markets without an adapter price start at even odds.</p>
               </div>
               <Link className="text-sm text-primary hover:underline" to="/payouts">Payout model →</Link>
             </div>
