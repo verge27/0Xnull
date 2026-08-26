@@ -60,8 +60,8 @@ export const BalanceStrip = ({ token, balance, onFund, onLogout }: BalanceStripP
             <Plus className="w-3.5 h-3.5" /> Fund
           </Button>
           <Button size="sm" variant="outline" asChild className="gap-1">
-            <Link to="/cashout">
-              <Banknote className="w-3.5 h-3.5" /> Cash out
+            <Link to="/token/cashout">
+              <Banknote className="w-3.5 h-3.5" /> Withdraw XMR
             </Link>
           </Button>
           {showLogoutConfirm ? (
