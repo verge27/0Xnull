@@ -74,7 +74,7 @@ const TokenCashout = () => {
       );
       setQueued(res as QueuedWithdrawal);
       idempotencyKey.current = null;
-      refreshBalance();
+      await refreshBalance();
     } catch (e) {
       // Backend validation messages are shown verbatim.
       setError(e instanceof Error ? e.message : 'Withdrawal could not be queued');
