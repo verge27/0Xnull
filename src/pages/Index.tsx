@@ -116,6 +116,23 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Updated / announcement panel */}
+        <section className="container mx-auto px-4 pb-12">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Updated</h2>
+          <Link
+            to="/predict"
+            className="group flex flex-col sm:flex-row items-center sm:items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 backdrop-blur shadow-[0_4px_20px_-8px_hsl(var(--amber-500)/0.25)] transition-all duration-200 hover:-translate-y-1 hover:border-amber-500/50 hover:bg-amber-500/10 hover:shadow-[0_10px_28px_-8px_hsl(var(--amber-500)/0.4)] active:translate-y-0 active:scale-[0.98]"
+          >
+            <div className="shrink-0">
+              <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-amber-500" aria-hidden="true" />
+            </div>
+            <div className="text-center sm:text-left">
+              <h3 className="text-base font-semibold leading-tight">Predictions V.2</h3>
+              <p className="text-sm text-muted-foreground leading-snug">TXN-ledger funding, no wallet-per-market and instant settlements.</p>
+            </div>
+          </Link>
+        </section>
+
         {/* New / below-the-fold panel */}
         <section className="container mx-auto px-4 pb-12">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">New</h2>
@@ -130,6 +147,7 @@ const Index = () => {
             </div>
           </Link>
         </section>
+
 
         {/* Secondary links */}
         <section className="container mx-auto px-4 pb-20">
