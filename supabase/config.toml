@@ -94,3 +94,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.hodlhodl-offers]
 verify_jwt = false
+[functions.generate-daily-post]
+verify_jwt = false
