@@ -702,7 +702,7 @@ const Swaps = () => {
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <code className="flex-1 bg-background p-2 rounded text-sm break-all">{trade.address}</code>
-                      <Button size="icon" variant="ghost" onClick={() => copyAddress(trade.address)}>
+                      <Button size="icon" variant="ghost" aria-label="Copy deposit address" onClick={() => copyAddress(trade.address)}>
                         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
@@ -712,7 +712,7 @@ const Swaps = () => {
                       <Label className="text-xs text-muted-foreground">Memo/Tag (REQUIRED)</Label>
                       <div className="flex items-center gap-2 mt-1">
                         <code className="flex-1 bg-background p-2 rounded text-sm">{trade.address_memo}</code>
-                        <Button size="icon" variant="ghost" onClick={() => copyAddress(trade.address_memo!)}>
+                        <Button size="icon" variant="ghost" aria-label="Copy memo or tag" onClick={() => copyAddress(trade.address_memo!)}>
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1156,7 +1156,7 @@ const Swaps = () => {
               <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <div className="text-center sm:text-left">
-                    <h3 className="font-semibold mb-1">Need help with a swap?</h3>
+                    <h2 className="font-semibold mb-1">Need help with a swap?</h2>
                     <p className="text-sm text-muted-foreground">Contact Trocador support directly on Telegram</p>
                   </div>
                   <Button asChild variant="outline">
@@ -1172,7 +1172,7 @@ const Swaps = () => {
             <Card className="bg-secondary/30">
               <CardContent className="pt-6">
                 <div className="text-center mb-4">
-                  <h3 className="font-semibold text-lg mb-1">Need a Wallet?</h3>
+                  <h2 className="font-semibold text-lg mb-1">Need a Wallet?</h2>
                   <p className="text-sm text-muted-foreground">We recommend Cake Wallet - a privacy-focused multi-currency wallet with built-in exchange</p>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center">
