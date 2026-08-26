@@ -135,7 +135,10 @@ export default function BlogQueueAdmin() {
 
   const togglePublishMode = async (checked: boolean) => {
     const { data: current } = await supabase.from('blog_settings').select('id').limit(1).maybeSingle();
-    if (!current) return;
+    if (!current) {
+      toast.error('Blog settings are not configured yet');
+      return;
+    }
     const { error } = await supabase
       .from('blog_settings')
       .update({ publish_mode: checked ? 'auto' : 'draft', updated_at: new Date().toISOString() })
@@ -146,6 +149,7 @@ export default function BlogQueueAdmin() {
       toast.success(checked ? 'Publishing automatically' : 'Saving as drafts');
     }
   };
+
 
   if (adminLoading || loading) {
     return (
@@ -174,7 +178,16 @@ export default function BlogQueueAdmin() {
         </div>
 
         <div className="space-y-4">
+          {rows.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                The queue is empty. Seed the blog voice spec, settings and queue rows before the daily
+                job can generate a post.
+              </CardContent>
+            </Card>
+          )}
           {rows.map((row) => (
+
             <Card key={row.id}>
               <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
                 <CardTitle className="text-base">
