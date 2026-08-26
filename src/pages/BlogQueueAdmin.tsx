@@ -45,6 +45,7 @@ export default function BlogQueueAdmin() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [autoPublish, setAutoPublish] = useState(false);
+  const [confirmRow, setConfirmRow] = useState<QueueRow | null>(null);
 
   const load = async () => {
     const [queue, settings] = await Promise.all([
