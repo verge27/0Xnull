@@ -30,7 +30,7 @@ const TokenCashout = () => {
   });
 
   const { token, balance, hasToken, refreshBalance } = useToken();
-  const { xmrUsdRate } = useExchangeRate() as unknown as { xmrUsdRate: number };
+  const { xmrUsdRate } = useExchangeRate();
   const [address, setAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
