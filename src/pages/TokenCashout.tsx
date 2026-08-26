@@ -37,7 +37,7 @@ const TokenCashout = () => {
   const [error, setError] = useState<string | null>(null);
   const [queued, setQueued] = useState<QueuedWithdrawal | null>(null);
   // Keep the same key across retries of an uncertain request.
-  const idempotencyKey = useRef<string | null>(null);
+  const idempotencyKey = useRef<ReturnType<typeof crypto.randomUUID> | null>(null);
 
   const amountNum = parseFloat(amount);
   const addrError = addressError('XMR', address.trim());
