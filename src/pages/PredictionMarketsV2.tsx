@@ -266,7 +266,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: 'Every market opens from combined bookmaker odds, with the treasury rotating back as markets settle.' },
+              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: view === 'esports' ? 'Every market opens on model odds from recent PandaScore results, with the treasury rotating back as markets settle.' : 'Every market opens from combined bookmaker odds, with the treasury rotating back as markets settle.' },
               { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },
               { icon: CheckCircle2, title: 'Automatic settlement', body: 'Wins and refunds return to the same token balance when the oracle resolves.' },
             ].map(({ icon: Icon, title, body }) => (
