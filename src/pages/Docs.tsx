@@ -92,7 +92,7 @@ export default function Docs() {
 
             <Section id="markets" icon={Scale} title="Market resolution">
               <p>
-                Every v2 prediction market is a two-sided dollar ledger. Treasury liquidity seeds each eligible market from combined bookmaker odds where an adapter price exists, at even odds otherwise, and rotates back into the pool as markets settle; user stakes then
+                Every v2 prediction market is a two-sided dollar ledger. Treasury liquidity seeds each eligible market from combined bookmaker odds where an adapter price exists, at even odds otherwise and rotates back into the pool as markets settle; user stakes then
                 reserve from their existing 0xn_ token and move the live pool ratio.
               </p>
               <ul className="list-disc pl-5 space-y-2">
