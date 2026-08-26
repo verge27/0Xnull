@@ -16,7 +16,6 @@ import { toast } from 'sonner';
 
 import { Navbar } from '@/components/Navbar';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
-import { PredictionsAvailabilityNotice } from '@/components/PredictionsAvailabilityNotice';
 import { Footer } from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -241,7 +240,6 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
       <main className="container mx-auto flex-1 px-4 py-8">
         <section className="mx-auto max-w-6xl">
-          <PredictionsAvailabilityNotice />
           <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <Badge className="mb-3 border-primary/30 bg-primary/10 text-primary" variant="outline">
