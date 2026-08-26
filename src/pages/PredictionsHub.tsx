@@ -3,6 +3,7 @@ import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, ShieldCheck, Trophy, W
 
 import { Navbar } from '@/components/Navbar';
 import { PredictionsSubsiteNav } from '@/components/PredictionsSubsiteNav';
+import { PredictionsAvailabilityNotice } from '@/components/PredictionsAvailabilityNotice';
 import { Footer } from '@/components/Footer';
 import { RelatedGuides } from '@/components/RelatedGuides';
 import { ServicePriceBar } from '@/components/ServicePriceBar';
@@ -33,6 +34,7 @@ export default function PredictionsHub() {
 
       <main className="container mx-auto flex-1 px-4 py-10">
         <section className="mx-auto max-w-5xl">
+          <PredictionsAvailabilityNotice />
           <div className="text-center">
             <Badge className="border-primary/30 bg-primary/10 text-primary" variant="outline">Prediction v2</Badge>
             <h1 className="mt-5 text-4xl font-bold tracking-tight md:text-5xl">One token. Every market.</h1>
