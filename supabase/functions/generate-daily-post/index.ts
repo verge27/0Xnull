@@ -107,7 +107,7 @@ serve(async (req) => {
     return json({ error: "Unauthorized" }, 401);
   }
 
-  let payload: { day_index?: number; force?: boolean } = {};
+  let payload: { day_index?: number; force?: boolean; as_draft?: boolean } = {};
   try {
     if (req.method === "POST") payload = await req.json();
   } catch (_) {
