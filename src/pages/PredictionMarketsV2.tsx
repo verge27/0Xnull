@@ -83,14 +83,36 @@ function marketMatchesView(market: PredictionMarket, view: PredictionMarketView)
   if (view === 'all' || view === 'sports') return oracleType === 'sports';
   if (view === 'cricket') return sportKey.startsWith('cricket_') || text.includes('cricket');
   if (view === 'combat') return sportKey.startsWith('mma_') || sportKey.startsWith('boxing_') || text.includes('mma') || text.includes('boxing');
-  if (view === 'esports') return oracleType.includes('esport') || text.includes('esport');
+  if (view === 'esports') return oracleType === 'esports';
   if (view === 'starcraft') return text.includes('starcraft');
   if (view === 'crypto') return oracleType.includes('crypto') || text.includes('crypto');
   return category === 'governance' || oracleType.includes('governance') || text.includes('governance');
 }
 
+const ESPORTS_GAME_LABELS: Record<string, string> = {
+  lol: 'League of Legends',
+  dota2: 'Dota 2',
+  csgo: 'Counter-Strike',
+  cs2: 'Counter-Strike 2',
+  valorant: 'Valorant',
+  ow: 'Overwatch',
+  r6siege: 'Rainbow Six Siege',
+  starcraft2: 'StarCraft II',
+  rocketleague: 'Rocket League',
+  kingofglory: 'King of Glory',
+  mlbb: 'Mobile Legends',
+  codmw: 'Call of Duty',
+  pubg: 'PUBG',
+  fifa: 'EA FC',
+  lolwildrift: 'Wild Rift',
+};
+
 function sportLabel(key?: string) {
   if (!key) return 'Market';
+  if (key.startsWith('esports:')) {
+    const game = key.slice('esports:'.length).toLowerCase();
+    return ESPORTS_GAME_LABELS[game] || game.replace(/[_-]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
   return key
     .replace(/^(americanfootball|basketball|baseball|soccer|cricket|icehockey|tennis|mma|boxing|rugbyunion|rugbyleague|aussierules)_/, '')
     .replace(/_/g, ' ')
