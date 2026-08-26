@@ -1,4 +1,5 @@
 import { Shield, Globe, Key, FileCheck, ChevronDown, Copy, Check, Terminal } from "lucide-react";
+import { PrivateAccessAddresses } from '@/components/PrivateAccessAddresses';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
