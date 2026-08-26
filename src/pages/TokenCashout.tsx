@@ -255,7 +255,7 @@ const TokenCashout = () => {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Converted at the live XMR price when the withdrawal is processed, minus the standard 0.5% deduction.
+                  Converted at the live XMR price when the withdrawal is processed.
                 </p>
               </div>
 
