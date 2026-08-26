@@ -74,6 +74,7 @@ export const Navbar = () => {
   const betSlip = useMultibetSlip();
   const navigate = useNavigate();
   const location = useLocation();
+  const isOnion = typeof window !== 'undefined' && window.location.hostname.endsWith('.onion');
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -170,7 +171,7 @@ export const Navbar = () => {
                 </SheetHeader>
 
                 <nav className="flex-1 overflow-y-auto px-3 py-3">
-                  {MOBILE_NAV.map((item) => {
+                  {MOBILE_NAV.filter((item) => !isOnion || !['/predict', '/payouts'].includes(item.to)).map((item) => {
                     const active =
                       item.to === '/'
                         ? location.pathname === '/'
@@ -203,7 +204,7 @@ export const Navbar = () => {
               { to: '/work', label: 'Work', icon: Briefcase },
               { to: '/predictions', label: 'Predictions', icon: TrendingUp },
               { to: '/docs', label: 'Docs', icon: FileText },
-            ].map((item) => {
+            ].filter((item) => !isOnion || item.to !== '/predictions').map((item) => {
               const active =
                 item.to === '/'
                   ? location.pathname === '/'
@@ -235,7 +236,7 @@ export const Navbar = () => {
             <TokenDashboardBadge />
 
             {/* Bet Slip Counter */}
-            {betSlip.items.length > 0 && (
+            {!isOnion && betSlip.items.length > 0 && (
               <Button
                 variant="ghost"
                 size="icon"
