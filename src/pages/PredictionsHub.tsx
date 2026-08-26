@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, Info, ShieldCheck, Trophy, WalletCards } from 'lucide-react';
+import { ArrowRight, BarChart3, Bitcoin, Gamepad2, Gavel, Info, ShieldCheck, Trophy, WalletCards, Zap } from 'lucide-react';
 
 
 import { Navbar } from '@/components/Navbar';
@@ -21,6 +21,7 @@ const categories = [
   { title: 'Esports', description: 'Model odds when available, even odds otherwise', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
   { title: 'Crypto', description: 'Even-odds treasury seed', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: true },
   { title: 'Governance', description: 'Even-odds treasury seed', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: true },
+  { title: 'Flash', description: '$4 every ten-minute round', href: '/flash', icon: Zap, color: 'text-fuchsia-400', live: true },
 ];
 
 export default function PredictionsHub() {
