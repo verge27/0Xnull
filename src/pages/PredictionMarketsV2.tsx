@@ -58,7 +58,7 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
   },
   esports: {
     title: 'Esports Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'Esports markets priced by the 0xNull model from recent PandaScore results, funded from your 0xn_ token.',
   },
   crypto: {
     title: 'Crypto Predictions',
@@ -83,14 +83,36 @@ function marketMatchesView(market: PredictionMarket, view: PredictionMarketView)
   if (view === 'all' || view === 'sports') return oracleType === 'sports';
   if (view === 'cricket') return sportKey.startsWith('cricket_') || text.includes('cricket');
   if (view === 'combat') return sportKey.startsWith('mma_') || sportKey.startsWith('boxing_') || text.includes('mma') || text.includes('boxing');
-  if (view === 'esports') return oracleType.includes('esport') || text.includes('esport');
+  if (view === 'esports') return oracleType === 'esports';
   if (view === 'starcraft') return text.includes('starcraft');
   if (view === 'crypto') return oracleType.includes('crypto') || text.includes('crypto');
   return category === 'governance' || oracleType.includes('governance') || text.includes('governance');
 }
 
+const ESPORTS_GAME_LABELS: Record<string, string> = {
+  lol: 'League of Legends',
+  dota2: 'Dota 2',
+  csgo: 'Counter-Strike',
+  cs2: 'Counter-Strike 2',
+  valorant: 'Valorant',
+  ow: 'Overwatch',
+  r6siege: 'Rainbow Six Siege',
+  starcraft2: 'StarCraft II',
+  rocketleague: 'Rocket League',
+  kingofglory: 'King of Glory',
+  mlbb: 'Mobile Legends',
+  codmw: 'Call of Duty',
+  pubg: 'PUBG',
+  fifa: 'EA FC',
+  lolwildrift: 'Wild Rift',
+};
+
 function sportLabel(key?: string) {
   if (!key) return 'Market';
+  if (key.startsWith('esports:')) {
+    const game = key.slice('esports:'.length).toLowerCase();
+    return ESPORTS_GAME_LABELS[game] || game.replace(/[_-]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
   return key
     .replace(/^(americanfootball|basketball|baseball|soccer|cricket|icehockey|tennis|mma|boxing|rugbyunion|rugbyleague|aussierules)_/, '')
     .replace(/_/g, ' ')
@@ -111,6 +133,13 @@ function formatStart(timestamp?: number) {
 function money(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
+
+function pricingLabel(market: PredictionMarket) {
+  if (market.pricing_method === 'model') return 'Model odds · PandaScore results';
+  const books = market.bookmaker_count || 0;
+  return books > 0 ? `${books} books · median no-vig` : 'Externally priced';
+}
+
 
 export default function PredictionMarketsV2({ view = 'sports' }: { view?: PredictionMarketView }) {
   const copy = VIEW_COPY[view];
@@ -237,7 +266,7 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             {[
-              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: 'Every market opens from combined bookmaker odds, with the treasury rotating back as markets settle.' },
+              { icon: BarChart3, title: 'Treasury-rotated liquidity', body: view === 'esports' ? 'Every market opens on model odds from recent PandaScore results, with the treasury rotating back as markets settle.' : 'Every market opens from combined bookmaker odds, with the treasury rotating back as markets settle.' },
               { icon: Coins, title: 'One token', body: 'A bet reserves dollars already on your 0xn_ token—no market wallet or view key.' },
               { icon: CheckCircle2, title: 'Automatic settlement', body: 'Wins and refunds return to the same token balance when the oracle resolves.' },
             ].map(({ icon: Icon, title, body }) => (
@@ -284,6 +313,8 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
               </CardContent>
             </Card>
           ) : (
+            <>
+            <h2 className="mb-4 text-lg font-semibold">Active Markets ({visibleMarkets.length})</h2>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visibleMarkets.map((market) => {
                 const yes = market.yes_pool_cents || 0;
@@ -310,8 +341,8 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
 
                       <div className="mt-5 space-y-2">
                         <div className="flex justify-between text-xs font-medium">
-                          <span className="text-emerald-400">YES {yesPercent}%</span>
-                          <span className="text-red-400">NO {noPercent}%</span>
+                          <span className="text-emerald-400">{money(yes)} YES · {yesPercent}%</span>
+                          <span className="text-red-400">{money(no)} NO · {noPercent}%</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-red-500/30">
                           <div className="h-full bg-emerald-500" style={{ width: `${yesPercent}%` }} />
@@ -327,15 +358,17 @@ export default function PredictionMarketsV2({ view = 'sports' }: { view?: Predic
                         </Button>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
-                        <span>{money(totalPool)} total liquidity</span>
-                        <span>{market.bookmaker_count || 0} books · median no-vig</span>
+                      <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                        <span>{money(totalPool)} total</span>
+                        <span className="text-right">{pricingLabel(market)}</span>
                       </div>
+
                     </CardContent>
                   </Card>
                 );
               })}
             </div>
+            </>
           )}
 
           <div className="mt-8 flex items-center justify-between rounded-lg border border-border/70 bg-card/40 px-4 py-3 text-sm">
