@@ -42,7 +42,7 @@ export type PredictionMarketView =
 const VIEW_COPY: Record<PredictionMarketView, { title: string; description: string }> = {
   all: {
     title: 'Prediction Markets',
-    description: 'Externally priced markets funded from one reusable 0xn_ token.',
+    description: 'Markets funded from one reusable 0xn_ token, priced by adapter odds or an even-odds seed.',
   },
   sports: {
     title: 'Sports Predictions',
