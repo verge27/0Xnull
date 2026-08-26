@@ -40,12 +40,14 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
             <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                aria-label="Previous image"
                 className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                aria-label="Next image"
                 className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -87,6 +89,7 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95">
           <button
             onClick={() => setLightboxOpen(false)}
+            aria-label="Close image viewer"
             className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
           >
             <X className="w-6 h-6" />

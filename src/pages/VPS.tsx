@@ -461,6 +461,7 @@ const VPS = () => {
                         <Button 
                           variant="outline" 
                           size="icon" 
+                          aria-label="Copy API token"
                           onClick={copyToken}
                         >
                           {tokenCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -569,7 +570,7 @@ const VPS = () => {
                                 <div className="flex items-center gap-2 text-sm">
                                   <span className="text-muted-foreground">IPv4:</span>
                                   <code className="bg-secondary px-2 py-0.5 rounded">{server.ipv4}</code>
-                                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => copyToClipboard(server.ipv4)}>
+                                  <Button size="icon" variant="ghost" aria-label="Copy IPv4 address" className="h-6 w-6" onClick={() => copyToClipboard(server.ipv4)}>
                                     <Copy className="h-3 w-3" />
                                   </Button>
                                 </div>
@@ -580,7 +581,7 @@ const VPS = () => {
                                   Expires: {new Date(server.expiration).toLocaleDateString()}
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon" onClick={() => deleteServer(server.machine_id)}>
+                              <Button variant="ghost" size="icon" aria-label="Delete server" onClick={() => deleteServer(server.machine_id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </div>
@@ -801,6 +802,7 @@ const VPS = () => {
                         <Button 
                           size="icon" 
                           variant="ghost" 
+                          aria-label="Copy XMR amount"
                           className="h-6 w-6"
                           onClick={() => copyToClipboard(fundingXmrAmount)}
                         >
@@ -815,6 +817,7 @@ const VPS = () => {
                         <Button 
                           size="icon" 
                           variant="ghost" 
+                          aria-label="Copy funding address"
                           className="h-6 w-6 shrink-0"
                           onClick={() => copyToClipboard(fundingAddress)}
                         >
