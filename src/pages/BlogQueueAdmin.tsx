@@ -135,7 +135,10 @@ export default function BlogQueueAdmin() {
 
   const togglePublishMode = async (checked: boolean) => {
     const { data: current } = await supabase.from('blog_settings').select('id').limit(1).maybeSingle();
-    if (!current) return;
+    if (!current) {
+      toast.error('Blog settings are not configured yet');
+      return;
+    }
     const { error } = await supabase
       .from('blog_settings')
       .update({ publish_mode: checked ? 'auto' : 'draft', updated_at: new Date().toISOString() })
@@ -146,6 +149,7 @@ export default function BlogQueueAdmin() {
       toast.success(checked ? 'Publishing automatically' : 'Saving as drafts');
     }
   };
+
 
   if (adminLoading || loading) {
     return (
