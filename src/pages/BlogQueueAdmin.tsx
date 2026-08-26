@@ -8,6 +8,16 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ArrowLeft, Loader2, RefreshCw, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -45,6 +55,7 @@ export default function BlogQueueAdmin() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [autoPublish, setAutoPublish] = useState(false);
+  const [confirmRow, setConfirmRow] = useState<QueueRow | null>(null);
 
   const load = async () => {
     const [queue, settings] = await Promise.all([
@@ -88,7 +99,7 @@ export default function BlogQueueAdmin() {
     }
   };
 
-  const regenerate = async (row: QueueRow) => {
+  const runGeneration = async (row: QueueRow, asDraft: boolean) => {
     setBusy(row.id);
     const reset = await supabase
       .from('blog_queue')
@@ -102,13 +113,24 @@ export default function BlogQueueAdmin() {
     }
 
     const { data, error } = await supabase.functions.invoke('generate-daily-post', {
-      body: { day_index: row.day_index, force: true },
+      body: { day_index: row.day_index, force: true, as_draft: asDraft },
     });
     setBusy(null);
 
     if (error) toast.error(`Generation failed: ${error.message}`);
-    else toast.success(`Day ${row.day_index}: ${(data as { status?: string })?.status ?? 'done'}`);
+    else
+      toast.success(
+        `Day ${row.day_index}: ${(data as { status?: string })?.status ?? 'done'}${asDraft ? ' (new draft)' : ''}`,
+      );
     load();
+  };
+
+  const regenerate = (row: QueueRow) => {
+    if (row.status === 'published') {
+      setConfirmRow(row);
+      return;
+    }
+    runGeneration(row, false);
   };
 
   const togglePublishMode = async (checked: boolean) => {
@@ -195,7 +217,33 @@ export default function BlogQueueAdmin() {
           ))}
         </div>
       </main>
+
+      <AlertDialog open={!!confirmRow} onOpenChange={(open) => !open && setConfirmRow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Day {confirmRow?.day_index} is already published</AlertDialogTitle>
+            <AlertDialogDescription>
+              Regenerating will not touch the live post. It creates a new draft post you can review
+              and publish yourself.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const row = confirmRow;
+                setConfirmRow(null);
+                if (row) runGeneration(row, true);
+              }}
+            >
+              Create new draft
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Footer />
+
     </div>
   );
 }
