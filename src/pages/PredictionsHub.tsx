@@ -53,7 +53,7 @@ export default function PredictionsHub() {
             className="mt-9"
             price="0.4% of winnings"
             tokenMetered
-            trust={<>Treasury liquidity seeds every market from combined bookmaker odds and rotates back into the pool as markets settle.</>}
+            trust={<>Treasury liquidity seeds every market from combined bookmaker odds where an adapter price exists, at even odds otherwise, and rotates back into the pool as markets settle.</>}
           />
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
