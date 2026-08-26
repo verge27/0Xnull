@@ -8,6 +8,7 @@ import { SiteAssistant } from '@/components/SiteAssistant';
 import { getListings } from '@/lib/data';
 import { useListings } from '@/hooks/useListings';
 import { xmrbazaarListings } from '@/lib/xmrbazaar';
+import { xmrHubListings } from '@/lib/partners/xmrHub';
 import { freakInTheSheetsListings } from '@/lib/partners/freakInTheSheets';
 import { peptidesUKPartnerListings } from '@/lib/partners/peptidesUK';
 import { ukPeptidesPartnerListings } from '@/lib/partners/ukPeptides';
@@ -63,7 +64,7 @@ const Browse = () => {
     isDbListing: true
   }));
   
-  // Combine all listings (Database first, then XMRBazaar, then partners, then demo)
+  // Combine all listings (Database first, then external suppliers, then demo)
   const listings: any[] = [
     ...databaseListings,
     ...xmrbazaarListings.map(xmr => ({
@@ -78,6 +79,11 @@ const Browse = () => {
       isXMRBazaar: true,
       xmrbazaarUrl: xmr.xmrbazaarUrl,
       seller: xmr.seller
+    })),
+    ...xmrHubListings.map(item => ({
+      ...item,
+      isPartner: true,
+      partnerName: 'XMR Hub'
     })),
     ...freakInTheSheetsListings.map(item => ({
       ...item,
