@@ -71,18 +71,10 @@ const TokenCashout = () => {
   const amountNum = parseFloat(amount);
   const addrError = addressError('XMR', address.trim());
   const rate = xmrUsdRate || 0;
-  const feeRate = 0.005;
-
-  const breakdown = useMemo(() => {
-    if (!amountNum || Number.isNaN(amountNum) || amountNum <= 0 || !rate) return null;
-    const gross = amountNum;
-    const fee = gross * feeRate;
-    const net = gross - fee;
-    const xmr = roundUpXmr(net / rate, 10);
-    return { gross, fee, net, rate, xmr };
+  const estimatedXmr = useMemo(() => {
+    if (!amountNum || !rate) return null;
+    return roundUpXmr(amountNum / rate, 10);
   }, [amountNum, rate]);
-
-  const estimatedXmr = breakdown ? breakdown.xmr : null;
 
   const amountError = !amount
     ? null
@@ -138,7 +130,6 @@ const TokenCashout = () => {
       setQueued(res);
       recordWithdrawal({
         ...res,
-        amount_usd: res.amount_usd ?? amountNum,
         address: address.trim(),
         created_at: new Date().toISOString(),
       });
@@ -256,33 +247,15 @@ const TokenCashout = () => {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-border bg-secondary/40 p-4 space-y-2 text-sm">
+              <div className="rounded-lg border border-border bg-secondary/40 p-4 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Withdrawal amount</span>
-                  <span className="font-mono">{breakdown ? `$${breakdown.gross.toFixed(2)}` : '—'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">0.5% deduction</span>
-                  <span className="font-mono text-destructive">
-                    {breakdown ? `-$${breakdown.fee.toFixed(2)}` : '—'}
+                  <span className="text-muted-foreground">Estimated XMR received</span>
+                  <span className="font-mono">
+                    {estimatedXmr ? `${estimatedXmr} XMR` : '—'}
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-border pt-2">
-                  <span className="text-muted-foreground">Net after deduction</span>
-                  <span className="font-mono">{breakdown ? `$${breakdown.net.toFixed(2)}` : '—'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Live XMR/USD rate</span>
-                  <span className="font-mono">{breakdown ? `$${breakdown.rate.toFixed(2)}` : '—'}</span>
-                </div>
-                <div className="flex justify-between border-t border-border pt-2">
-                  <span className="font-medium">Estimated XMR received</span>
-                  <span className="font-mono font-medium">
-                    {breakdown ? `${breakdown.xmr} XMR` : '—'}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground pt-1">
-                  Net TXN/USD is converted at the live XMR price when the withdrawal is processed.
+                <p className="text-xs text-muted-foreground">
+                  Converted at the live XMR price when the withdrawal is processed.
                 </p>
               </div>
 

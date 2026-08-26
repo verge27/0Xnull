@@ -384,12 +384,11 @@ const Browse = () => {
 
           <ServicePriceBar
             className="mt-6"
-            price="Free to list · direct listings settle in XMR · external cards use supplier checkout"
+            price="Free to list · buyers pay the listed price in XMR"
             trust={
               <>
-                Direct marketplace orders use browser-side PGP encryption and escrow. Cards marked with a
-                supplier name open that supplier's website; checkout, shipping data, fulfilment and support
-                stay with the supplier. See{' '}
+                Shipping details are PGP-encrypted in your browser, and order funds sit in escrow with a
+                timed release so a silent operator cannot strand them. See{' '}
                 <Link to="/docs#escrow" className="text-primary hover:underline">escrow and the dead man's switch</Link>.
               </>
             }
