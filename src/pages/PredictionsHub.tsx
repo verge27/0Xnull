@@ -15,19 +15,20 @@ import { useSEO } from '@/hooks/useSEO';
 
 
 const categories = [
-  { title: 'Sports', description: 'All bookmaker-priced events', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
-  { title: 'Cricket', description: 'Cricket-only event filter', href: '/cricket-predictions', icon: Trophy, color: 'text-cyan-400', live: true },
-  { title: 'Combat', description: 'MMA and boxing events', href: '/predictions/sports/combat', icon: Trophy, color: 'text-red-400', live: true },
-  { title: 'Esports', description: 'Model odds · PandaScore results', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
-  { title: 'Crypto', description: 'Awaiting a v2 odds adapter', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: false },
-  { title: 'Governance', description: 'Awaiting a v2 odds adapter', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: false },
+  { title: 'Sports', description: 'Bookmaker odds when available, even odds otherwise', href: '/sports-predictions', icon: Trophy, color: 'text-emerald-400', live: true },
+  { title: 'Cricket', description: 'Bookmaker odds when available, even odds otherwise', href: '/cricket-predictions', icon: Trophy, color: 'text-cyan-400', live: true },
+  { title: 'Combat', description: 'Bookmaker odds when available, even odds otherwise', href: '/predictions/sports/combat', icon: Trophy, color: 'text-red-400', live: true },
+  { title: 'Esports', description: 'Model odds when available, even odds otherwise', href: '/esports-predictions', icon: Gamepad2, color: 'text-purple-400', live: true },
+  { title: 'Crypto', description: 'Even-odds treasury seed', href: '/predictions', icon: Bitcoin, color: 'text-orange-400', live: true },
+  { title: 'Governance', description: 'Even-odds treasury seed', href: '/governance-predictions', icon: Gavel, color: 'text-amber-400', live: true },
 ];
 
 export default function PredictionsHub() {
   useSEO({
     title: 'Prediction Markets | 0xNull',
-    description: 'Token-funded prediction markets with bookmaker-priced treasury liquidity and automatic settlement.',
+    description: 'Token-funded prediction markets with treasury-seeded liquidity and automatic settlement.',
   });
+
 
   return (
     <TooltipProvider>
