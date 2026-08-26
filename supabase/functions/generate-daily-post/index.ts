@@ -224,7 +224,7 @@ Write the post. Return JSON only.`;
         "Lovable-API-Key": apiKey,
       },
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: "google/gemini-3.1-pro-preview",
         messages: [
           { role: "system", content: voice.spec },
           { role: "user", content: userMessage },
