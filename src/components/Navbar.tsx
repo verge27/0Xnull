@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText, TrendingUp } from 'lucide-react';
+import { Shield, ShoppingBag, User, Package, LogOut, Search, Heart, MessageCircle, Menu, Key, Copy, Check, Trash2, Bot, Server, Smartphone, Wallet, ArrowLeftRight, Briefcase, Receipt, Rocket, X, FileText, TrendingUp, Landmark, Newspaper } from 'lucide-react';
 import { useToken } from '@/hooks/useToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,14 +21,20 @@ import { toast } from 'sonner';
 const TokenDashboardBadge = () => <TokenStatusWidget />;
 
 
-/** Mirrors the homepage service cards exactly (icons, labels, order, destinations). */
+/** Global mobile navigation — all active top-level destinations. */
 const MOBILE_NAV = [
   { to: '/', label: 'Home', icon: Shield },
+  { to: '/predict', label: 'Predictions', icon: TrendingUp },
+  { to: '/payouts', label: 'Payouts', icon: Receipt },
+  { to: '/work', label: 'Work', icon: Briefcase },
+  { to: '/browse', label: 'Marketplace', icon: ShoppingBag },
+  { to: '/lending', label: 'Lending', icon: Landmark },
+  { to: '/docs', label: 'Docs', icon: FileText },
+  { to: '/blog', label: 'Blog', icon: Newspaper },
   { to: '/ai', label: 'AI & Voice', icon: Bot },
   { to: '/phone', label: 'Phone & eSIM', icon: Smartphone },
   { to: '/swaps', label: 'Swaps', icon: ArrowLeftRight },
   { to: '/ramp', label: 'Fiat On/Off Ramp', icon: Wallet },
-  { to: '/work', label: 'Work', icon: Briefcase },
   { to: '/vps', label: 'VPS', icon: Server },
 ];
 
