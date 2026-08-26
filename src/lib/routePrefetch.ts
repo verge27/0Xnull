@@ -58,6 +58,7 @@ const routeImports: Record<string, ImportFn> = {
   '/verify': () => import('@/pages/Verify'),
   '/support': () => import('@/pages/Support'),
   '/tor-guide': () => import('@/pages/TorGuide'),
+  '/i2p-guide': () => import('@/pages/I2pGuide'),
   '/get-started': () => import('@/pages/GetStarted'),
   '/api-docs': () => import('@/pages/ApiDocs'),
   '/influencer': () => import('@/pages/Influencer'),
