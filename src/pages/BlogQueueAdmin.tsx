@@ -178,7 +178,16 @@ export default function BlogQueueAdmin() {
         </div>
 
         <div className="space-y-4">
+          {rows.length === 0 && (
+            <Card>
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                The queue is empty. Seed the blog voice spec, settings and queue rows before the daily
+                job can generate a post.
+              </CardContent>
+            </Card>
+          )}
           {rows.map((row) => (
+
             <Card key={row.id}>
               <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
                 <CardTitle className="text-base">
