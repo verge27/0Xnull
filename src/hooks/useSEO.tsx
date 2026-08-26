@@ -928,6 +928,29 @@ const articleSchemas: Record<string, StructuredData> = {
     },
     proficiencyLevel: 'Beginner',
   },
+  '/i2p-guide': {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'How to Access 0xNull over I2P',
+    description: 'Install an I2P or i2pd router, let it bootstrap, configure a browser profile for the local HTTP proxy on 127.0.0.1:4444 and open the 0xNull .i2p address.',
+    url: 'https://0xnull.io/i2p-guide',
+    datePublished: '2026-08-26',
+    dateModified: '2026-08-26',
+    author: {
+      '@type': 'Organization',
+      name: '0xNull',
+      url: 'https://0xnull.io',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '0xNull',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://0xnull.io/favicon-512.png',
+      },
+    },
+    proficiencyLevel: 'Beginner',
+  },
   '/get-started': {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
