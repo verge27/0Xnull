@@ -58,7 +58,7 @@ const VIEW_COPY: Record<PredictionMarketView, { title: string; description: stri
   },
   esports: {
     title: 'Esports Predictions',
-    description: 'Only markets with a current external consensus are listed.',
+    description: 'Esports markets priced by the 0xNull model from recent PandaScore results, funded from your 0xn_ token.',
   },
   crypto: {
     title: 'Crypto Predictions',
