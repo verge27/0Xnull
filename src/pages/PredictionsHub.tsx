@@ -120,5 +120,6 @@ export default function PredictionsHub() {
 
       <Footer />
     </div>
+    </TooltipProvider>
   );
 }
