@@ -88,8 +88,9 @@ export default function PredictionsHub() {
                       <div className="flex items-center justify-between">
                         <Icon className={`h-6 w-6 ${color}`} />
                         <Badge variant="outline" className={live ? 'border-emerald-500/30 text-emerald-400' : 'text-muted-foreground'}>
-                          {live ? 'Live' : 'Next adapter'}
+                          Live
                         </Badge>
+
                       </div>
                       <div className="mt-4 flex items-center gap-2">
                         <h3 className="text-lg font-semibold">{title}</h3>
