@@ -325,6 +325,7 @@ export interface PredictionMarket {
   pool_address?: string;
   view_key?: string;
   odds_sport_key?: string;
+  category?: string;
   event_home_team?: string;
   event_away_team?: string;
   // Betting cutoff fields
