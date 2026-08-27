@@ -3,6 +3,7 @@ import { TOR_URL, I2P_URL } from '@/lib/privateNetworks';
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Code, Zap, Shield, Globe, Trophy, Gamepad2, CircleDollarSign, Briefcase } from "lucide-react";
@@ -41,6 +42,12 @@ const ApiDocs = () => {
               Auth: X-TXN-Token
             </Badge>
           </div>
+
+          <Alert role="note">
+            <AlertDescription>
+              Predictions is not available to residents of Great Britain. Access from GB is blocked.
+            </AlertDescription>
+          </Alert>
         </div>
 
         {/* Quick Start */}

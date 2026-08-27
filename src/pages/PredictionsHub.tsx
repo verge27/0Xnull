@@ -10,6 +10,7 @@ import { ServicePriceBar } from '@/components/ServicePriceBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSEO } from '@/hooks/useSEO';
 
@@ -48,6 +49,12 @@ export default function PredictionsHub() {
               <Link to="/sports-predictions">View live markets <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
+
+          <Alert className="mt-6" role="note">
+            <AlertDescription>
+              Predictions is not available to residents of Great Britain. Access from GB is blocked.
+            </AlertDescription>
+          </Alert>
 
           <ServicePriceBar
             className="mt-9"
