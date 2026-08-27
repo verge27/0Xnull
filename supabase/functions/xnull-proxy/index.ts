@@ -32,6 +32,11 @@ const ALLOWED_METHODS = ['GET', 'POST', 'PUT'];
 const GB_PREDICTIONS_NOTICE =
   'Predictions is not available to residents of Great Britain. Access from GB is blocked.';
 
+type PolicyGateResult = {
+  response: Response | null;
+  attestationHeaders: Record<string, string>;
+};
+
 const isPredictionMoneyAction = (method: string, path: string): boolean => {
   const pathname = path.split('?', 1)[0].replace(/\/+$/, '');
   if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return false;
@@ -40,6 +45,8 @@ const isPredictionMoneyAction = (method: string, path: string): boolean => {
   if (method === 'POST' && pathname === '/api/multibets/create') return true;
   if (method === 'POST' && /^\/api\/multibets\/[^/]+\/payout-address$/.test(pathname)) return true;
   if (method === 'POST' && pathname === '/api/flash/bet') return true;
+  if (method === 'POST' && pathname === '/api/token/withdraw') return true;
+  if (method === 'POST' && pathname === '/api/token/withdraw-v2') return true;
   return false;
 };
 
@@ -61,12 +68,61 @@ const predictionGbBlocked = () => new Response(JSON.stringify({
   headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
 });
 
-async function enforcePredictionCountry(req: Request): Promise<Response | null> {
+const bytesToHex = (value: ArrayBuffer): string =>
+  Array.from(new Uint8Array(value), (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+async function createPolicyAttestation(
+  clientIp: string,
+  method: string,
+  targetPath: string,
+): Promise<Record<string, string> | null> {
+  const secret = Deno.env.get('PREDICTIONS_POLICY_SECRET') || '';
+  if (!secret) return null;
+
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const nonce = crypto.randomUUID();
+  const pathname = targetPath.split('?', 1)[0].replace(/\/+$/, '') || '/';
+  const canonical = `v1\n${timestamp}\n${nonce}\n${method.toUpperCase()}\n${pathname}\n${clientIp}`;
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = bytesToHex(await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(canonical),
+  ));
+
+  return {
+    'X-Oxnull-Policy-Timestamp': timestamp,
+    'X-Oxnull-Policy-Nonce': nonce,
+    'X-Oxnull-Policy-Method': method.toUpperCase(),
+    'X-Oxnull-Policy-Path': pathname,
+    'X-Oxnull-Policy-Client-IP': clientIp,
+    'X-Oxnull-Policy-Signature': signature,
+  };
+}
+
+async function enforcePredictionCountry(
+  req: Request,
+  method: string,
+  targetPath: string,
+): Promise<PolicyGateResult> {
   // Supabase's gateway supplies this header; its first address is the caller.
   // The address is sent only in the POST body to Cache for an in-memory MMDB
   // lookup. It is never put in a URL or compliance log.
   const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  if (!clientIp) return predictionGeoUnavailable();
+  if (!clientIp) {
+    return { response: predictionGeoUnavailable(), attestationHeaders: {} };
+  }
+
+  const attestationHeaders = await createPolicyAttestation(clientIp, method, targetPath);
+  if (!attestationHeaders) {
+    return { response: predictionGeoUnavailable(), attestationHeaders: {} };
+  }
 
   let check: Response;
   try {
@@ -74,23 +130,27 @@ async function enforcePredictionCountry(req: Request): Promise<Response | null> 
     const timeoutId = setTimeout(() => controller.abort(), 3000);
     check = await fetch(`${API_BASE}/api/compliance/predictions-check`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...attestationHeaders },
       body: JSON.stringify({ ip: clientIp }),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
   } catch {
-    return predictionGeoUnavailable();
+    return { response: predictionGeoUnavailable(), attestationHeaders: {} };
   }
 
   if (check.status === 451) {
     console.warn(`[xnull-proxy] prediction_gb_block count=1 timestamp=${new Date().toISOString()} channel=clearnet_edge`);
-    return predictionGbBlocked();
+    return { response: predictionGbBlocked(), attestationHeaders: {} };
   }
-  if (!check.ok) return predictionGeoUnavailable();
+  if (!check.ok) {
+    return { response: predictionGeoUnavailable(), attestationHeaders: {} };
+  }
 
   const result = await check.json().catch(() => null);
-  return result?.allowed === true ? null : predictionGeoUnavailable();
+  return result?.allowed === true
+    ? { response: null, attestationHeaders }
+    : { response: predictionGeoUnavailable(), attestationHeaders: {} };
 }
 
 // The upstream API sometimes sends a Content-Length that far exceeds the bytes it
@@ -216,9 +276,11 @@ serve(async (req) => {
       });
     }
 
+    let policyAttestationHeaders: Record<string, string> = {};
     if (isPredictionMoneyAction(req.method, targetPath)) {
-      const blocked = await enforcePredictionCountry(req);
-      if (blocked) return blocked;
+      const gate = await enforcePredictionCountry(req, req.method, targetPath);
+      if (gate.response) return gate.response;
+      policyAttestationHeaders = gate.attestationHeaders;
     }
 
 
@@ -399,6 +461,11 @@ serve(async (req) => {
     const txnToken = req.headers.get('x-txn-token');
     const idempotencyKey = req.headers.get('idempotency-key');
 
+    const forwardedHeaders: Record<string, string> = { ...policyAttestationHeaders };
+    if (oxnullToken) forwardedHeaders['X-0xNull-Token'] = oxnullToken;
+    if (txnToken) forwardedHeaders['X-TXN-Token'] = txnToken;
+    if (idempotencyKey) forwardedHeaders['Idempotency-Key'] = idempotencyKey;
+
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers.get('content-type') || '';
 
@@ -415,12 +482,13 @@ serve(async (req) => {
         });
         console.log(`FormData entries: ${entries.join(', ')}`);
 
+        fetchOptions.headers = forwardedHeaders;
         fetchOptions.body = formData;
       } else {
-        const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
-        if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
-        if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
+        const reqHeaders: Record<string, string> = {
+          ...forwardedHeaders,
+          'Content-Type': 'application/json',
+        };
         fetchOptions.headers = reqHeaders;
         try {
           const body = await req.text();
@@ -430,10 +498,10 @@ serve(async (req) => {
         }
       }
     } else {
-      const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (oxnullToken) reqHeaders['X-0xNull-Token'] = oxnullToken;
-      if (txnToken) reqHeaders['X-TXN-Token'] = txnToken;
-      if (idempotencyKey) reqHeaders['Idempotency-Key'] = idempotencyKey;
+      const reqHeaders: Record<string, string> = {
+        ...forwardedHeaders,
+        'Content-Type': 'application/json',
+      };
       fetchOptions.headers = reqHeaders;
     }
 
