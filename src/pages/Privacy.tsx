@@ -21,7 +21,8 @@ const Privacy = () => {
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
                   0xNull Marketplace is built on the principle of privacy-first commerce. We collect the 
-                  absolute minimum data necessary to facilitate transactions.
+                  absolute minimum data necessary to provide and protect the service. We do not use Google
+                  Analytics, Google Tag Manager, advertising pixels, or behavioural analytics.
                 </p>
               </CardContent>
             </Card>
@@ -41,7 +42,8 @@ const Privacy = () => {
                 <ul className="list-disc list-inside space-y-1">
                   <li>Real names or government IDs</li>
                   <li>Physical addresses (shipping handled directly between parties)</li>
-                  <li>IP addresses or browser fingerprints</li>
+                  <li>Analytics cookies, advertising identifiers, or browser fingerprints</li>
+                  <li>Persistent identifiers for page-view or journey tracking</li>
                   <li>Payment information beyond XMR wallet addresses</li>
                 </ul>
               </CardContent>
@@ -72,9 +74,23 @@ const Privacy = () => {
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-3">
                 <p>
-                  We use Trocador AnonPay for payment processing. No other third parties have 
-                  access to your data. We do not use analytics trackers, advertising networks, 
-                  or sell any user information.
+                  We use service providers only where needed to host the site, provide requested features,
+                  process payments, and protect the service. Trocador AnonPay processes payment requests sent
+                  to it. We do not use third-party analytics or advertising networks, and we do not sell user
+                  information.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Operational Records</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground space-y-3">
+                <p>
+                  Security, fraud-prevention, transaction, and error records are limited to what is necessary
+                  to deliver and protect the service. Ramp diagnostics contain no browser or session identifier.
+                  Voucher reporting records completed transaction events without a user token or page-view trail.
                 </p>
               </CardContent>
             </Card>

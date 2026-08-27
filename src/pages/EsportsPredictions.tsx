@@ -69,10 +69,10 @@ export default function EsportsPredictions() {
   const { xmrUsdRate } = useExchangeRate();
   const { isAdmin } = useIsAdmin();
   
-  // Voucher support with analytics
+  // Voucher support with transaction-only attribution
   const { voucher: savedVoucher } = useVoucher();
   useVoucherFromUrl();
-  const { trackView, trackBetPlaced } = useVoucherAnalytics();
+  const { trackBetPlaced } = useVoucherAnalytics();
   
   // Check for streamer-specific vouchers for welcome banners
   const isAWFViewer = savedVoucher?.toUpperCase() === 'AWF0XDOTA';

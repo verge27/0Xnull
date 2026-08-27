@@ -1,9 +1,8 @@
 /**
  * Analytics and error reporting for the fiat ramp route finder.
  *
- * Every routing decision, quote failure and outbound redirect is logged so we
- * can see which route users were pushed towards and exactly which eligibility
- * reason they were shown. Logging is best effort and never blocks the UI.
+ * Events contain no browser or session identifier. They are used to diagnose
+ * routing and provider failures, are best effort, and never block the UI.
  */
 
 export type RampEventType =
@@ -35,22 +34,8 @@ export interface RampEvent {
   target_url?: string;
 }
 
-const SESSION_KEY = 'ramp_analytics_session';
-
-const getSessionId = (): string => {
-  try {
-    const existing = sessionStorage.getItem(SESSION_KEY);
-    if (existing) return existing;
-    const id = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_KEY, id);
-    return id;
-  } catch {
-    return 'unavailable';
-  }
-};
-
 export const logRampEvent = (event: RampEvent): void => {
-  const payload = { ...event, session_id: getSessionId() };
+  const payload = event;
 
   if (event.event_type.endsWith('failure')) {
     console.error('[ramp]', event.event_type, payload);

@@ -62,7 +62,8 @@ serve(async (req) => {
 
     const row = {
       event_type: eventType,
-      session_id: str(body.session_id, 64),
+      // Deliberately do not accept or persist browser/session identifiers.
+      session_id: null,
       side: str(body.side, 8),
       country_code: str(body.country_code, 2)?.toUpperCase() ?? null,
       asset: str(body.asset, 16),

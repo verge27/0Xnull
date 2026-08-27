@@ -53,8 +53,6 @@ serve(async (req) => {
       return json({ error: "Invalid event type" }, 400);
     }
 
-    const userToken = sanitizeString(body.user_token, 64);
-    const page = sanitizeString(body.page, 2048);
     let marketId = sanitizeString(body.market_id, 64);
 
     if (marketId && !UUID_REGEX.test(marketId)) {
@@ -77,8 +75,10 @@ serve(async (req) => {
     const { error: insertErr } = await supabase.from("voucher_analytics").insert({
       voucher_code: voucherCode.toUpperCase(),
       event_type: eventType,
-      user_token: userToken,
-      page,
+      // Voucher reporting is transaction-only. Never persist a browser token
+      // or page-view trail, even if an older client sends those fields.
+      user_token: null,
+      page: null,
       market_id: marketId,
       bet_amount: betAmount,
       metadata,
