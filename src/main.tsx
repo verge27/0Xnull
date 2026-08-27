@@ -4,6 +4,15 @@ import "./index.css";
 
 const rootElement = document.getElementById("root");
 
+const removeLegacyAnalyticsIdentifiers = () => {
+  try {
+    localStorage.removeItem('0xnull_anon_token');
+    sessionStorage.removeItem('ramp_analytics_session');
+  } catch {
+    // Browser storage can be unavailable; neither identifier is used anymore.
+  }
+};
+
 const renderApp = () => {
   if (!rootElement) return;
   createRoot(rootElement).render(<App />);
@@ -70,6 +79,8 @@ const bypassStaleServiceWorkerForStaticRoutes = async () => {
 };
 
 void (async () => {
+  removeLegacyAnalyticsIdentifiers();
+
   const isRecoveringStaticRoute = await bypassStaleServiceWorkerForStaticRoutes();
   if (isRecoveringStaticRoute) return;
 
